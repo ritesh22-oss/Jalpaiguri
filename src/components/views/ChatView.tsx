@@ -3,49 +3,42 @@ import {
   ArrowLeft,
   Phone,
   Send,
-  Image as ImageIcon,
   CheckCheck,
   ShieldCheck
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
+import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 
 export const ChatView: React.FC = () => {
   const { goBack, activeParams } = useNav();
+  const { chatMessages, sendChatMessage } = useApp();
+  const { user } = useAuth();
 
-  const recipientName = activeParams?.recipientName || 'Ramesh Sarkar';
-  const profession = activeParams?.profession || 'Electrician';
+  const recipientId = activeParams?.recipientId || 'provider-default';
+  const recipientName = activeParams?.recipientName || 'Service Provider';
+  const profession = activeParams?.profession || 'Specialist';
+  const recipientPhone = activeParams?.phone || '03561-230006';
 
-  const [messages, setMessages] = useState([
-    { id: 1, text: `Hello! I see you need help with ${profession.toLowerCase()} work in Jalpaiguri.`, sender: 'other', time: '10:14 AM' },
-    { id: 2, text: 'Hi! Yes, I wanted to check if you are available today.', sender: 'user', time: '10:15 AM' },
-    { id: 3, text: 'Yes, I am available after 3:30 PM near Kadamtala. Please share your exact landmark.', sender: 'other', time: '10:16 AM' }
-  ]);
+  const threadMessages = chatMessages[recipientId] || [
+    {
+      id: 'init-1',
+      senderId: recipientId,
+      senderName: recipientName,
+      text: `Namaskar! How can I assist you in Jalpaiguri?`,
+      timestamp: 'Just now',
+      isMe: false
+    }
+  ];
+
   const [inputText, setInputText] = useState('');
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputText.trim()) return;
-    const newMsg = {
-      id: Date.now(),
-      text: inputText,
-      sender: 'user',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-    setMessages((prev) => [...prev, newMsg]);
+    const textToSend = inputText.trim();
     setInputText('');
-
-    // Simulate quick auto-reply
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          text: `Got it! I will arrive on time. You can also call me directly if needed.`,
-          sender: 'other',
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
-      ]);
-    }, 1200);
+    await sendChatMessage(recipientId, textToSend, user?.name || 'Citizen');
   };
 
   return (
@@ -69,7 +62,7 @@ export const ChatView: React.FC = () => {
         </div>
 
         <button
-          onClick={() => window.location.href = 'tel:9832044102'}
+          onClick={() => window.location.href = `tel:${recipientPhone}`}
           className="w-9 h-9 rounded-full bg-[#E6F4EA] text-[#063B2C] flex items-center justify-center shadow-xs cursor-pointer"
         >
           <Phone className="w-4 h-4" />
@@ -80,18 +73,18 @@ export const ChatView: React.FC = () => {
       <div className="flex-1 p-4 space-y-3 overflow-y-auto">
         <div className="text-center my-2">
           <span className="text-[10px] font-bold bg-[#EFECE6] text-[#55685F] px-3 py-1 rounded-full">
-            End-to-End Local Direct Connection
+            Realtime Direct Connection
           </span>
         </div>
 
-        {messages.map((m) => (
+        {threadMessages.map((m) => (
           <div
             key={m.id}
-            className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`flex ${m.isMe ? 'justify-end' : 'justify-start'}`}
           >
             <div
               className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-xs font-semibold space-y-1 shadow-xs ${
-                m.sender === 'user'
+                m.isMe
                   ? 'bg-[#063B2C] text-white rounded-br-none'
                   : 'bg-white text-[#11241C] border border-[#E8E4DA] rounded-bl-none'
               }`}
@@ -99,11 +92,11 @@ export const ChatView: React.FC = () => {
               <p className="leading-relaxed">{m.text}</p>
               <div
                 className={`text-[9px] flex items-center justify-end gap-1 ${
-                  m.sender === 'user' ? 'text-[#A7D7B9]' : 'text-[#8C9B93]'
+                  m.isMe ? 'text-[#A7D7B9]' : 'text-[#8C9B93]'
                 }`}
               >
-                <span>{m.time}</span>
-                {m.sender === 'user' && <CheckCheck className="w-3 h-3 text-[#A7D7B9]" />}
+                <span>{m.timestamp}</span>
+                {m.isMe && <CheckCheck className="w-3 h-3 text-[#A7D7B9]" />}
               </div>
             </div>
           </div>

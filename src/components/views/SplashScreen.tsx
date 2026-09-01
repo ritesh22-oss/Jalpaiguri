@@ -1,20 +1,32 @@
 import React, { useEffect } from 'react';
 import { SplashLeafLogo } from '../common/SplashLeafLogo';
 import { useNav } from '../../context/NavigationContext';
+import { useAuth } from '../../context/AuthContext';
 
 export const SplashScreen: React.FC = () => {
   const { replaceView } = useNav();
+  const { user } = useAuth();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      replaceView('onboarding');
-    }, 2400);
+      if (user) {
+        replaceView('home');
+      } else {
+        const hasOnboarded = localStorage.getItem('jpg_has_onboarded');
+        replaceView(hasOnboarded ? 'auth' : 'onboarding');
+      }
+    }, 1800);
 
     return () => clearTimeout(timer);
-  }, [replaceView]);
+  }, [replaceView, user]);
 
   const handleScreenTap = () => {
-    replaceView('onboarding');
+    if (user) {
+      replaceView('home');
+    } else {
+      const hasOnboarded = localStorage.getItem('jpg_has_onboarded');
+      replaceView(hasOnboarded ? 'auth' : 'onboarding');
+    }
   };
 
   return (

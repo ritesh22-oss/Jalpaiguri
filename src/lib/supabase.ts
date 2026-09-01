@@ -27,6 +27,12 @@ export let supabase: SupabaseClient | null = isSupabaseConfigured
         autoRefreshToken: true,
         detectSessionInUrl: true,
         flowType: 'pkce'
+      },
+      global: {
+        fetch: (...args: Parameters<typeof fetch>) => {
+          const fetchFn = typeof window !== 'undefined' && typeof window.fetch === 'function' ? window.fetch : fetch;
+          return fetchFn(...args);
+        }
       }
     })
   : null;
@@ -37,19 +43,23 @@ export let supabase: SupabaseClient | null = isSupabaseConfigured
  */
 export const apiFetch = async <T>(endpoint: string, options?: RequestInit): Promise<T | null> => {
   try {
-    const res = await fetch(endpoint, {
+    const fetchFn = typeof window !== 'undefined' && typeof window.fetch === 'function' ? window.fetch : fetch;
+    const res = await fetchFn(endpoint, {
       headers: {
         'Content-Type': 'application/json',
         ...options?.headers
       },
       ...options
     });
+    const data = await res.json().catch(() => null);
     if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.message || `Request failed with status ${res.status}`);
+      if (data && typeof data === 'object') {
+        return data as T;
+      }
+      throw new Error(`Request failed with status ${res.status}`);
     }
-    return await res.json();
-  } catch (error) {
+    return data as T;
+  } catch (error: any) {
     console.warn(`API call to ${endpoint} note:`, error);
     return null;
   }

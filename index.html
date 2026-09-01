@@ -3,6 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <script>
+      (function() {
+        function makeFetchWritable(obj) {
+          if (!obj) return;
+          try {
+            var originalFetch = typeof obj.fetch === 'function' ? obj.fetch.bind(obj) : null;
+            if (!originalFetch && typeof fetch === 'function') {
+              originalFetch = fetch;
+            }
+            var storedFetch = originalFetch;
+            Object.defineProperty(obj, 'fetch', {
+              get: function() {
+                return storedFetch || (typeof window !== 'undefined' && window !== obj && typeof window.fetch === 'function' ? window.fetch : fetch);
+              },
+              set: function(val) {
+                storedFetch = val;
+              },
+              configurable: true,
+              enumerable: true
+            });
+          } catch (e) {}
+        }
+
+        try {
+          if (typeof window !== 'undefined') makeFetchWritable(window);
+          if (typeof Window !== 'undefined' && Window.prototype) makeFetchWritable(Window.prototype);
+          if (typeof globalThis !== 'undefined') makeFetchWritable(globalThis);
+          if (typeof self !== 'undefined') makeFetchWritable(self);
+        } catch (_) {}
+      })();
+    </script>
     <title>Jalpaiguri Connect</title>
     <meta name="description" content="Hyperlocal community utility platform for Jalpaiguri connecting residents with local workers, emergency assistance, blood donors, civic reporting, and alerts." />
     <meta property="og:title" content="Jalpaiguri Connect" />
