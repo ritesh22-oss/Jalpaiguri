@@ -1,0 +1,126 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'r11746667@gmail.com' ||
+        request.auth.token.email == 'admin.civic@jalpaiguri.gov.in' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Connection testing
+    match /test/connection {
+      allow read: if true;
+    }
+
+    // Admin collection
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // User Profiles
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create, update: if isOwner(userId) || isAdmin();
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+    // Workers Directory
+    match /workers/{workerId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Civic Reports
+    match /civic_reports/{reportId} {
+      allow read: if true;
+      allow create: if true; // Allows citizens to submit reports
+      allow update: if isSignedIn() || isAdmin(); // Upvotes, status updates
+      allow delete: if isAdmin();
+    }
+
+    // Local Alerts
+    match /local_alerts/{alertId} {
+      allow read: if true;
+      allow create: if isSignedIn() || isAdmin();
+      allow update: if true; // Confirm count increments
+      allow delete: if isAdmin();
+    }
+
+    // Blood Donors
+    match /blood_donors/{donorId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if isSignedIn() || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Blood Requests
+    match /blood_requests/{requestId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if isSignedIn() || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Jobs
+    match /jobs/{jobId} {
+      allow read: if true;
+      allow create: if isSignedIn() || true;
+      allow update, delete: if isSignedIn() || isAdmin();
+    }
+
+    // Rentals
+    match /rentals/{rentalId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if isSignedIn() || isAdmin();
+    }
+
+    // Lost & Found
+    match /lost_found/{itemId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if isSignedIn() || isAdmin();
+    }
+
+    // Service Requests
+    match /service_requests/{requestId} {
+      allow read, write: if true;
+    }
+
+    // Chat Messages
+    match /chats/{recipientId}/messages/{messageId} {
+      allow read, write: if true;
+    }
+
+    // Admin Verifications
+    match /admin_verifications/{verificationId} {
+      allow read: if isSignedIn() || isAdmin();
+      allow write: if isAdmin() || isSignedIn();
+    }
+  }
+}

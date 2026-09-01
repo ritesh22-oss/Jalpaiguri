@@ -59,9 +59,12 @@ export const JobsView: React.FC = () => {
 
         <div className="space-y-3">
           {jobs
-            .filter((j) => filterType === 'All' || j.type === filterType)
+            .filter((j) => filterType === 'All' || (j.jobType || j.type) === filterType)
             .map((job) => {
               const isApplied = appliedJobIds.includes(job.id);
+              const jobKind = job.jobType || job.type || 'Full-time';
+              const companyName = job.employer || job.company || 'Local Employer';
+              const postDate = job.postedTime || job.postedAt || 'Recently';
               return (
                 <div
                   key={job.id}
@@ -70,10 +73,10 @@ export const JobsView: React.FC = () => {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h3 className="font-extrabold text-sm text-[#11241C]">{job.title}</h3>
-                      <p className="text-xs font-semibold text-[#063B2C] mt-0.5">{job.company}</p>
+                      <p className="text-xs font-semibold text-[#063B2C] mt-0.5">{companyName}</p>
                     </div>
                     <span className="text-[11px] font-bold text-[#854D0E] bg-[#FEF9C3] px-2.5 py-0.5 rounded-full">
-                      {job.type}
+                      {jobKind}
                     </span>
                   </div>
 
@@ -91,7 +94,7 @@ export const JobsView: React.FC = () => {
                   </p>
 
                   <div className="pt-2 flex items-center justify-between border-t border-[#F0ECE1]">
-                    <span className="text-[10px] font-semibold text-[#8C9B93]">Posted {job.postedAt}</span>
+                    <span className="text-[10px] font-semibold text-[#8C9B93]">Posted {postDate}</span>
                     <button
                       disabled={isApplied}
                       onClick={() => handleApply(job.id, job.title)}

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   Worker,
   CivicReport,
@@ -16,7 +16,16 @@ import {
   ChatMessage
 } from '../types';
 import { OFFICIAL_DOCTORS, OFFICIAL_HOSPITALS } from '../data/directoryData';
-import { supabase, isSupabaseConfigured, apiFetch } from '../lib/supabase';
+import { db, isFirebaseConfigured, apiFetch } from '../lib/firebase';
+import {
+  collection,
+  onSnapshot,
+  doc,
+  setDoc,
+  updateDoc,
+  increment,
+  addDoc
+} from 'firebase/firestore';
 import confetti from 'canvas-confetti';
 
 interface AppContextType {
@@ -48,6 +57,7 @@ interface AppContextType {
   confirmLocalAlert: (alertId: string) => Promise<void>;
   addLocalAlert: (alert: Omit<LocalAlert, 'id' | 'timeAgo' | 'confirmedCount'>) => Promise<void>;
   submitServiceRequest: (req: Omit<ServiceRequest, 'id' | 'status' | 'createdAt'>) => Promise<ServiceRequest>;
+  requestWorkerService?: (req: Omit<ServiceRequest, 'id' | 'status' | 'createdAt'>) => Promise<ServiceRequest>;
   updateServiceRequestStatus: (id: string, status: ServiceRequest['status']) => Promise<void>;
   registerBloodDonor: (donor: Omit<BloodDonor, 'id' | 'verified' | 'donationsCount'>) => Promise<void>;
   submitBloodRequest: (req: Omit<BloodRequest, 'id' | 'status' | 'postedAt'>) => Promise<BloodRequest>;
@@ -183,7 +193,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Initial Fetch & Real-Time Sync via Server-Sent Events (SSE) and Supabase
+  // Initial Fetch & Real-Time Sync via Server-Sent Events (SSE) and Firestore
   useEffect(() => {
     refreshData();
 
@@ -285,51 +295,103 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setupSSE();
 
-    // Supabase Postgres Realtime Subscriptions (if Supabase configured)
-    let supabaseChannel: any = null;
-    if (isSupabaseConfigured && supabase) {
+    // Firestore Real-Time Subscriptions
+    const unsubscribers: (() => void)[] = [];
+    if (isFirebaseConfigured && db) {
       try {
-        supabaseChannel = supabase
-          .channel('public-realtime')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'civic_reports' }, (payload) => {
-            if (payload.eventType === 'INSERT') {
-              setCivicReports((prev) => [payload.new as CivicReport, ...prev.filter((r) => r.id !== payload.new.id)]);
-            } else if (payload.eventType === 'UPDATE') {
-              setCivicReports((prev) => prev.map((r) => (r.id === payload.new.id ? (payload.new as CivicReport) : r)));
+        // Civic Reports snapshot
+        unsubscribers.push(
+          onSnapshot(collection(db, 'civic_reports'), (snap) => {
+            if (!snap.empty) {
+              const loaded: CivicReport[] = [];
+              snap.forEach((d) => loaded.push({ ...(d.data() as CivicReport), id: d.id }));
+              setCivicReports((prev) => {
+                const combined = [...loaded];
+                for (const p of prev) {
+                  if (!combined.some((c) => c.id === p.id)) combined.push(p);
+                }
+                return combined;
+              });
             }
           })
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'workers' }, (payload) => {
-            if (payload.eventType === 'INSERT') {
-              setWorkers((prev) => [payload.new as Worker, ...prev.filter((w) => w.id !== payload.new.id)]);
+        );
+
+        // Workers snapshot
+        unsubscribers.push(
+          onSnapshot(collection(db, 'workers'), (snap) => {
+            if (!snap.empty) {
+              const loaded: Worker[] = [];
+              snap.forEach((d) => loaded.push({ ...(d.data() as Worker), id: d.id }));
+              setWorkers((prev) => {
+                const combined = [...loaded];
+                for (const p of prev) {
+                  if (!combined.some((c) => c.id === p.id)) combined.push(p);
+                }
+                return combined;
+              });
             }
           })
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'local_alerts' }, (payload) => {
-            if (payload.eventType === 'INSERT') {
-              setLocalAlerts((prev) => [payload.new as LocalAlert, ...prev.filter((a) => a.id !== payload.new.id)]);
+        );
+
+        // Local Alerts snapshot
+        unsubscribers.push(
+          onSnapshot(collection(db, 'local_alerts'), (snap) => {
+            if (!snap.empty) {
+              const loaded: LocalAlert[] = [];
+              snap.forEach((d) => loaded.push({ ...(d.data() as LocalAlert), id: d.id }));
+              setLocalAlerts((prev) => {
+                const combined = [...loaded];
+                for (const p of prev) {
+                  if (!combined.some((c) => c.id === p.id)) combined.push(p);
+                }
+                return combined;
+              });
             }
           })
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'blood_donors' }, (payload) => {
-            if (payload.eventType === 'INSERT') {
-              setBloodDonors((prev) => [payload.new as BloodDonor, ...prev.filter((b) => b.id !== payload.new.id)]);
+        );
+
+        // Blood Donors snapshot
+        unsubscribers.push(
+          onSnapshot(collection(db, 'blood_donors'), (snap) => {
+            if (!snap.empty) {
+              const loaded: BloodDonor[] = [];
+              snap.forEach((d) => loaded.push({ ...(d.data() as BloodDonor), id: d.id }));
+              setBloodDonors((prev) => {
+                const combined = [...loaded];
+                for (const p of prev) {
+                  if (!combined.some((c) => c.id === p.id)) combined.push(p);
+                }
+                return combined;
+              });
             }
           })
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'blood_requests' }, (payload) => {
-            if (payload.eventType === 'INSERT') {
-              setBloodRequests((prev) => [payload.new as BloodRequest, ...prev.filter((br) => br.id !== payload.new.id)]);
+        );
+
+        // Blood Requests snapshot
+        unsubscribers.push(
+          onSnapshot(collection(db, 'blood_requests'), (snap) => {
+            if (!snap.empty) {
+              const loaded: BloodRequest[] = [];
+              snap.forEach((d) => loaded.push({ ...(d.data() as BloodRequest), id: d.id }));
+              setBloodRequests((prev) => {
+                const combined = [...loaded];
+                for (const p of prev) {
+                  if (!combined.some((c) => c.id === p.id)) combined.push(p);
+                }
+                return combined;
+              });
             }
           })
-          .subscribe();
+        );
       } catch (err) {
-        console.warn('Supabase realtime subscription error:', err);
+        console.warn('Firestore snapshot subscription note:', err);
       }
     }
 
     return () => {
       if (eventSource) eventSource.close();
       if (reconnectTimeout) clearTimeout(reconnectTimeout);
-      if (supabaseChannel && supabase) {
-        supabase.removeChannel(supabaseChannel);
-      }
+      unsubscribers.forEach((u) => u());
     };
   }, []);
 
@@ -352,6 +414,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addWorker = async (newWorker: Worker) => {
     setWorkers((prev) => [newWorker, ...prev.filter((w) => w.id !== newWorker.id)]);
     showToast(`${newWorker.name} has been listed in Workers directory!`);
+
+    if (isFirebaseConfigured && db) {
+      try {
+        await setDoc(doc(db, 'workers', newWorker.id), newWorker);
+      } catch (e) {
+        console.warn('Firestore add worker error:', e);
+      }
+    }
+
     try {
       await apiFetch('/api/workers', {
         method: 'POST',
@@ -365,6 +436,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addRental = async (newRental: RentalProperty) => {
     setRentals((prev) => [newRental, ...prev.filter((r) => r.id !== newRental.id)]);
     showToast('Rental property listed successfully!');
+
+    if (isFirebaseConfigured && db) {
+      try {
+        await setDoc(doc(db, 'rentals', newRental.id), newRental);
+      } catch (e) {
+        console.warn('Firestore rental add error:', e);
+      }
+    }
+
     try {
       await apiFetch('/api/rentals', {
         method: 'POST',
@@ -398,7 +478,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       reportedAt: 'Just now',
       status: 'Submitted',
       upvotes: 1,
-      hasUpvoted: true,
       timeline: [
         { title: 'Submitted by Citizen', time: 'Just now', done: true },
         { title: 'Municipal Authority Review', time: 'Pending', done: false },
@@ -406,56 +485,73 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         { title: 'Resolved', time: 'Pending', done: false }
       ]
     };
-    setCivicReports((prev) => [newReport, ...prev.filter((r) => r.id !== newReport.id)]);
-    showToast(`Civic report ${randomId} submitted successfully!`);
+
+    setCivicReports((prev) => [newReport, ...prev]);
+    showToast('Civic problem reported to Jalpaiguri Municipality!', 'success');
+
+    if (isFirebaseConfigured && db) {
+      try {
+        await setDoc(doc(db, 'civic_reports', newReport.id), newReport);
+      } catch (e) {
+        console.warn('Firestore civic report submit error:', e);
+      }
+    }
+
     try {
       await apiFetch('/api/reports', {
         method: 'POST',
         body: JSON.stringify(newReport)
       });
     } catch (e) {
-      console.warn('Sync report error', e);
+      console.warn('Backend sync report error:', e);
     }
+
     return newReport;
   };
 
   const upvoteCivicReport = async (id: string) => {
     setCivicReports((prev) =>
-      prev.map((rep) => {
-        if (rep.id === id) {
-          const hasUpvoted = !rep.hasUpvoted;
-          return {
-            ...rep,
-            upvotes: hasUpvoted ? rep.upvotes + 1 : rep.upvotes - 1,
-            hasUpvoted
-          };
-        }
-        return rep;
-      })
+      prev.map((r) => (r.id === id ? { ...r, upvotes: r.upvotes + 1 } : r))
     );
+    showToast('Report upvoted! Priority escalated to ward authorities.', 'info');
+
+    if (isFirebaseConfigured && db) {
+      try {
+        await updateDoc(doc(db, 'civic_reports', id), {
+          upvotes: increment(1)
+        });
+      } catch (e) {
+        console.warn('Firestore report upvote error:', e);
+      }
+    }
+
     try {
       await apiFetch(`/api/reports/${id}/upvote`, { method: 'POST' });
     } catch (e) {
-      console.warn('Sync upvote error', e);
+      console.warn('Upvote sync error', e);
     }
   };
 
   const confirmLocalAlert = async (alertId: string) => {
     setLocalAlerts((prev) =>
-      prev.map((alt) => {
-        if (alt.id === alertId) {
-          const userConfirmed = !alt.userConfirmed;
-          const confirmedCount = userConfirmed ? alt.confirmedCount + 1 : alt.confirmedCount - 1;
-          showToast(userConfirmed ? 'Thank you for confirming this alert!' : 'Confirmation removed', 'info');
-          return { ...alt, userConfirmed, confirmedCount };
-        }
-        return alt;
-      })
+      prev.map((a) => (a.id === alertId ? { ...a, confirmedCount: a.confirmedCount + 1 } : a))
     );
+    showToast('Thank you! Alert confirmed for Jalpaiguri community.', 'success');
+
+    if (isFirebaseConfigured && db) {
+      try {
+        await updateDoc(doc(db, 'local_alerts', alertId), {
+          confirmedCount: increment(1)
+        });
+      } catch (e) {
+        console.warn('Firestore confirm alert error:', e);
+      }
+    }
+
     try {
       await apiFetch(`/api/alerts/${alertId}/confirm`, { method: 'POST' });
     } catch (e) {
-      console.warn('Sync alert confirm error', e);
+      console.warn('Confirm sync error', e);
     }
   };
 
@@ -464,11 +560,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...alertData,
       id: 'alt-' + Date.now(),
       timeAgo: 'Just now',
-      confirmedCount: 1,
-      userConfirmed: true
+      confirmedCount: 1
     };
-    setLocalAlerts((prev) => [newAlert, ...prev.filter((a) => a.id !== newAlert.id)]);
-    showToast('Community alert published successfully!');
+
+    setLocalAlerts((prev) => [newAlert, ...prev]);
+    showToast('Community alert published successfully!', 'success');
+
+    if (isFirebaseConfigured && db) {
+      try {
+        await setDoc(doc(db, 'local_alerts', newAlert.id), newAlert);
+      } catch (e) {
+        console.warn('Firestore add alert error:', e);
+      }
+    }
+
     try {
       await apiFetch('/api/alerts', {
         method: 'POST',
@@ -479,15 +584,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const submitServiceRequest = async (reqData: Omit<ServiceRequest, 'id' | 'status' | 'createdAt'>): Promise<ServiceRequest> => {
+  const submitServiceRequest = async (req: Omit<ServiceRequest, 'id' | 'status' | 'createdAt'>): Promise<ServiceRequest> => {
     const newReq: ServiceRequest = {
-      ...reqData,
-      id: 'REQ-' + Math.floor(1000 + Math.random() * 9000),
+      ...req,
+      id: 'req-' + Date.now(),
       status: 'Submitted',
-      createdAt: 'Just now'
+      createdAt: new Date().toISOString()
     };
-    setServiceRequests((prev) => [newReq, ...prev.filter((s) => s.id !== newReq.id)]);
-    showToast(`Request sent to ${reqData.workerName || 'service provider'}!`);
+
+    setServiceRequests((prev) => [newReq, ...prev]);
+    showToast(`Service request sent to ${req.workerName}!`, 'success');
+
+    if (isFirebaseConfigured && db) {
+      try {
+        await setDoc(doc(db, 'service_requests', newReq.id), newReq);
+      } catch (e) {
+        console.warn('Firestore service request error:', e);
+      }
+    }
+
     try {
       await apiFetch('/api/service-requests', {
         method: 'POST',
@@ -496,21 +611,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {
       console.warn('Sync service request error', e);
     }
+
     return newReq;
   };
 
   const updateServiceRequestStatus = async (id: string, status: ServiceRequest['status']) => {
-    setServiceRequests((prev) =>
-      prev.map((req) => (req.id === id ? { ...req, status } : req))
-    );
-    showToast(`Request status updated: ${status}`);
+    setServiceRequests((prev) => prev.map((s) => (s.id === id ? { ...s, status } : s)));
+    showToast(`Request updated to ${status}`);
+
+    if (isFirebaseConfigured && db) {
+      try {
+        await updateDoc(doc(db, 'service_requests', id), { status });
+      } catch (e) {
+        console.warn('Firestore service request update error:', e);
+      }
+    }
+
     try {
-      await apiFetch(`/api/service-requests/${id}`, {
+      await apiFetch(`/api/service-requests/${id}/status`, {
         method: 'PATCH',
         body: JSON.stringify({ status })
       });
     } catch (e) {
-      console.warn('Sync status error', e);
+      console.warn('Sync service status error', e);
     }
   };
 
@@ -521,8 +644,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       verified: true,
       donationsCount: 0
     };
-    setBloodDonors((prev) => [newDonor, ...prev.filter((b) => b.id !== newDonor.id)]);
-    showToast('You are registered as a life-saving blood donor!', 'success');
+
+    setBloodDonors((prev) => [newDonor, ...prev]);
+    showToast('Registered as Jalpaiguri Blood Donor! Thank you for saving lives.', 'success');
+
+    if (isFirebaseConfigured && db) {
+      try {
+        await setDoc(doc(db, 'blood_donors', newDonor.id), newDonor);
+      } catch (e) {
+        console.warn('Firestore blood donor register error:', e);
+      }
+    }
+
     try {
       await apiFetch('/api/blood/donors', {
         method: 'POST',
@@ -540,8 +673,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       status: 'Urgent',
       postedAt: 'Just now'
     };
-    setBloodRequests((prev) => [newReq, ...prev.filter((b) => b.id !== newReq.id)]);
-    showToast('Emergency blood request broadcasted to nearby donors!');
+
+    setBloodRequests((prev) => [newReq, ...prev]);
+    showToast('Emergency blood request broadcasted across Jalpaiguri network!', 'error');
+
+    if (isFirebaseConfigured && db) {
+      try {
+        await setDoc(doc(db, 'blood_requests', newReq.id), newReq);
+      } catch (e) {
+        console.warn('Firestore blood request submit error:', e);
+      }
+    }
+
     try {
       await apiFetch('/api/blood/requests', {
         method: 'POST',
@@ -550,21 +693,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {
       console.warn('Sync blood request error', e);
     }
+
     return newReq;
   };
 
   const applyForJob = (jobId: string, applicantName: string) => {
-    showToast(`Application submitted successfully to employer!`);
+    showToast(`Application submitted for job! Employer notified.`, 'success');
   };
 
   const postJob = async (jobData: Omit<Job, 'id' | 'postedTime'>) => {
     const newJob: Job = {
       ...jobData,
-      id: 'j-' + Date.now(),
+      id: 'job-' + Date.now(),
       postedTime: 'Just now'
     };
-    setJobs((prev) => [newJob, ...prev.filter((j) => j.id !== newJob.id)]);
-    showToast('Job listing posted to Jalpaiguri community!');
+
+    setJobs((prev) => [newJob, ...prev]);
+    showToast('Job listing published to Jalpaiguri employment board!', 'success');
+
+    if (isFirebaseConfigured && db) {
+      try {
+        await setDoc(doc(db, 'jobs', newJob.id), newJob);
+      } catch (e) {
+        console.warn('Firestore post job error:', e);
+      }
+    }
+
     try {
       await apiFetch('/api/jobs', {
         method: 'POST',
@@ -581,8 +735,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: 'lf-' + Date.now(),
       status: 'Open'
     };
-    setLostFound((prev) => [newItem, ...prev.filter((l) => l.id !== newItem.id)]);
-    showToast(`${itemData.type} item posted to community board!`);
+
+    setLostFound((prev) => [newItem, ...prev]);
+    showToast(`${newItem.type} item notice posted!`, 'success');
+
+    if (isFirebaseConfigured && db) {
+      try {
+        await setDoc(doc(db, 'lost_found', newItem.id), newItem);
+      } catch (e) {
+        console.warn('Firestore lost found error:', e);
+      }
+    }
+
     try {
       await apiFetch('/api/lostfound', {
         method: 'POST',
@@ -593,45 +757,60 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const sendChatMessage = async (recipientId: string, text: string, senderName: string = 'You') => {
-    const newMsg: ChatMessage = {
-      id: 'm-' + Date.now(),
+  const sendChatMessage = async (recipientId: string, text: string, senderName: string = 'Citizen') => {
+    const msg: ChatMessage = {
+      id: 'msg-' + Date.now(),
       senderId: 'me',
       senderName,
       text,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: 'Just now',
       isMe: true
     };
-    setChatMessages((prev) => ({
-      ...prev,
-      [recipientId]: [...(prev[recipientId] || []), newMsg]
-    }));
+
+    setChatMessages((prev) => {
+      const list = prev[recipientId] || [];
+      return { ...prev, [recipientId]: [...list, msg] };
+    });
+
+    if (isFirebaseConfigured && db) {
+      try {
+        await addDoc(collection(db, 'chats', recipientId, 'messages'), {
+          ...msg,
+          createdAt: new Date().toISOString()
+        });
+      } catch (e) {
+        console.warn('Firestore chat send error:', e);
+      }
+    }
+
     try {
-      await apiFetch('/api/chat', {
+      await apiFetch(`/api/chat/${recipientId}/messages`, {
         method: 'POST',
-        body: JSON.stringify({ recipientId, text, senderName, isMe: true })
+        body: JSON.stringify({ message: msg })
       });
     } catch (e) {
-      console.warn('Sync chat error', e);
+      console.warn('Sync chat message error', e);
     }
   };
 
   const markNotificationRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
   };
 
   const approveWorkerVerification = async (id: string) => {
-    setAdminVerificationQueue((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: 'Approved' } : item))
-    );
-    showToast('Provider application approved and verified!');
+    setAdminVerificationQueue((prev) => prev.map((v) => (v.id === id ? { ...v, status: 'Approved' } : v)));
+    showToast('Worker profile verified and approved!', 'success');
+
+    if (isFirebaseConfigured && db) {
+      try {
+        await updateDoc(doc(db, 'admin_verifications', id), { status: 'Approved' });
+      } catch (e) {
+        console.warn('Firestore verification approval error:', e);
+      }
+    }
+
     try {
-      await apiFetch('/api/admin/verifications/approve', {
-        method: 'POST',
-        body: JSON.stringify({ id })
-      });
+      await apiFetch(`/api/admin/verifications/${id}/approve`, { method: 'POST' });
     } catch (e) {
       console.warn('Sync approve error', e);
     }
@@ -667,6 +846,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         confirmLocalAlert,
         addLocalAlert,
         submitServiceRequest,
+        requestWorkerService: submitServiceRequest,
         updateServiceRequestStatus,
         registerBloodDonor,
         submitBloodRequest,

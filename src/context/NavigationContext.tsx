@@ -9,6 +9,7 @@ interface NavigationStackItem {
 interface NavigationContextType {
   currentView: ViewType;
   params: Record<string, any>;
+  activeParams: Record<string, any>;
   navigate: (view: ViewType, params?: Record<string, any>) => void;
   goBack: () => void;
   resetToHome: () => void;
@@ -72,6 +73,7 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       value={{
         currentView,
         params,
+        activeParams: params,
         navigate,
         goBack,
         resetToHome,

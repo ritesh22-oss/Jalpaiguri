@@ -2,16 +2,20 @@ export type ViewType =
   | 'splash'
   | 'onboarding'
   | 'auth'
+  | 'phone-auth'
   | 'otp'
   | 'profile-onboarding'
+  | 'profile-setup'
   | 'location-permission'
   | 'home'
+  | 'nearby'
   | 'discover'
   | 'workers'
   | 'worker-detail'
   | 'worker-request'
   | 'worker-request-tracking'
   | 'offer-services'
+  | 'emergency'
   | 'blood'
   | 'blood-request'
   | 'blood-donors'
@@ -44,9 +48,72 @@ export type ViewType =
   | 'profile'
   | 'edit-profile'
   | 'settings'
-  | 'admin-dashboard';
+  | 'admin-dashboard'
+  | 'ai-chat'
+  | 'maps-explorer';
 
 export type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | "I don't know";
+
+export type LocationStatus =
+  | 'idle'
+  | 'detecting'
+  | 'permission_request'
+  | 'found'
+  | 'permission_denied'
+  | 'unavailable'
+  | 'timeout'
+  | 'error'
+  | 'manual';
+
+export interface UserLocation {
+  name: string;
+  locality: string;
+  lat: number;
+  lng: number;
+  isApproximate?: boolean;
+  accuracy?: number;
+  updatedAt?: string;
+}
+
+export type NearbyCategoryType =
+  | 'All'
+  | 'Workers'
+  | 'Medical'
+  | 'Blood'
+  | 'Jobs'
+  | 'Shops'
+  | 'Vehicle'
+  | 'Animal'
+  | 'Rentals'
+  | 'Services';
+
+export type DistanceFilterType = 'Within 1 km' | 'Within 3 km' | 'Within 5 km' | 'Within 10 km' | 'Any distance';
+
+export interface NearbyItem {
+  id: string;
+  name: string;
+  category: NearbyCategoryType;
+  subcategory: string;
+  area: string;
+  lat: number;
+  lng: number;
+  distanceKm?: number;
+  distanceText?: string;
+  verified?: boolean;
+  availability?: string;
+  openStatus?: string;
+  rating?: number;
+  reviewCount?: number;
+  startingPrice?: string;
+  salary?: string;
+  rent?: string;
+  phone?: string;
+  imageUrl?: string;
+  description?: string;
+  primaryActionLabel: string;
+  targetView: ViewType;
+  targetParams?: Record<string, any>;
+}
 
 export interface UserProfile {
   id: string;
@@ -79,7 +146,10 @@ export interface Worker {
   availability: 'Available Now' | 'Available Today' | 'Busy';
   startingPrice: string;
   phone: string;
-  experienceYears: number;
+  experienceYears?: number;
+  experience?: string;
+  location?: string;
+  bio?: string;
   serviceArea: string;
   skills: string[];
   description: string;
@@ -110,6 +180,7 @@ export interface CivicReport {
   photoUrl?: string;
   status: 'Submitted' | 'Under Review' | 'Action Taken' | 'Resolved';
   reportedAt: string;
+  date?: string;
   upvotes: number;
   hasUpvoted?: boolean;
   timeline: { title: string; time: string; done: boolean }[];
@@ -162,8 +233,13 @@ export interface Doctor {
   specialty: string;
   qualifications: string;
   medicalCentre: string;
+  clinic?: string;
   distance: string;
   visitingHours: string;
+  timing?: string;
+  fee?: string;
+  experience?: string;
+  avatarUrl?: string;
   verified: boolean;
   rating: number;
   phone: string;
@@ -190,11 +266,14 @@ export interface Job {
   id: string;
   title: string;
   employer: string;
+  company?: string;
   location: string;
   salary: string;
   jobType: 'Full-time' | 'Part-time' | 'Contract' | 'Daily Wage';
+  type?: string;
   distance: string;
   postedTime: string;
+  postedAt?: string;
   description: string;
   requirements: string[];
   phone: string;

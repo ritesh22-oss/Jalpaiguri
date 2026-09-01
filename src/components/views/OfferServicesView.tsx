@@ -45,7 +45,7 @@ export const OfferServicesView: React.FC = () => {
     'Appliance Servicing'
   ]);
   const [customSkillInput, setCustomSkillInput] = useState('');
-  const [availability, setAvailability] = useState<'Available Now' | 'Available Today' | 'By Appointment'>('Available Now');
+  const [availability, setAvailability] = useState<Worker['availability']>('Available Now');
   const [isEmergencyAvailable, setIsEmergencyAvailable] = useState(true);
   const [licenseNumber, setLicenseNumber] = useState('WB-JPG-EL-2024');
   const [description, setDescription] = useState(
@@ -422,7 +422,7 @@ export const OfferServicesView: React.FC = () => {
               Current Availability Status
             </label>
             <div className="grid grid-cols-3 gap-2">
-              {(['Available Now', 'Available Today', 'By Appointment'] as const).map((status) => (
+              {(['Available Now', 'Available Today', 'Busy'] as const).map((status) => (
                 <button
                   key={status}
                   type="button"
@@ -433,7 +433,7 @@ export const OfferServicesView: React.FC = () => {
                       : 'bg-[#FAF8F5] text-[#55685F] border-[#D2CEBE] hover:bg-white'
                   }`}
                 >
-                  {status === 'Available Now' ? '⚡ Available Now' : status}
+                  {status === 'Available Now' ? '⚡ Now' : status}
                 </button>
               ))}
             </div>
