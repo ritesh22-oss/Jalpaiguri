@@ -1,0 +1,12 @@
+{
+  "name": "Jalpaiguri Connect",
+  "description": "Hyperlocal community utility platform for Jalpaiguri connecting residents with local workers, emergency assistance, blood donors, civic reporting, and alerts.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
