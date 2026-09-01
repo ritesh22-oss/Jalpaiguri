@@ -164,26 +164,49 @@ export const WorkersView: React.FC = () => {
         {/* Worker Cards List */}
         <div className="space-y-4 pt-1">
           {filteredWorkers.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-3xl p-6 border border-[#E8E4DA]">
-              <Wrench className="w-12 h-12 text-[#8C9B93] mx-auto mb-3 opacity-60" />
-              <h3 className="font-bold text-base text-[#11241C]">No workers found</h3>
-              <p className="text-xs text-[#55685F] mt-1">
-                Try clearing active filters or searching for another category.
-              </p>
-              <button
-                onClick={() =>
-                  setWorkerFilters({
-                    category: 'All',
-                    distance: 'Any',
-                    availableNowOnly: false,
-                    availableTodayOnly: false,
-                    minRating: 3.0
-                  })
-                }
-                className="mt-4 px-4 py-2 bg-[#063B2C] text-white text-xs font-bold rounded-xl cursor-pointer"
-              >
-                Reset Filters
-              </button>
+            <div className="text-center py-10 bg-white rounded-3xl p-6 border border-[#E8E4DA] shadow-xs space-y-4">
+              <div className="w-16 h-16 rounded-full bg-[#E6F4EA] text-[#063B2C] flex items-center justify-center mx-auto shadow-xs">
+                <Wrench className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-base text-[#11241C]">
+                  {workers.length === 0 ? 'No Workers Registered Yet' : 'No Workers Match Your Filter'}
+                </h3>
+                <p className="text-xs text-[#55685F] mt-1 max-w-[280px] mx-auto leading-relaxed">
+                  {workers.length === 0
+                    ? 'Are you an electrician, plumber, carpenter, painter, or artisan in Jalpaiguri? Be the first to join the directory!'
+                    : 'Try changing your trade category or resetting search filters.'}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2 pt-2 max-w-xs mx-auto">
+                <button
+                  type="button"
+                  onClick={() => navigate('offer-services')}
+                  className="w-full py-3.5 px-4 rounded-2xl bg-[#063B2C] hover:bg-[#084D3A] text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm cursor-pointer active:scale-98 transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Join as Worker / Add Trade</span>
+                </button>
+
+                {workers.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setWorkerFilters({
+                        category: 'All',
+                        distance: 'Any',
+                        availableNowOnly: false,
+                        availableTodayOnly: false,
+                        minRating: 3.0
+                      })
+                    }
+                    className="py-2.5 px-4 text-xs font-bold text-[#55685F] hover:text-[#11241C] cursor-pointer"
+                  >
+                    Reset Active Filters
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
             filteredWorkers.map((worker) => (

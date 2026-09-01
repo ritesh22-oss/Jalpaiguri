@@ -57,8 +57,10 @@ const AppContent: React.FC = () => {
       case 'onboarding':
         return <OnboardingView />;
       case 'auth':
+      case 'otp':
         return <AuthView />;
       case 'profile-onboarding':
+      case 'location-permission':
         return <ProfileOnboardingView />;
       case 'home':
         return <HomeView />;
@@ -69,6 +71,7 @@ const AppContent: React.FC = () => {
       case 'worker-detail':
         return <WorkerDetailView />;
       case 'worker-request':
+      case 'worker-request-tracking':
         return <WorkerRequestModalView />;
       case 'report-problem':
         return <ReportProblemView />;
@@ -79,24 +82,41 @@ const AppContent: React.FC = () => {
       case 'emergency':
         return <EmergencyView />;
       case 'medical':
+      case 'doctor-detail':
+      case 'hospital-detail':
+      case 'pharmacy':
         return <MedicalView />;
       case 'blood':
+      case 'blood-request':
+      case 'blood-donors':
         return <BloodView />;
       case 'jobs':
+      case 'job-detail':
+      case 'job-apply':
+      case 'post-job':
         return <JobsView />;
       case 'vehicle':
+      case 'vehicle-request':
+      case 'animal':
         return <VehicleView />;
       case 'rentals':
+      case 'rental-detail':
+      case 'list-property':
         return <RentalsView />;
       case 'businesses':
+      case 'business-detail':
         return <BusinessesView />;
       case 'government':
         return <GovernmentServicesView />;
       case 'lost-found':
         return <LostFoundView />;
       case 'chat':
+      case 'messages':
         return <ChatView />;
       case 'profile':
+      case 'volunteer':
+      case 'settings':
+      case 'notifications':
         return <ProfileView />;
       case 'offer-services':
         return <OfferServicesView />;

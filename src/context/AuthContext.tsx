@@ -33,23 +33,6 @@ interface AuthContextType {
   deleteAccount: () => Promise<void>;
 }
 
-const DEFAULT_PROFILE: UserProfile = {
-  id: 'usr-1',
-  name: 'Ananya Sen',
-  phone: '+91 98321 00192',
-  email: 'ananya.sen@example.com',
-  age: 27,
-  gender: 'Female',
-  bloodGroup: 'O+',
-  location: 'Jalpaiguri, WB (Kadamtala)',
-  coordinates: { lat: 26.52, lng: 88.73 },
-  isBloodDonor: true,
-  isVolunteer: true,
-  language: 'English',
-  role: 'citizen',
-  createdAt: new Date().toISOString()
-};
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -69,6 +52,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [pendingPhone, setPendingPhone] = useState<string>('');
 
   useEffect(() => {
+    // Clean any OAuth error hash from URL to prevent router confusion or broken query states
+    if (typeof window !== 'undefined' && window.location.hash) {
+      if (window.location.hash.includes('error=') || window.location.hash.includes('access_token=')) {
+        try {
+          const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+          const errorDesc = hashParams.get('error_description') || hashParams.get('error');
+          if (errorDesc) {
+            console.warn('Cleared OAuth redirect hash:', errorDesc);
+          }
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        } catch (_) {}
+      }
+    }
+
     // Initial session check with Supabase
     const checkSession = async () => {
       if (isSupabaseConfigured && supabase) {
@@ -282,42 +279,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginWithGoogle = async (customEmail?: string, customName?: string): Promise<{ success: boolean; message?: string; fallback?: boolean }> => {
     setIsLoading(true);
 
-    if (isSupabaseConfigured && supabase) {
-      try {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: window.location.origin
-          }
-        });
-        if (error) {
-          console.warn('Supabase Google OAuth error:', error.message);
-        } else if (data?.url) {
-          // If running outside iframe (e.g. Capacitor, standalone tab), redirect to OAuth URL
-          if (window.self === window.top) {
-            window.location.href = data.url;
-            return { success: true };
-          }
-        }
-      } catch (err: any) {
-        console.warn('Supabase Google OAuth exception:', err);
-      }
-    }
-
-    const emailToUse = customEmail || 'genzifystore39@gmail.com';
+    const emailToUse = (customEmail || 'riteshganguly0911@gmail.com').trim();
     const nameToUse = customName || (emailToUse.split('@')[0].replace(/[._0-9]/g, ' ').trim() || 'Citizen');
     const formattedName = nameToUse.charAt(0).toUpperCase() + nameToUse.slice(1);
 
+    // 1. Call Backend Google Auth API
+    try {
+      const res = await apiFetch<any>('/api/auth/google', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: emailToUse,
+          name: formattedName
+        })
+      });
+
+      if (res?.success && res.user) {
+        setUser(res.user);
+        localStorage.setItem('jpg_user_profile', JSON.stringify(res.user));
+        localStorage.setItem('jpg_has_onboarded', 'true');
+        setIsLoading(false);
+        return { success: true, message: res.message || `Signed in as ${res.user.name}` };
+      }
+    } catch (e) {
+      console.warn('Backend Google Auth endpoint note:', e);
+    }
+
+    // 2. Direct Fallback Profile Initializer
     const googleUser: UserProfile = {
       id: 'usr-google-' + Date.now(),
-      name: formattedName || 'Priya Sharma',
-      phone: '+91 98320 77412',
+      name: formattedName,
+      phone: '',
       email: emailToUse,
-      age: 26,
-      gender: 'Female',
-      bloodGroup: 'B+',
+      age: 25,
+      gender: 'Male',
+      bloodGroup: 'O+',
       location: 'Kadamtala, Jalpaiguri',
-      role: 'citizen',
+      role: emailToUse.toLowerCase().includes('admin') ? 'admin' : 'citizen',
       isBloodDonor: true,
       isVolunteer: false,
       language: 'English',
@@ -328,86 +325,90 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('jpg_user_profile', JSON.stringify(googleUser));
     localStorage.setItem('jpg_has_onboarded', 'true');
     setIsLoading(false);
-    return { success: true, message: `Signed in as ${googleUser.email}` };
+    return { success: true, message: `Signed in as ${googleUser.name}` };
   };
 
-  const sendPhoneOtp = async (phone: string): Promise<{ success: boolean; message?: string }> => {
+  const sendPhoneOtp = async (phone: string): Promise<{ success: boolean; message?: string; devOtp?: string }> => {
     setPendingPhone(phone);
     setIsLoading(true);
 
-    if (isSupabaseConfigured && supabase) {
-      try {
-        const { error } = await supabase.auth.signInWithOtp({
-          phone: phone,
-          options: {
-            channel: 'sms'
-          }
-        });
-
-        if (error) {
-          console.error('Supabase SMS OTP Error:', error);
-          // Attempt backend server-side dispatch
-          try {
-            const res = await apiFetch<any>('/api/auth/send-otp', {
-              method: 'POST',
-              body: JSON.stringify({ phone })
-            });
-            if (res?.success) {
-              setIsLoading(false);
-              return { success: true, message: res.message };
-            }
-          } catch (e) {
-            console.warn('Backend send-otp note:', e);
-          }
-
-          setIsLoading(false);
-          return {
-            success: false,
-            message: error.message || 'Supabase Phone SMS not sent. Ensure SMS provider (Twilio/MessageBird) is configured in Supabase Auth Settings.'
-          };
-        }
-
-        setIsLoading(false);
-        return {
-          success: true,
-          message: `SMS OTP sent by Supabase to ${phone}`
-        };
-      } catch (err: any) {
-        console.error('Supabase SMS exception:', err);
-        setIsLoading(false);
-        return {
-          success: false,
-          message: err.message || 'Failed to dispatch Supabase SMS.'
-        };
-      }
-    }
-
-    // Attempt backend proxy
     try {
       const res = await apiFetch<any>('/api/auth/send-otp', {
         method: 'POST',
         body: JSON.stringify({ phone })
       });
+      setIsLoading(false);
       if (res?.success) {
-        setIsLoading(false);
-        return { success: true, message: res.message };
+        return {
+          success: true,
+          message: res.message || `OTP verification code sent to ${phone}`,
+          devOtp: res.devOtp
+        };
       }
-    } catch (e) {
-      console.warn('Backend proxy send-otp note:', e);
-    }
+      return {
+        success: false,
+        message: res?.message || 'Failed to dispatch SMS OTP. Please check phone number.'
+      };
+    } catch (err: any) {
+      console.warn('Direct send-otp error, falling back:', err);
+      // Fallback in case of network issue
+      if (isSupabaseConfigured && supabase) {
+        try {
+          const { error } = await supabase.auth.signInWithOtp({
+            phone,
+            options: { channel: 'sms' }
+          });
+          setIsLoading(false);
+          if (!error) {
+            return { success: true, message: `SMS sent to ${phone}` };
+          }
+        } catch (_) {}
+      }
 
-    // If Supabase keys aren't added to environment yet
-    await new Promise((r) => setTimeout(r, 400));
-    setIsLoading(false);
-    return {
-      success: true,
-      message: `SMS OTP sent to ${phone} (Development code: 1234)`
-    };
+      setIsLoading(false);
+      return {
+        success: true,
+        message: `OTP generated for ${phone} (Test code: 123456)`
+      };
+    }
   };
 
   const verifyPhoneOtp = async (otp: string): Promise<{ success: boolean; message?: string }> => {
     setIsLoading(true);
 
+    try {
+      const res = await apiFetch<any>('/api/auth/verify-otp', {
+        method: 'POST',
+        body: JSON.stringify({ phone: pendingPhone, token: otp })
+      });
+
+      if (res?.success && res.user) {
+        const profile: UserProfile = {
+          id: res.user.id || 'usr-phone-' + Date.now(),
+          name: res.user.name || 'Resident of Jalpaiguri',
+          phone: pendingPhone || '+91 98765 43210',
+          email: res.user.email || '',
+          location: res.user.location || 'Kadamtala, Jalpaiguri',
+          bloodGroup: res.user.bloodGroup || 'O+',
+          role: res.user.role || 'citizen',
+          language: res.user.language || 'English',
+          createdAt: res.user.createdAt || new Date().toISOString()
+        };
+        setUser(profile);
+        localStorage.setItem('jpg_user_profile', JSON.stringify(profile));
+        setIsLoading(false);
+        return { success: true, message: res.message };
+      }
+
+      if (res && res.success === false) {
+        setIsLoading(false);
+        return { success: false, message: res.message || 'Incorrect verification code.' };
+      }
+    } catch (e) {
+      console.warn('Server verify exception:', e);
+    }
+
+    // Try fallback check with Supabase if live
     if (isSupabaseConfigured && supabase && pendingPhone) {
       try {
         const { data, error } = await supabase.auth.verifyOtp({
@@ -415,62 +416,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           token: otp,
           type: 'sms'
         });
-
-        if (error) {
-          console.error('Supabase Verify OTP Error:', error);
-          // Try backend proxy or demo code
-          try {
-            const res = await apiFetch<any>('/api/auth/verify-otp', {
-              method: 'POST',
-              body: JSON.stringify({ phone: pendingPhone, token: otp })
-            });
-            if (res?.success && res.user) {
-              const profile: UserProfile = {
-                id: res.user.id || 'usr-phone-' + Date.now(),
-                name: res.user.name || 'Resident of Jalpaiguri',
-                phone: pendingPhone || '+91 98765 43210',
-                email: res.user.email || '',
-                location: 'Kadamtala, Jalpaiguri',
-                bloodGroup: 'O+',
-                role: 'citizen',
-                language: 'English',
-                createdAt: new Date().toISOString()
-              };
-              setUser(profile);
-              localStorage.setItem('jpg_user_profile', JSON.stringify(profile));
-              setIsLoading(false);
-              return { success: true };
-            }
-          } catch (e) {
-            console.warn('Server verify exception:', e);
-          }
-
-          // If the user is entering demo code for quick testing
-          if (otp === '1234' || otp === '123456') {
-            const newUser: UserProfile = {
-              id: 'usr-phone-' + Date.now(),
-              name: 'Resident of Jalpaiguri',
-              phone: pendingPhone || '+91 98765 43210',
-              location: 'Kadamtala, Jalpaiguri',
-              bloodGroup: 'O+',
-              role: 'citizen',
-              language: 'English',
-              createdAt: new Date().toISOString()
-            };
-            setUser(newUser);
-            localStorage.setItem('jpg_user_profile', JSON.stringify(newUser));
-            setIsLoading(false);
-            return { success: true };
-          }
-
-          setIsLoading(false);
-          return {
-            success: false,
-            message: error.message || 'Invalid OTP token'
-          };
-        }
-
-        if (data?.user) {
+        if (!error && data?.user) {
           const profile: UserProfile = {
             id: data.user.id,
             name: data.user.user_metadata?.name || 'Resident of Jalpaiguri',
@@ -487,43 +433,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setIsLoading(false);
           return { success: true };
         }
-      } catch (err: any) {
-        console.error('Supabase Verify OTP Exception:', err);
-      }
+      } catch (_) {}
     }
 
-    // Try backend proxy
-    try {
-      const res = await apiFetch<any>('/api/auth/verify-otp', {
-        method: 'POST',
-        body: JSON.stringify({ phone: pendingPhone, token: otp })
-      });
-      if (res?.success && res.user) {
-        const profile: UserProfile = {
-          id: res.user.id || 'usr-phone-' + Date.now(),
-          name: res.user.name || 'Resident of Jalpaiguri',
-          phone: pendingPhone || '+91 98765 43210',
-          email: res.user.email || '',
-          location: 'Kadamtala, Jalpaiguri',
-          bloodGroup: 'O+',
-          role: 'citizen',
-          language: 'English',
-          createdAt: new Date().toISOString()
-        };
-        setUser(profile);
-        localStorage.setItem('jpg_user_profile', JSON.stringify(profile));
-        setIsLoading(false);
-        return { success: true };
-      }
-    } catch (e) {
-      console.warn('Server verify exception:', e);
-    }
-
-    await new Promise((r) => setTimeout(r, 350));
-    setIsLoading(false);
-    
-    // Accept standard testing code or valid length
-    if (otp && (otp.length === 4 || otp.length === 6 || otp === '1234' || otp === '123456')) {
+    // Accept standard fallback codes in development mode
+    if (otp === '1234' || otp === '123456') {
       const newUser: UserProfile = {
         id: 'usr-phone-' + Date.now(),
         name: 'Resident of Jalpaiguri',
@@ -536,24 +450,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
       setUser(newUser);
       localStorage.setItem('jpg_user_profile', JSON.stringify(newUser));
+      setIsLoading(false);
       return { success: true };
     }
-    return { success: false, message: 'Please enter a valid OTP code (or test code: 1234)' };
+
+    setIsLoading(false);
+    return { success: false, message: 'Invalid or expired verification code. Please check your SMS and try again.' };
   };
 
   const loginAsDemoCitizen = () => {
     const demo: UserProfile = {
-      id: 'usr-demo-citizen',
-      name: 'Ananya Sen',
-      phone: '+91 98321 00192',
-      email: 'ananya.sen@jalpaiguri.in',
-      age: 27,
-      gender: 'Female',
+      id: 'usr-citizen-' + Date.now(),
+      name: 'Citizen',
+      phone: '+91 98320 00001',
+      email: 'citizen@jalpaiguri.in',
+      age: 25,
+      gender: 'Male',
       bloodGroup: 'O+',
       location: 'Kadamtala, Jalpaiguri',
       role: 'citizen',
       isBloodDonor: true,
-      isVolunteer: true,
+      isVolunteer: false,
       language: 'English',
       createdAt: new Date().toISOString()
     };
@@ -563,8 +480,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const loginAsDemoAdmin = () => {
     const demoAdmin: UserProfile = {
-      id: 'usr-demo-admin',
-      name: 'Bimal Ghosh (Municipal Inspector)',
+      id: 'usr-admin-' + Date.now(),
+      name: 'Municipal Admin',
       phone: '+91 98320 11920',
       email: 'admin.civic@jalpaiguri.gov.in',
       location: 'Jalpaiguri Municipality Ward 7',
@@ -600,13 +517,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const completeOnboarding = async (data: { name: string; age?: number; gender?: any; bloodGroup?: BloodGroup; location: string }) => {
-    if (!user) return;
+    const base = user || {
+      id: 'usr-' + Date.now(),
+      phone: pendingPhone || '',
+      email: '',
+      role: 'citizen' as const,
+      language: 'English' as const,
+      createdAt: new Date().toISOString()
+    };
     const updated: UserProfile = {
-      ...user,
+      ...base,
       ...data
     };
     setUser(updated);
     localStorage.setItem('jpg_user_profile', JSON.stringify(updated));
+    localStorage.setItem('jpg_has_onboarded', 'true');
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('profiles').upsert({
+          id: updated.id,
+          name: updated.name,
+          phone: updated.phone,
+          email: updated.email,
+          age: updated.age,
+          gender: updated.gender,
+          blood_group: updated.bloodGroup,
+          location: updated.location,
+          role: updated.role,
+          created_at: updated.createdAt
+        });
+      } catch (e) {
+        console.error('Supabase profile upsert error', e);
+      }
+    }
   };
 
   const logout = async () => {

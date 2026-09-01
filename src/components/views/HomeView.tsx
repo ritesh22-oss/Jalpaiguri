@@ -31,7 +31,7 @@ import { JalpaiguriLogo } from '../common/JalpaiguriLogo';
 export const HomeView: React.FC = () => {
   const { navigate, setIsAssistantOpen } = useNav();
   const { user } = useAuth();
-  const { workers, doctors, localAlerts, civicReports } = useApp();
+  const { workers, doctors, localAlerts, civicReports, isRealtimeConnected, refreshData } = useApp();
 
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const placeholders = [
@@ -77,12 +77,25 @@ export const HomeView: React.FC = () => {
                 <span>{user ? `Good day, ${user.name.split(' ')[0]}` : 'Welcome, Citizen'}</span>
                 <span>👋</span>
               </h2>
-              <div
-                onClick={() => navigate(user ? 'profile' : 'auth')}
-                className="flex items-center gap-1 text-xs font-semibold text-[#55685F] cursor-pointer hover:text-[#063B2C]"
-              >
-                <MapPin className="w-3.5 h-3.5 text-[#063B2C]" />
-                <span className="truncate max-w-[180px]">{user?.location || 'Jalpaiguri, West Bengal'}</span>
+              <div className="flex items-center gap-2 mt-0.5">
+                <div
+                  onClick={() => navigate(user ? 'profile' : 'auth')}
+                  className="flex items-center gap-1 text-xs font-semibold text-[#55685F] cursor-pointer hover:text-[#063B2C]"
+                >
+                  <MapPin className="w-3.5 h-3.5 text-[#063B2C]" />
+                  <span className="truncate max-w-[130px]">{user?.location || 'Jalpaiguri, WB'}</span>
+                </div>
+                <div
+                  onClick={() => refreshData()}
+                  className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#E6F4EA] text-[#063B2C] text-[10px] font-bold cursor-pointer hover:bg-[#C8E6C9] transition-colors"
+                  title="Real-time data stream active. Tap to sync now."
+                >
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+                  </span>
+                  <span>Live Stream</span>
+                </div>
               </div>
             </div>
           </div>
@@ -209,41 +222,57 @@ export const HomeView: React.FC = () => {
           </div>
 
           <div className="space-y-3">
-            {/* Worker Card 1: Ramesh Sarkar */}
-            {workers.slice(0, 2).map((worker) => (
+            {workers.length === 0 ? (
               <div
-                key={worker.id}
-                onClick={() => navigate('worker-detail', { workerId: worker.id })}
-                className="bg-white border border-[#E8E4DA] rounded-3xl p-4 shadow-xs flex items-center gap-3.5 hover:border-[#063B2C] transition-all cursor-pointer"
+                onClick={() => navigate('offer-services')}
+                className="bg-white border border-dashed border-[#CBD5E1] rounded-3xl p-5 text-center shadow-xs hover:border-[#063B2C] transition-all cursor-pointer"
               >
-                <img
-                  src={worker.avatarUrl}
-                  alt={worker.name}
-                  className="w-14 h-14 rounded-2xl object-cover shrink-0 border border-[#E8E4DA]"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-1">
-                    <h4 className="font-extrabold text-sm text-[#11241C] truncate">
-                      {worker.name}
-                    </h4>
-                    <span className="text-[11px] font-bold text-[#063B2C] bg-[#E6F4EA] px-2 py-0.5 rounded-full shrink-0">
-                      ★ {worker.rating}
-                    </span>
-                  </div>
-                  <p className="text-xs font-semibold text-[#55685F] mt-0.5">
-                    {worker.profession} • {worker.distance}
-                  </p>
-                  <p className="text-[11px] font-medium text-[#11241C] mt-1">
-                    {worker.startingPrice}
-                  </p>
+                <div className="text-xs font-bold text-[#11241C] mb-1">
+                  Are you a skilled professional in Jalpaiguri?
                 </div>
-                <ChevronRight className="w-5 h-5 text-[#8C9B93]" />
+                <p className="text-[11px] text-[#55685F] mb-3">
+                  List your services (Electrician, Plumber, Painter, etc.) to get direct calls from neighbors.
+                </p>
+                <span className="inline-block bg-[#063B2C] text-white text-xs font-bold px-4 py-1.5 rounded-full">
+                  List Your Service Now
+                </span>
               </div>
-            ))}
+            ) : (
+              workers.slice(0, 2).map((worker) => (
+                <div
+                  key={worker.id}
+                  onClick={() => navigate('worker-detail', { workerId: worker.id })}
+                  className="bg-white border border-[#E8E4DA] rounded-3xl p-4 shadow-xs flex items-center gap-3.5 hover:border-[#063B2C] transition-all cursor-pointer"
+                >
+                  <img
+                    src={worker.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
+                    alt={worker.name}
+                    className="w-14 h-14 rounded-2xl object-cover shrink-0 border border-[#E8E4DA]"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1">
+                      <h4 className="font-extrabold text-sm text-[#11241C] truncate">
+                        {worker.name}
+                      </h4>
+                      <span className="text-[11px] font-bold text-[#063B2C] bg-[#E6F4EA] px-2 py-0.5 rounded-full shrink-0">
+                        ★ {worker.rating}
+                      </span>
+                    </div>
+                    <p className="text-xs font-semibold text-[#55685F] mt-0.5">
+                      {worker.profession} • {worker.distance}
+                    </p>
+                    <p className="text-[11px] font-medium text-[#11241C] mt-1">
+                      {worker.startingPrice}
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-[#8C9B93]" />
+                </div>
+              ))
+            )}
           </div>
         </div>
 
-        {/* Live Local Alerts Ticker matching image 9 */}
+        {/* Live Local Alerts Ticker */}
         <div>
           <div className="flex items-center justify-between mb-3 px-1">
             <h3 className="text-sm font-extrabold text-[#11241C] tracking-tight flex items-center gap-1.5">
@@ -258,23 +287,37 @@ export const HomeView: React.FC = () => {
             </button>
           </div>
 
-          <div
-            onClick={() => navigate('alerts')}
-            className="bg-white border border-[#E8E4DA] rounded-3xl p-4 shadow-xs hover:border-[#063B2C] transition-all cursor-pointer"
-          >
-            <div className="flex items-center justify-between text-xs font-bold mb-1.5">
-              <span className="text-[#D9383A] bg-[#FFEBEA] px-2.5 py-0.5 rounded-full">
-                Waterlogging Notice
-              </span>
-              <span className="text-[#8C9B93] font-medium">18 mins ago</span>
+          {localAlerts.length > 0 ? (
+            <div
+              onClick={() => navigate('alerts')}
+              className="bg-white border border-[#E8E4DA] rounded-3xl p-4 shadow-xs hover:border-[#063B2C] transition-all cursor-pointer"
+            >
+              <div className="flex items-center justify-between text-xs font-bold mb-1.5">
+                <span className="text-[#D9383A] bg-[#FFEBEA] px-2.5 py-0.5 rounded-full">
+                  {localAlerts[0].category}
+                </span>
+                <span className="text-[#8C9B93] font-medium">{localAlerts[0].timeAgo}</span>
+              </div>
+              <h4 className="font-extrabold text-sm text-[#11241C]">
+                {localAlerts[0].title}
+              </h4>
+              <p className="text-xs text-[#55685F] mt-1 line-clamp-2">
+                {localAlerts[0].description} ({localAlerts[0].confirmedCount} citizens confirmed). Tap to see live map.
+              </p>
             </div>
-            <h4 className="font-extrabold text-sm text-[#11241C]">
-              Paharpur Teesta River connector road
-            </h4>
-            <p className="text-xs text-[#55685F] mt-1 line-clamp-2">
-              Water accumulation reported near Paharpur crossing. 3 citizens confirmed. Tap to see live map.
-            </p>
-          </div>
+          ) : (
+            <div
+              onClick={() => navigate('alerts')}
+              className="bg-white border border-[#E8E4DA] rounded-3xl p-4 shadow-xs hover:border-[#063B2C] transition-all cursor-pointer text-center"
+            >
+              <p className="text-xs font-semibold text-[#55685F]">
+                No active traffic or weather hazards reported right now in Jalpaiguri.
+              </p>
+              <span className="text-[11px] font-bold text-[#063B2C] underline mt-1 inline-block">
+                View Community Map & Report
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>
