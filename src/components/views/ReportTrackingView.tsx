@@ -20,9 +20,9 @@ export const ReportTrackingView: React.FC = () => {
   const report = civicReports.find((r) => r.id === reportId) || civicReports[0];
 
   const steps = [
-    { label: 'Report Logged', date: report?.date || 'Today', done: true, desc: 'Logged with Jalpaiguri Municipal System' },
-    { label: 'Assigned to Ward Officer', date: 'Within 2 hrs', done: report?.status !== 'Pending', desc: 'Ward 12 Sanitary Inspector notified' },
-    { label: 'On-site Inspection', date: 'In progress', done: report?.status === 'In Progress' || report?.status === 'Resolved', desc: 'Field team reviewing the location' },
+    { label: 'Report Logged', date: report?.reportedAt || report?.date || 'Today', done: true, desc: 'Logged with Jalpaiguri Municipal System' },
+    { label: 'Assigned to Ward Officer', date: 'Within 2 hrs', done: report?.status !== 'Submitted', desc: 'Ward 12 Sanitary Inspector notified' },
+    { label: 'On-site Inspection', date: 'In progress', done: report?.status === 'Action Taken' || report?.status === 'Resolved', desc: 'Field team reviewing the location' },
     { label: 'Work Resolved', date: 'Expected 24-48 hrs', done: report?.status === 'Resolved', desc: 'Issue repaired & verified' }
   ];
 

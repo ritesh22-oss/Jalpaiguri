@@ -19,47 +19,48 @@ export const SplashLeafLogo: React.FC<SplashLeafLogoProps> = ({
   return (
     <div className={`relative flex items-center justify-center shrink-0 ${sizeClasses[size]} ${className}`}>
       <svg
-        viewBox="0 0 100 100"
+        viewBox="0 0 120 120"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-full drop-shadow-[0_4px_16px_rgba(255,255,255,0.35)]"
+        className="w-full h-full"
       >
-        {/* Central stem & connected node lines */}
-        {/* Left top node branch */}
-        <circle cx="28" cy="45" r="5" fill="#A8F0C6" />
-        <path d="M28 45H50" stroke="#A8F0C6" strokeWidth="5.5" strokeLinecap="round" />
+        {/* Top-Left Node & Connector */}
+        <circle cx="28" cy="46" r="6" stroke="#9DF3C4" strokeWidth="5.5" fill="none" />
+        <path d="M34 46H58" stroke="#9DF3C4" strokeWidth="5.5" strokeLinecap="round" />
 
-        {/* Left bottom node branch */}
-        <circle cx="28" cy="65" r="5" fill="#A8F0C6" />
-        <path d="M28 65H50" stroke="#A8F0C6" strokeWidth="5.5" strokeLinecap="round" />
+        {/* Bottom-Left Node & Connector */}
+        <circle cx="28" cy="72" r="6" stroke="#9DF3C4" strokeWidth="5.5" fill="none" />
+        <path d="M34 72H58" stroke="#9DF3C4" strokeWidth="5.5" strokeLinecap="round" />
 
-        {/* Main central vertical stem */}
-        <path d="M50 24V76" stroke="#A8F0C6" strokeWidth="5.5" strokeLinecap="round" />
+        {/* Main Central Vertical Line */}
+        <path d="M58 26V88" stroke="#9DF3C4" strokeWidth="5.5" strokeLinecap="round" />
 
-        {/* Bottom center node */}
-        <circle cx="50" cy="76" r="5" fill="#A8F0C6" />
+        {/* Bottom Center Node */}
+        <circle cx="58" cy="94" r="6" stroke="#9DF3C4" strokeWidth="5.5" fill="none" />
 
-        {/* Right bottom node branch */}
-        <circle cx="72" cy="65" r="5" fill="#A8F0C6" />
-        <path d="M50 65H72" stroke="#A8F0C6" strokeWidth="5.5" strokeLinecap="round" />
+        {/* Bottom-Right Node & Connector */}
+        <path d="M58 72H82" stroke="#9DF3C4" strokeWidth="5.5" strokeLinecap="round" />
+        <circle cx="88" cy="72" r="6" stroke="#9DF3C4" strokeWidth="5.5" fill="none" />
 
-        {/* Leaf outline extending upward to top right */}
+        {/* Top-Right Leaf Contour */}
         <path
-          d="M50 24C50 24 74 20 76 45C77 56 64 62 50 62"
-          stroke="#A8F0C6"
+          d="M58 26C58 26 88 20 92 50C93 64 78 72 58 72"
+          stroke="#9DF3C4"
           strokeWidth="5.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
 
-        {/* Inner leaf vein */}
+        {/* Inner Leaf Vein with Node */}
         <path
-          d="M50 42C57 40 65 42 68 47"
-          stroke="#A8F0C6"
-          strokeWidth="4"
+          d="M58 48C68 45 78 48 82 54"
+          stroke="#9DF3C4"
+          strokeWidth="4.5"
           strokeLinecap="round"
         />
+        <circle cx="84" cy="55" r="3.5" fill="#9DF3C4" />
       </svg>
     </div>
   );
 };
+

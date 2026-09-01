@@ -80,12 +80,12 @@ export const WorkerDetailView: React.FC = () => {
               {worker.name}
             </h2>
             <p className="text-xs font-bold text-[#063B2C] mt-0.5">
-              {worker.profession} • {worker.experience}
+              {worker.profession} • {worker.experience || (worker.experienceYears ? `${worker.experienceYears} yrs exp` : 'Verified Professional')}
             </p>
             <div className="flex items-center justify-center gap-3 text-xs font-semibold text-[#55685F] mt-2">
               <span className="flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-[#063B2C]" />
-                <span>{worker.location} ({worker.distance})</span>
+                <span>{worker.location || worker.serviceArea} ({worker.distance})</span>
               </span>
               <span>•</span>
               <span className="flex items-center gap-1 text-[#063B2C] font-bold">
@@ -134,7 +134,7 @@ export const WorkerDetailView: React.FC = () => {
             About Provider
           </h3>
           <p className="text-xs text-[#55685F] leading-relaxed">
-            {worker.bio}
+            {worker.bio || worker.description}
           </p>
         </div>
       </div>

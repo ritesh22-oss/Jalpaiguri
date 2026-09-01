@@ -97,8 +97,9 @@ export const ProfileView: React.FC = () => {
   };
 
   const handleLogout = async () => {
+    localStorage.removeItem('jpg_has_onboarded');
     await logout();
-    navigate('auth');
+    navigate('onboarding');
   };
 
   return (

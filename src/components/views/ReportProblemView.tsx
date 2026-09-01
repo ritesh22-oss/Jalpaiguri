@@ -51,15 +51,15 @@ export const ReportProblemView: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!description.trim()) {
       alert('Please provide a brief description of the issue');
       return;
     }
     setIsSubmitting(true);
-    setTimeout(() => {
-      const report = submitCivicReport({
+    try {
+      const report = await submitCivicReport({
         category,
         location,
         description,
@@ -68,7 +68,9 @@ export const ReportProblemView: React.FC = () => {
       setSubmittedReportId(report.id);
       setIsSubmitting(false);
       setIsSubmitted(true);
-    }, 600);
+    } catch (err) {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubmitted) {

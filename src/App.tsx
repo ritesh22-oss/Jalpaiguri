@@ -2,13 +2,18 @@ import React from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NavigationProvider, useNav } from './context/NavigationContext';
 import { AppProvider, useApp } from './context/AppContext';
+import { LocationProvider } from './context/LocationContext';
 
 // Views
 import { SplashScreen } from './components/views/SplashScreen';
 import { OnboardingView } from './components/views/OnboardingView';
 import { AuthView } from './components/views/AuthView';
+import { PhoneAuthView } from './components/views/PhoneAuthView';
+import { OTPView } from './components/views/OTPView';
+import { ProfileSetupView } from './components/views/ProfileSetupView';
 import { ProfileOnboardingView } from './components/views/ProfileOnboardingView';
 import { HomeView } from './components/views/HomeView';
+import { NearbyView } from './components/views/NearbyView';
 import { DiscoverView } from './components/views/DiscoverView';
 import { WorkersView } from './components/views/WorkersView';
 import { WorkerDetailView } from './components/views/WorkerDetailView';
@@ -26,13 +31,16 @@ import { BusinessesView } from './components/views/BusinessesView';
 import { GovernmentServicesView } from './components/views/GovernmentServicesView';
 import { LostFoundView } from './components/views/LostFoundView';
 import { ChatView } from './components/views/ChatView';
+import { GeminiChatView } from './components/views/GeminiChatView';
+import { MapsExplorerView } from './components/views/MapsExplorerView';
 import { ProfileView } from './components/views/ProfileView';
 import { OfferServicesView } from './components/views/OfferServicesView';
 import { AdminDashboardView } from './components/views/AdminDashboardView';
 
-// Common Components
+// Common Components & Modals
 import { BottomNav } from './components/common/BottomNav';
 import { FiltersBottomSheet } from './components/common/FiltersBottomSheet';
+import { LocationSelectorModal } from './components/common/LocationSelectorModal';
 import { JalpaigiAssistantModal } from './components/common/JalpaigiAssistantModal';
 import { Toast } from './components/common/Toast';
 
@@ -57,13 +65,20 @@ const AppContent: React.FC = () => {
       case 'onboarding':
         return <OnboardingView />;
       case 'auth':
-      case 'otp':
         return <AuthView />;
+      case 'phone-auth':
+        return <PhoneAuthView />;
+      case 'otp':
+        return <OTPView />;
+      case 'profile-setup':
+        return <ProfileSetupView />;
       case 'profile-onboarding':
       case 'location-permission':
-        return <ProfileOnboardingView />;
+        return <ProfileSetupView />;
       case 'home':
         return <HomeView />;
+      case 'nearby':
+        return <NearbyView />;
       case 'discover':
         return <DiscoverView />;
       case 'workers':
@@ -110,9 +125,13 @@ const AppContent: React.FC = () => {
         return <GovernmentServicesView />;
       case 'lost-found':
         return <LostFoundView />;
+      case 'ai-chat':
+        return <GeminiChatView />;
+      case 'maps-explorer':
+        return <MapsExplorerView />;
       case 'chat':
       case 'messages':
-        return <ChatView />;
+        return <GeminiChatView />;
       case 'profile':
       case 'volunteer':
       case 'settings':
@@ -128,7 +147,19 @@ const AppContent: React.FC = () => {
   };
 
   // Determine if BottomNav should be visible
-  const hideBottomNavViews = ['splash', 'onboarding', 'auth', 'profile-onboarding', 'chat', 'admin-dashboard'];
+  const hideBottomNavViews = [
+    'splash',
+    'onboarding',
+    'auth',
+    'phone-auth',
+    'otp',
+    'profile-setup',
+    'profile-onboarding',
+    'location-permission',
+    'chat',
+    'ai-chat',
+    'admin-dashboard'
+  ];
   const showBottomNav = !hideBottomNavViews.includes(currentView);
 
   return (
@@ -139,6 +170,7 @@ const AppContent: React.FC = () => {
         {showBottomNav && <BottomNav />}
 
         {/* Global Modals & Sheets */}
+        <LocationSelectorModal />
         <FiltersBottomSheet />
         <JalpaigiAssistantModal />
         <Toast />
@@ -150,11 +182,13 @@ const AppContent: React.FC = () => {
 export default function App() {
   return (
     <AuthProvider>
-      <NavigationProvider>
-        <AppProvider>
-          <AppContent />
-        </AppProvider>
-      </NavigationProvider>
+      <LocationProvider>
+        <NavigationProvider>
+          <AppProvider>
+            <AppContent />
+          </AppProvider>
+        </NavigationProvider>
+      </LocationProvider>
     </AuthProvider>
   );
 }

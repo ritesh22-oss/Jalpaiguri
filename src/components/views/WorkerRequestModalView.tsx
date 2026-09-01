@@ -35,13 +35,17 @@ export const WorkerRequestModalView: React.FC = () => {
     }
     setIsSubmitting(true);
     setTimeout(() => {
-      requestWorkerService({
-        workerId: worker.id,
-        workerName: worker.name,
-        serviceDate,
-        problemDescription,
-        address
-      });
+      if (requestWorkerService) {
+        requestWorkerService({
+          workerId: worker.id,
+          workerName: worker.name,
+          serviceCategory: worker.category || 'General Service',
+          description: problemDescription,
+          location: address,
+          preferredDate: serviceDate,
+          preferredTime: 'Morning / Afternoon'
+        });
+      }
       setIsSubmitting(false);
       setIsDone(true);
     }, 600);

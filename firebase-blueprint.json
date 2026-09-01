@@ -1,0 +1,224 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Registered citizen or admin profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "bloodGroup": { "type": "string" },
+        "location": { "type": "string" },
+        "role": { "type": "string", "enum": ["citizen", "admin", "worker"] },
+        "language": { "type": "string" },
+        "isBloodDonor": { "type": "boolean" },
+        "isVolunteer": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "role"]
+    },
+    "Worker": {
+      "title": "Worker",
+      "description": "Local skilled worker in Jalpaiguri",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "profession": { "type": "string" },
+        "phone": { "type": "string" },
+        "location": { "type": "string" },
+        "rating": { "type": "number" },
+        "reviewsCount": { "type": "number" },
+        "experience": { "type": "string" },
+        "price": { "type": "string" },
+        "isVerified": { "type": "boolean" },
+        "isAvailableNow": { "type": "boolean" },
+        "category": { "type": "string" }
+      },
+      "required": ["id", "name", "profession", "phone", "location"]
+    },
+    "CivicReport": {
+      "title": "CivicReport",
+      "description": "Citizen civic issue report for Jalpaiguri municipality",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "category": { "type": "string" },
+        "location": { "type": "string" },
+        "description": { "type": "string" },
+        "photoUrl": { "type": "string" },
+        "reportedAt": { "type": "string" },
+        "status": { "type": "string", "enum": ["Submitted", "Verified", "In Progress", "Resolved"] },
+        "upvotes": { "type": "number" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "category", "location", "description", "status"]
+    },
+    "LocalAlert": {
+      "title": "LocalAlert",
+      "description": "Emergency or municipal alert in Jalpaiguri",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "area": { "type": "string" },
+        "timeAgo": { "type": "string" },
+        "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        "description": { "type": "string" },
+        "confirmedCount": { "type": "number" },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "isOfficial": { "type": "boolean" }
+      },
+      "required": ["id", "title", "category", "area", "description", "severity"]
+    },
+    "BloodDonor": {
+      "title": "BloodDonor",
+      "description": "Registered voluntary blood donor",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "bloodGroup": { "type": "string" },
+        "location": { "type": "string" },
+        "phone": { "type": "string" },
+        "verified": { "type": "boolean" },
+        "donationsCount": { "type": "number" },
+        "availability": { "type": "string" },
+        "lastDonation": { "type": "string" }
+      },
+      "required": ["id", "name", "bloodGroup", "phone", "location"]
+    },
+    "BloodRequest": {
+      "title": "BloodRequest",
+      "description": "Emergency blood request at local hospital",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "patientName": { "type": "string" },
+        "bloodGroup": { "type": "string" },
+        "hospital": { "type": "string" },
+        "units": { "type": "number" },
+        "urgency": { "type": "string" },
+        "contactPerson": { "type": "string" },
+        "phone": { "type": "string" },
+        "location": { "type": "string" },
+        "status": { "type": "string" },
+        "postedAt": { "type": "string" }
+      },
+      "required": ["id", "patientName", "bloodGroup", "hospital", "phone", "status"]
+    },
+    "Job": {
+      "title": "Job",
+      "description": "Local employment or gig listing",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "employer": { "type": "string" },
+        "location": { "type": "string" },
+        "salary": { "type": "string" },
+        "jobType": { "type": "string" },
+        "postedTime": { "type": "string" },
+        "description": { "type": "string" },
+        "phone": { "type": "string" }
+      },
+      "required": ["id", "title", "employer", "location", "phone"]
+    },
+    "RentalProperty": {
+      "title": "RentalProperty",
+      "description": "Rental house, flat or commercial space",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "type": { "type": "string" },
+        "rent": { "type": "string" },
+        "deposit": { "type": "string" },
+        "area": { "type": "string" },
+        "contact": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["id", "title", "rent", "area", "contact"]
+    },
+    "LostFoundItem": {
+      "title": "LostFoundItem",
+      "description": "Lost or found report",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["Lost", "Found"] },
+        "category": { "type": "string" },
+        "title": { "type": "string" },
+        "location": { "type": "string" },
+        "date": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "type", "title", "location", "status"]
+    },
+    "ServiceRequest": {
+      "title": "ServiceRequest",
+      "description": "Direct worker service request",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "workerId": { "type": "string" },
+        "workerName": { "type": "string" },
+        "workerProfession": { "type": "string" },
+        "serviceType": { "type": "string" },
+        "address": { "type": "string" },
+        "problemDescription": { "type": "string" },
+        "timing": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "workerId", "serviceType", "address", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Citizen user profiles"
+    },
+    "/workers/{workerId}": {
+      "schema": "Worker",
+      "description": "Verified local worker directory"
+    },
+    "/civic_reports/{reportId}": {
+      "schema": "CivicReport",
+      "description": "Municipal civic issue reports"
+    },
+    "/local_alerts/{alertId}": {
+      "schema": "LocalAlert",
+      "description": "Public safety and weather alerts"
+    },
+    "/blood_donors/{donorId}": {
+      "schema": "BloodDonor",
+      "description": "Voluntary blood donor records"
+    },
+    "/blood_requests/{requestId}": {
+      "schema": "BloodRequest",
+      "description": "Urgent hospital blood requests"
+    },
+    "/jobs/{jobId}": {
+      "schema": "Job",
+      "description": "Local jobs and gigs"
+    },
+    "/rentals/{rentalId}": {
+      "schema": "RentalProperty",
+      "description": "Housing and rental properties"
+    },
+    "/lost_found/{itemId}": {
+      "schema": "LostFoundItem",
+      "description": "Lost and found directory"
+    },
+    "/service_requests/{requestId}": {
+      "schema": "ServiceRequest",
+      "description": "Direct service bookings"
+    }
+  }
+}

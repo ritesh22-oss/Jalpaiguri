@@ -26,10 +26,11 @@ export const MedicalView: React.FC = () => {
   const specialties = ['All', 'Cardiologist', 'Pediatrician', 'Orthopedic', 'General Physician', 'Gynecologist'];
 
   const filteredDoctors = doctors.filter((doc) => {
+    const clinicName = doc.clinic || doc.medicalCentre || '';
     if (selectedSpecialty !== 'All' && doc.specialty !== selectedSpecialty) return false;
     if (search.trim()) {
       const q = search.toLowerCase();
-      return doc.name.toLowerCase().includes(q) || doc.specialty.toLowerCase().includes(q) || doc.clinic.toLowerCase().includes(q);
+      return doc.name.toLowerCase().includes(q) || doc.specialty.toLowerCase().includes(q) || clinicName.toLowerCase().includes(q);
     }
     return true;
   });
@@ -113,7 +114,7 @@ export const MedicalView: React.FC = () => {
             >
               <div className="flex items-start gap-3">
                 <img
-                  src={doc.avatarUrl}
+                  src={doc.avatarUrl || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80'}
                   alt={doc.name}
                   className="w-14 h-14 rounded-2xl object-cover border border-[#E8E4DA] shrink-0"
                 />
@@ -124,9 +125,9 @@ export const MedicalView: React.FC = () => {
                       ★ {doc.rating}
                     </span>
                   </div>
-                  <p className="text-xs font-semibold text-[#063B2C]">{doc.specialty} • {doc.experience}</p>
-                  <p className="text-[11px] text-[#55685F] mt-0.5">{doc.clinic} ({doc.distance})</p>
-                  <p className="text-[11px] font-bold text-[#11241C] mt-1">{doc.fee} • Timing: {doc.timing}</p>
+                  <p className="text-xs font-semibold text-[#063B2C]">{doc.specialty} • {doc.experience || '10+ yrs exp'}</p>
+                  <p className="text-[11px] text-[#55685F] mt-0.5">{doc.clinic || doc.medicalCentre} ({doc.distance})</p>
+                  <p className="text-[11px] font-bold text-[#11241C] mt-1">{doc.fee || '₹400-₹600'} • Timing: {doc.timing || doc.visitingHours}</p>
                 </div>
               </div>
 
