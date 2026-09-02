@@ -1,39 +1,44 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   ChevronLeft,
-  Signal,
-  Wifi,
-  Battery,
   ChevronDown,
   Loader2,
   AlertCircle
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNav } from '../../context/NavigationContext';
+import { useExpo } from '../../context/ExpoContext';
+import { WritingCaptcha } from '../common/WritingCaptcha';
 
 export const PhoneAuthView: React.FC = () => {
-  const { sendPhoneOtp, setupRecaptcha, setPendingPhone } = useAuth();
+  const { sendPhoneOtp, pendingPhone, setPendingPhone } = useAuth();
   const { navigate } = useNav();
+  const { triggerHaptic, triggerPushNotification, setLatestOtp } = useExpo();
 
-  const [rawPhone, setRawPhone] = useState('');
+  const [rawPhone, setRawPhone] = useState(() => {
+    if (pendingPhone) {
+      const digits = pendingPhone.replace(/\D/g, '');
+      return digits.slice(-10);
+    }
+    return '';
+  });
+  const [isCaptchaValid, setIsCaptchaValid] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const recaptchaContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    try {
-      setupRecaptcha('recaptcha-container-phoneview');
-    } catch (e) {
-      console.warn('reCAPTCHA init:', e);
-    }
-  }, []);
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     const digitsOnly = rawPhone.replace(/\D/g, '');
 
     if (digitsOnly.length < 10) {
+      triggerHaptic('warning');
       setErrorMsg('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
+    if (!isCaptchaValid) {
+      triggerHaptic('warning');
+      setErrorMsg('Please enter the security characters correctly before continuing.');
       return;
     }
 
@@ -41,39 +46,41 @@ export const PhoneAuthView: React.FC = () => {
     setPendingPhone(formattedNumber);
     setErrorMsg('');
     setLoading(true);
+    triggerHaptic('medium');
 
     try {
-      const verifier = setupRecaptcha('recaptcha-container-phoneview');
-      if (verifier) {
-        await sendPhoneOtp(formattedNumber, verifier);
-      }
+      const res = await sendPhoneOtp(formattedNumber);
       setLoading(false);
-      navigate('otp');
+
+      if (res && res.success) {
+        triggerHaptic('success');
+        if (res.otp) {
+          setLatestOtp(res.otp);
+          triggerPushNotification({
+            appTitle: 'Messages',
+            category: 'SMS',
+            title: 'Jalpaiguri Connect Verification',
+            body: `Your verification code is ${res.otp}. Tap to auto-fill.`,
+            code: res.otp,
+            actionLabel: 'Auto-Fill'
+          });
+        }
+        navigate('otp');
+      } else {
+        triggerHaptic('warning');
+        setErrorMsg(res?.message || 'Failed to send SMS code. Please check the number and try again.');
+      }
     } catch (err: any) {
       setLoading(false);
-      // Still allow navigation to OTP with demo flow
-      navigate('otp');
+      triggerHaptic('warning');
+      setErrorMsg(err?.message || 'Failed to send SMS code. Please check your network and retry.');
     }
   };
 
   return (
     <div className="min-h-screen bg-white text-[#11241C] flex flex-col justify-between p-5 max-w-md mx-auto select-none relative shadow-2xl">
-      <div id="recaptcha-container-phoneview" ref={recaptchaContainerRef}></div>
-
-      {/* Top Mobile Status Bar */}
-      <div className="w-full flex items-center justify-between pt-1 px-1 text-gray-900 text-xs font-semibold">
-        <span>9:41</span>
-        <div className="flex items-center gap-1.5">
-          <Signal className="w-3.5 h-3.5 fill-current" />
-          <Wifi className="w-3.5 h-3.5" />
-          <div className="flex items-center">
-            <Battery className="w-4 h-4 fill-current" />
-          </div>
-        </div>
-      </div>
-
       {/* Top Header */}
-      <div className="w-full flex items-center justify-between pt-3">
+      <div className="w-full flex items-center justify-between pt-2 pb-2">
         <button
           onClick={() => navigate('auth')}
           className="p-1 -ml-1 text-gray-800 hover:text-black active:scale-95 transition-all cursor-pointer"
@@ -88,8 +95,8 @@ export const PhoneAuthView: React.FC = () => {
         <div className="w-6"></div>
       </div>
 
-      {/* Phone Number Input Card */}
-      <form onSubmit={handleSendOtp} className="space-y-4 my-auto w-full px-1">
+      {/* Phone Number Input & Writing CAPTCHA Card */}
+      <form onSubmit={handleSendOtp} className="space-y-3.5 my-auto w-full px-1">
         {errorMsg && (
           <div className="bg-rose-50 border border-rose-200 rounded-2xl p-3 text-xs text-rose-800 flex items-start gap-2 animate-in fade-in duration-200">
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
@@ -97,7 +104,7 @@ export const PhoneAuthView: React.FC = () => {
           </div>
         )}
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <label className="block text-xs font-semibold text-gray-700">
             Enter your mobile number
           </label>
@@ -126,10 +133,16 @@ export const PhoneAuthView: React.FC = () => {
           </div>
         </div>
 
+        {/* User-Friendly Writing CAPTCHA (Canvas Security Characters) */}
+        <WritingCaptcha onVerifyChange={setIsCaptchaValid} />
+
+        {/* Hidden reCAPTCHA DOM anchor */}
+        <div id="recaptcha-container" className="hidden"></div>
+
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={loading || rawPhone.length < 10}
+          disabled={loading || rawPhone.length < 10 || !isCaptchaValid}
           className="w-full h-[48px] rounded-xl bg-[#2F74E9] hover:bg-[#2563EB] active:scale-[0.99] text-white font-semibold text-[14px] flex items-center justify-center shadow-sm transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {loading ? (
@@ -138,7 +151,7 @@ export const PhoneAuthView: React.FC = () => {
               <span>Sending Code...</span>
             </div>
           ) : (
-            <span>Continue</span>
+            <span>Send OTP / Continue</span>
           )}
         </button>
       </form>

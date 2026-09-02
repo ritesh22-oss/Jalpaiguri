@@ -14,7 +14,9 @@ import {
   Train,
   ChevronRight,
   ShieldCheck,
-  Loader2
+  Loader2,
+  Activity,
+  Sparkles
 } from 'lucide-react';
 import { useLocation } from '../../context/LocationContext';
 import { LocalityInfo } from '../../data/jalpaiguriLocalities';
@@ -26,6 +28,9 @@ export const LocationSelectorModal: React.FC = () => {
     errorMessage,
     isLocationSelectorOpen,
     setIsLocationSelectorOpen,
+    isLiveTracking,
+    startLiveTracking,
+    stopLiveTracking,
     requestCurrentLocation,
     setManualLocation,
     localities
@@ -44,6 +49,14 @@ export const LocationSelectorModal: React.FC = () => {
       setTimeout(() => {
         setIsLocationSelectorOpen(false);
       }, 500);
+    }
+  };
+
+  const toggleLiveTracking = () => {
+    if (isLiveTracking) {
+      stopLiveTracking();
+    } else {
+      startLiveTracking();
     }
   };
 
@@ -119,6 +132,11 @@ export const LocationSelectorModal: React.FC = () => {
                     {location.name}
                   </p>
                 </div>
+                {!location.isApproximate && (
+                  <p className="text-[11px] text-gray-500 font-mono mt-0.5">
+                    {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+                  </p>
+                )}
               </div>
 
               {location.isApproximate ? (
@@ -128,29 +146,55 @@ export const LocationSelectorModal: React.FC = () => {
               ) : (
                 <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold flex items-center gap-1">
                   <ShieldCheck className="w-3 h-3" />
-                  GPS Detected
+                  Real GPS
                 </span>
               )}
             </div>
 
-            {/* Use Current GPS Location Button */}
-            <button
-              onClick={handleUseCurrentLocation}
-              disabled={isDetecting}
-              className="w-full bg-[#063B2C] text-white hover:bg-[#084D3A] active:scale-[0.99] transition-all py-3 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-75"
-            >
-              {isDetecting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Detecting GPS Location...</span>
-                </>
-              ) : (
-                <>
-                  <Navigation className="w-4 h-4 text-emerald-300" />
-                  <span>Use Current GPS Location</span>
-                </>
-              )}
-            </button>
+            {!location.isApproximate && location.accuracy && (
+              <div className="flex items-center justify-between text-[11px] text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+                <div className="flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Accuracy: ±{location.accuracy}m</span>
+                </div>
+                {location.speed !== null && location.speed !== undefined && location.speed > 0 && (
+                  <span className="font-mono">Speed: {(location.speed * 3.6).toFixed(1)} km/h</span>
+                )}
+              </div>
+            )}
+
+            {/* GPS Action Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button
+                onClick={handleUseCurrentLocation}
+                disabled={isDetecting}
+                className="w-full bg-[#063B2C] text-white hover:bg-[#084D3A] active:scale-[0.99] transition-all py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-75"
+              >
+                {isDetecting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Detecting GPS...</span>
+                  </>
+                ) : (
+                  <>
+                    <Navigation className="w-4 h-4 text-emerald-300" />
+                    <span>Detect Real GPS</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={toggleLiveTracking}
+                className={`w-full py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 border transition-all cursor-pointer ${
+                  isLiveTracking
+                    ? 'bg-emerald-600 text-white border-emerald-700 shadow-xs'
+                    : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <Activity className={`w-4 h-4 ${isLiveTracking ? 'animate-pulse text-white' : 'text-gray-500'}`} />
+                <span>{isLiveTracking ? 'Live Tracking ON' : 'Start Live GPS'}</span>
+              </button>
+            </div>
 
             {/* Error or Notice State */}
             {status === 'permission_denied' && (
