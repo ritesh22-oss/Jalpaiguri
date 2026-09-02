@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Signal,
-  Wifi,
-  Battery,
   ChevronDown,
   Loader2,
   AlertCircle,
@@ -14,11 +11,12 @@ import { useNav } from '../../context/NavigationContext';
 import { HandshakePinLogo } from '../common/HandshakePinLogo';
 
 export const AuthView: React.FC = () => {
-  const { loginWithGoogle, setPendingPhone } = useAuth();
+  const { loginWithGoogle, sendPhoneOtp, setPendingPhone } = useAuth();
   const { navigate, replaceView } = useNav();
 
   const [rawPhone, setRawPhone] = useState('');
   const [loading, setLoading] = useState(false);
+  const [phoneLoading, setPhoneLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -51,34 +49,19 @@ export const AuthView: React.FC = () => {
     }
   };
 
-  const handlePhoneContinue = (e: React.FormEvent) => {
+  const handlePhoneContinue = async (e: React.FormEvent) => {
     e.preventDefault();
     const digitsOnly = rawPhone.replace(/\D/g, '');
 
-    if (digitsOnly.length < 10 && rawPhone.trim() !== '') {
-      setErrorMsg('Please enter a valid 10-digit mobile number.');
-      return;
+    if (digitsOnly.length > 0) {
+      const formattedNumber = `+91 ${digitsOnly.slice(-10)}`;
+      setPendingPhone(formattedNumber);
     }
-
-    const formattedNumber = digitsOnly.length >= 10 ? `+91 ${digitsOnly.slice(-10)}` : '+91 98765 43210';
-    setPendingPhone(formattedNumber);
-    navigate('otp');
+    navigate('phone-auth');
   };
 
   return (
     <div className="min-h-screen bg-white text-[#11241C] flex flex-col justify-between p-5 max-w-md mx-auto select-none relative shadow-2xl">
-      {/* Top Mobile Status Bar (9:41, Cellular, WiFi, Battery) */}
-      <div className="w-full flex items-center justify-between pt-1 px-1 text-gray-900 text-xs font-semibold">
-        <span>9:41</span>
-        <div className="flex items-center gap-1.5">
-          <Signal className="w-3.5 h-3.5 fill-current" />
-          <Wifi className="w-3.5 h-3.5" />
-          <div className="flex items-center">
-            <Battery className="w-4 h-4 fill-current" />
-          </div>
-        </div>
-      </div>
-
       {/* Top Navigation Bar with Back Button & Centered "Sign In" */}
       <div className="w-full flex items-center justify-between pt-2 pb-2">
         <button
@@ -96,6 +79,7 @@ export const AuthView: React.FC = () => {
         {/* Empty placeholder to ensure perfect center alignment */}
         <div className="w-6"></div>
       </div>
+
 
       {/* Main Content Area */}
       <div className="w-full px-1 my-auto flex flex-col items-center">
@@ -203,9 +187,17 @@ export const AuthView: React.FC = () => {
             <button
               id="btn-phone-continue"
               type="submit"
-              className="w-full h-[48px] rounded-xl bg-[#2F74E9] hover:bg-[#2563EB] active:scale-[0.99] text-white font-semibold text-[14px] flex items-center justify-center shadow-sm transition-all cursor-pointer"
+              disabled={phoneLoading || rawPhone.replace(/\D/g, '').length < 10}
+              className="w-full h-[48px] rounded-xl bg-[#2F74E9] hover:bg-[#2563EB] active:scale-[0.99] text-white font-semibold text-[14px] flex items-center justify-center shadow-sm transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Continue
+              {phoneLoading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  <span>Sending OTP...</span>
+                </div>
+              ) : (
+                <span>Continue</span>
+              )}
             </button>
           </form>
         </div>

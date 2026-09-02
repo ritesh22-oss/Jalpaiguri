@@ -1,33 +1,85 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ChevronLeft,
-  Signal,
-  Wifi,
-  Battery,
-  Delete,
   Loader2,
   AlertCircle,
-  CheckCircle2
+  CheckCircle2,
+  Zap,
+  Sparkles,
+  Copy,
+  Check,
+  RefreshCw,
+  PhoneCall,
+  WifiOff,
+  RotateCcw,
+  Edit3,
+  ShieldCheck,
+  Smartphone,
+  Lock,
+  Info
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNav } from '../../context/NavigationContext';
+import { useExpo } from '../../context/ExpoContext';
 
 export const OTPView: React.FC = () => {
-  const { pendingPhone, verifyPhoneOtp, sendPhoneOtp, setupRecaptcha } = useAuth();
+  const { pendingPhone, verifyPhoneOtp, sendPhoneOtp, activeOtp } = useAuth();
   const { navigate, replaceView } = useNav();
+  const {
+    autoFillOtpTrigger,
+    clearAutoFillRequest,
+    triggerHaptic,
+    latestOtp,
+    triggerPushNotification
+  } = useExpo();
 
-  const [digits, setDigits] = useState<string[]>(['1', '', '', '']);
-  const [resendCountdown, setResendCountdown] = useState<number>(28);
+  const [digits, setDigits] = useState<string[]>(['', '', '', '', '', '']);
+  const [resendCountdown, setResendCountdown] = useState<number>(30);
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [errorType, setErrorType] = useState<'invalid' | 'network' | 'expired' | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
   const [shake, setShake] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const hiddenInputRef = useRef<HTMLInputElement>(null);
 
-  // Active cursor index (first empty index, or 3 if all filled)
+  // Suggested OTP from backend or SSE
+  const availableOtp = activeOtp || latestOtp;
+
+  // Active cursor index (first empty index, or 5 if all filled)
   const activeIndex = digits.findIndex((d) => d === '');
-  const currentCursorIndex = activeIndex === -1 ? 3 : activeIndex;
+  const currentCursorIndex = activeIndex === -1 ? 5 : activeIndex;
 
-  // 28 second timer countdown
+  // Auto-focus hidden input on mount for physical keyboard & paste support
+  useEffect(() => {
+    hiddenInputRef.current?.focus();
+
+    // If an OTP exists, trigger push notification for seamless testing
+    if (availableOtp) {
+      triggerPushNotification({
+        appTitle: 'Messages',
+        category: 'SMS',
+        title: 'Jalpaiguri Connect Verification',
+        body: `Your verification code is ${availableOtp}. Tap to auto-fill.`,
+        code: availableOtp,
+        actionLabel: 'Auto-Fill'
+      });
+    }
+  }, []);
+
+  // Listen to external Auto-Fill trigger from ExpoPushBanner
+  useEffect(() => {
+    if (autoFillOtpTrigger && autoFillOtpTrigger.length === 6) {
+      const newDigits = autoFillOtpTrigger.split('');
+      setDigits(newDigits);
+      clearAutoFillRequest();
+      triggerHaptic('success');
+      verifyCode(autoFillOtpTrigger);
+    }
+  }, [autoFillOtpTrigger]);
+
+  // 30 second resend timer countdown
   useEffect(() => {
     let timer: any;
     if (resendCountdown > 0) {
@@ -38,37 +90,74 @@ export const OTPView: React.FC = () => {
     return () => clearInterval(timer);
   }, [resendCountdown]);
 
+  // Apply Auto-Fill directly
+  const handleAutoFillClick = (code: string) => {
+    const cleanCode = code.trim().slice(0, 6);
+    if (cleanCode.length === 6) {
+      setDigits(cleanCode.split(''));
+      setErrorMsg('');
+      setErrorType(null);
+      triggerHaptic('medium');
+      verifyCode(cleanCode);
+    }
+  };
+
+  // Handle keypad press or typing
   const handleKeypadPress = (val: string) => {
     if (loading || isSuccess) return;
+    triggerHaptic('light');
 
     if (val === 'backspace') {
-      // Find the last filled digit
       const lastFilledIndex = digits.reduce((last, d, idx) => (d !== '' ? idx : last), -1);
       if (lastFilledIndex !== -1) {
         const newDigits = [...digits];
         newDigits[lastFilledIndex] = '';
         setDigits(newDigits);
         setErrorMsg('');
+        setErrorType(null);
       }
       return;
     }
 
-    // Add digit to first empty spot
+    // Add digit to first empty slot
     const firstEmptyIndex = digits.findIndex((d) => d === '');
     if (firstEmptyIndex !== -1) {
       const newDigits = [...digits];
       newDigits[firstEmptyIndex] = val;
       setDigits(newDigits);
       setErrorMsg('');
+      setErrorType(null);
 
-      // If all 4 filled, trigger verification
-      if (firstEmptyIndex === 3) {
+      // When all 6 are filled, trigger OTP verification
+      if (firstEmptyIndex === 5) {
         verifyCode(newDigits.join(''));
       }
     }
   };
 
-  // Allow physical keyboard input as well
+  // Clipboard Paste Handler
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    if (loading || isSuccess) return;
+
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pastedData.length > 0) {
+      const newDigits = ['', '', '', '', '', ''];
+      for (let i = 0; i < pastedData.length; i++) {
+        newDigits[i] = pastedData[i];
+      }
+      setDigits(newDigits);
+      setErrorMsg('');
+      setErrorType(null);
+      triggerHaptic('medium');
+
+      if (pastedData.length === 6) {
+        verifyCode(pastedData);
+      }
+    }
+  };
+
+  // Allow physical keyboard input
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (loading || isSuccess) return;
@@ -77,9 +166,9 @@ export const OTPView: React.FC = () => {
       } else if (e.key === 'Backspace') {
         handleKeypadPress('backspace');
       } else if (e.key === 'Enter') {
-        const filled = digits.filter(Boolean);
-        if (filled.length >= 4) {
-          verifyCode(digits.join(''));
+        const code = digits.join('');
+        if (code.length === 6) {
+          verifyCode(code);
         }
       }
     };
@@ -89,13 +178,16 @@ export const OTPView: React.FC = () => {
   }, [digits, loading, isSuccess]);
 
   const verifyCode = async (codeToVerify: string) => {
-    if (codeToVerify.length < 4) {
-      setErrorMsg('Please enter all 4 digits.');
+    if (codeToVerify.length < 6) {
+      setErrorType('invalid');
+      setErrorMsg('Please enter all 6 digits to verify.');
+      triggerHaptic('warning');
       return;
     }
 
     setLoading(true);
     setErrorMsg('');
+    setErrorType(null);
 
     try {
       const res = await verifyPhoneOtp(codeToVerify);
@@ -103,48 +195,93 @@ export const OTPView: React.FC = () => {
 
       if (res.success) {
         setIsSuccess(true);
+        triggerHaptic('success');
         setTimeout(() => {
           if (res.isNewUser) {
             replaceView('profile-setup');
           } else {
             replaceView('home');
           }
-        }, 600);
+        }, 500);
       } else {
         setShake(true);
+        triggerHaptic('error');
+        setErrorType('invalid');
         setErrorMsg(res.message || 'Incorrect verification code. Please check and try again.');
         setTimeout(() => setShake(false), 500);
       }
     } catch (err: any) {
       setLoading(false);
       setShake(true);
-      setErrorMsg('Verification failed. Please try entering the code again.');
+      triggerHaptic('error');
+      setErrorType('network');
+      setErrorMsg('Network connectivity issue. Please check your connection or retry.');
       setTimeout(() => setShake(false), 500);
     }
   };
 
   const handleResendOtp = async () => {
-    if (resendCountdown > 0) return;
+    if (resending || loading) return;
 
-    setLoading(true);
+    setResending(true);
     setErrorMsg('');
+    setErrorType(null);
+    triggerHaptic('medium');
 
     try {
-      const verifier = setupRecaptcha('recaptcha-resend-box');
-      if (verifier && pendingPhone) {
-        await sendPhoneOtp(pendingPhone, verifier);
+      const phoneToUse = pendingPhone || '+91 90915 63912';
+      const res = await sendPhoneOtp(phoneToUse);
+      setResending(false);
+
+      if (res.success) {
+        setResendCountdown(30);
+        setDigits(['', '', '', '', '', '']);
+        triggerHaptic('success');
+        if (res.otp) {
+          triggerPushNotification({
+            appTitle: 'Messages',
+            category: 'SMS',
+            title: 'Jalpaiguri Connect Verification',
+            body: `Your new verification code is ${res.otp}. Tap to auto-fill.`,
+            code: res.otp,
+            actionLabel: 'Auto-Fill'
+          });
+        }
+      } else {
+        setErrorType('network');
+        setErrorMsg(res.message || 'Failed to dispatch new OTP. Please retry.');
       }
-      setLoading(false);
-      setResendCountdown(28);
-      setDigits(['', '', '', '']);
     } catch (err: any) {
-      setLoading(false);
-      setResendCountdown(28);
-      setDigits(['', '', '', '']);
+      setResending(false);
+      setErrorType('network');
+      setErrorMsg('Failed to reach verification service. Tap retry to attempt again.');
     }
   };
 
-  // Format seconds as 00:ss
+  // Re-trigger whole auth flow / change number without page reload
+  const handleRestartFlow = () => {
+    triggerHaptic('light');
+    setDigits(['', '', '', '', '', '']);
+    setErrorMsg('');
+    setErrorType(null);
+    navigate('phone-auth');
+  };
+
+  const handleClearDigits = () => {
+    triggerHaptic('light');
+    setDigits(['', '', '', '', '', '']);
+    setErrorMsg('');
+    setErrorType(null);
+    hiddenInputRef.current?.focus();
+  };
+
+  const handleCopyOtp = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    triggerHaptic('light');
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const formattedSeconds = resendCountdown < 10 ? `0${resendCountdown}` : `${resendCountdown}`;
 
   const keypadRows = [
@@ -171,112 +308,245 @@ export const OTPView: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white text-[#11241C] flex flex-col justify-between p-5 max-w-md mx-auto select-none relative shadow-2xl">
-      <div id="recaptcha-resend-box"></div>
+    <div
+      className="min-h-screen bg-white text-[#11241C] flex flex-col justify-between p-4 max-w-md mx-auto select-none relative shadow-2xl"
+      onPaste={handlePaste}
+    >
+      {/* Hidden input for mobile keyboard and clipboard paste auto-detection */}
+      <input
+        ref={hiddenInputRef}
+        type="tel"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        maxLength={6}
+        className="opacity-0 absolute -z-10 w-0 h-0"
+        onPaste={handlePaste}
+        onChange={(e) => {
+          const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+          if (val.length > 0) {
+            const newDigits = ['', '', '', '', '', ''];
+            for (let i = 0; i < val.length; i++) newDigits[i] = val[i];
+            setDigits(newDigits);
+            if (val.length === 6) verifyCode(val);
+          }
+        }}
+      />
 
-      {/* Top Mobile Status Bar (9:41, Cellular, WiFi, Battery) */}
-      <div className="w-full flex items-center justify-between pt-1 px-1 text-gray-900 text-xs font-semibold">
-        <span>9:41</span>
-        <div className="flex items-center gap-1.5">
-          <Signal className="w-3.5 h-3.5 fill-current" />
-          <Wifi className="w-3.5 h-3.5" />
-          <div className="flex items-center">
-            <Battery className="w-4 h-4 fill-current" />
-          </div>
-        </div>
-      </div>
-
-      {/* Top Navigation Header Bar with Back button & Centered Title */}
-      <div className="w-full flex items-center justify-between pt-2 pb-2">
+      {/* Top Navigation Header Bar */}
+      <div className="w-full flex items-center justify-between pt-1 pb-1">
         <button
-          onClick={() => navigate('auth')}
-          className="p-1 -ml-1 text-gray-800 hover:text-black active:scale-95 transition-all cursor-pointer"
-          aria-label="Go Back"
+          onClick={handleRestartFlow}
+          className="p-1.5 -ml-1.5 text-gray-700 hover:text-black active:scale-95 transition-all cursor-pointer rounded-full hover:bg-gray-100 flex items-center gap-1 text-xs font-semibold"
+          aria-label="Go Back & Change Number"
         >
-          <ChevronLeft className="w-6 h-6 stroke-[2.2]" />
+          <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
+          <span>Back</span>
         </button>
 
         <h1 className="text-base font-bold text-gray-900 tracking-tight">
           Verify Phone
         </h1>
 
-        <div className="w-6"></div>
+        <button
+          onClick={handleRestartFlow}
+          className="text-xs font-semibold text-[#2F74E9] hover:underline flex items-center gap-1 cursor-pointer"
+          title="Change Phone Number"
+        >
+          <Edit3 className="w-3.5 h-3.5" />
+          <span>Change</span>
+        </button>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex flex-col items-center text-center space-y-5 pt-3 pb-2 my-auto">
+      {/* Main Verification Content Area */}
+      <div className="flex flex-col items-center text-center space-y-3 my-auto w-full px-2">
         {/* Instruction Subtitle */}
-        <div className="space-y-0.5">
-          <p className="text-sm font-medium text-gray-900">
-            Enter the 4-digit code sent to
+        <div className="space-y-1">
+          <p className="text-xs font-medium text-gray-500">
+            Enter the 6-digit verification code sent to
           </p>
-          <p className="text-sm font-bold text-gray-900 tracking-wide">
-            {pendingPhone || '+91 98765 43210'}
-          </p>
+          <div className="inline-flex items-center gap-2 bg-gray-100/90 px-3 py-1 rounded-full border border-gray-200">
+            <span className="text-sm font-bold text-gray-900 font-mono tracking-wide">
+              {pendingPhone || '+91 90915 63912'}
+            </span>
+            <button
+              onClick={handleRestartFlow}
+              className="text-[11px] font-semibold text-[#2F74E9] hover:text-blue-700 hover:underline cursor-pointer"
+            >
+              Edit
+            </button>
+          </div>
         </div>
 
-        {/* Error / Success Alerts */}
+        {/* Security Shield & Expiry Badge */}
+        <div className="w-full max-w-xs flex items-center justify-between text-[11px] text-gray-500 bg-gray-50/80 px-2.5 py-1.5 rounded-xl border border-gray-100">
+          <div className="flex items-center gap-1.5 text-emerald-700 font-medium">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Anti-Hack 256-Bit OTP</span>
+          </div>
+          <div className="flex items-center gap-1 text-gray-500 font-mono text-[10px]">
+            <Lock className="w-3 h-3 text-gray-400" />
+            <span>Expires in 5m</span>
+          </div>
+        </div>
+
+        {/* Instant Auto-Fill Banner Pill */}
+        {availableOtp && (
+          <div className="w-full max-w-xs bg-blue-50/90 border border-blue-200/90 rounded-2xl p-2.5 flex items-center justify-between shadow-xs animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-xl bg-[#2F74E9] flex items-center justify-center text-white shrink-0 shadow-xs">
+                <Zap className="w-4 h-4 text-amber-300 fill-amber-300" />
+              </div>
+              <div className="text-left">
+                <p className="text-[10px] font-bold text-blue-900 uppercase tracking-wider">
+                  Instant SMS Code
+                </p>
+                <p className="text-sm font-black text-[#2F74E9] font-mono tracking-widest leading-none">
+                  {availableOtp}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => handleCopyOtp(availableOtp)}
+                className="p-1.5 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-blue-100 transition-colors cursor-pointer"
+                title="Copy Code"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleAutoFillClick(availableOtp)}
+                className="py-1 px-2.5 bg-[#2F74E9] hover:bg-[#2563EB] active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1"
+              >
+                <Sparkles className="w-3 h-3 text-amber-200" />
+                <span>Auto-Fill</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Dynamic Rich Error Alerts with Retry Actions */}
         {errorMsg && (
-          <div className="bg-rose-50 border border-rose-200 rounded-xl p-2.5 text-xs text-rose-800 flex items-center gap-2 max-w-xs animate-in fade-in duration-200">
-            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-            <p className="text-[11px] leading-tight text-left">{errorMsg}</p>
+          <div
+            className={`w-full max-w-xs rounded-2xl p-3 text-xs border shadow-xs animate-in fade-in zoom-in-95 duration-200 ${
+              errorType === 'network'
+                ? 'bg-amber-50 border-amber-200 text-amber-900'
+                : 'bg-rose-50 border-rose-200 text-rose-900'
+            }`}
+          >
+            <div className="flex items-start gap-2">
+              {errorType === 'network' ? (
+                <WifiOff className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              ) : (
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              )}
+              <div className="text-left flex-1">
+                <p className="text-[12px] font-semibold leading-snug">{errorMsg}</p>
+                <div className="flex items-center gap-2 mt-2 pt-1.5 border-t border-rose-200/60">
+                  <button
+                    type="button"
+                    onClick={handleClearDigits}
+                    className="text-[11px] font-bold text-rose-700 hover:text-rose-900 hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Clear Digits</span>
+                  </button>
+                  <span className="text-rose-300">•</span>
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    className="text-[11px] font-bold text-[#2F74E9] hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${resending ? 'animate-spin' : ''}`} />
+                    <span>Resend Code</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
+        {/* Success Alert */}
         {isSuccess && (
-          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 text-xs text-emerald-800 flex items-center gap-2 font-bold max-w-xs animate-in fade-in duration-200">
+          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-xs text-emerald-800 flex items-center justify-center gap-2 font-bold max-w-xs animate-in fade-in duration-200">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <p className="text-xs">Phone verified successfully!</p>
+            <p className="text-xs">Phone verified successfully! Redirecting...</p>
           </div>
         )}
 
-        {/* 4 Circular OTP Input Display matching image */}
-        <div className={`flex items-center justify-center gap-3.5 py-1 ${shake ? 'animate-shake' : ''}`}>
+        {/* 6 OTP Input Boxes with Dynamic Error/Success States */}
+        <div className={`flex items-center justify-center gap-2 py-1 ${shake ? 'animate-shake' : ''}`}>
           {digits.map((digit, idx) => {
             const isFilled = Boolean(digit);
             const isActive = idx === currentCursorIndex && !isFilled;
+            const hasError = Boolean(errorMsg);
+
+            let borderStyle = 'border-2 border-gray-200 bg-gray-50/70 hover:border-gray-300';
+            if (isSuccess) {
+              borderStyle = 'border-2 border-emerald-500 bg-emerald-50/70 text-emerald-700 shadow-sm';
+            } else if (hasError) {
+              borderStyle = isFilled
+                ? 'border-2 border-rose-500 bg-rose-50/50 text-rose-800 shadow-sm'
+                : 'border-2 border-rose-300 bg-rose-50/30';
+            } else if (isActive) {
+              borderStyle = 'border-2 border-[#2F74E9] bg-white ring-4 ring-blue-100/60 shadow-sm';
+            } else if (isFilled) {
+              borderStyle = 'border-2 border-[#2F74E9] bg-white shadow-sm';
+            }
 
             return (
               <div
                 key={idx}
                 onClick={() => {
+                  triggerHaptic('light');
+                  hiddenInputRef.current?.focus();
                   const newDigits = [...digits];
-                  for (let i = idx; i < 4; i++) newDigits[i] = '';
+                  for (let i = idx; i < 6; i++) newDigits[i] = '';
                   setDigits(newDigits);
                 }}
-                className={`w-[50px] h-[50px] rounded-full flex items-center justify-center transition-all duration-150 relative cursor-pointer ${
-                  isActive
-                    ? 'border-2 border-[#2F74E9] bg-white ring-2 ring-blue-100 shadow-2xs'
-                    : isFilled
-                    ? 'border-2 border-[#2F74E9] bg-white shadow-2xs'
-                    : 'border-2 border-gray-200 bg-gray-50/60'
-                }`}
+                className={`w-[44px] h-[44px] sm:w-[48px] sm:h-[48px] rounded-2xl flex items-center justify-center transition-all duration-150 relative cursor-pointer ${borderStyle}`}
               >
                 {isFilled ? (
-                  <div className="w-3.5 h-3.5 rounded-full bg-[#111827]"></div>
+                  <span className={`text-lg font-bold font-mono ${hasError ? 'text-rose-800' : isSuccess ? 'text-emerald-700' : 'text-gray-900'}`}>
+                    {digit}
+                  </span>
                 ) : isActive ? (
-                  <div className="w-[2px] h-6 bg-[#2F74E9] rounded-full animate-pulse"></div>
+                  <div className="w-[2px] h-5 bg-[#2F74E9] rounded-full animate-pulse"></div>
                 ) : null}
               </div>
             );
           })}
         </div>
 
-        {/* Resend Code Timer */}
-        <div>
+        {/* Resend & Retry Actions Panel */}
+        <div className="flex items-center justify-center gap-3 text-xs pt-1">
           {resendCountdown > 0 ? (
-            <p className="text-xs text-gray-500 font-normal">
-              Resend code in <span className="font-semibold text-gray-700">00:{formattedSeconds}</span>
+            <p className="text-gray-500 font-normal">
+              Resend code in <span className="font-semibold text-gray-700 font-mono">00:{formattedSeconds}</span>
             </p>
           ) : (
             <button
               onClick={handleResendOtp}
-              disabled={loading}
-              className="text-xs font-semibold text-[#2F74E9] hover:underline cursor-pointer"
+              disabled={loading || resending}
+              className="font-semibold text-[#2F74E9] hover:underline cursor-pointer flex items-center gap-1.5"
             >
-              Resend code
+              <RefreshCw className={`w-3.5 h-3.5 ${resending ? 'animate-spin' : ''}`} />
+              <span>{resending ? 'Sending Code...' : 'Resend Code'}</span>
             </button>
           )}
+
+          <span className="text-gray-300">•</span>
+
+          <button
+            onClick={handleRestartFlow}
+            className="text-gray-600 hover:text-gray-900 font-medium hover:underline cursor-pointer flex items-center gap-1"
+          >
+            <RotateCcw className="w-3 h-3" />
+            <span>Try Another Number</span>
+          </button>
         </div>
 
         {/* Verify Action Button */}
@@ -292,19 +562,24 @@ export const OTPView: React.FC = () => {
                 <Loader2 className="w-4 h-4 animate-spin text-white" />
                 <span>Verifying...</span>
               </div>
+            ) : isSuccess ? (
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-white" />
+                <span>Verified!</span>
+              </div>
             ) : (
-              <span>Verify</span>
+              <span>Verify & Continue</span>
             )}
           </button>
         </div>
       </div>
 
-      {/* iOS-Style Custom On-Screen Numeric Keypad matching screenshot */}
-      <div className="w-full max-w-[340px] mx-auto bg-[#E5E9F0]/80 p-2.5 rounded-2xl shadow-inner mt-2 mb-2">
-        <div className="grid grid-cols-3 gap-2">
+      {/* iOS-Style Custom On-Screen Numeric Keypad */}
+      <div className="w-full max-w-[340px] mx-auto bg-[#E5E9F0]/80 p-2 rounded-2xl shadow-inner mt-2 mb-1">
+        <div className="grid grid-cols-3 gap-1.5">
           {keypadRows.flat().map((key, i) => {
             if (key.isBlank) {
-              return <div key={i} className="h-11"></div>;
+              return <div key={i} className="h-10"></div>;
             }
 
             if (key.isBackspace) {
@@ -313,11 +588,11 @@ export const OTPView: React.FC = () => {
                   key={i}
                   type="button"
                   onClick={() => handleKeypadPress('backspace')}
-                  className="h-11 rounded-lg flex items-center justify-center text-gray-800 hover:bg-white/60 active:bg-white/90 active:scale-95 transition-all cursor-pointer"
+                  className="h-10 rounded-lg flex items-center justify-center text-gray-800 hover:bg-white/60 active:bg-white/90 active:scale-95 transition-all cursor-pointer"
                   aria-label="Backspace"
                 >
                   <div className="w-7 h-5 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-gray-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg className="w-5 h-5 text-gray-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path>
                       <line x1="18" y1="9" x2="12" y2="15"></line>
                       <line x1="12" y1="9" x2="18" y2="15"></line>
@@ -332,13 +607,13 @@ export const OTPView: React.FC = () => {
                 key={i}
                 type="button"
                 onClick={() => handleKeypadPress(key.num)}
-                className="h-11 bg-white rounded-lg flex flex-col items-center justify-center shadow-xs border border-white/80 hover:bg-gray-50 active:bg-gray-200/80 active:scale-95 transition-all cursor-pointer select-none"
+                className="h-10 bg-white rounded-lg flex flex-col items-center justify-center shadow-xs border border-white/80 hover:bg-gray-50 active:bg-gray-200/80 active:scale-95 transition-all cursor-pointer select-none"
               >
-                <span className="text-xl font-bold text-gray-900 leading-none">
+                <span className="text-lg font-bold text-gray-900 leading-none">
                   {key.num}
                 </span>
                 {key.letters && (
-                  <span className="text-[8px] font-bold text-gray-500 tracking-widest uppercase mt-0.5 leading-none">
+                  <span className="text-[7px] font-bold text-gray-500 tracking-widest uppercase mt-0.5 leading-none">
                     {key.letters}
                   </span>
                 )}
@@ -346,11 +621,6 @@ export const OTPView: React.FC = () => {
             );
           })}
         </div>
-      </div>
-
-      {/* Bottom iOS Home Indicator */}
-      <div className="w-full flex justify-center pb-1 pt-1">
-        <div className="w-32 h-1 bg-black/80 rounded-full"></div>
       </div>
     </div>
   );

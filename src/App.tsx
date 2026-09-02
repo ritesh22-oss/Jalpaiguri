@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { NavigationProvider, useNav } from './context/NavigationContext';
 import { AppProvider, useApp } from './context/AppContext';
 import { LocationProvider } from './context/LocationContext';
+import { ExpoProvider } from './context/ExpoContext';
+import { ExpoDeviceShell } from './components/common/ExpoDeviceShell';
 
 // Views
 import { SplashScreen } from './components/views/SplashScreen';
@@ -45,8 +47,18 @@ import { JalpaigiAssistantModal } from './components/common/JalpaigiAssistantMod
 import { Toast } from './components/common/Toast';
 
 const AppContent: React.FC = () => {
-  const { currentView } = useNav();
-  const { user } = useAuth();
+  const { currentView, replaceView } = useNav();
+  const { user, isAuthenticated, isProfileComplete, isLoading } = useAuth();
+
+  // Automatic auth state transition: if user is authenticated but has not completed profile setup
+  // and is currently on auth/onboarding views, smoothly navigate them to profile-setup immediately
+  React.useEffect(() => {
+    if (!isLoading && isAuthenticated && !isProfileComplete) {
+      if (currentView === 'auth' || currentView === 'phone-auth' || currentView === 'onboarding') {
+        replaceView('profile-setup');
+      }
+    }
+  }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView]);
 
   // If user switched to admin role and is on admin dashboard
   if (user?.role === 'admin' && currentView === 'admin-dashboard') {
@@ -163,32 +175,32 @@ const AppContent: React.FC = () => {
   const showBottomNav = !hideBottomNavViews.includes(currentView);
 
   return (
-    <div className="min-h-screen bg-[#F0ECE1] flex justify-center text-[#11241C] font-sans antialiased">
-      <div className="w-full max-w-md min-h-screen bg-[#FAF8F5] shadow-2xl relative flex flex-col justify-between overflow-x-hidden">
-        <main className="flex-1 w-full">{renderView()}</main>
+    <ExpoDeviceShell>
+      <main className="flex-1 w-full">{renderView()}</main>
 
-        {showBottomNav && <BottomNav />}
+      {showBottomNav && <BottomNav />}
 
-        {/* Global Modals & Sheets */}
-        <LocationSelectorModal />
-        <FiltersBottomSheet />
-        <JalpaigiAssistantModal />
-        <Toast />
-      </div>
-    </div>
+      {/* Global Modals & Sheets */}
+      <LocationSelectorModal />
+      <FiltersBottomSheet />
+      <JalpaigiAssistantModal />
+      <Toast />
+    </ExpoDeviceShell>
   );
 };
 
 export default function App() {
   return (
-    <AuthProvider>
-      <LocationProvider>
-        <NavigationProvider>
-          <AppProvider>
-            <AppContent />
-          </AppProvider>
-        </NavigationProvider>
-      </LocationProvider>
-    </AuthProvider>
+    <ExpoProvider>
+      <AuthProvider>
+        <LocationProvider>
+          <NavigationProvider>
+            <AppProvider>
+              <AppContent />
+            </AppProvider>
+          </NavigationProvider>
+        </LocationProvider>
+      </AuthProvider>
+    </ExpoProvider>
   );
 }
