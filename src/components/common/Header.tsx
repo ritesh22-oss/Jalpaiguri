@@ -1,7 +1,8 @@
 import React from 'react';
-import { ArrowLeft, Search, Shield, Sparkles, Sun, Moon } from 'lucide-react';
+import { ArrowLeft, Search, Shield, Sparkles, Sun, Moon, Globe } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { JalpaiguriLogo } from './JalpaiguriLogo';
 
 interface HeaderProps {
@@ -23,6 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { goBack, navigate, setIsAssistantOpen } = useNav();
   const { isDarkMode, toggleTheme } = useTheme();
+  const { language, toggleLanguage, isBengali } = useLanguage();
 
   return (
     <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0F1713]/90 backdrop-blur-md border-b border-[#E8E4DA]/60 dark:border-white/10 px-4 py-3 flex items-center justify-between transition-colors">
@@ -50,6 +52,18 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="flex items-center gap-2">
+        {/* Quick Language Switch Button */}
+        <button
+          id="header-lang-btn"
+          onClick={toggleLanguage}
+          className="h-9 px-2.5 rounded-full bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] flex items-center gap-1.5 shadow-sm hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
+          title={isBengali ? 'Switch to English' : 'বাংলায় দেখুন'}
+          aria-label="Toggle language"
+        >
+          <Globe className="w-3.5 h-3.5" />
+          <span className="font-semibold">{isBengali ? 'বাংলা' : 'EN'}</span>
+        </button>
+
         {/* Quick Theme Toggle Icon */}
         <button
           onClick={toggleTheme}

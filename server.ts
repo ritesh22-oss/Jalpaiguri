@@ -120,27 +120,14 @@ const memoryDb = {
   ] as any[],
   alerts: [
     {
-      id: 'alt-1',
-      title: 'Waterlogging & Traffic Diversion on Kadamtala-Dinbazar Route',
-      category: 'Waterlogging',
-      area: 'Kadamtala Market Road',
-      timeAgo: '15m ago',
-      severity: 'high',
-      description: 'Heavy rain has caused momentary water congestion near railway underpass. Vehicles diverted via Club Road.',
-      confirmedCount: 34,
-      lat: 26.521,
-      lng: 88.729,
-      isOfficial: true
-    },
-    {
-      id: 'alt-2',
-      title: 'Emergency Power Grid Maintenance at Mohitnagar Substation',
-      category: 'Power Outage',
-      area: 'Mohitnagar & Adarpara',
-      timeAgo: '45m ago',
+      id: 'alt-official-1',
+      title: 'Power Grid Scheduled Maintenance - Mohitnagar Substation',
+      category: 'Electricity',
+      area: 'Mohitnagar & Adarpara, Jalpaiguri',
+      timeAgo: '1h ago',
       severity: 'medium',
-      description: 'Scheduled emergency line maintenance from 2:00 PM to 4:30 PM by WBSEDCL.',
-      confirmedCount: 52,
+      description: 'Scheduled maintenance update by WBSEDCL for Jalpaiguri town feeder lines.',
+      confirmedCount: 18,
       lat: 26.535,
       lng: 88.742,
       isOfficial: true
@@ -820,6 +807,241 @@ app.post('/api/gemini/maps-grounding', async (req: Request, res: Response) => {
   }
 });
 
+// Google Places Cache & Proxy Endpoints
+interface PlacePhotoCacheEntry {
+  photoUrl: string | null;
+  attribution?: string;
+  hasPhoto: boolean;
+  expiresAt: number;
+}
+interface PlaceAiImageCacheEntry {
+  imageUrl: string;
+  attribution: string;
+  expiresAt: number;
+}
+const serverPlacePhotoCache = new Map<string, PlacePhotoCacheEntry>();
+const serverPlaceAiImageCache = new Map<string, PlaceAiImageCacheEntry>();
+const serverPlaceDetailsCache = new Map<string, { data: any; expiresAt: number }>();
+const SERVER_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+// Google Maps API Key Config Endpoint (Safe for client-side maps loader)
+app.get('/api/config/maps-key', (req: Request, res: Response) => {
+  res.json({
+    apiKey: process.env.GOOGLE_MAPS_API_KEY || process.env.VITE_GOOGLE_MAPS_API_KEY || ''
+  });
+});
+
+// Gemini AI Place Image Generation Endpoint (Tier 3 fallback)
+app.post('/api/places/generate-image', async (req: Request, res: Response) => {
+  const { placeId, name, category, subcategory, address } = req.body;
+  if (!name) {
+    return res.status(400).json({ error: 'Place name is required' });
+  }
+
+  const cacheKey = placeId || name;
+  const cached = serverPlaceAiImageCache.get(cacheKey);
+  if (cached && Date.now() < cached.expiresAt) {
+    return res.json({
+      imageUrl: cached.imageUrl,
+      attribution: cached.attribution,
+      imageSource: 'gemini',
+      cached: true
+    });
+  }
+
+  const ai = getGeminiClient();
+  if (!ai) {
+    return res.json({
+      imageUrl: null,
+      message: 'Gemini API not configured'
+    });
+  }
+
+  try {
+    const prompt = `A realistic, high-quality architectural photo and landscape view of "${name}" (${subcategory || category || 'Landmark'}) in Jalpaiguri, North Bengal, India. Traditional North Bengal architectural elements, lush greenery, realistic sunlight, vibrant cultural aesthetic of Jalpaiguri town. Clean, no text or watermarks.`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.1-flash-lite-image',
+      contents: {
+        parts: [{ text: prompt }]
+      },
+      config: {
+        imageConfig: {
+          aspectRatio: '16:9'
+        }
+      }
+    });
+
+    let generatedImageUrl: string | null = null;
+    const candidates = response.candidates || [];
+    if (candidates[0]?.content?.parts) {
+      for (const part of candidates[0].content.parts) {
+        if (part.inlineData && part.inlineData.data) {
+          const mimeType = part.inlineData.mimeType || 'image/png';
+          generatedImageUrl = `data:${mimeType};base64,${part.inlineData.data}`;
+          break;
+        }
+      }
+    }
+
+    if (generatedImageUrl) {
+      serverPlaceAiImageCache.set(cacheKey, {
+        imageUrl: generatedImageUrl,
+        attribution: 'AI-generated Preview (Gemini)',
+        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 days
+      });
+      return res.json({
+        imageUrl: generatedImageUrl,
+        attribution: 'AI-generated Preview (Gemini)',
+        imageSource: 'gemini'
+      });
+    } else {
+      return res.json({ imageUrl: null });
+    }
+  } catch (err: any) {
+    console.error('Gemini place image generation error:', err);
+    return res.json({ imageUrl: null, error: err?.message });
+  }
+});
+
+// 1. Google Places Photo Endpoint (Official Places API Media Proxy with Caching)
+app.get('/api/places/photo', async (req: Request, res: Response) => {
+  const placeId = (req.query.placeId as string) || '';
+  const photoName = (req.query.name as string) || '';
+  const maxWidth = parseInt(req.query.width as string, 10) || 600;
+  const maxHeight = parseInt(req.query.height as string, 10) || 400;
+
+  if (!placeId && !photoName) {
+    return res.status(400).json({ error: 'placeId or name parameter is required' });
+  }
+
+  const cacheKey = `${placeId || photoName}_${maxWidth}x${maxHeight}`;
+  const cached = serverPlacePhotoCache.get(cacheKey);
+  if (cached && Date.now() < cached.expiresAt) {
+    return res.json({
+      photoUrl: cached.photoUrl,
+      attribution: cached.attribution,
+      hasPhoto: cached.hasPhoto,
+      cached: true
+    });
+  }
+
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  if (!apiKey) {
+    // If no Google Maps API key is configured yet, safely return authentic missing-photo state
+    const entry: PlacePhotoCacheEntry = {
+      photoUrl: null,
+      hasPhoto: false,
+      expiresAt: Date.now() + SERVER_CACHE_TTL
+    };
+    serverPlacePhotoCache.set(cacheKey, entry);
+    return res.json({
+      photoUrl: null,
+      hasPhoto: false,
+      message: 'No Google Maps API Key configured; place rendered with official Google Maps metadata'
+    });
+  }
+
+  try {
+    let targetPhotoName = photoName;
+
+    // If only placeId provided and no photoName, query place photos from Places API (New)
+    if (!targetPhotoName && placeId) {
+      const placeUrl = `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}?fields=photos&key=${apiKey}&solution_id=gmp_mcp_codeassist_v1_aistudio`;
+      const placeRes = await fetch(placeUrl);
+      if (placeRes.ok) {
+        const placeData = await placeRes.json();
+        if (Array.isArray(placeData.photos) && placeData.photos.length > 0) {
+          targetPhotoName = placeData.photos[0].name;
+        }
+      }
+    }
+
+    if (!targetPhotoName) {
+      const entry: PlacePhotoCacheEntry = {
+        photoUrl: null,
+        hasPhoto: false,
+        expiresAt: Date.now() + SERVER_CACHE_TTL
+      };
+      serverPlacePhotoCache.set(cacheKey, entry);
+      return res.json({ photoUrl: null, hasPhoto: false });
+    }
+
+    // Fetch photo media URL using official Places API (New)
+    const mediaUrl = `https://places.googleapis.com/v1/${encodeURIComponent(targetPhotoName)}/media?maxWidthPx=${maxWidth}&maxHeightPx=${maxHeight}&skipHttpRedirect=true&key=${apiKey}&solution_id=gmp_mcp_codeassist_v1_aistudio`;
+    const mediaRes = await fetch(mediaUrl);
+
+    if (mediaRes.ok) {
+      const mediaData = await mediaRes.json();
+      const photoUri = mediaData.photoUri || null;
+      const entry: PlacePhotoCacheEntry = {
+        photoUrl: photoUri,
+        hasPhoto: !!photoUri,
+        attribution: '© Google Maps Contributor',
+        expiresAt: Date.now() + SERVER_CACHE_TTL
+      };
+      serverPlacePhotoCache.set(cacheKey, entry);
+      return res.json({
+        photoUrl: photoUri,
+        hasPhoto: !!photoUri,
+        attribution: entry.attribution
+      });
+    } else {
+      const entry: PlacePhotoCacheEntry = {
+        photoUrl: null,
+        hasPhoto: false,
+        expiresAt: Date.now() + SERVER_CACHE_TTL
+      };
+      serverPlacePhotoCache.set(cacheKey, entry);
+      return res.json({ photoUrl: null, hasPhoto: false });
+    }
+  } catch (err) {
+    console.error('Error fetching Google Places photo:', err);
+    return res.json({ photoUrl: null, hasPhoto: false });
+  }
+});
+
+// 2. Google Places Details Endpoint (Cached)
+app.get('/api/places/details/:placeId', async (req: Request, res: Response) => {
+  const { placeId } = req.params;
+  if (!placeId) {
+    return res.status(400).json({ error: 'placeId is required' });
+  }
+
+  const cached = serverPlaceDetailsCache.get(placeId);
+  if (cached && Date.now() < cached.expiresAt) {
+    return res.json(cached.data);
+  }
+
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  if (!apiKey) {
+    return res.json({
+      placeId,
+      status: 'offline_catalog',
+      message: 'Google Maps API key not configured'
+    });
+  }
+
+  try {
+    const fields = 'id,displayName,formattedAddress,rating,userRatingCount,primaryTypeDisplayName,photos,location,currentOpeningHours,googleMapsUri';
+    const url = `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}?fields=${fields}&key=${apiKey}&solution_id=gmp_mcp_codeassist_v1_aistudio`;
+    const resp = await fetch(url);
+    if (resp.ok) {
+      const data = await resp.json();
+      serverPlaceDetailsCache.set(placeId, {
+        data,
+        expiresAt: Date.now() + SERVER_CACHE_TTL
+      });
+      return res.json(data);
+    } else {
+      return res.status(resp.status).json({ error: 'Failed to fetch place details from Google Places' });
+    }
+  } catch (err) {
+    console.error('Error fetching Google Places details:', err);
+    return res.status(500).json({ error: 'Server error fetching place details' });
+  }
+});
+
 // Backward compatibility routes
 app.post('/api/ai/jalpaigi-chat', async (req: Request, res: Response) => {
   const { message, history } = req.body;
@@ -898,9 +1120,154 @@ app.post('/api/reports', (req: Request, res: Response) => {
   res.status(201).json({ success: true, report: newReport });
 });
 
+app.post('/api/reports/:id/upvote', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const rep = memoryDb.reports.find((r) => r.id === id);
+  if (rep) {
+    rep.upvotes = (rep.upvotes || 0) + 1;
+    broadcastRealtime('report_upvoted', { id, upvotes: rep.upvotes });
+    return res.json({ success: true, upvotes: rep.upvotes });
+  }
+  return res.status(404).json({ error: 'Report not found' });
+});
+
+app.post('/api/reports/enhance-report', async (req: Request, res: Response) => {
+  const { description, category, location } = req.body;
+  if (!description || typeof description !== 'string') {
+    return res.status(400).json({ error: 'Description is required' });
+  }
+
+  const ai = getGeminiClient();
+  if (!ai) {
+    const cleaned = description.trim().replace(/\s+/g, ' ');
+    return res.json({
+      enhancedDescription: cleaned.charAt(0).toUpperCase() + cleaned.slice(1),
+      suggestedCategory: category || 'Road',
+      missingInfo: ['Specific nearby landmark or ward number', 'Approximate duration of problem'],
+      isAiAssisted: true
+    });
+  }
+
+  try {
+    const prompt = `You are a municipal assistant for Jalpaiguri Municipality civic complaints in West Bengal.
+A citizen wrote this problem report:
+"${description}"
+Current category: ${category || 'Unknown'}
+Location: ${location || 'Jalpaiguri'}
+
+Your task:
+1. Polish the description into clear, objective, well-formatted English for municipal engineers and sanitary inspectors.
+2. DO NOT INVENT any fake details, addresses, or hazards not stated or implied by the citizen.
+3. Suggest the most fitting category among: Road, Streetlight, Garbage, Water, Flooding, Electricity, Drainage, Sewage, Footpath, Traffic Signal, Public Toilet, Illegal Dumping, Park / Public Space, Tree / Fallen Tree, Stray Animal, Other.
+4. List any missing context that would help municipal teams locate and resolve it faster (e.g., nearest pole number, house landmark).
+
+Respond strictly with valid JSON:
+{
+  "enhancedDescription": "string",
+  "suggestedCategory": "string",
+  "missingInfo": ["string"],
+  "isAiAssisted": true
+}`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json'
+      }
+    });
+
+    const parsed = JSON.parse(response.text || '{}');
+    return res.json({
+      enhancedDescription: parsed.enhancedDescription || description,
+      suggestedCategory: parsed.suggestedCategory || category || 'Road',
+      missingInfo: parsed.missingInfo || [],
+      isAiAssisted: true
+    });
+  } catch (err) {
+    console.error('AI enhance report error:', err);
+    return res.json({
+      enhancedDescription: description.trim(),
+      suggestedCategory: category || 'Road',
+      missingInfo: [],
+      isAiAssisted: false
+    });
+  }
+});
+
 // Local alerts routes
 app.get('/api/alerts', (req: Request, res: Response) => {
   res.json(memoryDb.alerts);
+});
+
+// Live Real-Time Waterlogging & Precipitation Telemetry Endpoint
+app.get('/api/alerts/waterlogging-live', async (req: Request, res: Response) => {
+  const govtFeedUrl = process.env.MUNICIPAL_WATERLOGGING_API_URL || process.env.GOVT_FLOOD_FEED_URL;
+  
+  let precipitationData: any = null;
+  try {
+    // Query genuine real-time meteorological precipitation for Jalpaiguri (26.5228° N, 88.7245° E)
+    const weatherResp = await fetch(
+      'https://api.open-meteo.com/v1/forecast?latitude=26.5228&longitude=88.7245&current=precipitation,rain,weather_code,wind_speed_10m&timezone=Asia%2FKolkata'
+    );
+    if (weatherResp.ok) {
+      precipitationData = await weatherResp.json();
+    }
+  } catch (err) {
+    // Weather fetch optional
+  }
+
+  // Check verified civic complaints from citizens for Water / Drainage / Flooding
+  const verifiedWaterReports = memoryDb.reports.filter((r) => 
+    (r.category === 'Water' || r.category === 'Drainage' || r.category?.toLowerCase().includes('water') || r.category?.toLowerCase().includes('flood')) &&
+    r.status !== 'Closed' &&
+    r.status !== 'Resolved'
+  );
+
+  // If a legitimate supported government/public real-time waterlogging API is configured
+  if (govtFeedUrl) {
+    try {
+      const feedResp = await fetch(govtFeedUrl);
+      if (feedResp.ok) {
+        const feedData = await feedResp.json();
+        return res.json({
+          available: true,
+          source: 'Municipal Sensor Network',
+          attribution: 'Official Jalpaiguri Municipal Telemetry',
+          lastUpdated: new Date().toISOString(),
+          precipitation: precipitationData?.current || null,
+          data: feedData,
+          reports: verifiedWaterReports
+        });
+      }
+    } catch (e) {
+      // Fall through to unavailable state
+    }
+  }
+
+  // If no real waterlogging API/feed is configured or available:
+  return res.json({
+    available: false,
+    message: 'Live waterlogging data is currently unavailable.',
+    reason: 'No official municipal sensor feed or verified real-time flood monitoring stream is currently configured for Jalpaiguri.',
+    policy: 'In accordance with strict civic data integrity standards, simulated or synthetic waterlogging markers are never displayed.',
+    lastChecked: new Date().toISOString(),
+    serviceArea: 'Jalpaiguri Municipality (26.5228° N, 88.7245° E)',
+    liveWeatherObservation: precipitationData?.current ? {
+      precipitation_mm: precipitationData.current.precipitation ?? 0,
+      rain_mm: precipitationData.current.rain ?? 0,
+      source: 'Open-Meteo ECMWF Observation',
+      time: precipitationData.current.time
+    } : null,
+    verifiedCitizenReports: verifiedWaterReports.map((r) => ({
+      id: r.id,
+      location: r.location,
+      description: r.description,
+      status: r.status,
+      reportedAt: r.reportedAt,
+      verified: true
+    }))
+  });
 });
 
 // Blood Donors and Requests

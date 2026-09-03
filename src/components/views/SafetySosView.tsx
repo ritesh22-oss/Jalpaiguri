@@ -469,7 +469,7 @@ export const SafetySosView: React.FC<SafetySosViewProps> = ({ onBack, onNavigate
                     )}
 
                     <button
-                      onClick={simulateShake}
+                      onClick={() => simulateShake()}
                       className="ml-auto px-3 py-1.5 rounded-xl bg-white dark:bg-[#1C2C24] border border-[#D2CEBE] dark:border-white/10 text-xs font-bold text-[#063B2C] dark:text-emerald-300 hover:bg-[#E6F4EA] dark:hover:bg-[#233A2F] active:scale-95 transition-all cursor-pointer flex items-center gap-1"
                       title="Test motion detection logic without moving phone"
                     >

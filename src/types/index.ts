@@ -240,6 +240,7 @@ export interface PrivateIncidentNote {
 export const PREDEFINED_ADMIN_EMAIL = 'riteshganguly0911@gmail.com';
 
 const AUTHORIZED_ADMIN_EMAILS: readonly string[] = [
+  'r36728659@gmail.com',
   PREDEFINED_ADMIN_EMAIL,
   'riteshganguly0911@gamil.com' // Handle common domain typo securely
 ];
@@ -289,18 +290,65 @@ export interface ServiceRequest {
   createdAt: string;
 }
 
+export type CivicCategory =
+  | 'Road'
+  | 'Streetlight'
+  | 'Garbage'
+  | 'Water'
+  | 'Flooding'
+  | 'Electricity'
+  | 'Drainage'
+  | 'Sewage'
+  | 'Footpath'
+  | 'Traffic Signal'
+  | 'Public Toilet'
+  | 'Illegal Dumping'
+  | 'Park / Public Space'
+  | 'Tree / Fallen Tree'
+  | 'Stray Animal'
+  | 'Other';
+
+export type CivicReportStatus =
+  | 'Submitted'
+  | 'Under Review'
+  | 'Assigned'
+  | 'In Progress'
+  | 'Resolved'
+  | 'Closed'
+  | 'Action Taken';
+
+export type CivicSeverity = 'Low' | 'Medium' | 'High' | 'Critical';
+
 export interface CivicReport {
   id: string;
-  category: 'Road' | 'Streetlight' | 'Garbage' | 'Water' | 'Flooding' | 'Waterlogging' | 'Electricity' | 'Fallen Tree' | 'Traffic';
+  userId?: string;
+  category: CivicCategory | string;
   location: string;
+  locality?: string;
+  city?: string;
+  district?: string;
+  state?: string;
+  lat?: number;
+  lng?: number;
+  accuracy?: number;
   description: string;
   photoUrl?: string;
-  status: 'Submitted' | 'Under Review' | 'Action Taken' | 'Resolved';
+  videoUrl?: string;
+  mediaType?: 'image' | 'video';
+  severity?: CivicSeverity;
+  landmark?: string;
+  nearbyArea?: string;
+  noticedWhen?: string;
+  aiAssisted?: boolean;
+  status: CivicReportStatus;
   reportedAt: string;
   date?: string;
+  createdAt?: string;
+  updatedAt?: string;
   upvotes: number;
   hasUpvoted?: boolean;
-  timeline: { title: string; time: string; done: boolean }[];
+  officialResponse?: string;
+  timeline: { title: string; time: string; done: boolean; desc?: string }[];
 }
 
 export interface LocalAlert {
@@ -450,3 +498,36 @@ export interface WorkerFilterState {
   availableTodayOnly: boolean;
   minRating: number;
 }
+
+export type ExplorePlaceCategory =
+  | 'All'
+  | 'Healthcare'
+  | 'Heritage & Tourism'
+  | 'Commercial & Markets'
+  | 'Transport'
+  | 'Education & Civic'
+  | 'Fuel & Utilities';
+
+export interface ExplorePlaceItem {
+  id: string;
+  placeId: string; // Official Google Place ID (e.g., ChIJ...)
+  name: string;
+  category: ExplorePlaceCategory;
+  subcategory: string;
+  formattedAddress: string;
+  lat: number;
+  lng: number;
+  rating: number;
+  userRatingCount: number;
+  googleMapsUri: string;
+  photoResourceName?: string;
+  photoUrl?: string | null;
+  photoAttribution?: string;
+  openStatus?: string;
+  phone?: string;
+  description?: string;
+  features?: string[];
+  distanceKm?: number;
+  distanceText?: string;
+}
+

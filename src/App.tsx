@@ -5,6 +5,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import { LocationProvider, useLocation } from './context/LocationContext';
 import { SafetyProvider } from './context/SafetyContext';
 import { ExpoProvider } from './context/ExpoContext';
+import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { ExpoDeviceShell } from './components/common/ExpoDeviceShell';
 
 // Views
@@ -227,10 +228,17 @@ const AppContent: React.FC = () => {
     'admin-dashboard'
   ];
   const showBottomNav = !hideBottomNavViews.includes(currentView);
+  const { isBengali } = useLanguage();
+  const isPostLogin = !['splash', 'onboarding', 'auth', 'phone-auth', 'otp', 'profile-setup', 'profile-onboarding'].includes(currentView);
 
   return (
     <ExpoDeviceShell>
-      <main className="flex-1 w-full">{renderView()}</main>
+      <main
+        className={`flex-1 w-full ${isBengali && isPostLogin ? 'font-bengali' : ''}`}
+        data-lang={isBengali && isPostLogin ? 'bn' : 'en'}
+      >
+        {renderView()}
+      </main>
 
       {showBottomNav && <BottomNav />}
 
@@ -247,17 +255,19 @@ export default function App() {
   return (
     <ExpoProvider>
       <ThemeProvider>
-        <AuthProvider>
-          <LocationProvider>
-            <SafetyProvider>
-              <NavigationProvider>
-                <AppProvider>
-                  <AppContent />
-                </AppProvider>
-              </NavigationProvider>
-            </SafetyProvider>
-          </LocationProvider>
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <LocationProvider>
+              <SafetyProvider>
+                <NavigationProvider>
+                  <AppProvider>
+                    <AppContent />
+                  </AppProvider>
+                </NavigationProvider>
+              </SafetyProvider>
+            </LocationProvider>
+          </AuthProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </ExpoProvider>
   );
