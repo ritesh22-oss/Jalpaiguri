@@ -50,7 +50,8 @@ export type ViewType =
   | 'settings'
   | 'admin-dashboard'
   | 'ai-chat'
-  | 'maps-explorer';
+  | 'maps-explorer'
+  | 'faq';
 
 export type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | "I don't know";
 
@@ -68,11 +69,30 @@ export type LocationStatus =
 export interface UserLocation {
   name: string;
   locality: string;
+  city?: string;
+  district?: string;
+  state?: string;
+  country?: string;
+  pincode?: string;
+  road?: string;
   lat: number;
   lng: number;
   isApproximate?: boolean;
   accuracy?: number;
+  altitude?: number | null;
+  speed?: number | null;
+  heading?: number | null;
+  locationSource?: 'gps' | 'manual';
   updatedAt?: string;
+}
+
+export interface ServiceRegion {
+  name: string;
+  city: string;
+  state: string;
+  lat: number;
+  lng: number;
+  radiusKm: number;
 }
 
 export type NearbyCategoryType =
@@ -130,7 +150,23 @@ export interface UserProfile {
   isBloodDonor?: boolean;
   language: 'English' | 'বাংলা' | 'हिन्दी';
   role?: 'citizen' | 'admin' | 'worker';
+  fingerprintEnrolled?: boolean;
+  fingerprintCredentialId?: string;
   createdAt: string;
+}
+
+// Internal municipal administrator access verification (strictly private, never exposed to UI)
+export const PREDEFINED_ADMIN_EMAIL = 'riteshganguly0911@gmail.com';
+
+const AUTHORIZED_ADMIN_EMAILS: readonly string[] = [
+  PREDEFINED_ADMIN_EMAIL,
+  'riteshganguly0911@gamil.com' // Handle common domain typo securely
+];
+
+export function isAuthorizedAdminEmail(email?: string | null): boolean {
+  if (!email) return false;
+  const normalized = email.trim().toLowerCase();
+  return AUTHORIZED_ADMIN_EMAILS.includes(normalized);
 }
 
 export interface Worker {

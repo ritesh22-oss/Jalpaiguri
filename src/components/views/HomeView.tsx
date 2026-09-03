@@ -18,6 +18,8 @@ import {
   HelpCircle,
   ChevronRight,
   ShieldCheck,
+  BadgeCheck,
+  ExternalLink,
   Star,
   Clock,
   Radio,
@@ -30,6 +32,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { useLocation } from '../../context/LocationContext';
 import { JalpaiguriLogo } from '../common/JalpaiguriLogo';
+import { LiveJalpaiguriMap } from '../common/LiveJalpaiguriMap';
 import { UNIFIED_NEARBY_DIRECTORY } from '../../data/nearbyServicesDirectory';
 import { calculateHaversineDistance, formatDistanceString } from '../../data/jalpaiguriLocalities';
 import { NearbyCategoryType } from '../../types';
@@ -122,8 +125,8 @@ export const HomeView: React.FC = () => {
                   onClick={() => setIsLocationSelectorOpen(true)}
                   className="flex items-center gap-1 text-xs font-bold text-[#063B2C] cursor-pointer hover:underline"
                 >
-                  <MapPin className="w-3.5 h-3.5 text-[#063B2C]" />
-                  <span className="truncate max-w-[140px]">{location.locality}, Jalpaiguri</span>
+                  <MapPin className="w-3.5 h-3.5 text-[#063B2C] shrink-0" />
+                  <span className="truncate max-w-[150px]">{location.name || `${location.locality}, ${location.city || ''}`}</span>
                 </div>
                 <div
                   onClick={() => refreshData()}
@@ -426,6 +429,108 @@ export const HomeView: React.FC = () => {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Popular Government Services Section (Only 2 cards + View All) */}
+        <div>
+          <div className="flex items-center justify-between mb-3 px-1">
+            <div className="flex items-center gap-1.5">
+              <Landmark className="w-4 h-4 text-[#063B2C]" />
+              <h3 className="text-sm font-extrabold text-[#11241C] tracking-tight">
+                Popular Government Services
+              </h3>
+            </div>
+            <button
+              onClick={() => navigate('government')}
+              className="text-xs font-bold text-[#063B2C] hover:underline cursor-pointer flex items-center gap-0.5"
+            >
+              <span>View All</span>
+              <ChevronRight className="w-3 h-3" />
+            </button>
+          </div>
+
+          {/* Exactly 2 Government Service Cards */}
+          <div className="grid grid-cols-2 gap-2.5">
+            <div
+              onClick={() => navigate('government')}
+              className="bg-white border border-[#E8E4DA] rounded-2xl p-3.5 shadow-2xs hover:border-[#063B2C] hover:shadow-xs active:scale-98 transition-all cursor-pointer flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between gap-1 mb-2">
+                  <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-[#E6F4EA] text-[#063B2C] uppercase tracking-wider">
+                    Pay Online
+                  </span>
+                  <BadgeCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                </div>
+                <h4 className="font-extrabold text-xs text-[#11241C] leading-snug">
+                  Property Tax & Mutation
+                </h4>
+                <p className="text-[10px] text-[#55685F] line-clamp-2 mt-1 font-medium">
+                  Jalpaiguri Municipality portal for ward holding tax & receipts
+                </p>
+              </div>
+
+              <div className="pt-2.5 mt-2 border-t border-[#F0ECE1] flex items-center justify-between text-[10px] font-bold text-[#063B2C]">
+                <span>Official Government Portal</span>
+                <ExternalLink className="w-3 h-3" />
+              </div>
+            </div>
+
+            <div
+              onClick={() => navigate('government')}
+              className="bg-white border border-[#E8E4DA] rounded-2xl p-3.5 shadow-2xs hover:border-[#063B2C] hover:shadow-xs active:scale-98 transition-all cursor-pointer flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between gap-1 mb-2">
+                  <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-[#E0F2FE] text-[#0369A1] uppercase tracking-wider">
+                    Official
+                  </span>
+                  <BadgeCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                </div>
+                <h4 className="font-extrabold text-xs text-[#11241C] leading-snug">
+                  Birth & Death Certificates
+                </h4>
+                <p className="text-[10px] text-[#55685F] line-clamp-2 mt-1 font-medium">
+                  Janma-Mrityu Tathya WB verified digital civic certificates
+                </p>
+              </div>
+
+              <div className="pt-2.5 mt-2 border-t border-[#F0ECE1] flex items-center justify-between text-[10px] font-bold text-[#063B2C]">
+                <span>Official Government Portal</span>
+                <ExternalLink className="w-3 h-3" />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-2.5">
+            <button
+              onClick={() => navigate('government')}
+              className="w-full py-2.5 rounded-2xl bg-[#FAF8F5] border border-[#D2CEBE] text-[#063B2C] font-extrabold text-xs hover:bg-[#E6F4EA] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <Landmark className="w-3.5 h-3.5 text-[#063B2C]" />
+              <span>View All Government Services</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Small Live Map of Jalpaiguri According to User Location */}
+        <div>
+          <div className="flex items-center justify-between mb-2.5 px-1">
+            <h3 className="text-sm font-extrabold text-[#11241C] tracking-tight flex items-center gap-1.5">
+              <MapPin className="w-4 h-4 text-[#063B2C]" />
+              <span>Live Location & Civic Map</span>
+            </h3>
+            <button
+              onClick={() => navigate('maps-explorer')}
+              className="text-xs font-bold text-[#063B2C] hover:underline cursor-pointer flex items-center gap-0.5"
+            >
+              <span>Explore Full Map</span>
+              <ChevronRight className="w-3 h-3" />
+            </button>
+          </div>
+
+          <LiveJalpaiguriMap height={200} showDetails={true} />
         </div>
 
         {/* Live Local Alerts */}

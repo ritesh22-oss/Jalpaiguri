@@ -4,6 +4,7 @@ import {
   MapPin,
   Heart,
   ShieldCheck,
+  ShieldAlert,
   Globe,
   LogOut,
   ChevronRight,
@@ -20,17 +21,67 @@ import {
   Check,
   Droplet,
   Shield,
-  Calendar
+  Calendar,
+  Mail,
+  Fingerprint,
+  Lock,
+  RotateCcw,
+  HelpCircle,
+  Landmark,
+  Sun,
+  Moon,
+  Navigation,
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNav } from '../../context/NavigationContext';
 import { useApp } from '../../context/AppContext';
-import { BloodGroup } from '../../types';
+import { useLocation } from '../../context/LocationContext';
+import { useTheme } from '../../context/ThemeContext';
+import { BloodGroup, isAuthorizedAdminEmail } from '../../types';
+import { FingerprintScannerModal } from '../common/FingerprintScannerModal';
 
 export const ProfileView: React.FC = () => {
-  const { user, logout, toggleRole, updateProfile } = useAuth();
+  const {
+    user,
+    firebaseUser,
+    logout,
+    toggleRole,
+    updateProfile,
+    enrolledFingerprint,
+    registerWithFingerprint,
+    loginWithFingerprint,
+    removeFingerprint
+  } = useAuth();
   const { navigate } = useNav();
   const { civicReports, savedItemIds, language, setLanguage } = useApp();
+  const {
+    location,
+    requestCurrentLocation,
+    setIsLocationSelectorOpen,
+    isWithinServiceRegion,
+    distanceToServiceRegionKm
+  } = useLocation();
+
+  const [isRefreshingLocation, setIsRefreshingLocation] = useState(false);
+  const [locationRefreshSuccess, setLocationRefreshSuccess] = useState(false);
+
+  const handleRefreshLocation = async () => {
+    setIsRefreshingLocation(true);
+    await requestCurrentLocation();
+    setIsRefreshingLocation(false);
+    setLocationRefreshSuccess(true);
+    setTimeout(() => setLocationRefreshSuccess(false), 3500);
+  };
+
+  const isOfficialAdmin = isAuthorizedAdminEmail(user?.email || firebaseUser?.email);
+  const { isDarkMode, toggleTheme } = useTheme();
+
+  // Biometric scanner modal in Profile
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [scannerMode, setScannerMode] = useState<'enroll' | 'verify'>('verify');
+  const [bioFeedback, setBioFeedback] = useState<string>('');
 
   // Edit Profile Modal state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -108,23 +159,41 @@ export const ProfileView: React.FC = () => {
         <h1 className="text-2xl font-extrabold text-[#11241C] tracking-tight">
           Citizen Profile
         </h1>
-        {user ? (
+        <div className="flex items-center gap-2">
+          {/* Simple Light / Dark Mode Toggle Icon */}
           <button
-            onClick={toggleRole}
-            className="text-xs font-bold text-[#063B2C] bg-[#E6F4EA] px-3 py-1.5 rounded-full flex items-center gap-1 cursor-pointer"
+            onClick={toggleTheme}
+            className="w-8 h-8 rounded-full bg-white border border-[#E8E4DA] flex items-center justify-center text-[#55685F] hover:text-[#063B2C] hover:bg-[#FAF8F5] transition-colors cursor-pointer shadow-xs"
+            title={isDarkMode ? 'Switch to Bright Mode' : 'Switch to Dark Mode'}
+            aria-label="Toggle Bright/Dark Mode"
           >
-            <LayoutDashboard className="w-3.5 h-3.5" />
-            <span>{user?.role === 'admin' ? 'Switch to User' : 'Admin Panel'}</span>
+            {isDarkMode ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4" />}
           </button>
-        ) : (
-          <button
-            onClick={() => navigate('auth')}
-            className="text-xs font-bold text-white bg-[#063B2C] px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-xs cursor-pointer"
-          >
-            <LogIn className="w-3.5 h-3.5" />
-            <span>Sign In</span>
-          </button>
-        )}
+
+          {user ? (
+            isOfficialAdmin ? (
+              <button
+                onClick={() => navigate('admin-dashboard')}
+                className="text-xs font-bold text-white bg-[#063B2C] px-3.5 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <LayoutDashboard className="w-3.5 h-3.5 text-emerald-300" />
+                <span>Admin Console</span>
+              </button>
+            ) : (
+              <span className="text-[11px] font-bold text-[#063B2C] bg-[#E6F4EA] px-3 py-1 rounded-full border border-[#C3E6D0]">
+                Citizen Verified
+              </span>
+            )
+          ) : (
+            <button
+              onClick={() => navigate('auth')}
+              className="text-xs font-bold text-white bg-[#063B2C] px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-xs cursor-pointer"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </button>
+          )}
+        </div>
       </header>
 
       <div className="p-5 space-y-5">
@@ -133,15 +202,30 @@ export const ProfileView: React.FC = () => {
           <div className="bg-white rounded-3xl p-5 border border-[#E8E4DA] shadow-xs space-y-4">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3.5">
-                <div className="w-16 h-16 rounded-3xl bg-[#063B2C] text-white flex items-center justify-center font-extrabold text-2xl shadow-sm">
-                  {user?.name ? user.name.charAt(0).toUpperCase() : 'J'}
-                </div>
+                {firebaseUser?.photoURL ? (
+                  <img
+                    src={firebaseUser.photoURL}
+                    alt={user?.name || 'User'}
+                    className="w-16 h-16 rounded-3xl object-cover shadow-sm border border-[#E8E4DA]"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-3xl bg-[#063B2C] text-white flex items-center justify-center font-extrabold text-2xl shadow-sm">
+                    {user?.name ? user.name.charAt(0).toUpperCase() : 'J'}
+                  </div>
+                )}
                 <div>
                   <h2 className="text-lg font-extrabold text-[#11241C] leading-tight">{user?.name}</h2>
                   <p className="text-xs font-semibold text-[#55685F] mt-0.5 flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5 text-[#063B2C]" />
                     <span>{user?.location || 'Jalpaiguri, WB'}</span>
                   </p>
+                  {(user?.email || firebaseUser?.email) && (
+                    <p className="text-[11px] font-semibold text-[#55685F] mt-0.5 flex items-center gap-1">
+                      <Mail className="w-3 h-3 text-[#55685F]" />
+                      <span className="truncate max-w-[170px]">{user?.email || firebaseUser?.email}</span>
+                    </p>
+                  )}
                   {user?.phone && (
                     <p className="text-[11px] font-semibold text-[#8C9B93] mt-0.5 flex items-center gap-1">
                       <Phone className="w-3 h-3 text-[#55685F]" />
@@ -164,6 +248,18 @@ export const ProfileView: React.FC = () => {
 
             {/* Profile Badges */}
             <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#F0ECE1]">
+              {(firebaseUser?.providerData?.some((p) => p.providerId === 'google.com') || (user?.email && user.email.includes('@'))) && (
+                <span className="text-[11px] font-bold text-[#1D4ED8] bg-[#EFF6FF] px-2.5 py-1 rounded-xl flex items-center gap-1 border border-blue-100">
+                  <svg className="w-3 h-3 shrink-0" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                  </svg>
+                  <span>Google Auth</span>
+                </span>
+              )}
+
               <span className="text-[11px] font-bold text-[#D9383A] bg-[#FFEBEA] px-2.5 py-1 rounded-xl flex items-center gap-1">
                 <Droplet className="w-3 h-3 fill-[#D9383A]" />
                 <span>Blood: {user?.bloodGroup || 'O+'}</span>
@@ -217,6 +313,85 @@ export const ProfileView: React.FC = () => {
           </div>
         )}
 
+        {/* Biometric Fingerprint Privacy Section */}
+        <div className="bg-white rounded-3xl p-5 border border-[#E8E4DA] shadow-xs space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-2xl bg-[#E6F4EA] text-[#063B2C] flex items-center justify-center">
+                <Fingerprint className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-xs font-black text-[#11241C]">Biometric Privacy Key</h3>
+                <p className="text-[10px] text-emerald-800 font-semibold">Hardware-bound fingerprint signature</p>
+              </div>
+            </div>
+            {enrolledFingerprint ? (
+              <span className="text-[10px] bg-emerald-100 text-emerald-900 font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-300 flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3" />
+                <span>Enrolled & Bound</span>
+              </span>
+            ) : (
+              <span className="text-[10px] bg-gray-100 text-gray-700 font-bold px-2 py-0.5 rounded-full">
+                Not Enrolled
+              </span>
+            )}
+          </div>
+
+          <div className="p-3 bg-[#FAF8F5] border border-[#E8E4DA] rounded-2xl text-[11px] text-gray-700 space-y-1">
+            <p className="flex items-center gap-1.5 font-semibold text-gray-900">
+              <Lock className="w-3.5 h-3.5 text-[#063B2C]" />
+              <span>Strict Anti-Spoof Privacy Protection</span>
+            </p>
+            <p className="text-[10px] text-gray-500 leading-relaxed">
+              Once your biometric fingerprint is scanned, no other person can log in using another fingerprint on this device.
+            </p>
+          </div>
+
+          {bioFeedback && (
+            <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-semibold animate-in fade-in">
+              {bioFeedback}
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 pt-1">
+            {enrolledFingerprint ? (
+              <>
+                <button
+                  onClick={() => {
+                    setScannerMode('verify');
+                    setIsScannerOpen(true);
+                  }}
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-[#063B2C] hover:bg-[#084D3A] active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                >
+                  <Fingerprint className="w-4 h-4 text-emerald-300" />
+                  <span>Verify Fingerprint</span>
+                </button>
+                <button
+                  onClick={() => {
+                    removeFingerprint();
+                    setBioFeedback('Fingerprint cleared from this device.');
+                  }}
+                  className="py-2.5 px-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 text-xs font-bold cursor-pointer"
+                  title="Remove enrollment"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => {
+                  setScannerMode('enroll');
+                  setIsScannerOpen(true);
+                }}
+                className="w-full py-2.5 px-3 rounded-xl bg-[#063B2C] hover:bg-[#084D3A] active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+              >
+                <Fingerprint className="w-4 h-4 text-emerald-300" />
+                <span>Enroll Biometric Fingerprint</span>
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Quick Menu Options */}
         <div className="bg-white rounded-3xl border border-[#E8E4DA] shadow-xs divide-y divide-[#F0ECE1] overflow-hidden">
           <div
@@ -262,6 +437,40 @@ export const ProfileView: React.FC = () => {
               <div>
                 <h3 className="text-xs font-extrabold text-[#11241C]">Blood Donor Network</h3>
                 <p className="text-[11px] text-[#55685F]">Active Donor Hub • {user?.bloodGroup || 'All Groups'}</p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
+          </div>
+
+          {/* Government Services Hub */}
+          <div
+            onClick={() => navigate('government')}
+            className="p-4 flex items-center justify-between hover:bg-[#FAF8F5] cursor-pointer"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#DCFCE7] text-[#15803D] flex items-center justify-center">
+                <Landmark className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs font-extrabold text-[#11241C]">Government Services Hub</h3>
+                <p className="text-[11px] text-[#55685F]">Property tax, certificates, land records & schemes</p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
+          </div>
+
+          {/* Frequently Asked Questions */}
+          <div
+            onClick={() => navigate('faq')}
+            className="p-4 flex items-center justify-between hover:bg-[#FAF8F5] cursor-pointer"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#E0F2FE] text-[#0369A1] flex items-center justify-center">
+                <HelpCircle className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs font-extrabold text-[#11241C]">Frequently Asked Questions</h3>
+                <p className="text-[11px] text-[#55685F]">Find quick answers about Jalpaiguri Connect</p>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
@@ -504,6 +713,23 @@ export const ProfileView: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Fingerprint Scanner Modal */}
+      <FingerprintScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        mode={scannerMode}
+        userName={user?.name || enrolledFingerprint?.userName}
+        enrolledUser={enrolledFingerprint}
+        onSuccess={async (enrolled) => {
+          if (scannerMode === 'enroll') {
+            await registerWithFingerprint(user?.name || enrolled.userName, user?.location);
+            setBioFeedback(`Enrolled! Locked exclusively to ${user?.name || enrolled.userName}.`);
+          } else {
+            setBioFeedback(`Verified! Identity confirmed for ${enrolled.userName}.`);
+          }
+        }}
+        onError={(msg) => setBioFeedback(msg)}
+      />
     </div>
   );
 };

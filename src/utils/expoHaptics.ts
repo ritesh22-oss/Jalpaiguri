@@ -141,3 +141,9 @@ class ExpoHapticsEngine {
 }
 
 export const ExpoHaptics = new ExpoHapticsEngine();
+
+export const expoHaptics = {
+  impact: (style: 'light' | 'medium' | 'heavy' = 'light') => ExpoHaptics.impactAsync(style),
+  selection: () => ExpoHaptics.selection(),
+  notification: (type: 'success' | 'warning' | 'error') => ExpoHaptics.notificationAsync(type)
+};

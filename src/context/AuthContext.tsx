@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { UserProfile, BloodGroup } from '../types';
+import { UserProfile, BloodGroup, isAuthorizedAdminEmail } from '../types';
 import { auth, db, googleProvider, isFirebaseConfigured, validateFirestoreConnection } from '../lib/firebase';
 import {
   signInWithPopup,
@@ -11,6 +11,13 @@ import {
   ConfirmationResult
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import {
+  EnrolledFingerprint,
+  getEnrolledFingerprint,
+  clearEnrolledFingerprint,
+  registerFingerprint,
+  verifyFingerprint
+} from '../lib/biometrics';
 
 // Global singleton instance for RecaptchaVerifier to prevent multiple instances and UI duplicates
 let globalRecaptchaVerifier: RecaptchaVerifier | null = null;
@@ -64,7 +71,12 @@ interface AuthContextType {
   confirmationResult: ConfirmationResult | null;
   setConfirmationResult: (cr: ConfirmationResult | null) => void;
   // Auth actions
-  loginWithGoogle: () => Promise<{ success: boolean; isNewUser?: boolean; message?: string }>;
+  loginWithGoogle: (options?: { asAdmin?: boolean }) => Promise<{ success: boolean; isNewUser?: boolean; isAdmin?: boolean; message?: string }>;
+  enrolledFingerprint: EnrolledFingerprint | null;
+  refreshEnrolledFingerprint: () => void;
+  loginWithFingerprint: (scannedSignature?: string) => Promise<{ success: boolean; message?: string; isNewUser?: boolean }>;
+  registerWithFingerprint: (name: string, location?: string) => Promise<{ success: boolean; message?: string }>;
+  removeFingerprint: () => void;
   sendPhoneOtp: (phoneNumber: string) => Promise<{ success: boolean; otp?: string; message?: string }>;
   verifyPhoneOtp: (otpCode: string) => Promise<{ success: boolean; isNewUser?: boolean; message?: string }>;
   pendingPhone: string;
@@ -101,6 +113,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return Boolean(user?.name && user?.location);
   });
 
+  // Biometric Fingerprint State
+  const [enrolledFingerprint, setEnrolledFingerprint] = useState<EnrolledFingerprint | null>(() => {
+    return getEnrolledFingerprint();
+  });
+
+  const refreshEnrolledFingerprint = () => {
+    setEnrolledFingerprint(getEnrolledFingerprint());
+  };
+
+  const removeFingerprint = () => {
+    clearEnrolledFingerprint();
+    setEnrolledFingerprint(null);
+  };
+
   const [pendingPhone, setPendingPhone] = useState<string>('');
   const [activeOtp, setActiveOtp] = useState<string | null>(null);
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
@@ -128,12 +154,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (fbUser) {
           try {
+            const isOfficialAdmin = isAuthorizedAdminEmail(fbUser.email);
             // Fetch Firestore Profile
             const userDocRef = doc(db, 'users', fbUser.uid);
             const userSnap = await getDoc(userDocRef);
 
             if (userSnap.exists()) {
               const data = userSnap.data() as UserProfile;
+              const role = isOfficialAdmin ? 'admin' : (data.role === 'admin' ? 'citizen' : (data.role || 'citizen'));
               setUser({
                 id: fbUser.uid,
                 name: data.name || fbUser.displayName || '',
@@ -143,14 +171,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 gender: data.gender,
                 bloodGroup: data.bloodGroup || 'O+',
                 location: data.location || 'Kadamtala, Jalpaiguri',
-                role: data.role || (fbUser.email?.toLowerCase().includes('admin') ? 'admin' : 'citizen'),
+                role,
                 language: data.language || 'English',
                 isBloodDonor: data.isBloodDonor ?? true,
                 isVolunteer: data.isVolunteer ?? false,
                 createdAt: data.createdAt || new Date().toISOString()
               });
             } else {
-              // Profile does not exist yet; mark as incomplete for profile setup
+              // Profile does not exist yet
               const partialProfile: UserProfile = {
                 id: fbUser.uid,
                 name: fbUser.displayName || '',
@@ -158,7 +186,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 email: fbUser.email || '',
                 bloodGroup: 'O+',
                 location: '',
-                role: fbUser.email?.toLowerCase().includes('admin') ? 'admin' : 'citizen',
+                role: isOfficialAdmin ? 'admin' : 'citizen',
                 language: 'English',
                 isBloodDonor: true,
                 isVolunteer: false,
@@ -170,7 +198,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.warn('Firestore profile fetch warning:', err);
           }
         } else {
-          setUser(null);
+          // If no Firebase user, check if we have a valid biometric local user
+          const enrolled = getEnrolledFingerprint();
+          if (!enrolled) {
+            setUser(null);
+          }
         }
 
         setIsLoading(false);
@@ -184,8 +216,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  // 1. Google Sign-In with Firebase Popup
-  const loginWithGoogle = async (): Promise<{ success: boolean; isNewUser?: boolean; message?: string }> => {
+  // 1. Google Sign-In with Firebase Popup (Supports any citizen + strict Admin verification)
+  const loginWithGoogle = async (
+    options?: { asAdmin?: boolean }
+  ): Promise<{ success: boolean; isNewUser?: boolean; isAdmin?: boolean; message?: string }> => {
     setIsLoading(true);
     try {
       if (!isFirebaseConfigured || !auth) {
@@ -196,16 +230,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const fbUser = result.user;
 
       if (fbUser) {
+        const isOfficialAdmin = isAuthorizedAdminEmail(fbUser.email);
+
+        // Strict Admin Security Check: Only verified municipal administrators are granted admin access
+        if (options?.asAdmin && !isOfficialAdmin) {
+          setIsLoading(false);
+          return {
+            success: false,
+            isAdmin: false,
+            message: 'Access Denied: Administrative console access is restricted exclusively to authorized municipal officers. This Google account is not on the authorized municipal registry.'
+          };
+        }
+
         const userDocRef = doc(db, 'users', fbUser.uid);
         const userSnap = await getDoc(userDocRef);
+        const assignedRole: 'admin' | 'citizen' = isOfficialAdmin ? 'admin' : 'citizen';
 
         if (userSnap.exists()) {
           const profileData = userSnap.data() as UserProfile;
-          setUser(profileData);
+          const updatedProfile: UserProfile = {
+            ...profileData,
+            role: assignedRole,
+            email: fbUser.email || profileData.email || ''
+          };
+          setUser(updatedProfile);
           setIsLoading(false);
-          return { success: true, isNewUser: !profileData.name || !profileData.location };
+          return {
+            success: true,
+            isAdmin: isOfficialAdmin,
+            isNewUser: !profileData.name || !profileData.location
+          };
         } else {
-          // New Google User -> Create initial doc and prompt profile setup
+          // New Google Citizen User -> Create initial doc
           const newProfile: UserProfile = {
             id: fbUser.uid,
             name: fbUser.displayName || '',
@@ -213,7 +269,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             phone: fbUser.phoneNumber || '',
             bloodGroup: 'O+',
             location: '',
-            role: fbUser.email?.toLowerCase().includes('admin') ? 'admin' : 'citizen',
+            role: assignedRole,
             language: 'English',
             isBloodDonor: true,
             isVolunteer: false,
@@ -228,7 +284,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
           setUser(newProfile);
           setIsLoading(false);
-          return { success: true, isNewUser: true };
+          return {
+            success: true,
+            isAdmin: isOfficialAdmin,
+            isNewUser: true
+          };
         }
       }
       setIsLoading(false);
@@ -245,6 +305,127 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         msg = err.message;
       }
       return { success: false, message: msg };
+    }
+  };
+
+  // 2. Biometric Fingerprint Sign Up
+  // Enrolls user's fingerprint cryptographic key. Once enrolled, no other fingerprint can access!
+  const registerWithFingerprint = async (
+    name: string,
+    location: string = 'Kadamtala, Jalpaiguri'
+  ): Promise<{ success: boolean; message?: string }> => {
+    setIsLoading(true);
+    try {
+      const res = await registerFingerprint(name);
+      if (!res.success || !res.enrolled) {
+        setIsLoading(false);
+        return { success: false, message: res.message || 'Fingerprint registration failed.' };
+      }
+
+      setEnrolledFingerprint(res.enrolled);
+
+      const citizenProfile: UserProfile = {
+        id: res.enrolled.userId,
+        name: res.enrolled.userName,
+        phone: '',
+        email: res.enrolled.userEmail || `${name.toLowerCase().replace(/\s+/g, '')}@citizen.jalpaiguri.wb`,
+        bloodGroup: 'O+',
+        location: location || 'Kadamtala, Jalpaiguri',
+        role: 'citizen',
+        language: 'English',
+        isBloodDonor: true,
+        isVolunteer: false,
+        fingerprintEnrolled: true,
+        fingerprintCredentialId: res.enrolled.credentialId,
+        createdAt: new Date().toISOString()
+      };
+
+      setUser(citizenProfile);
+      localStorage.setItem('jpg_user_profile', JSON.stringify(citizenProfile));
+      localStorage.setItem('jpg_has_onboarded', 'true');
+      setIsProfileComplete(Boolean(citizenProfile.name && citizenProfile.location));
+
+      if (isFirebaseConfigured && db) {
+        try {
+          await setDoc(doc(db, 'users', citizenProfile.id), citizenProfile, { merge: true });
+        } catch (_) {}
+      }
+
+      setIsLoading(false);
+      return { success: true, message: `Fingerprint registered and bound exclusively to ${name}.` };
+    } catch (e: any) {
+      setIsLoading(false);
+      return { success: false, message: e.message || 'Fingerprint registration failed.' };
+    }
+  };
+
+  // 3. Biometric Fingerprint Login
+  // Enforces privacy: Verifies that ONLY the exact enrolled fingerprint unlocks the account!
+  const loginWithFingerprint = async (
+    scannedSignature?: string
+  ): Promise<{ success: boolean; message?: string; isNewUser?: boolean }> => {
+    setIsLoading(true);
+    try {
+      const res = await verifyFingerprint(scannedSignature);
+      if (!res.success || !res.enrolled) {
+        setIsLoading(false);
+        return {
+          success: false,
+          message: res.message || 'Fingerprint verification failed.'
+        };
+      }
+
+      setEnrolledFingerprint(res.enrolled);
+
+      // Restore user profile
+      let existingProfile: UserProfile | null = null;
+      try {
+        const raw = localStorage.getItem('jpg_user_profile');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && (parsed.id === res.enrolled.userId || parsed.name === res.enrolled.userName)) {
+            existingProfile = parsed;
+          }
+        }
+      } catch (_) {}
+
+      if (!existingProfile && isFirebaseConfigured && db) {
+        try {
+          const snap = await getDoc(doc(db, 'users', res.enrolled.userId));
+          if (snap.exists()) {
+            existingProfile = snap.data() as UserProfile;
+          }
+        } catch (_) {}
+      }
+
+      if (!existingProfile) {
+        existingProfile = {
+          id: res.enrolled.userId,
+          name: res.enrolled.userName,
+          phone: '',
+          email: res.enrolled.userEmail || `${res.enrolled.userName.toLowerCase().replace(/\s+/g, '')}@citizen.jalpaiguri.wb`,
+          bloodGroup: 'O+',
+          location: 'Kadamtala, Jalpaiguri',
+          role: 'citizen',
+          language: 'English',
+          isBloodDonor: true,
+          isVolunteer: false,
+          fingerprintEnrolled: true,
+          fingerprintCredentialId: res.enrolled.credentialId,
+          createdAt: new Date().toISOString()
+        };
+      }
+
+      setUser(existingProfile);
+      localStorage.setItem('jpg_user_profile', JSON.stringify(existingProfile));
+      localStorage.setItem('jpg_has_onboarded', 'true');
+      setIsProfileComplete(Boolean(existingProfile.name && existingProfile.location));
+
+      setIsLoading(false);
+      return { success: true, message: `Welcome back, ${res.enrolled.userName}!` };
+    } catch (e: any) {
+      setIsLoading(false);
+      return { success: false, message: e.message || 'Fingerprint login failed.' };
     }
   };
 
@@ -503,6 +684,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const toggleRole = () => {
     if (!user) return;
+    if (user.role !== 'admin') {
+      const email = user.email || firebaseUser?.email;
+      if (!isAuthorizedAdminEmail(email)) {
+        console.warn('[AUTH] Admin role switch blocked: Unauthorized email', email);
+        return;
+      }
+    }
     const nextRole = user.role === 'admin' ? 'citizen' : 'admin';
     const updated = { ...user, role: nextRole as any };
     setUser(updated);
@@ -535,6 +723,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         confirmationResult,
         setConfirmationResult,
         loginWithGoogle,
+        enrolledFingerprint,
+        refreshEnrolledFingerprint,
+        loginWithFingerprint,
+        registerWithFingerprint,
+        removeFingerprint,
         sendPhoneOtp,
         verifyPhoneOtp,
         pendingPhone,

@@ -38,6 +38,8 @@ import { MapsExplorerView } from './components/views/MapsExplorerView';
 import { ProfileView } from './components/views/ProfileView';
 import { OfferServicesView } from './components/views/OfferServicesView';
 import { AdminDashboardView } from './components/views/AdminDashboardView';
+import { FAQView } from './components/views/FAQView';
+import { ThemeProvider } from './context/ThemeContext';
 
 // Common Components & Modals
 import { BottomNav } from './components/common/BottomNav';
@@ -153,6 +155,8 @@ const AppContent: React.FC = () => {
         return <OfferServicesView />;
       case 'admin-dashboard':
         return <AdminDashboardView />;
+      case 'faq':
+        return <FAQView />;
       default:
         return <HomeView />;
     }
@@ -192,15 +196,17 @@ const AppContent: React.FC = () => {
 export default function App() {
   return (
     <ExpoProvider>
-      <AuthProvider>
-        <LocationProvider>
-          <NavigationProvider>
-            <AppProvider>
-              <AppContent />
-            </AppProvider>
-          </NavigationProvider>
-        </LocationProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <LocationProvider>
+            <NavigationProvider>
+              <AppProvider>
+                <AppContent />
+              </AppProvider>
+            </NavigationProvider>
+          </LocationProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </ExpoProvider>
   );
 }

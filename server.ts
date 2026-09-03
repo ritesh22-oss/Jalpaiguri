@@ -319,6 +319,157 @@ app.get('/api/health', (req: Request, res: Response) => {
   });
 });
 
+// Dedicated Server-Side High-Accuracy Reverse Geocoding Route
+app.get('/api/location/reverse-geocode', async (req: Request, res: Response) => {
+  const latStr = req.query.lat as string;
+  const lngStr = req.query.lng as string;
+
+  const lat = parseFloat(latStr);
+  const lng = parseFloat(lngStr);
+
+  if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    return res.status(400).json({ error: 'Valid latitude and longitude are required.' });
+  }
+
+  // 1. Try Nominatim (OpenStreetMap) with server-side custom User-Agent
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7000);
+
+    const osmResponse = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+      {
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'JalpaiguriConnectApp/2.0 (civic.portal.wb@gmail.com)'
+        }
+      }
+    );
+    clearTimeout(timeoutId);
+
+    if (osmResponse.ok) {
+      const data = await osmResponse.json();
+      if (data && data.address) {
+        const addr = data.address;
+        const road = addr.road || addr.pedestrian || addr.street || '';
+        const locality =
+          addr.suburb ||
+          addr.neighbourhood ||
+          addr.residential ||
+          addr.village ||
+          addr.town ||
+          addr.city_district ||
+          addr.hamlet ||
+          road ||
+          '';
+
+        let city = addr.city || addr.town || addr.municipality || addr.state_district || addr.county || '';
+        // Clean up administrative suffixes like "Corporation" or "District"
+        city = city.replace(/\s+Corporation$/i, '').trim();
+
+        const district = addr.state_district || addr.district || addr.county || city;
+        const state = addr.state || '';
+        const country = addr.country || 'India';
+        const pincode = addr.postcode || '';
+
+        const primaryPlace = locality || road || city || district || 'Detected Location';
+        const secondaryPlace = [city && city !== primaryPlace ? city : '', state].filter(Boolean).join(', ');
+        const displayName = secondaryPlace ? `${primaryPlace}, ${secondaryPlace}` : (state ? `${primaryPlace}, ${state}` : `${primaryPlace}, ${country}`);
+
+        return res.json({
+          success: true,
+          lat,
+          lng,
+          name: displayName,
+          locality: primaryPlace,
+          city: city || primaryPlace,
+          district,
+          state,
+          country,
+          pincode,
+          road,
+          rawAddress: addr,
+          source: 'osm-nominatim'
+        });
+      }
+    }
+  } catch (err) {
+    console.warn('[REVERSE GEOCODE] OSM lookup notice:', (err as any)?.message);
+  }
+
+  // 2. Intelligent Geographic Regional Resolver for Indian Metros & Regions if offline/rate-limited
+  const KNOWN_REGIONS = [
+    { name: 'Chennai', state: 'Tamil Nadu', lat: 13.0827, lng: 80.2707, radiusKm: 80 },
+    { name: 'Bengaluru', state: 'Karnataka', lat: 12.9716, lng: 77.5946, radiusKm: 70 },
+    { name: 'Kolkata', state: 'West Bengal', lat: 22.5726, lng: 88.3639, radiusKm: 60 },
+    { name: 'Jalpaiguri', state: 'West Bengal', lat: 26.5414, lng: 88.7196, radiusKm: 35 },
+    { name: 'Siliguri', state: 'West Bengal', lat: 26.7271, lng: 88.3953, radiusKm: 40 },
+    { name: 'Mumbai', state: 'Maharashtra', lat: 19.0760, lng: 72.8777, radiusKm: 80 },
+    { name: 'Delhi', state: 'Delhi', lat: 28.6139, lng: 77.2090, radiusKm: 70 },
+    { name: 'Hyderabad', state: 'Telangana', lat: 17.3850, lng: 78.4867, radiusKm: 70 },
+    { name: 'Pune', state: 'Maharashtra', lat: 18.5204, lng: 73.8567, radiusKm: 50 },
+    { name: 'Coimbatore', state: 'Tamil Nadu', lat: 11.0168, lng: 76.9558, radiusKm: 45 },
+    { name: 'Madurai', state: 'Tamil Nadu', lat: 9.9252, lng: 78.1198, radiusKm: 40 },
+    { name: 'Kochi', state: 'Kerala', lat: 9.9312, lng: 76.2673, radiusKm: 45 },
+    { name: 'Guwahati', state: 'Assam', lat: 26.1445, lng: 91.7362, radiusKm: 50 }
+  ];
+
+  function calcDistKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  let matchedRegion = null;
+  let minDistance = Infinity;
+
+  for (const reg of KNOWN_REGIONS) {
+    const d = calcDistKm(lat, lng, reg.lat, reg.lng);
+    if (d <= reg.radiusKm && d < minDistance) {
+      minDistance = d;
+      matchedRegion = reg;
+    }
+  }
+
+  if (matchedRegion) {
+    return res.json({
+      success: true,
+      lat,
+      lng,
+      name: `${matchedRegion.name}, ${matchedRegion.state}`,
+      locality: matchedRegion.name,
+      city: matchedRegion.name,
+      district: matchedRegion.name,
+      state: matchedRegion.state,
+      country: 'India',
+      pincode: '',
+      source: 'offline-regional-resolver'
+    });
+  }
+
+  // Generic fallback using coordinates — NEVER "Kadamtala"
+  const genericLocality = `Location (${lat.toFixed(3)}°, ${lng.toFixed(3)}°)`;
+  return res.json({
+    success: true,
+    lat,
+    lng,
+    name: genericLocality,
+    locality: genericLocality,
+    city: 'Detected City',
+    district: '',
+    state: '',
+    country: 'India',
+    pincode: '',
+    source: 'generic-coordinates'
+  });
+});
+
 // ==========================================
 // GEMINI AI & GOOGLE MAPS GROUNDING ROUTES
 // ==========================================

@@ -26,8 +26,10 @@ export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
 // Initialize Firestore with configured databaseId
-const databaseId = firebaseConfig.firestoreDatabaseId || '(default)';
-export const db = getFirestore(app, databaseId);
+const rawDatabaseId = firebaseConfig.firestoreDatabaseId;
+export const db = (rawDatabaseId && rawDatabaseId !== '(default)')
+  ? getFirestore(app, rawDatabaseId)
+  : getFirestore(app);
 
 export const isFirebaseConfigured = Boolean(firebaseConfig.projectId && firebaseConfig.apiKey);
 export const recaptchaSiteKey = firebaseConfig.recaptchaSiteKey || null;
