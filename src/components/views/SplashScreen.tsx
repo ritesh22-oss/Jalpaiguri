@@ -20,7 +20,7 @@ export const SplashScreen: React.FC = () => {
   return (
     <div
       onClick={handleScreenTap}
-      className="fixed inset-0 z-50 bg-gradient-to-b from-[#26C174] via-[#1EBA6E] to-[#0A8C60] text-white flex flex-col justify-between p-6 select-none cursor-pointer max-w-md mx-auto overflow-hidden shadow-2xl"
+      className="fixed inset-0 z-50 bg-gradient-to-b from-[#26C174] via-[#1EBA6E] to-[#0A8C60] dark:from-[#0B3B26] dark:via-[#082E1E] dark:to-[#051C12] text-white flex flex-col justify-between p-6 select-none cursor-pointer max-w-md mx-auto overflow-hidden shadow-2xl transition-colors"
     >
       {/* Top spacing */}
       <div className="w-full pt-4"></div>

@@ -9,9 +9,12 @@ import {
   Sparkles,
   Zap,
   CheckCircle2,
-  ChevronDown
+  ChevronDown,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useExpo, ExpoDeviceType } from '../../context/ExpoContext';
+import { useTheme } from '../../context/ThemeContext';
 import { ExpoPushBanner } from './ExpoPushBanner';
 import { ExpoDevMenuModal } from './ExpoDevMenuModal';
 import { ExpoQrModal } from './ExpoQrModal';
@@ -27,6 +30,7 @@ export const ExpoDeviceShell: React.FC<{ children: React.ReactNode }> = ({ child
     triggerHaptic,
     latestOtp
   } = useExpo();
+  const { isDarkMode, toggleTheme } = useTheme();
 
   // Keyboard shortcut listener for Expo Dev Menu (⌘D or Ctrl+M)
   React.useEffect(() => {
@@ -116,6 +120,19 @@ export const ExpoDeviceShell: React.FC<{ children: React.ReactNode }> = ({ child
             <span className="hidden sm:inline text-[11px]">Dev Menu</span>
           </button>
 
+          {/* Theme Toggle in Developer Bar */}
+          <button
+            onClick={() => {
+              triggerHaptic('light');
+              toggleTheme();
+            }}
+            title={isDarkMode ? 'Switch to Bright Mode' : 'Switch to Dark Mode'}
+            className="h-8 px-2.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+          >
+            {isDarkMode ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-gray-300" />}
+            <span className="hidden sm:inline text-[11px]">{isDarkMode ? 'Dark' : 'Light'}</span>
+          </button>
+
           {/* Reload button */}
           <button
             onClick={() => {
@@ -143,7 +160,7 @@ export const ExpoDeviceShell: React.FC<{ children: React.ReactNode }> = ({ child
         }`}
       >
         <div
-          className={`w-full bg-[#FAF8F5] relative flex flex-col justify-between overflow-hidden transition-all duration-300 ${
+          className={`w-full bg-[#FAF8F5] dark:bg-[#0F1713] relative flex flex-col justify-between overflow-hidden transition-all duration-300 ${
             isFullscreen
               ? 'min-h-screen rounded-none'
               : deviceType === 'iphone-16-pro'
@@ -155,7 +172,7 @@ export const ExpoDeviceShell: React.FC<{ children: React.ReactNode }> = ({ child
         >
           {/* Realistic Native Status Bar */}
           {!isFullscreen && (
-            <div className="w-full bg-white/95 backdrop-blur-md pt-3.5 px-6 pb-2 flex items-center justify-between text-xs text-gray-900 z-40 border-b border-gray-100 select-none">
+            <div className="w-full bg-white/95 dark:bg-[#15211B]/95 backdrop-blur-md pt-3.5 px-6 pb-2 flex items-center justify-between text-xs text-gray-900 dark:text-gray-100 z-40 border-b border-gray-100 dark:border-white/10 select-none transition-colors">
               {/* Left: Time */}
               <span className="font-bold text-[13px] tracking-tight">{simulatedTime}</span>
 
@@ -184,11 +201,11 @@ export const ExpoDeviceShell: React.FC<{ children: React.ReactNode }> = ({ child
 
               {/* Right: Cellular "Jio 5G", Wifi, Battery */}
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-gray-600">5G</span>
-                <Wifi className="w-3.5 h-3.5 text-gray-800 stroke-[2.2]" />
-                <div className="flex items-center gap-0.5 font-bold text-[11px] text-gray-900">
+                <span className="text-[10px] font-bold text-gray-600 dark:text-gray-400">5G</span>
+                <Wifi className="w-3.5 h-3.5 text-gray-800 dark:text-gray-200 stroke-[2.2]" />
+                <div className="flex items-center gap-0.5 font-bold text-[11px] text-gray-900 dark:text-gray-100">
                   <span>{batteryLevel}%</span>
-                  <BatteryCharging className="w-4 h-4 text-emerald-600 stroke-[2.2]" />
+                  <BatteryCharging className="w-4 h-4 text-emerald-600 dark:text-emerald-400 stroke-[2.2]" />
                 </div>
               </div>
             </div>
@@ -198,14 +215,14 @@ export const ExpoDeviceShell: React.FC<{ children: React.ReactNode }> = ({ child
           <ExpoPushBanner />
 
           {/* Inner Application View */}
-          <div className="flex-1 w-full overflow-y-auto flex flex-col justify-between relative">
+          <div className="flex-1 w-full overflow-y-auto flex flex-col justify-between relative bg-[#FAF8F5] dark:bg-[#0F1713] text-[#11241C] dark:text-[#E8ECE9] transition-colors">
             {children}
           </div>
 
           {/* Native Bottom Home Indicator Bar */}
           {!isFullscreen && (
-            <div className="w-full bg-white/95 backdrop-blur-md flex justify-center py-2 z-40 border-t border-gray-100 select-none">
-              <div className="w-36 h-1.5 bg-black/80 rounded-full hover:bg-black transition-colors cursor-grab active:scale-95"></div>
+            <div className="w-full bg-white/95 dark:bg-[#15211B]/95 backdrop-blur-md flex justify-center py-2 z-40 border-t border-gray-100 dark:border-white/10 select-none transition-colors">
+              <div className="w-36 h-1.5 bg-black/80 dark:bg-white/40 rounded-full hover:bg-black dark:hover:bg-white/60 transition-colors cursor-grab active:scale-95"></div>
             </div>
           )}
         </div>

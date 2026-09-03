@@ -39,7 +39,7 @@ import { NearbyCategoryType } from '../../types';
 
 export const HomeView: React.FC = () => {
   const { navigate, setIsAssistantOpen } = useNav();
-  const { user } = useAuth();
+  const { user, firebaseUser } = useAuth();
   const { workers, doctors, localAlerts, civicReports, isRealtimeConnected, refreshData } = useApp();
   const { location, status, setIsLocationSelectorOpen, requestCurrentLocation } = useLocation();
 
@@ -108,29 +108,29 @@ export const HomeView: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] pb-28 max-w-md mx-auto select-none">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 max-w-md mx-auto select-none transition-colors">
       {/* Top Header */}
-      <div className="bg-white px-5 pt-5 pb-4 border-b border-[#E8E4DA] sticky top-0 z-20 shadow-xs space-y-3">
+      <div className="bg-white dark:bg-[#131F1A] px-5 pt-5 pb-4 border-b border-[#E8E4DA] dark:border-white/10 sticky top-0 z-20 shadow-xs space-y-3 transition-colors">
         {/* User Greeting & Quick Actions */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <JalpaiguriLogo size="sm" showText={false} />
             <div>
-              <h2 className="text-base font-extrabold text-[#11241C] tracking-tight flex items-center gap-1.5">
+              <h2 className="text-base font-extrabold text-[#11241C] dark:text-white tracking-tight flex items-center gap-1.5">
                 <span>{greeting}, {userName}</span>
                 <span>👋</span>
               </h2>
               <div className="flex items-center gap-2 mt-0.5">
                 <div
                   onClick={() => setIsLocationSelectorOpen(true)}
-                  className="flex items-center gap-1 text-xs font-bold text-[#063B2C] cursor-pointer hover:underline"
+                  className="flex items-center gap-1 text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] cursor-pointer hover:underline"
                 >
-                  <MapPin className="w-3.5 h-3.5 text-[#063B2C] shrink-0" />
+                  <MapPin className="w-3.5 h-3.5 text-[#063B2C] dark:text-[#4ECCA3] shrink-0" />
                   <span className="truncate max-w-[150px]">{location.name || `${location.locality}, ${location.city || ''}`}</span>
                 </div>
                 <div
                   onClick={() => refreshData()}
-                  className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E6F4EA] text-[#063B2C] text-[10px] font-bold cursor-pointer hover:bg-[#C8E6C9] transition-colors"
+                  className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E6F4EA] dark:bg-[#1C4532] text-[#063B2C] dark:text-[#4ECCA3] text-[10px] font-bold cursor-pointer hover:bg-[#C8E6C9] dark:hover:bg-[#235840] transition-colors"
                   title="Real-time data stream active. Tap to sync."
                 >
                   <span className="relative flex h-2 w-2">
@@ -146,23 +146,32 @@ export const HomeView: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsAssistantOpen(true)}
-              className="w-9 h-9 rounded-full bg-[#E6F4EA] text-[#063B2C] flex items-center justify-center hover:bg-[#C8E6C9] active:scale-95 transition-all shadow-xs cursor-pointer"
+              className="w-9 h-9 rounded-full bg-[#E6F4EA] dark:bg-[#1C4532] text-[#063B2C] dark:text-[#4ECCA3] flex items-center justify-center hover:bg-[#C8E6C9] dark:hover:bg-[#235840] active:scale-95 transition-all shadow-xs cursor-pointer"
               title="AI Jalpaigi Assistant"
             >
               <Sparkles className="w-4 h-4" />
             </button>
             {user ? (
-              <div
+              <button
                 onClick={() => navigate('profile')}
-                className="w-9 h-9 rounded-full bg-[#063B2C] text-white flex items-center justify-center font-bold text-xs shadow-xs cursor-pointer hover:ring-2 hover:ring-[#A7D7B9]"
+                className="w-9 h-9 rounded-full bg-[#063B2C] dark:bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-xs cursor-pointer hover:ring-2 hover:ring-[#A7D7B9] overflow-hidden"
                 title="View Profile"
               >
-                {user.name ? user.name.charAt(0) : 'J'}
-              </div>
+                {firebaseUser?.photoURL ? (
+                  <img
+                    src={firebaseUser.photoURL}
+                    alt={user.name || 'User'}
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <span>{user.name ? user.name.charAt(0) : 'J'}</span>
+                )}
+              </button>
             ) : (
               <button
                 onClick={() => navigate('auth')}
-                className="text-xs font-extrabold text-white bg-[#063B2C] px-3.5 py-1.5 rounded-full shadow-xs hover:bg-[#084D3A] cursor-pointer"
+                className="text-xs font-extrabold text-white bg-[#063B2C] dark:bg-emerald-600 px-3.5 py-1.5 rounded-full shadow-xs hover:bg-[#084D3A] cursor-pointer"
               >
                 Sign In
               </button>
@@ -171,30 +180,30 @@ export const HomeView: React.FC = () => {
         </div>
 
         {/* PROMINENT LOCATION SELECTOR BAR */}
-        <div className="bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 shadow-xs space-y-2">
+        <div className="bg-[#FAF8F5] dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 rounded-2xl p-3 shadow-xs space-y-2 transition-colors">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              <MapPin className="w-4 h-4 text-[#063B2C]" />
-              <span className="text-xs font-extrabold text-[#11241C]">
+              <MapPin className="w-4 h-4 text-[#063B2C] dark:text-[#4ECCA3]" />
+              <span className="text-xs font-extrabold text-[#11241C] dark:text-white">
                 Your Location
               </span>
             </div>
 
             <button
               onClick={() => setIsLocationSelectorOpen(true)}
-              className="text-[11px] font-extrabold text-[#063B2C] hover:underline cursor-pointer"
+              className="text-[11px] font-extrabold text-[#063B2C] dark:text-[#4ECCA3] hover:underline cursor-pointer"
             >
               Change Location
             </button>
           </div>
 
-          <div className="flex items-center justify-between gap-2 pt-1 border-t border-[#E8E4DA]/60">
+          <div className="flex items-center justify-between gap-2 pt-1 border-t border-[#E8E4DA]/60 dark:border-white/10">
             <div className="flex items-center gap-1.5 truncate">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
               </span>
-              <span className="text-xs font-bold text-[#11241C] truncate">
+              <span className="text-xs font-bold text-[#11241C] dark:text-white truncate">
                 📍 {location.name}
               </span>
             </div>
@@ -202,7 +211,7 @@ export const HomeView: React.FC = () => {
             <button
               onClick={handleUseCurrentLocation}
               disabled={isDetectingLocation}
-              className="bg-white border border-[#D2CEBE] hover:border-[#063B2C] active:scale-95 transition-all text-[#063B2C] px-2.5 py-1 rounded-lg text-[11px] font-extrabold flex items-center gap-1 shrink-0 shadow-xs cursor-pointer disabled:opacity-60"
+              className="bg-white dark:bg-[#131F1A] border border-[#D2CEBE] dark:border-white/15 hover:border-[#063B2C] dark:hover:border-emerald-500 active:scale-95 transition-all text-[#063B2C] dark:text-[#4ECCA3] px-2.5 py-1 rounded-lg text-[11px] font-extrabold flex items-center gap-1 shrink-0 shadow-xs cursor-pointer disabled:opacity-60"
             >
               {isDetectingLocation ? (
                 <>
@@ -221,15 +230,15 @@ export const HomeView: React.FC = () => {
 
         {/* "What do you need today?" & Search Bar */}
         <div className="space-y-1.5">
-          <h3 className="text-xs font-extrabold text-[#55685F] uppercase tracking-wider px-0.5">
+          <h3 className="text-xs font-extrabold text-[#55685F] dark:text-[#A2B3AA] uppercase tracking-wider px-0.5">
             What do you need today?
           </h3>
           <div
             onClick={() => navigate('nearby')}
-            className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl px-4 py-3 flex items-center gap-3 shadow-xs cursor-pointer hover:border-[#063B2C] transition-all"
+            className="w-full bg-[#FAF8F5] dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-xs cursor-pointer hover:border-[#063B2C] dark:hover:border-emerald-500 transition-all"
           >
-            <Search className="w-4 h-4 text-[#55685F]" />
-            <span className="text-xs font-medium text-[#73827B] flex-1">
+            <Search className="w-4 h-4 text-[#55685F] dark:text-[#A2B3AA]" />
+            <span className="text-xs font-medium text-[#73827B] dark:text-[#94A39B] flex-1">
               {placeholders[placeholderIndex]}
             </span>
             <button
@@ -238,7 +247,7 @@ export const HomeView: React.FC = () => {
                 e.stopPropagation();
                 setIsAssistantOpen(true);
               }}
-              className="text-[#55685F] hover:text-[#063B2C]"
+              className="text-[#55685F] dark:text-[#A2B3AA] hover:text-[#063B2C] dark:hover:text-[#4ECCA3]"
             >
               <Mic className="w-4 h-4" />
             </button>
@@ -247,27 +256,43 @@ export const HomeView: React.FC = () => {
       </div>
 
       <div className="p-4 space-y-6">
-        {/* Urgent Help Card */}
-        <div className="bg-gradient-to-r from-[#FFEBEA] to-[#FFF5F5] border border-[#FFCCD0] rounded-3xl p-4 shadow-xs flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        {/* Urgent Help Card with direct 🆘 Safety SOS and Emergency Hub */}
+        <div className="bg-gradient-to-r from-[#FFEBEA] to-[#FFF5F5] dark:from-[#331515] dark:to-[#240F0F] border-2 border-[#FECDCA] dark:border-red-900/60 rounded-3xl p-4 shadow-xs flex items-center justify-between transition-colors">
+          <div
+            onClick={() => navigate('safety-sos')}
+            className="flex items-center gap-3 cursor-pointer flex-1"
+          >
             <div className="w-11 h-11 rounded-2xl bg-[#D9383A] text-white flex items-center justify-center shadow-sm shrink-0">
               <Radio className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <h3 className="text-sm font-extrabold text-[#8A1A1C] tracking-tight">
-                Need urgent help?
-              </h3>
-              <p className="text-[11px] text-[#632021] font-medium">
-                Ambulance, Hospital, Blood, Police & Fire
+              <div className="flex items-center gap-1.5">
+                <h3 className="text-sm font-extrabold text-[#8A1A1C] dark:text-red-300 tracking-tight">
+                  🆘 Safety SOS Hub
+                </h3>
+                <span className="text-[10px] font-bold bg-[#D9383A] text-white px-1.5 py-0.2 rounded-full">
+                  112
+                </span>
+              </div>
+              <p className="text-[11px] text-[#632021] dark:text-red-200/80 font-medium">
+                Hold-to-SOS, Shake Detection & Trusted Contacts
               </p>
             </div>
           </div>
-          <button
-            onClick={() => navigate('blood')}
-            className="bg-[#D9383A] hover:bg-[#B92628] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs active:scale-95 transition-all cursor-pointer shrink-0"
-          >
-            Emergency
-          </button>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={() => navigate('safety-sos')}
+              className="bg-[#D9383A] hover:bg-[#B92628] text-white text-xs font-bold px-3 py-2 rounded-xl shadow-xs active:scale-95 transition-all cursor-pointer"
+            >
+              SOS Hub
+            </button>
+            <button
+              onClick={() => navigate('emergency')}
+              className="bg-white dark:bg-[#17231E] border border-[#FECDCA] dark:border-red-900/50 text-[#D9383A] dark:text-red-400 hover:bg-[#FFEBEA] dark:hover:bg-red-950/40 text-xs font-bold px-2.5 py-2 rounded-xl active:scale-95 transition-all cursor-pointer"
+            >
+              Services
+            </button>
+          </div>
         </div>
 
         {/* 2 NEW CORE FEATURES: GEMINI CHATBOT & GOOGLE MAPS GROUNDING */}
@@ -275,7 +300,7 @@ export const HomeView: React.FC = () => {
           {/* Feature 1: Gemini AI Chat */}
           <div
             onClick={() => navigate('ai-chat')}
-            className="bg-gradient-to-br from-[#063B2C] to-[#0A58CA] text-white rounded-3xl p-4 shadow-sm hover:shadow-md active:scale-98 transition-all cursor-pointer flex flex-col justify-between space-y-3 group"
+            className="bg-gradient-to-br from-[#063B2C] to-[#0A58CA] dark:from-[#063024] dark:to-[#094191] text-white rounded-3xl p-4 shadow-sm hover:shadow-md active:scale-98 transition-all cursor-pointer flex flex-col justify-between space-y-3 group"
           >
             <div>
               <div className="flex items-center justify-between">
@@ -303,26 +328,26 @@ export const HomeView: React.FC = () => {
           {/* Feature 2: Google Maps Grounding */}
           <div
             onClick={() => navigate('maps-explorer')}
-            className="bg-white border border-[#A7D7B9] rounded-3xl p-4 shadow-sm hover:shadow-md hover:border-[#063B2C] active:scale-98 transition-all cursor-pointer flex flex-col justify-between space-y-3 group"
+            className="bg-white dark:bg-[#17231E] border border-[#A7D7B9] dark:border-emerald-800/50 rounded-3xl p-4 shadow-sm hover:shadow-md hover:border-[#063B2C] dark:hover:border-emerald-500 active:scale-98 transition-all cursor-pointer flex flex-col justify-between space-y-3 group"
           >
             <div>
               <div className="flex items-center justify-between">
-                <div className="w-9 h-9 rounded-2xl bg-[#E6F4EA] flex items-center justify-center text-[#063B2C]">
+                <div className="w-9 h-9 rounded-2xl bg-[#E6F4EA] dark:bg-[#1C4532] flex items-center justify-center text-[#063B2C] dark:text-[#4ECCA3]">
                   <MapPin className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 </div>
-                <span className="text-[9px] font-bold bg-[#E6F4EA] text-[#063B2C] px-2 py-0.5 rounded-full uppercase tracking-wider">
+                <span className="text-[9px] font-bold bg-[#E6F4EA] dark:bg-[#1C4532] text-[#063B2C] dark:text-[#4ECCA3] px-2 py-0.5 rounded-full uppercase tracking-wider">
                   Maps Live
                 </span>
               </div>
-              <h3 className="text-sm font-extrabold text-[#11241C] mt-2.5 leading-snug">
+              <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white mt-2.5 leading-snug">
                 Maps Grounding
               </h3>
-              <p className="text-[11px] text-[#55685F] mt-0.5 leading-tight">
+              <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA] mt-0.5 leading-tight">
                 Verified clinics, stores, transport & tourist spots.
               </p>
             </div>
 
-            <div className="pt-2 border-t border-[#F0ECE1] flex items-center justify-between text-xs font-bold text-[#063B2C]">
+            <div className="pt-2 border-t border-[#F0ECE1] dark:border-white/10 flex items-center justify-between text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3]">
               <span>Explore Places</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
@@ -333,16 +358,16 @@ export const HomeView: React.FC = () => {
         <div>
           <div className="flex items-center justify-between mb-3 px-1">
             <div>
-              <h3 className="text-sm font-extrabold text-[#11241C] tracking-tight">
+              <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white tracking-tight">
                 Nearby For You
               </h3>
-              <p className="text-[11px] font-semibold text-[#55685F]">
+              <p className="text-[11px] font-semibold text-[#55685F] dark:text-[#A2B3AA]">
                 Sorted by distance from {location.locality}
               </p>
             </div>
             <button
               onClick={() => navigate('nearby')}
-              className="text-xs font-bold text-[#063B2C] hover:underline cursor-pointer flex items-center gap-0.5"
+              className="text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] hover:underline cursor-pointer flex items-center gap-0.5"
             >
               <span>Explore all</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -354,33 +379,33 @@ export const HomeView: React.FC = () => {
               <div
                 key={item.id}
                 onClick={() => navigate('nearby', { category: item.category })}
-                className="w-64 bg-white rounded-2xl p-3.5 border border-[#E8E4DA] shadow-xs hover:shadow-md hover:border-[#063B2C] transition-all cursor-pointer flex flex-col justify-between shrink-0"
+                className="w-64 bg-white dark:bg-[#17231E] rounded-2xl p-3.5 border border-[#E8E4DA] dark:border-white/10 shadow-xs hover:shadow-md hover:border-[#063B2C] dark:hover:border-emerald-500 transition-all cursor-pointer flex flex-col justify-between shrink-0"
               >
                 <div>
                   {/* Category & Distance Header */}
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-[#E6F4EA] text-[#063B2C] uppercase">
+                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-[#E6F4EA] dark:bg-[#1C4532] text-[#063B2C] dark:text-[#4ECCA3] uppercase">
                       {item.subcategory}
                     </span>
-                    <span className="text-[11px] font-black text-[#063B2C] flex items-center gap-0.5">
+                    <span className="text-[11px] font-black text-[#063B2C] dark:text-[#4ECCA3] flex items-center gap-0.5">
                       <MapPin className="w-3 h-3" />
                       {item.distanceText}
                     </span>
                   </div>
 
-                  <h4 className="text-xs font-extrabold text-[#11241C] line-clamp-1 leading-snug">
+                  <h4 className="text-xs font-extrabold text-[#11241C] dark:text-white line-clamp-1 leading-snug">
                     {item.name}
                   </h4>
-                  <p className="text-[11px] text-[#55685F] line-clamp-1 mt-0.5">
+                  <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA] line-clamp-1 mt-0.5">
                     📍 {item.area}
                   </p>
                 </div>
 
-                <div className="pt-2 mt-2 border-t border-[#F0ECE1] flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-[#11241C]">
+                <div className="pt-2 mt-2 border-t border-[#F0ECE1] dark:border-white/10 flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-[#11241C] dark:text-white">
                     {item.startingPrice || item.salary || item.openStatus || 'Available'}
                   </span>
-                  <span className="text-[11px] font-extrabold text-[#063B2C] flex items-center gap-0.5">
+                  <span className="text-[11px] font-extrabold text-[#063B2C] dark:text-[#4ECCA3] flex items-center gap-0.5">
                     <span>View</span>
                     <ChevronRight className="w-3 h-3" />
                   </span>
@@ -393,12 +418,12 @@ export const HomeView: React.FC = () => {
         {/* 12 Quick Services Icon Grid */}
         <div>
           <div className="flex items-center justify-between mb-3 px-1">
-            <h3 className="text-sm font-extrabold text-[#11241C] tracking-tight">
+            <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white tracking-tight">
               City Services
             </h3>
             <button
               onClick={() => navigate('nearby')}
-              className="text-xs font-bold text-[#063B2C] hover:underline cursor-pointer"
+              className="text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] hover:underline cursor-pointer"
             >
               View all
             </button>
@@ -416,14 +441,14 @@ export const HomeView: React.FC = () => {
                     navigate(srv.view);
                   }
                 }}
-                className="bg-white border border-[#E8E4DA] rounded-2xl p-2.5 flex flex-col items-center justify-center text-center shadow-xs hover:border-[#063B2C] hover:shadow-sm active:scale-95 transition-all cursor-pointer group"
+                className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-2.5 flex flex-col items-center justify-center text-center shadow-xs hover:border-[#063B2C] dark:hover:border-emerald-500 hover:shadow-sm active:scale-95 transition-all cursor-pointer group"
               >
                 <div
-                  className={`w-11 h-11 rounded-xl ${srv.bg} flex items-center justify-center mb-1.5 transition-transform group-hover:scale-105`}
+                  className={`w-11 h-11 rounded-xl ${srv.bg} dark:bg-[#1C2C25] flex items-center justify-center mb-1.5 transition-transform group-hover:scale-105`}
                 >
                   {srv.icon}
                 </div>
-                <span className="text-[11px] font-bold text-[#11241C] leading-tight line-clamp-1">
+                <span className="text-[11px] font-bold text-[#11241C] dark:text-white leading-tight line-clamp-1">
                   {srv.label}
                 </span>
               </button>
@@ -435,14 +460,14 @@ export const HomeView: React.FC = () => {
         <div>
           <div className="flex items-center justify-between mb-3 px-1">
             <div className="flex items-center gap-1.5">
-              <Landmark className="w-4 h-4 text-[#063B2C]" />
-              <h3 className="text-sm font-extrabold text-[#11241C] tracking-tight">
+              <Landmark className="w-4 h-4 text-[#063B2C] dark:text-[#4ECCA3]" />
+              <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white tracking-tight">
                 Popular Government Services
               </h3>
             </div>
             <button
               onClick={() => navigate('government')}
-              className="text-xs font-bold text-[#063B2C] hover:underline cursor-pointer flex items-center gap-0.5"
+              className="text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] hover:underline cursor-pointer flex items-center gap-0.5"
             >
               <span>View All</span>
               <ChevronRight className="w-3 h-3" />
@@ -453,24 +478,24 @@ export const HomeView: React.FC = () => {
           <div className="grid grid-cols-2 gap-2.5">
             <div
               onClick={() => navigate('government')}
-              className="bg-white border border-[#E8E4DA] rounded-2xl p-3.5 shadow-2xs hover:border-[#063B2C] hover:shadow-xs active:scale-98 transition-all cursor-pointer flex flex-col justify-between"
+              className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-3.5 shadow-2xs hover:border-[#063B2C] dark:hover:border-emerald-500 hover:shadow-xs active:scale-98 transition-all cursor-pointer flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between gap-1 mb-2">
-                  <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-[#E6F4EA] text-[#063B2C] uppercase tracking-wider">
+                  <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-[#E6F4EA] dark:bg-[#1C4532] text-[#063B2C] dark:text-[#4ECCA3] uppercase tracking-wider">
                     Pay Online
                   </span>
-                  <BadgeCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <BadgeCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 </div>
-                <h4 className="font-extrabold text-xs text-[#11241C] leading-snug">
+                <h4 className="font-extrabold text-xs text-[#11241C] dark:text-white leading-snug">
                   Property Tax & Mutation
                 </h4>
-                <p className="text-[10px] text-[#55685F] line-clamp-2 mt-1 font-medium">
+                <p className="text-[10px] text-[#55685F] dark:text-[#A2B3AA] line-clamp-2 mt-1 font-medium">
                   Jalpaiguri Municipality portal for ward holding tax & receipts
                 </p>
               </div>
 
-              <div className="pt-2.5 mt-2 border-t border-[#F0ECE1] flex items-center justify-between text-[10px] font-bold text-[#063B2C]">
+              <div className="pt-2.5 mt-2 border-t border-[#F0ECE1] dark:border-white/10 flex items-center justify-between text-[10px] font-bold text-[#063B2C] dark:text-[#4ECCA3]">
                 <span>Official Government Portal</span>
                 <ExternalLink className="w-3 h-3" />
               </div>
@@ -478,24 +503,24 @@ export const HomeView: React.FC = () => {
 
             <div
               onClick={() => navigate('government')}
-              className="bg-white border border-[#E8E4DA] rounded-2xl p-3.5 shadow-2xs hover:border-[#063B2C] hover:shadow-xs active:scale-98 transition-all cursor-pointer flex flex-col justify-between"
+              className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-3.5 shadow-2xs hover:border-[#063B2C] dark:hover:border-emerald-500 hover:shadow-xs active:scale-98 transition-all cursor-pointer flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between gap-1 mb-2">
-                  <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-[#E0F2FE] text-[#0369A1] uppercase tracking-wider">
+                  <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-[#E0F2FE] dark:bg-[#153448] text-[#0369A1] dark:text-[#70C1FF] uppercase tracking-wider">
                     Official
                   </span>
-                  <BadgeCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <BadgeCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 </div>
-                <h4 className="font-extrabold text-xs text-[#11241C] leading-snug">
+                <h4 className="font-extrabold text-xs text-[#11241C] dark:text-white leading-snug">
                   Birth & Death Certificates
                 </h4>
-                <p className="text-[10px] text-[#55685F] line-clamp-2 mt-1 font-medium">
+                <p className="text-[10px] text-[#55685F] dark:text-[#A2B3AA] line-clamp-2 mt-1 font-medium">
                   Janma-Mrityu Tathya WB verified digital civic certificates
                 </p>
               </div>
 
-              <div className="pt-2.5 mt-2 border-t border-[#F0ECE1] flex items-center justify-between text-[10px] font-bold text-[#063B2C]">
+              <div className="pt-2.5 mt-2 border-t border-[#F0ECE1] dark:border-white/10 flex items-center justify-between text-[10px] font-bold text-[#063B2C] dark:text-[#4ECCA3]">
                 <span>Official Government Portal</span>
                 <ExternalLink className="w-3 h-3" />
               </div>
@@ -505,9 +530,9 @@ export const HomeView: React.FC = () => {
           <div className="mt-2.5">
             <button
               onClick={() => navigate('government')}
-              className="w-full py-2.5 rounded-2xl bg-[#FAF8F5] border border-[#D2CEBE] text-[#063B2C] font-extrabold text-xs hover:bg-[#E6F4EA] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+              className="w-full py-2.5 rounded-2xl bg-[#FAF8F5] dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 text-[#063B2C] dark:text-[#4ECCA3] font-extrabold text-xs hover:bg-[#E6F4EA] dark:hover:bg-[#1F312A] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
             >
-              <Landmark className="w-3.5 h-3.5 text-[#063B2C]" />
+              <Landmark className="w-3.5 h-3.5 text-[#063B2C] dark:text-[#4ECCA3]" />
               <span>View All Government Services</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
@@ -517,13 +542,13 @@ export const HomeView: React.FC = () => {
         {/* Small Live Map of Jalpaiguri According to User Location */}
         <div>
           <div className="flex items-center justify-between mb-2.5 px-1">
-            <h3 className="text-sm font-extrabold text-[#11241C] tracking-tight flex items-center gap-1.5">
-              <MapPin className="w-4 h-4 text-[#063B2C]" />
+            <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white tracking-tight flex items-center gap-1.5">
+              <MapPin className="w-4 h-4 text-[#063B2C] dark:text-[#4ECCA3]" />
               <span>Live Location & Civic Map</span>
             </h3>
             <button
               onClick={() => navigate('maps-explorer')}
-              className="text-xs font-bold text-[#063B2C] hover:underline cursor-pointer flex items-center gap-0.5"
+              className="text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] hover:underline cursor-pointer flex items-center gap-0.5"
             >
               <span>Explore Full Map</span>
               <ChevronRight className="w-3 h-3" />
@@ -536,13 +561,13 @@ export const HomeView: React.FC = () => {
         {/* Live Local Alerts */}
         <div>
           <div className="flex items-center justify-between mb-3 px-1">
-            <h3 className="text-sm font-extrabold text-[#11241C] tracking-tight flex items-center gap-1.5">
+            <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white tracking-tight flex items-center gap-1.5">
               <AlertTriangle className="w-4 h-4 text-[#D9383A]" />
               <span>Local Updates</span>
             </h3>
             <button
               onClick={() => navigate('alerts')}
-              className="text-xs font-bold text-[#063B2C] hover:underline cursor-pointer"
+              className="text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] hover:underline cursor-pointer"
             >
               Open Map
             </button>
@@ -551,30 +576,30 @@ export const HomeView: React.FC = () => {
           {localAlerts.length > 0 ? (
             <div
               onClick={() => navigate('alerts')}
-              className="bg-white border border-[#E8E4DA] rounded-3xl p-4 shadow-xs hover:border-[#063B2C] transition-all cursor-pointer"
+              className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs hover:border-[#063B2C] dark:hover:border-emerald-500 transition-all cursor-pointer"
             >
               <div className="flex items-center justify-between text-xs font-bold mb-1.5">
-                <span className="text-[#D9383A] bg-[#FFEBEA] px-2.5 py-0.5 rounded-full">
+                <span className="text-[#D9383A] bg-[#FFEBEA] dark:bg-red-950/50 px-2.5 py-0.5 rounded-full">
                   {localAlerts[0].category}
                 </span>
-                <span className="text-[#8C9B93] font-medium">{localAlerts[0].timeAgo}</span>
+                <span className="text-[#8C9B93] dark:text-[#73857C] font-medium">{localAlerts[0].timeAgo}</span>
               </div>
-              <h4 className="font-extrabold text-sm text-[#11241C]">
+              <h4 className="font-extrabold text-sm text-[#11241C] dark:text-white">
                 {localAlerts[0].title}
               </h4>
-              <p className="text-xs text-[#55685F] mt-1 line-clamp-2">
+              <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] mt-1 line-clamp-2">
                 {localAlerts[0].description} ({localAlerts[0].confirmedCount} citizens confirmed).
               </p>
             </div>
           ) : (
             <div
               onClick={() => navigate('alerts')}
-              className="bg-white border border-[#E8E4DA] rounded-3xl p-4 shadow-xs hover:border-[#063B2C] transition-all cursor-pointer text-center"
+              className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs hover:border-[#063B2C] dark:hover:border-emerald-500 transition-all cursor-pointer text-center"
             >
-              <p className="text-xs font-semibold text-[#55685F]">
+              <p className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA]">
                 No active traffic or weather hazards reported right now in Jalpaiguri.
               </p>
-              <span className="text-[11px] font-bold text-[#063B2C] underline mt-1 inline-block">
+              <span className="text-[11px] font-bold text-[#063B2C] dark:text-[#4ECCA3] underline mt-1 inline-block">
                 View Community Map & Report
               </span>
             </div>

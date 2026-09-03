@@ -166,10 +166,10 @@ export const WritingCaptcha: React.FC<WritingCaptchaProps> = ({
   const isMatched = userInput === captchaText && userInput.length === 5;
 
   return (
-    <div className="w-full bg-[#F8FAFC] border border-gray-200 rounded-2xl p-3 space-y-2.5">
+    <div className="w-full bg-[#F8FAFC] dark:bg-[#121E19] border border-gray-200 dark:border-white/10 rounded-2xl p-3 space-y-2.5 transition-colors">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-800">
-          <ShieldCheck className="w-4 h-4 text-emerald-600" />
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-800 dark:text-white">
+          <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           <span>Security Code (Type the characters)</span>
         </div>
 
@@ -180,9 +180,9 @@ export const WritingCaptcha: React.FC<WritingCaptchaProps> = ({
             onClick={handleSpeakCaptcha}
             title="Read security code aloud"
             aria-label="Read code aloud"
-            className="p-1.5 rounded-lg text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-gray-500 dark:text-[#A2B3AA] hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors cursor-pointer"
           >
-            <Volume2 className={`w-4 h-4 ${isSpeaking ? 'text-blue-600 animate-pulse' : ''}`} />
+            <Volume2 className={`w-4 h-4 ${isSpeaking ? 'text-blue-600 dark:text-blue-400 animate-pulse' : ''}`} />
           </button>
 
           {/* Refresh button */}
@@ -191,16 +191,16 @@ export const WritingCaptcha: React.FC<WritingCaptchaProps> = ({
             onClick={refreshCaptcha}
             title="Get a new security code"
             aria-label="Refresh security code"
-            className="p-1.5 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-200 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-gray-500 dark:text-[#A2B3AA] hover:text-gray-800 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10 transition-colors cursor-pointer"
           >
-            <RotateCw className={`w-4 h-4 ${isRotating ? 'animate-spin text-blue-600' : ''}`} />
+            <RotateCw className={`w-4 h-4 ${isRotating ? 'animate-spin text-blue-600 dark:text-blue-400' : ''}`} />
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
         {/* Canvas Visual Display */}
-        <div className="relative rounded-xl overflow-hidden border border-gray-300/80 shadow-2xs bg-slate-100 flex items-center justify-center select-none">
+        <div className="relative rounded-xl overflow-hidden border border-gray-300/80 dark:border-white/10 shadow-2xs bg-slate-100 dark:bg-slate-200 flex items-center justify-center select-none">
           <canvas
             ref={canvasRef}
             width={170}
@@ -219,17 +219,17 @@ export const WritingCaptcha: React.FC<WritingCaptchaProps> = ({
             maxLength={5}
             autoComplete="off"
             spellCheck={false}
-            className={`w-full h-[44px] px-3 font-mono font-bold text-sm tracking-widest uppercase bg-white border rounded-xl focus:outline-none transition-all ${
+            className={`w-full h-[44px] px-3 font-mono font-bold text-sm tracking-widest uppercase bg-white dark:bg-[#17231E] border rounded-xl focus:outline-none transition-all ${
               isMatched
-                ? 'border-emerald-500 ring-2 ring-emerald-100 text-emerald-800'
+                ? 'border-emerald-500 dark:border-emerald-400 ring-2 ring-emerald-100 dark:ring-emerald-950 text-emerald-800 dark:text-emerald-300'
                 : userInput.length === 5
-                ? 'border-rose-400 ring-2 ring-rose-100 text-rose-800'
-                : 'border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-gray-900'
+                ? 'border-rose-400 dark:border-rose-500 ring-2 ring-rose-100 dark:ring-rose-950 text-rose-800 dark:text-rose-300'
+                : 'border-gray-300 dark:border-white/10 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500'
             } ${inputClassName}`}
           />
 
           {isMatched && (
-            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-emerald-600 pointer-events-none">
+            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-emerald-600 dark:text-emerald-400 pointer-events-none">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           )}
@@ -237,7 +237,7 @@ export const WritingCaptcha: React.FC<WritingCaptchaProps> = ({
       </div>
 
       {userInput.length > 0 && userInput.length === 5 && !isMatched && (
-        <p className="text-[11px] text-rose-600 font-medium">
+        <p className="text-[11px] text-rose-600 dark:text-rose-400 font-medium">
           Characters do not match. Please check or tap refresh.
         </p>
       )}

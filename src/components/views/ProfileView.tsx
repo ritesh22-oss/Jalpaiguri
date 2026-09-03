@@ -32,7 +32,8 @@ import {
   Moon,
   Navigation,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  Database
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNav } from '../../context/NavigationContext';
@@ -41,6 +42,7 @@ import { useLocation } from '../../context/LocationContext';
 import { useTheme } from '../../context/ThemeContext';
 import { BloodGroup, isAuthorizedAdminEmail } from '../../types';
 import { FingerprintScannerModal } from '../common/FingerprintScannerModal';
+import { isFirebaseConfigured } from '../../lib/firebase';
 
 export const ProfileView: React.FC = () => {
   const {
@@ -154,16 +156,16 @@ export const ProfileView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] pb-28 max-w-md mx-auto select-none">
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 backdrop-blur-md px-5 pt-6 pb-3 border-b border-[#E8E4DA]/50 flex items-center justify-between">
-        <h1 className="text-2xl font-extrabold text-[#11241C] tracking-tight">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 max-w-md mx-auto select-none transition-colors">
+      <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0F1A15]/90 backdrop-blur-md px-5 pt-6 pb-3 border-b border-[#E8E4DA]/50 dark:border-white/10 flex items-center justify-between transition-colors">
+        <h1 className="text-2xl font-extrabold text-[#11241C] dark:text-white tracking-tight">
           Citizen Profile
         </h1>
         <div className="flex items-center gap-2">
           {/* Simple Light / Dark Mode Toggle Icon */}
           <button
             onClick={toggleTheme}
-            className="w-8 h-8 rounded-full bg-white border border-[#E8E4DA] flex items-center justify-center text-[#55685F] hover:text-[#063B2C] hover:bg-[#FAF8F5] transition-colors cursor-pointer shadow-xs"
+            className="w-8 h-8 rounded-full bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#55685F] dark:text-[#A2B3AA] hover:text-[#063B2C] dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] transition-colors cursor-pointer shadow-xs"
             title={isDarkMode ? 'Switch to Bright Mode' : 'Switch to Dark Mode'}
             aria-label="Toggle Bright/Dark Mode"
           >
@@ -174,20 +176,20 @@ export const ProfileView: React.FC = () => {
             isOfficialAdmin ? (
               <button
                 onClick={() => navigate('admin-dashboard')}
-                className="text-xs font-bold text-white bg-[#063B2C] px-3.5 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer shadow-xs"
+                className="text-xs font-bold text-white bg-[#063B2C] dark:bg-emerald-600 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 <LayoutDashboard className="w-3.5 h-3.5 text-emerald-300" />
                 <span>Admin Console</span>
               </button>
             ) : (
-              <span className="text-[11px] font-bold text-[#063B2C] bg-[#E6F4EA] px-3 py-1 rounded-full border border-[#C3E6D0]">
+              <span className="text-[11px] font-bold text-[#063B2C] dark:text-[#4ECCA3] bg-[#E6F4EA] dark:bg-[#1C4532] px-3 py-1 rounded-full border border-[#C3E6D0] dark:border-emerald-800/60">
                 Citizen Verified
               </span>
             )
           ) : (
             <button
               onClick={() => navigate('auth')}
-              className="text-xs font-bold text-white bg-[#063B2C] px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-xs cursor-pointer"
+              className="text-xs font-bold text-white bg-[#063B2C] dark:bg-emerald-600 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-xs cursor-pointer"
             >
               <LogIn className="w-3.5 h-3.5" />
               <span>Sign In</span>
@@ -199,36 +201,36 @@ export const ProfileView: React.FC = () => {
       <div className="p-5 space-y-5">
         {/* User Card OR Guest Card */}
         {user ? (
-          <div className="bg-white rounded-3xl p-5 border border-[#E8E4DA] shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#17231E] rounded-3xl p-5 border border-[#E8E4DA] dark:border-white/10 shadow-xs space-y-4 transition-colors">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3.5">
                 {firebaseUser?.photoURL ? (
                   <img
                     src={firebaseUser.photoURL}
                     alt={user?.name || 'User'}
-                    className="w-16 h-16 rounded-3xl object-cover shadow-sm border border-[#E8E4DA]"
+                    className="w-16 h-16 rounded-3xl object-cover shadow-sm border border-[#E8E4DA] dark:border-white/10"
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded-3xl bg-[#063B2C] text-white flex items-center justify-center font-extrabold text-2xl shadow-sm">
+                  <div className="w-16 h-16 rounded-3xl bg-[#063B2C] dark:bg-emerald-600 text-white flex items-center justify-center font-extrabold text-2xl shadow-sm">
                     {user?.name ? user.name.charAt(0).toUpperCase() : 'J'}
                   </div>
                 )}
                 <div>
-                  <h2 className="text-lg font-extrabold text-[#11241C] leading-tight">{user?.name}</h2>
-                  <p className="text-xs font-semibold text-[#55685F] mt-0.5 flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-[#063B2C]" />
+                  <h2 className="text-lg font-extrabold text-[#11241C] dark:text-white leading-tight">{user?.name}</h2>
+                  <p className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA] mt-0.5 flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-[#063B2C] dark:text-[#4ECCA3]" />
                     <span>{user?.location || 'Jalpaiguri, WB'}</span>
                   </p>
                   {(user?.email || firebaseUser?.email) && (
-                    <p className="text-[11px] font-semibold text-[#55685F] mt-0.5 flex items-center gap-1">
-                      <Mail className="w-3 h-3 text-[#55685F]" />
+                    <p className="text-[11px] font-semibold text-[#55685F] dark:text-[#A2B3AA] mt-0.5 flex items-center gap-1">
+                      <Mail className="w-3 h-3 text-[#55685F] dark:text-[#A2B3AA]" />
                       <span className="truncate max-w-[170px]">{user?.email || firebaseUser?.email}</span>
                     </p>
                   )}
                   {user?.phone && (
-                    <p className="text-[11px] font-semibold text-[#8C9B93] mt-0.5 flex items-center gap-1">
-                      <Phone className="w-3 h-3 text-[#55685F]" />
+                    <p className="text-[11px] font-semibold text-[#8C9B93] dark:text-[#73857C] mt-0.5 flex items-center gap-1">
+                      <Phone className="w-3 h-3 text-[#55685F] dark:text-[#A2B3AA]" />
                       <span>{user.phone}</span>
                     </p>
                   )}
@@ -238,7 +240,7 @@ export const ProfileView: React.FC = () => {
               {/* Edit Profile Button */}
               <button
                 onClick={handleOpenEdit}
-                className="py-1.5 px-3 rounded-2xl bg-[#FAF8F5] border border-[#D2CEBE] text-[#063B2C] hover:bg-[#E6F4EA] text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer active:scale-95 transition-all"
+                className="py-1.5 px-3 rounded-2xl bg-[#FAF8F5] dark:bg-[#131F1A] border border-[#D2CEBE] dark:border-white/15 text-[#063B2C] dark:text-[#4ECCA3] hover:bg-[#E6F4EA] dark:hover:bg-[#1F312A] text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer active:scale-95 transition-all"
                 title="Edit Your Profile Manually"
               >
                 <Edit3 className="w-3.5 h-3.5" />
@@ -247,9 +249,9 @@ export const ProfileView: React.FC = () => {
             </div>
 
             {/* Profile Badges */}
-            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#F0ECE1]">
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#F0ECE1] dark:border-white/10">
               {(firebaseUser?.providerData?.some((p) => p.providerId === 'google.com') || (user?.email && user.email.includes('@'))) && (
-                <span className="text-[11px] font-bold text-[#1D4ED8] bg-[#EFF6FF] px-2.5 py-1 rounded-xl flex items-center gap-1 border border-blue-100">
+                <span className="text-[11px] font-bold text-[#1D4ED8] dark:text-blue-300 bg-[#EFF6FF] dark:bg-blue-950/50 px-2.5 py-1 rounded-xl flex items-center gap-1 border border-blue-100 dark:border-blue-900/50">
                   <svg className="w-3 h-3 shrink-0" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -260,20 +262,20 @@ export const ProfileView: React.FC = () => {
                 </span>
               )}
 
-              <span className="text-[11px] font-bold text-[#D9383A] bg-[#FFEBEA] px-2.5 py-1 rounded-xl flex items-center gap-1">
-                <Droplet className="w-3 h-3 fill-[#D9383A]" />
+              <span className="text-[11px] font-bold text-[#D9383A] dark:text-red-400 bg-[#FFEBEA] dark:bg-red-950/50 px-2.5 py-1 rounded-xl flex items-center gap-1 border border-transparent dark:border-red-900/40">
+                <Droplet className="w-3 h-3 fill-[#D9383A] dark:fill-red-400" />
                 <span>Blood: {user?.bloodGroup || 'O+'}</span>
               </span>
 
               {user?.age && (
-                <span className="text-[11px] font-bold text-[#854D0E] bg-[#FEF9C3] px-2.5 py-1 rounded-xl flex items-center gap-1">
+                <span className="text-[11px] font-bold text-[#854D0E] dark:text-amber-300 bg-[#FEF9C3] dark:bg-amber-950/40 px-2.5 py-1 rounded-xl flex items-center gap-1 border border-transparent dark:border-amber-900/40">
                   <Calendar className="w-3 h-3" />
                   <span>Age: {user.age} yrs</span>
                 </span>
               )}
 
               {user?.gender && (
-                <span className="text-[11px] font-bold text-[#1E293B] bg-[#F1F5F9] px-2.5 py-1 rounded-xl">
+                <span className="text-[11px] font-bold text-[#1E293B] dark:text-[#C5D2CB] bg-[#F1F5F9] dark:bg-[#1C2A24] px-2.5 py-1 rounded-xl">
                   {user.gender === 'Male' && '♂ Male'}
                   {user.gender === 'Female' && '♀ Female'}
                   {user.gender === 'Other' && '⚧ Other'}
@@ -281,10 +283,17 @@ export const ProfileView: React.FC = () => {
                 </span>
               )}
 
-              <span className="text-[11px] font-bold text-[#063B2C] bg-[#E6F4EA] px-2.5 py-1 rounded-xl flex items-center gap-1">
+              <span className="text-[11px] font-bold text-[#063B2C] dark:text-[#4ECCA3] bg-[#E6F4EA] dark:bg-[#1C4532] px-2.5 py-1 rounded-xl flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3" />
                 <span>Verified Citizen</span>
               </span>
+
+              {isFirebaseConfigured && (
+                <span className="text-[11px] font-bold text-[#063B2C] dark:text-[#4ECCA3] bg-[#E6F4EA] dark:bg-[#1C4532] px-2.5 py-1 rounded-xl flex items-center gap-1 border border-[#C3E6D0] dark:border-emerald-800/60">
+                  <Database className="w-3 h-3 text-[#063B2C] dark:text-[#4ECCA3]" />
+                  <span>Firestore Persistent</span>
+                </span>
+              )}
             </div>
           </div>
         ) : (
@@ -314,41 +323,41 @@ export const ProfileView: React.FC = () => {
         )}
 
         {/* Biometric Fingerprint Privacy Section */}
-        <div className="bg-white rounded-3xl p-5 border border-[#E8E4DA] shadow-xs space-y-3">
+        <div className="bg-white dark:bg-[#17231E] rounded-3xl p-5 border border-[#E8E4DA] dark:border-white/10 shadow-xs space-y-3 transition-colors">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-2xl bg-[#E6F4EA] text-[#063B2C] flex items-center justify-center">
+              <div className="w-9 h-9 rounded-2xl bg-[#E6F4EA] dark:bg-[#1C4532] text-[#063B2C] dark:text-[#4ECCA3] flex items-center justify-center">
                 <Fingerprint className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-xs font-black text-[#11241C]">Biometric Privacy Key</h3>
-                <p className="text-[10px] text-emerald-800 font-semibold">Hardware-bound fingerprint signature</p>
+                <h3 className="text-xs font-black text-[#11241C] dark:text-white">Biometric Privacy Key</h3>
+                <p className="text-[10px] text-emerald-800 dark:text-emerald-400 font-semibold">Hardware-bound fingerprint signature</p>
               </div>
             </div>
             {enrolledFingerprint ? (
-              <span className="text-[10px] bg-emerald-100 text-emerald-900 font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-300 flex items-center gap-1">
+              <span className="text-[10px] bg-emerald-100 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-300 font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700 flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3" />
                 <span>Enrolled & Bound</span>
               </span>
             ) : (
-              <span className="text-[10px] bg-gray-100 text-gray-700 font-bold px-2 py-0.5 rounded-full">
+              <span className="text-[10px] bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold px-2 py-0.5 rounded-full">
                 Not Enrolled
               </span>
             )}
           </div>
 
-          <div className="p-3 bg-[#FAF8F5] border border-[#E8E4DA] rounded-2xl text-[11px] text-gray-700 space-y-1">
-            <p className="flex items-center gap-1.5 font-semibold text-gray-900">
-              <Lock className="w-3.5 h-3.5 text-[#063B2C]" />
+          <div className="p-3 bg-[#FAF8F5] dark:bg-[#131F1A] border border-[#E8E4DA] dark:border-white/10 rounded-2xl text-[11px] text-gray-700 dark:text-[#C5D2CB] space-y-1">
+            <p className="flex items-center gap-1.5 font-semibold text-gray-900 dark:text-white">
+              <Lock className="w-3.5 h-3.5 text-[#063B2C] dark:text-[#4ECCA3]" />
               <span>Strict Anti-Spoof Privacy Protection</span>
             </p>
-            <p className="text-[10px] text-gray-500 leading-relaxed">
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-relaxed">
               Once your biometric fingerprint is scanned, no other person can log in using another fingerprint on this device.
             </p>
           </div>
 
           {bioFeedback && (
-            <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-semibold animate-in fade-in">
+            <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-[#1C4532] border border-emerald-200 dark:border-emerald-700 text-xs text-emerald-800 dark:text-emerald-200 font-semibold animate-in fade-in">
               {bioFeedback}
             </div>
           )}
@@ -361,7 +370,7 @@ export const ProfileView: React.FC = () => {
                     setScannerMode('verify');
                     setIsScannerOpen(true);
                   }}
-                  className="flex-1 py-2.5 px-3 rounded-xl bg-[#063B2C] hover:bg-[#084D3A] active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                 >
                   <Fingerprint className="w-4 h-4 text-emerald-300" />
                   <span>Verify Fingerprint</span>
@@ -371,7 +380,7 @@ export const ProfileView: React.FC = () => {
                     removeFingerprint();
                     setBioFeedback('Fingerprint cleared from this device.');
                   }}
-                  className="py-2.5 px-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 text-xs font-bold cursor-pointer"
+                  className="py-2.5 px-3 rounded-xl border border-gray-200 dark:border-white/15 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-bold cursor-pointer"
                   title="Remove enrollment"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
@@ -383,7 +392,7 @@ export const ProfileView: React.FC = () => {
                   setScannerMode('enroll');
                   setIsScannerOpen(true);
                 }}
-                className="w-full py-2.5 px-3 rounded-xl bg-[#063B2C] hover:bg-[#084D3A] active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                className="w-full py-2.5 px-3 rounded-xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <Fingerprint className="w-4 h-4 text-emerald-300" />
                 <span>Enroll Biometric Fingerprint</span>
@@ -393,18 +402,18 @@ export const ProfileView: React.FC = () => {
         </div>
 
         {/* Quick Menu Options */}
-        <div className="bg-white rounded-3xl border border-[#E8E4DA] shadow-xs divide-y divide-[#F0ECE1] overflow-hidden">
+        <div className="bg-white dark:bg-[#17231E] rounded-3xl border border-[#E8E4DA] dark:border-white/10 shadow-xs divide-y divide-[#F0ECE1] dark:divide-white/10 overflow-hidden transition-colors">
           <div
             onClick={() => navigate('report-tracking')}
-            className="p-4 flex items-center justify-between hover:bg-[#FAF8F5] cursor-pointer"
+            className="p-4 flex items-center justify-between hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] cursor-pointer transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#E6F4EA] text-[#063B2C] flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-[#E6F4EA] dark:bg-[#1C4532] text-[#063B2C] dark:text-[#4ECCA3] flex items-center justify-center">
                 <FileSpreadsheet className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-xs font-extrabold text-[#11241C]">My Civic Reports</h3>
-                <p className="text-[11px] text-[#55685F]">{civicReports.length} reported issues</p>
+                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">My Civic Reports</h3>
+                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">{civicReports.length} reported issues</p>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
@@ -412,15 +421,15 @@ export const ProfileView: React.FC = () => {
 
           <div
             onClick={() => navigate('offer-services')}
-            className="p-4 flex items-center justify-between hover:bg-[#FAF8F5] cursor-pointer"
+            className="p-4 flex items-center justify-between hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] cursor-pointer transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#FEF9C3] text-[#854D0E] flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-[#FEF9C3] dark:bg-amber-950/40 text-[#854D0E] dark:text-amber-300 flex items-center justify-center">
                 <Wrench className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-xs font-extrabold text-[#11241C]">Join as Worker / Offer Services</h3>
-                <p className="text-[11px] text-[#55685F]">Register as electrician, plumber, etc.</p>
+                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">Join as Worker / Offer Services</h3>
+                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">Register as electrician, plumber, etc.</p>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
@@ -428,15 +437,15 @@ export const ProfileView: React.FC = () => {
 
           <div
             onClick={() => navigate('blood')}
-            className="p-4 flex items-center justify-between hover:bg-[#FAF8F5] cursor-pointer"
+            className="p-4 flex items-center justify-between hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] cursor-pointer transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#FFEBEA] text-[#D9383A] flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-[#FFEBEA] dark:bg-red-950/40 text-[#D9383A] dark:text-red-400 flex items-center justify-center">
                 <Heart className="w-4 h-4 fill-current" />
               </div>
               <div>
-                <h3 className="text-xs font-extrabold text-[#11241C]">Blood Donor Network</h3>
-                <p className="text-[11px] text-[#55685F]">Active Donor Hub • {user?.bloodGroup || 'All Groups'}</p>
+                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">Blood Donor Network</h3>
+                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">Active Donor Hub • {user?.bloodGroup || 'All Groups'}</p>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
@@ -445,15 +454,15 @@ export const ProfileView: React.FC = () => {
           {/* Government Services Hub */}
           <div
             onClick={() => navigate('government')}
-            className="p-4 flex items-center justify-between hover:bg-[#FAF8F5] cursor-pointer"
+            className="p-4 flex items-center justify-between hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] cursor-pointer transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#DCFCE7] text-[#15803D] flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-[#DCFCE7] dark:bg-emerald-950/40 text-[#15803D] dark:text-emerald-400 flex items-center justify-center">
                 <Landmark className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-xs font-extrabold text-[#11241C]">Government Services Hub</h3>
-                <p className="text-[11px] text-[#55685F]">Property tax, certificates, land records & schemes</p>
+                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">Government Services Hub</h3>
+                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">Property tax, certificates, land records & schemes</p>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
@@ -462,15 +471,15 @@ export const ProfileView: React.FC = () => {
           {/* Frequently Asked Questions */}
           <div
             onClick={() => navigate('faq')}
-            className="p-4 flex items-center justify-between hover:bg-[#FAF8F5] cursor-pointer"
+            className="p-4 flex items-center justify-between hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] cursor-pointer transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#E0F2FE] text-[#0369A1] flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-[#E0F2FE] dark:bg-sky-950/40 text-[#0369A1] dark:text-sky-300 flex items-center justify-center">
                 <HelpCircle className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-xs font-extrabold text-[#11241C]">Frequently Asked Questions</h3>
-                <p className="text-[11px] text-[#55685F]">Find quick answers about Jalpaiguri Connect</p>
+                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">Frequently Asked Questions</h3>
+                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">Find quick answers about Jalpaiguri Connect</p>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
@@ -478,24 +487,24 @@ export const ProfileView: React.FC = () => {
         </div>
 
         {/* Language Selection */}
-        <div className="bg-white rounded-3xl p-4 border border-[#E8E4DA] shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-[#17231E] rounded-3xl p-4 border border-[#E8E4DA] dark:border-white/10 shadow-xs flex items-center justify-between transition-colors">
           <div className="flex items-center gap-3">
-            <Globe className="w-5 h-5 text-[#55685F]" />
-            <span className="text-xs font-bold text-[#11241C]">Language / ভাষা</span>
+            <Globe className="w-5 h-5 text-[#55685F] dark:text-[#A2B3AA]" />
+            <span className="text-xs font-bold text-[#11241C] dark:text-white">Language / ভাষা</span>
           </div>
-          <div className="flex gap-1 bg-[#FAF8F5] p-1 rounded-xl border border-[#D2CEBE]">
+          <div className="flex gap-1 bg-[#FAF8F5] dark:bg-[#131F1A] p-1 rounded-xl border border-[#D2CEBE] dark:border-white/10">
             <button
               onClick={() => handleLanguageChange('en')}
-              className={`px-3 py-1 text-xs font-bold rounded-lg cursor-pointer ${
-                language === 'en' ? 'bg-[#063B2C] text-white' : 'text-[#55685F]'
+              className={`px-3 py-1 text-xs font-bold rounded-lg cursor-pointer transition-colors ${
+                language === 'en' ? 'bg-[#063B2C] dark:bg-emerald-600 text-white' : 'text-[#55685F] dark:text-[#A2B3AA]'
               }`}
             >
               English
             </button>
             <button
               onClick={() => handleLanguageChange('bn')}
-              className={`px-3 py-1 text-xs font-bold rounded-lg cursor-pointer ${
-                language === 'bn' ? 'bg-[#063B2C] text-white' : 'text-[#55685F]'
+              className={`px-3 py-1 text-xs font-bold rounded-lg cursor-pointer transition-colors ${
+                language === 'bn' ? 'bg-[#063B2C] dark:bg-emerald-600 text-white' : 'text-[#55685F] dark:text-[#A2B3AA]'
               }`}
             >
               বাংলা
@@ -508,7 +517,7 @@ export const ProfileView: React.FC = () => {
           <div className="space-y-2">
             <button
               onClick={handleOpenEdit}
-              className="w-full py-3 bg-white border border-[#D2CEBE] text-[#063B2C] font-bold text-xs rounded-2xl flex items-center justify-center gap-2 hover:bg-[#FAF8F5] cursor-pointer shadow-2xs"
+              className="w-full py-3 bg-white dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/15 text-[#063B2C] dark:text-[#4ECCA3] font-bold text-xs rounded-2xl flex items-center justify-center gap-2 hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] cursor-pointer shadow-2xs transition-colors"
             >
               <Edit3 className="w-4 h-4" />
               <span>Edit My Profile Manually</span>
@@ -516,14 +525,14 @@ export const ProfileView: React.FC = () => {
 
             <button
               onClick={() => navigate('auth')}
-              className="w-full py-3 bg-white border border-[#D2CEBE] text-[#063B2C] font-bold text-xs rounded-2xl flex items-center justify-center gap-2 hover:bg-[#FAF8F5] cursor-pointer"
+              className="w-full py-3 bg-white dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/15 text-[#063B2C] dark:text-[#4ECCA3] font-bold text-xs rounded-2xl flex items-center justify-center gap-2 hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] cursor-pointer transition-colors"
             >
               <UserPlus className="w-4 h-4" />
               <span>Switch / Sign into Another Account</span>
             </button>
             <button
               onClick={handleLogout}
-              className="w-full py-3 bg-white border border-[#D9383A]/30 text-[#D9383A] font-bold text-xs rounded-2xl flex items-center justify-center gap-2 hover:bg-[#FFEBEA] cursor-pointer"
+              className="w-full py-3 bg-white dark:bg-[#17231E] border border-[#D9383A]/30 text-[#D9383A] dark:text-red-400 font-bold text-xs rounded-2xl flex items-center justify-center gap-2 hover:bg-[#FFEBEA] dark:hover:bg-red-950/30 cursor-pointer transition-colors"
             >
               <LogOut className="w-4 h-4" />
               <span>Log Out of Jalpaiguri Connect</span>
@@ -532,7 +541,7 @@ export const ProfileView: React.FC = () => {
         ) : (
           <button
             onClick={() => navigate('auth')}
-            className="w-full py-3.5 bg-[#063B2C] text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-md hover:bg-[#084D3A] active:scale-98 cursor-pointer"
+            className="w-full py-3.5 bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-md hover:bg-[#084D3A] active:scale-98 cursor-pointer"
           >
             <LogIn className="w-4 h-4" />
             <span>Open Sign In / Sign Up Page</span>
@@ -545,22 +554,22 @@ export const ProfileView: React.FC = () => {
       {/* ========================================================================= */}
       {isEditModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
+          <div className="bg-white dark:bg-[#17231E] w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4 border border-transparent dark:border-white/10 transition-colors">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0] dark:border-white/10">
               <div className="flex items-center gap-2">
-                <Edit3 className="w-5 h-5 text-[#063B2C]" />
-                <h3 className="font-extrabold text-base text-[#11241C]">Edit Profile</h3>
+                <Edit3 className="w-5 h-5 text-[#063B2C] dark:text-[#4ECCA3]" />
+                <h3 className="font-extrabold text-base text-[#11241C] dark:text-white">Edit Profile</h3>
               </div>
               <button
                 onClick={() => setIsEditModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-[#F1F5F9] flex items-center justify-center text-[#64748B] hover:text-[#11241C]"
+                className="w-8 h-8 rounded-full bg-[#F1F5F9] dark:bg-white/10 flex items-center justify-center text-[#64748B] dark:text-white hover:text-[#11241C]"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {saveSuccess && (
-              <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl text-xs font-bold flex items-center gap-2">
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300 rounded-2xl text-xs font-bold flex items-center gap-2">
                 <Check className="w-4 h-4" />
                 <span>Profile updated successfully!</span>
               </div>
@@ -569,7 +578,7 @@ export const ProfileView: React.FC = () => {
             <form onSubmit={handleSaveProfile} className="space-y-3.5">
               {/* Full Name */}
               <div>
-                <label className="block text-xs font-bold text-[#11241C] uppercase mb-1">
+                <label className="block text-xs font-bold text-[#11241C] dark:text-[#E8ECE9] uppercase mb-1">
                   Full Name *
                 </label>
                 <input
@@ -577,15 +586,15 @@ export const ProfileView: React.FC = () => {
                   required
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-bold text-[#11241C] focus:border-[#063B2C] focus:bg-white focus:outline-none"
+                  className="w-full bg-[#FAF8F5] dark:bg-[#131F1A] border border-[#D2CEBE] dark:border-white/15 rounded-2xl p-3 text-xs font-bold text-[#11241C] dark:text-white focus:border-[#063B2C] dark:focus:border-emerald-500 focus:bg-white focus:outline-none"
                 />
               </div>
 
               {/* Age in Years */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-bold text-[#11241C] uppercase">
-                    Age: <span className="text-[#063B2C]">{editAge} years</span>
+                  <label className="text-xs font-bold text-[#11241C] dark:text-[#E8ECE9] uppercase">
+                    Age: <span className="text-[#063B2C] dark:text-[#4ECCA3]">{editAge} years</span>
                   </label>
                 </div>
                 <input
@@ -594,13 +603,13 @@ export const ProfileView: React.FC = () => {
                   max={100}
                   value={editAge}
                   onChange={(e) => setEditAge(parseInt(e.target.value) || 18)}
-                  className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-bold text-[#11241C] focus:border-[#063B2C] focus:bg-white focus:outline-none"
+                  className="w-full bg-[#FAF8F5] dark:bg-[#131F1A] border border-[#D2CEBE] dark:border-white/15 rounded-2xl p-3 text-xs font-bold text-[#11241C] dark:text-white focus:border-[#063B2C] dark:focus:border-emerald-500 focus:bg-white focus:outline-none"
                 />
               </div>
 
               {/* Gender with Icons */}
               <div>
-                <label className="block text-xs font-bold text-[#11241C] uppercase mb-1.5">
+                <label className="block text-xs font-bold text-[#11241C] dark:text-[#E8ECE9] uppercase mb-1.5">
                   Gender *
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -611,8 +620,8 @@ export const ProfileView: React.FC = () => {
                       onClick={() => setEditGender(opt.id)}
                       className={`p-2.5 rounded-2xl border-2 text-left flex items-center justify-between transition-all cursor-pointer ${
                         editGender === opt.id
-                          ? 'bg-[#E6F4EA] border-[#063B2C] text-[#063B2C] font-extrabold shadow-2xs'
-                          : 'bg-[#FAF8F5] border-[#D2CEBE] text-[#55685F] font-bold hover:bg-white'
+                          ? 'bg-[#E6F4EA] dark:bg-[#1C4532] border-[#063B2C] dark:border-emerald-500 text-[#063B2C] dark:text-[#4ECCA3] font-extrabold shadow-2xs'
+                          : 'bg-[#FAF8F5] dark:bg-[#131F1A] border-[#D2CEBE] dark:border-white/15 text-[#55685F] dark:text-[#A2B3AA] font-bold hover:bg-white dark:hover:bg-[#1F312A]'
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -629,7 +638,7 @@ export const ProfileView: React.FC = () => {
 
               {/* Blood Group */}
               <div>
-                <label className="block text-xs font-bold text-[#11241C] uppercase mb-1.5">
+                <label className="block text-xs font-bold text-[#11241C] dark:text-[#E8ECE9] uppercase mb-1.5">
                   Blood Group *
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -640,8 +649,8 @@ export const ProfileView: React.FC = () => {
                       onClick={() => setEditBloodGroup(bg)}
                       className={`py-2 px-1 text-center rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                         editBloodGroup === bg
-                          ? 'bg-[#FFEBEA] border-[#D9383A] text-[#D9383A]'
-                          : 'bg-[#FAF8F5] border-[#D2CEBE] text-[#11241C] hover:bg-white'
+                          ? 'bg-[#FFEBEA] dark:bg-red-950/60 border-[#D9383A] text-[#D9383A] dark:text-red-400'
+                          : 'bg-[#FAF8F5] dark:bg-[#131F1A] border-[#D2CEBE] dark:border-white/15 text-[#11241C] dark:text-white hover:bg-white dark:hover:bg-[#1F312A]'
                       }`}
                     >
                       {bg}
@@ -652,20 +661,20 @@ export const ProfileView: React.FC = () => {
 
               {/* Location */}
               <div>
-                <label className="block text-xs font-bold text-[#11241C] uppercase mb-1">
+                <label className="block text-xs font-bold text-[#11241C] dark:text-[#E8ECE9] uppercase mb-1">
                   Location / Ward in Jalpaiguri
                 </label>
                 <input
                   type="text"
                   value={editLocation}
                   onChange={(e) => setEditLocation(e.target.value)}
-                  className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-bold text-[#11241C] focus:border-[#063B2C] focus:bg-white focus:outline-none"
+                  className="w-full bg-[#FAF8F5] dark:bg-[#131F1A] border border-[#D2CEBE] dark:border-white/15 rounded-2xl p-3 text-xs font-bold text-[#11241C] dark:text-white focus:border-[#063B2C] dark:focus:border-emerald-500 focus:bg-white focus:outline-none"
                 />
               </div>
 
               {/* Phone Number */}
               <div>
-                <label className="block text-xs font-bold text-[#11241C] uppercase mb-1">
+                <label className="block text-xs font-bold text-[#11241C] dark:text-[#E8ECE9] uppercase mb-1">
                   Contact Phone
                 </label>
                 <input
@@ -673,15 +682,15 @@ export const ProfileView: React.FC = () => {
                   value={editPhone}
                   onChange={(e) => setEditPhone(e.target.value)}
                   placeholder="+91 98320 XXXXX"
-                  className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-semibold text-[#11241C] focus:border-[#063B2C] focus:bg-white focus:outline-none"
+                  className="w-full bg-[#FAF8F5] dark:bg-[#131F1A] border border-[#D2CEBE] dark:border-white/15 rounded-2xl p-3 text-xs font-semibold text-[#11241C] dark:text-white focus:border-[#063B2C] dark:focus:border-emerald-500 focus:bg-white focus:outline-none"
                 />
               </div>
 
               {/* Blood Donor Toggle */}
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-[#FFEBEA] border border-[#FECACA]">
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-[#FFEBEA] dark:bg-red-950/40 border border-[#FECACA] dark:border-red-900/50">
                 <div className="flex items-center gap-2">
                   <Heart className="w-4 h-4 text-[#D9383A] fill-[#D9383A]" />
-                  <span className="text-xs font-extrabold text-[#D9383A]">
+                  <span className="text-xs font-extrabold text-[#D9383A] dark:text-red-300">
                     Register as Emergency Blood Donor
                   </span>
                 </div>
@@ -698,13 +707,13 @@ export const ProfileView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="flex-1 py-3 text-xs font-bold text-[#55685F] rounded-2xl bg-[#F1F5F9] hover:bg-[#E2E8F0] cursor-pointer"
+                  className="flex-1 py-3 text-xs font-bold text-[#55685F] dark:text-[#A2B3AA] rounded-2xl bg-[#F1F5F9] dark:bg-white/10 hover:bg-[#E2E8F0] cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 text-xs font-extrabold text-white rounded-2xl bg-[#063B2C] hover:bg-[#084D3A] shadow-md cursor-pointer active:scale-98 transition-all"
+                  className="flex-1 py-3 text-xs font-extrabold text-white rounded-2xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] shadow-md cursor-pointer active:scale-98 transition-all"
                 >
                   Save Profile Changes
                 </button>

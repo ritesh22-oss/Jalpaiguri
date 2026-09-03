@@ -2,7 +2,8 @@ import React from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NavigationProvider, useNav } from './context/NavigationContext';
 import { AppProvider, useApp } from './context/AppContext';
-import { LocationProvider } from './context/LocationContext';
+import { LocationProvider, useLocation } from './context/LocationContext';
+import { SafetyProvider } from './context/SafetyContext';
 import { ExpoProvider } from './context/ExpoContext';
 import { ExpoDeviceShell } from './components/common/ExpoDeviceShell';
 
@@ -39,6 +40,10 @@ import { ProfileView } from './components/views/ProfileView';
 import { OfferServicesView } from './components/views/OfferServicesView';
 import { AdminDashboardView } from './components/views/AdminDashboardView';
 import { FAQView } from './components/views/FAQView';
+import { OutsideAreaView } from './components/views/OutsideAreaView';
+import { LocationPermissionRequiredView } from './components/views/LocationPermissionRequiredView';
+import { SafetySosView } from './components/views/SafetySosView';
+import { SexualViolenceSupportView } from './components/views/SexualViolenceSupportView';
 import { ThemeProvider } from './context/ThemeContext';
 
 // Common Components & Modals
@@ -49,8 +54,9 @@ import { JalpaigiAssistantModal } from './components/common/JalpaigiAssistantMod
 import { Toast } from './components/common/Toast';
 
 const AppContent: React.FC = () => {
-  const { currentView, replaceView } = useNav();
+  const { currentView, replaceView, navigate, goBack } = useNav();
   const { user, isAuthenticated, isProfileComplete, isLoading } = useAuth();
+  const { isWithinServiceRegion, serviceAreaStatus, status: locationStatus } = useLocation();
 
   // Automatic auth state transition: if user is authenticated but has not completed profile setup
   // and is currently on auth/onboarding views, smoothly navigate them to profile-setup immediately
@@ -72,6 +78,38 @@ const AppContent: React.FC = () => {
     );
   }
 
+  // JALPAIGURI-ONLY ACCESS ENFORCEMENT:
+  // If the user's detected GPS coordinates are outside the Jalpaiguri service area,
+  // enforce the Outside Area restriction unless accessing Safety SOS or Sexual Violence Support.
+  const isExemptView =
+    currentView === 'outside-area' ||
+    currentView === 'safety-sos' ||
+    currentView === 'sexual-violence-support' ||
+    currentView === 'splash';
+
+  if (serviceAreaStatus === 'outside' && !isExemptView) {
+    return (
+      <ExpoDeviceShell>
+        <main className="flex-1 w-full">
+          <OutsideAreaView onNavigate={navigate} />
+        </main>
+        <Toast />
+      </ExpoDeviceShell>
+    );
+  }
+
+  // If GPS location permission is denied and not in exempt safety views:
+  if ((locationStatus === 'denied' || locationStatus === 'permission_denied') && !isExemptView) {
+    return (
+      <ExpoDeviceShell>
+        <main className="flex-1 w-full">
+          <LocationPermissionRequiredView onNavigate={navigate} />
+        </main>
+        <Toast />
+      </ExpoDeviceShell>
+    );
+  }
+
   const renderView = () => {
     switch (currentView) {
       case 'splash':
@@ -89,6 +127,14 @@ const AppContent: React.FC = () => {
       case 'profile-onboarding':
       case 'location-permission':
         return <ProfileSetupView />;
+      case 'outside-area':
+        return <OutsideAreaView onNavigate={navigate} />;
+      case 'location-permission-required':
+        return <LocationPermissionRequiredView onNavigate={navigate} />;
+      case 'safety-sos':
+        return <SafetySosView onBack={goBack} onNavigate={navigate} />;
+      case 'sexual-violence-support':
+        return <SexualViolenceSupportView onBack={goBack} onNavigate={navigate} />;
       case 'home':
         return <HomeView />;
       case 'nearby':
@@ -172,6 +218,10 @@ const AppContent: React.FC = () => {
     'profile-setup',
     'profile-onboarding',
     'location-permission',
+    'outside-area',
+    'location-permission-required',
+    'safety-sos',
+    'sexual-violence-support',
     'chat',
     'ai-chat',
     'admin-dashboard'
@@ -199,11 +249,13 @@ export default function App() {
       <ThemeProvider>
         <AuthProvider>
           <LocationProvider>
-            <NavigationProvider>
-              <AppProvider>
-                <AppContent />
-              </AppProvider>
-            </NavigationProvider>
+            <SafetyProvider>
+              <NavigationProvider>
+                <AppProvider>
+                  <AppContent />
+                </AppProvider>
+              </NavigationProvider>
+            </SafetyProvider>
           </LocationProvider>
         </AuthProvider>
       </ThemeProvider>

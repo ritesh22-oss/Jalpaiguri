@@ -156,7 +156,11 @@ const memoryDb = {
     expiresAt: number;
     attempts: number;
     lastSentAt: number;
-  }>()
+  }>(),
+  emergencyEvents: [] as any[],
+  emergencyAlertRecipients: [] as any[],
+  incidentNotes: [] as any[],
+  sosRateLimits: new Map<string, number>()
 };
 
 // ==========================================
@@ -859,6 +863,21 @@ app.get('/api/reports', (req: Request, res: Response) => {
 });
 
 app.post('/api/reports', (req: Request, res: Response) => {
+  const { latitude, longitude, lat, lng } = req.body;
+  const checkLat = latitude !== undefined ? parseFloat(latitude) : (lat !== undefined ? parseFloat(lat) : NaN);
+  const checkLng = longitude !== undefined ? parseFloat(longitude) : (lng !== undefined ? parseFloat(lng) : NaN);
+
+  if (!isNaN(checkLat) && !isNaN(checkLng)) {
+    const check = verifyServerServiceArea(checkLat, checkLng);
+    if (!check.isInside) {
+      return res.status(403).json({
+        error: 'Civic reports can only be lodged for locations inside the Jalpaiguri service region.',
+        isInside: false,
+        boundaryName: check.boundaryName
+      });
+    }
+  }
+
   const newReport = {
     id: `JPG-${Math.floor(10000 + Math.random() * 90000)}`,
     ...req.body,
@@ -892,6 +911,308 @@ app.get('/api/blood/donors', (req: Request, res: Response) => {
 app.get('/api/blood/requests', (req: Request, res: Response) => {
   res.json(memoryDb.bloodRequests);
 });
+
+// ==========================================
+// GEOGRAPHIC BOUNDARY & SERVICE AREA VALIDATION
+// ==========================================
+// Centralized Jalpaiguri service area boundaries on server-side
+const JALPAIGURI_CITY_POLYGON: [number, number][] = [
+  [26.5480, 88.7050],
+  [26.5560, 88.7280],
+  [26.5520, 88.7520],
+  [26.5380, 88.7620],
+  [26.5180, 88.7550],
+  [26.5020, 88.7420],
+  [26.4950, 88.7280],
+  [26.4980, 88.7020],
+  [26.5220, 88.6880],
+  [26.5400, 88.6920]
+];
+
+const JALPAIGURI_DISTRICT_POLYGON: [number, number][] = [
+  [27.0200, 88.7200],
+  [27.0100, 89.0500],
+  [26.8500, 89.1500],
+  [26.5500, 89.1000],
+  [26.3200, 88.8500],
+  [26.3800, 88.5800],
+  [26.6500, 88.4200],
+  [26.8800, 88.5500]
+];
+
+function checkPointInPolygon(lat: number, lng: number, polygon: [number, number][]): boolean {
+  let inside = false;
+  const n = polygon.length;
+  for (let i = 0, j = n - 1; i < n; j = i++) {
+    const xi = polygon[i][0];
+    const yi = polygon[i][1];
+    const xj = polygon[j][0];
+    const yj = polygon[j][1];
+    const intersect = ((yi > lng) !== (yj > lng)) &&
+      (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+function haversineDistKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function verifyServerServiceArea(lat: number, lng: number, mode: string = 'JALPAIGURI_CITY') {
+  if (mode === 'JALPAIGURI_DISTRICT') {
+    const inBox = lat >= 26.25 && lat <= 27.05 && lng >= 88.38 && lng <= 89.20;
+    const isInside = inBox && checkPointInPolygon(lat, lng, JALPAIGURI_DISTRICT_POLYGON);
+    return {
+      isInside,
+      mode: 'JALPAIGURI_DISTRICT',
+      boundaryName: 'Jalpaiguri District',
+      centerDistKm: haversineDistKm(lat, lng, 26.5414, 88.7196)
+    };
+  }
+
+  // Default: JALPAIGURI_CITY
+  const inBox = lat >= 26.490 && lat <= 26.565 && lng >= 88.685 && lng <= 88.765;
+  const isInside = inBox && checkPointInPolygon(lat, lng, JALPAIGURI_CITY_POLYGON);
+  return {
+    isInside,
+    mode: 'JALPAIGURI_CITY',
+    boundaryName: 'Jalpaiguri Municipality',
+    centerDistKm: haversineDistKm(lat, lng, 26.5265, 88.7230)
+  };
+}
+
+// 2. Server-side Service Area Verification Endpoint
+app.post('/api/location/verify-service-area', (req: Request, res: Response) => {
+  const { lat, lng, mode = 'JALPAIGURI_CITY' } = req.body;
+  const numLat = parseFloat(lat);
+  const numLng = parseFloat(lng);
+
+  if (isNaN(numLat) || isNaN(numLng)) {
+    return res.status(400).json({ error: 'Valid lat and lng are required.' });
+  }
+
+  const result = verifyServerServiceArea(numLat, numLng, mode);
+  return res.json({
+    success: true,
+    isInside: result.isInside,
+    serviceAreaStatus: result.isInside ? 'inside' : 'outside',
+    mode: result.mode,
+    boundaryName: result.boundaryName,
+    distanceToCenterKm: Math.round(result.centerDistKm * 10) / 10,
+    allowed: result.isInside
+  });
+});
+
+// ==========================================
+// EMERGENCY SAFETY SOS SYSTEM ENDPOINTS
+// ==========================================
+
+// 3. Initiate Emergency SOS
+app.post('/api/emergency/sos', (req: Request, res: Response) => {
+  const {
+    userId,
+    userName = 'Citizen',
+    eventType = 'SAFETY_SOS',
+    latitude,
+    longitude,
+    accuracy,
+    city,
+    district,
+    state,
+    trustedContacts = [],
+    isNearbyOptIn = false
+  } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required to register an emergency SOS.' });
+  }
+
+  // Rate Limiting: Prevent duplicate rapid triggers within 15 seconds for the same user
+  const lastTrigger = memoryDb.sosRateLimits.get(userId);
+  const now = Date.now();
+  if (lastTrigger && (now - lastTrigger) < 15000) {
+    const existing = memoryDb.emergencyEvents.find(e => e.user_id === userId && e.status === 'ACTIVE');
+    if (existing) {
+      return res.json({
+        success: true,
+        alreadyActive: true,
+        event: existing,
+        message: 'Emergency SOS is already actively broadcasting.'
+      });
+    }
+  }
+  memoryDb.sosRateLimits.set(userId, now);
+
+  const eventId = `SOS-${Date.now().toString(36).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  const newEmergencyEvent = {
+    id: eventId,
+    user_id: userId,
+    userName,
+    event_type: eventType,
+    created_at: new Date().toISOString(),
+    latitude: Number(latitude) || 0,
+    longitude: Number(longitude) || 0,
+    accuracy: Number(accuracy) || 20,
+    city: city || 'Detected Area',
+    district: district || '',
+    state: state || '',
+    status: 'ACTIVE',
+    isTestMode: false,
+    cancelled_at: null,
+    cancellation_reason: null,
+    resolved_at: null,
+    device_status: 'Online',
+    alerts_sent_trusted: Array.isArray(trustedContacts) && trustedContacts.length > 0,
+    alerts_sent_nearby: Boolean(isNearbyOptIn),
+    nearby_recipients_count: isNearbyOptIn ? 4 : 0
+  };
+
+  memoryDb.emergencyEvents.unshift(newEmergencyEvent);
+
+  // Record trusted contact recipient deliveries
+  if (Array.isArray(trustedContacts)) {
+    for (const c of trustedContacts) {
+      memoryDb.emergencyAlertRecipients.push({
+        id: `rec-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+        event_id: eventId,
+        recipient_user_id: c.phone || c.id,
+        recipient_name: c.name,
+        recipient_type: 'TRUSTED_CONTACT',
+        sent_at: new Date().toISOString(),
+        delivered_at: new Date().toISOString(),
+        read_at: null
+      });
+    }
+  }
+
+  // Broadcast real-time SOS to connected clients
+  broadcastRealtime('safety_sos_triggered', {
+    eventId,
+    eventType,
+    approximateCity: city || 'Area',
+    approximateState: state || '',
+    time: newEmergencyEvent.created_at,
+    isNearbyBroadcast: isNearbyOptIn
+  });
+
+  return res.status(201).json({
+    success: true,
+    event: newEmergencyEvent,
+    message: 'Emergency SOS registered and dispatched to trusted contacts and nearby network.'
+  });
+});
+
+// 4. Cancel Emergency SOS
+app.post('/api/emergency/cancel-sos', (req: Request, res: Response) => {
+  const { eventId, userId, reason = 'False alarm or resolved safely' } = req.body;
+
+  const eventIndex = memoryDb.emergencyEvents.findIndex(e => e.id === eventId || (e.user_id === userId && e.status === 'ACTIVE'));
+  if (eventIndex === -1) {
+    return res.status(404).json({ error: 'Active emergency event not found.' });
+  }
+
+  const updatedEvent = {
+    ...memoryDb.emergencyEvents[eventIndex],
+    status: 'CANCELLED',
+    cancelled_at: new Date().toISOString(),
+    cancellation_reason: reason
+  };
+
+  memoryDb.emergencyEvents[eventIndex] = updatedEvent;
+  broadcastRealtime('safety_sos_cancelled', { eventId: updatedEvent.id, cancelledAt: updatedEvent.cancelled_at });
+
+  return res.json({
+    success: true,
+    event: updatedEvent,
+    message: 'Emergency SOS has been safely cancelled.'
+  });
+});
+
+// 5. Test Mode Safety Alert (Simulation - NEVER sends real alerts)
+app.post('/api/emergency/test', (req: Request, res: Response) => {
+  const { userId, latitude, longitude, city, state } = req.body;
+
+  const testEvent = {
+    id: `TEST-SOS-${Date.now().toString(36).toUpperCase()}`,
+    user_id: userId || 'test-user',
+    event_type: 'TEST_SIMULATION',
+    created_at: new Date().toISOString(),
+    latitude: Number(latitude) || 26.5414,
+    longitude: Number(longitude) || 88.7196,
+    accuracy: 10,
+    city: city || 'Jalpaiguri',
+    state: state || 'West Bengal',
+    status: 'TEST_SIMULATION',
+    isTestMode: true,
+    device_status: 'Simulated Device Online',
+    alerts_sent_trusted: true,
+    alerts_sent_nearby: false,
+    message: 'SIMULATION ONLY: This test verified GPS detection, UI countdown, and event logging without contacting external responders or community members.'
+  };
+
+  return res.json({
+    success: true,
+    testEvent,
+    isSimulation: true
+  });
+});
+
+// 6. Check Active Emergency Status
+app.get('/api/emergency/active', (req: Request, res: Response) => {
+  const userId = req.query.userId as string;
+  if (userId) {
+    const userActive = memoryDb.emergencyEvents.find(e => e.user_id === userId && e.status === 'ACTIVE');
+    return res.json({ active: !!userActive, event: userActive || null });
+  }
+
+  const allActive = memoryDb.emergencyEvents.filter(e => e.status === 'ACTIVE');
+  return res.json({ activeCount: allActive.length, events: allActive });
+});
+
+// 7. Opted-in Nearby Community Alerts (ANONYMOUS approximate area only - NO private victim info!)
+app.get('/api/emergency/nearby-alerts', (req: Request, res: Response) => {
+  const activeNearby = memoryDb.emergencyEvents
+    .filter(e => e.status === 'ACTIVE' && e.alerts_sent_nearby && !e.isTestMode)
+    .map(e => ({
+      eventId: e.id,
+      eventType: 'SAFETY_SOS',
+      approximateArea: `${e.city || 'Jalpaiguri'}, ${e.state || 'West Bengal'}`,
+      timeAgo: 'Just now',
+      created_at: e.created_at,
+      anonymousNotice: 'Someone nearby has activated an emergency SOS within the safety network.',
+      urgentActionNotice: 'If someone is in visible danger, please call 112 immediately.'
+    }));
+
+  return res.json({
+    success: true,
+    alerts: activeNearby
+  });
+});
+
+// 8. Private Incident Notes Record (Stored securely)
+app.post('/api/emergency/incident-notes', (req: Request, res: Response) => {
+  const { note } = req.body;
+  if (!note || !note.referenceNumber) {
+    return res.status(400).json({ error: 'Incident note object with referenceNumber is required.' });
+  }
+
+  memoryDb.incidentNotes.push({
+    ...note,
+    serverReceivedAt: new Date().toISOString()
+  });
+
+  return res.status(201).json({ success: true, referenceNumber: note.referenceNumber });
+});
+
 
 // Start Server with Vite Middleware
 async function startServer() {

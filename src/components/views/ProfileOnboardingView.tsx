@@ -82,22 +82,22 @@ export const ProfileOnboardingView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] flex flex-col justify-between p-6 max-w-md mx-auto select-none">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] flex flex-col justify-between p-6 max-w-md mx-auto select-none transition-colors">
       {/* Top Header */}
       <div className="pt-4">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-xs font-extrabold uppercase tracking-wider text-[#063B2C]">
+          <span className="text-xs font-extrabold uppercase tracking-wider text-[#063B2C] dark:text-emerald-400">
             Step {step} of 5
           </span>
-          <span className="text-xs font-semibold text-[#55685F]">
+          <span className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA]">
             Manual Profile Setup
           </span>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full h-2 bg-[#E8E4DA] rounded-full overflow-hidden mb-6">
+        <div className="w-full h-2 bg-[#E8E4DA] dark:bg-[#1A2E24] rounded-full overflow-hidden mb-6">
           <div
-            className="h-full bg-[#063B2C] transition-all duration-300 rounded-full"
+            className="h-full bg-[#063B2C] dark:bg-emerald-500 transition-all duration-300 rounded-full"
             style={{ width: `${(step / 5) * 100}%` }}
           ></div>
         </div>
@@ -105,18 +105,18 @@ export const ProfileOnboardingView: React.FC = () => {
         {/* Step 1: Name */}
         {step === 1 && (
           <div className="space-y-4 animate-in fade-in duration-200">
-            <div className="w-12 h-12 rounded-2xl bg-[#E6F4EA] text-[#063B2C] flex items-center justify-center font-bold text-xl shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-[#E6F4EA] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-400 flex items-center justify-center font-bold text-xl shadow-xs">
               <User className="w-6 h-6" />
             </div>
-            <h2 className="text-2xl font-extrabold text-[#11241C] tracking-tight">
+            <h2 className="text-2xl font-extrabold text-[#11241C] dark:text-white tracking-tight">
               What should we call you?
             </h2>
-            <p className="text-xs text-[#55685F] leading-relaxed">
+            <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] leading-relaxed">
               Your name helps local workers, doctors, and neighbors identify your requests in Jalpaiguri.
             </p>
             <div className="pt-2 space-y-3">
               <div>
-                <label className="block text-xs font-bold text-[#11241C] uppercase mb-1.5">
+                <label className="block text-xs font-bold text-[#11241C] dark:text-white uppercase mb-1.5">
                   Full Name *
                 </label>
                 <input
@@ -124,13 +124,13 @@ export const ProfileOnboardingView: React.FC = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your full name"
-                  className="w-full bg-white border-2 border-[#D2CEBE] rounded-2xl px-4 py-3.5 text-base font-bold text-[#11241C] focus:border-[#063B2C] focus:outline-none shadow-xs"
+                  className="w-full bg-white dark:bg-[#17231E] border-2 border-[#D2CEBE] dark:border-white/10 rounded-2xl px-4 py-3.5 text-base font-bold text-[#11241C] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-[#063B2C] dark:focus:border-emerald-400 focus:outline-none shadow-xs transition-colors"
                   autoFocus
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#11241C] uppercase mb-1.5">
+                <label className="block text-xs font-bold text-[#11241C] dark:text-white uppercase mb-1.5">
                   Contact Phone (Optional)
                 </label>
                 <input
@@ -138,7 +138,7 @@ export const ProfileOnboardingView: React.FC = () => {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+91 98320 XXXXX"
-                  className="w-full bg-white border border-[#D2CEBE] rounded-2xl px-4 py-3 text-xs font-semibold text-[#11241C] focus:border-[#063B2C] focus:outline-none shadow-xs"
+                  className="w-full bg-white dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-[#063B2C] dark:focus:border-emerald-400 focus:outline-none shadow-xs transition-colors"
                 />
               </div>
             </div>
@@ -148,21 +148,21 @@ export const ProfileOnboardingView: React.FC = () => {
         {/* Step 2: Age */}
         {step === 2 && (
           <div className="space-y-4 animate-in fade-in duration-200">
-            <div className="w-12 h-12 rounded-2xl bg-[#FEF9C3] text-[#854D0E] flex items-center justify-center font-bold text-xl shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-[#FEF9C3] dark:bg-amber-950/60 text-[#854D0E] dark:text-amber-400 flex items-center justify-center font-bold text-xl shadow-xs">
               <Calendar className="w-6 h-6" />
             </div>
-            <h2 className="text-2xl font-extrabold text-[#11241C] tracking-tight">
+            <h2 className="text-2xl font-extrabold text-[#11241C] dark:text-white tracking-tight">
               How old are you?
             </h2>
-            <p className="text-xs text-[#55685F] leading-relaxed">
+            <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] leading-relaxed">
               Used to customize local health camps, civic volunteer roles, and community support.
             </p>
-            <div className="pt-2 bg-white p-5 rounded-3xl border border-[#D2CEBE] shadow-xs space-y-4">
+            <div className="pt-2 bg-white dark:bg-[#17231E] p-5 rounded-3xl border border-[#D2CEBE] dark:border-white/10 shadow-xs space-y-4 transition-colors">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-[#11241C] uppercase">
+                <label className="text-xs font-bold text-[#11241C] dark:text-white uppercase">
                   Age in Years
                 </label>
-                <span className="text-xl font-extrabold text-[#063B2C]">
+                <span className="text-xl font-extrabold text-[#063B2C] dark:text-emerald-400">
                   {age} yrs
                 </span>
               </div>
@@ -172,9 +172,9 @@ export const ProfileOnboardingView: React.FC = () => {
                 max="95"
                 value={age}
                 onChange={(e) => setAge(parseInt(e.target.value))}
-                className="w-full accent-[#063B2C] h-2 bg-[#E8E4DA] rounded-lg cursor-pointer"
+                className="w-full accent-[#063B2C] dark:accent-emerald-500 h-2 bg-[#E8E4DA] dark:bg-white/10 rounded-lg cursor-pointer"
               />
-              <div className="flex justify-between text-[10px] font-bold text-[#8C9B93]">
+              <div className="flex justify-between text-[10px] font-bold text-[#8C9B93] dark:text-[#A2B3AA]">
                 <span>14 yrs (Youth)</span>
                 <span>45 yrs (Adult)</span>
                 <span>95 yrs (Senior)</span>
@@ -186,10 +186,10 @@ export const ProfileOnboardingView: React.FC = () => {
         {/* Step 3: Gender with Icons */}
         {step === 3 && (
           <div className="space-y-4 animate-in fade-in duration-200">
-            <h2 className="text-2xl font-extrabold text-[#11241C] tracking-tight">
+            <h2 className="text-2xl font-extrabold text-[#11241C] dark:text-white tracking-tight">
               Select Your Gender
             </h2>
-            <p className="text-xs text-[#55685F] leading-relaxed">
+            <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] leading-relaxed">
               Choose your gender identity for personalized community & civic services.
             </p>
 
@@ -201,8 +201,8 @@ export const ProfileOnboardingView: React.FC = () => {
                   onClick={() => setGender(opt.id)}
                   className={`p-4 rounded-3xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${
                     gender === opt.id
-                      ? 'bg-[#E6F4EA] border-[#063B2C] text-[#063B2C] shadow-sm ring-1 ring-[#063B2C]'
-                      : 'bg-white border-[#D2CEBE] text-[#11241C] hover:bg-[#FAF8F5]'
+                      ? 'bg-[#E6F4EA] dark:bg-emerald-950/60 border-[#063B2C] dark:border-emerald-400 text-[#063B2C] dark:text-emerald-300 shadow-sm ring-1 ring-[#063B2C] dark:ring-emerald-400'
+                      : 'bg-white dark:bg-[#17231E] border-[#D2CEBE] dark:border-white/10 text-[#11241C] dark:text-white hover:bg-[#FAF8F5] dark:hover:bg-white/5'
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -210,14 +210,14 @@ export const ProfileOnboardingView: React.FC = () => {
                       {opt.symbol}
                     </div>
                     {gender === opt.id && (
-                      <div className="w-5 h-5 rounded-full bg-[#063B2C] text-white flex items-center justify-center">
+                      <div className="w-5 h-5 rounded-full bg-[#063B2C] dark:bg-emerald-500 text-white flex items-center justify-center">
                         <Check className="w-3 h-3 stroke-[3]" />
                       </div>
                     )}
                   </div>
                   <div>
                     <div className="text-sm font-extrabold">{opt.label}</div>
-                    <div className="text-[11px] text-[#55685F]">{opt.description}</div>
+                    <div className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">{opt.description}</div>
                   </div>
                 </button>
               ))}
@@ -228,14 +228,14 @@ export const ProfileOnboardingView: React.FC = () => {
         {/* Step 4: Blood Group */}
         {step === 4 && (
           <div className="space-y-4 animate-in fade-in duration-200">
-            <div className="flex items-center gap-2 text-[#D9383A]">
+            <div className="flex items-center gap-2 text-[#D9383A] dark:text-rose-400">
               <Heart className="w-5 h-5 fill-current" />
               <span className="text-xs font-bold uppercase tracking-wider">Emergency Blood Match</span>
             </div>
-            <h2 className="text-2xl font-extrabold text-[#11241C] tracking-tight">
+            <h2 className="text-2xl font-extrabold text-[#11241C] dark:text-white tracking-tight">
               What’s your blood group?
             </h2>
-            <p className="text-xs text-[#55685F] leading-relaxed">
+            <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] leading-relaxed">
               Allows Jalpaiguri hospitals & community members to reach you for urgent donor requirements.
             </p>
             <div className="grid grid-cols-3 gap-2.5 pt-2">
@@ -246,11 +246,11 @@ export const ProfileOnboardingView: React.FC = () => {
                   onClick={() => setBloodGroup(bg)}
                   className={`py-3.5 px-2 rounded-2xl border-2 text-sm font-extrabold text-center transition-all cursor-pointer flex flex-col items-center gap-1 ${
                     bloodGroup === bg
-                      ? 'bg-[#FFEBEA] border-[#D9383A] text-[#D9383A] shadow-xs ring-1 ring-[#D9383A]'
-                      : 'bg-white border-[#D2CEBE] text-[#11241C] hover:bg-[#FAF8F5]'
+                      ? 'bg-[#FFEBEA] dark:bg-rose-950/60 border-[#D9383A] dark:border-rose-400 text-[#D9383A] dark:text-rose-300 shadow-xs ring-1 ring-[#D9383A] dark:ring-rose-400'
+                      : 'bg-white dark:bg-[#17231E] border-[#D2CEBE] dark:border-white/10 text-[#11241C] dark:text-white hover:bg-[#FAF8F5] dark:hover:bg-white/5'
                   }`}
                 >
-                  <Droplet className={`w-4 h-4 ${bloodGroup === bg ? 'fill-[#D9383A]' : 'text-[#8C9B93]'}`} />
+                  <Droplet className={`w-4 h-4 ${bloodGroup === bg ? 'fill-[#D9383A] dark:fill-rose-400' : 'text-[#8C9B93] dark:text-[#A2B3AA]'}`} />
                   <span>{bg}</span>
                 </button>
               ))}
@@ -261,32 +261,32 @@ export const ProfileOnboardingView: React.FC = () => {
         {/* Step 5: Location */}
         {step === 5 && (
           <div className="space-y-4 animate-in fade-in duration-200">
-            <h2 className="text-2xl font-extrabold text-[#11241C] tracking-tight">
+            <h2 className="text-2xl font-extrabold text-[#11241C] dark:text-white tracking-tight">
               Where in Jalpaiguri do you stay?
             </h2>
-            <p className="text-xs text-[#55685F] leading-relaxed">
+            <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] leading-relaxed">
               Connects you with nearby electricians, plumbers, civic alerts, and community posts.
             </p>
 
-            <div className="bg-white border-2 border-[#D2CEBE] rounded-3xl p-4 shadow-xs space-y-3">
+            <div className="bg-white dark:bg-[#17231E] border-2 border-[#D2CEBE] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3 transition-colors">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#E6F4EA] text-[#063B2C] flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-full bg-[#E6F4EA] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-400 flex items-center justify-center shrink-0">
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div className="flex-1">
-                  <span className="text-xs font-semibold text-[#55685F] block">Your Locality / Ward</span>
+                  <span className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA] block">Your Locality / Ward</span>
                   <input
                     type="text"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    className="w-full font-extrabold text-sm text-[#11241C] focus:outline-none border-b border-transparent focus:border-[#063B2C]"
+                    className="w-full font-extrabold text-sm text-[#11241C] dark:text-white focus:outline-none border-b border-transparent focus:border-[#063B2C] dark:focus:border-emerald-400 bg-transparent"
                   />
                 </div>
               </div>
             </div>
 
             <div className="space-y-1.5 pt-2">
-              <span className="text-xs font-bold text-[#55685F]">Select Jalpaiguri Area:</span>
+              <span className="text-xs font-bold text-[#55685F] dark:text-[#A2B3AA]">Select Jalpaiguri Area:</span>
               <div className="flex flex-wrap gap-2">
                 {[
                   'Kadamtala',
@@ -304,8 +304,8 @@ export const ProfileOnboardingView: React.FC = () => {
                     onClick={() => setLocation(`${loc}, Jalpaiguri`)}
                     className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-all cursor-pointer ${
                       location.includes(loc)
-                        ? 'bg-[#063B2C] text-white border-[#063B2C]'
-                        : 'bg-white text-[#11241C] border-[#D2CEBE] hover:bg-[#FAF8F5]'
+                        ? 'bg-[#063B2C] dark:bg-emerald-600 text-white border-[#063B2C] dark:border-emerald-600'
+                        : 'bg-white dark:bg-[#17231E] text-[#11241C] dark:text-white border-[#D2CEBE] dark:border-white/10 hover:bg-[#FAF8F5] dark:hover:bg-white/5'
                     }`}
                   >
                     {loc}
@@ -321,7 +321,7 @@ export const ProfileOnboardingView: React.FC = () => {
       <div className="pt-6">
         <button
           onClick={handleNext}
-          className="w-full bg-[#063B2C] text-white font-extrabold text-sm py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-md hover:bg-[#084D3A] active:scale-98 transition-all cursor-pointer"
+          className="w-full bg-[#063B2C] dark:bg-emerald-600 text-white font-extrabold text-sm py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-md hover:bg-[#084D3A] dark:hover:bg-emerald-700 active:scale-98 transition-all cursor-pointer"
         >
           <span>{step === 5 ? 'Save & Start Exploring' : 'Continue'}</span>
           <ArrowRight className="w-4 h-4" />

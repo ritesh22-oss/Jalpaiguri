@@ -88,7 +88,7 @@ interface AuthContextType {
   completeOnboarding: (data: Partial<UserProfile>) => Promise<boolean>;
   updateProfile: (data: Partial<UserProfile>) => Promise<boolean>;
   toggleRole: () => void;
-  updateLocationInProfile: (locationName: string, coords?: { lat: number; lng: number }) => Promise<void>;
+  updateLocationInProfile: (locationInput: string | Partial<UserProfile>, coords?: { lat: number; lng: number }) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -651,23 +651,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return true;
   };
 
-  // 6. Update user's saved location
-  const updateLocationInProfile = async (locationName: string, coords?: { lat: number; lng: number }) => {
+  // 6. Update user's saved location with full geo-metadata
+  const updateLocationInProfile = async (
+    locationInput: string | Partial<UserProfile>,
+    coords?: { lat: number; lng: number }
+  ) => {
     if (!user) return;
-    const updated = {
+    const locationData: Partial<UserProfile> = typeof locationInput === 'string'
+      ? { location: locationInput, coordinates: coords }
+      : locationInput;
+
+    const updated: UserProfile = {
       ...user,
-      location: locationName,
-      coordinates: coords
+      ...locationData,
+      locationUpdatedAt: new Date().toISOString()
     };
     setUser(updated);
     localStorage.setItem('jpg_user_profile', JSON.stringify(updated));
 
     if (isFirebaseConfigured && db && user.id) {
       try {
-        await updateDoc(doc(db, 'users', user.id), {
-          location: locationName,
-          ...(coords ? { coordinates: coords } : {})
-        });
+        const firestorePayload: Record<string, any> = {
+          locationUpdatedAt: new Date().toISOString()
+        };
+        if (updated.location) firestorePayload.location = updated.location;
+        if (updated.coordinates) firestorePayload.coordinates = updated.coordinates;
+        if (updated.latitude !== undefined) firestorePayload.latitude = updated.latitude;
+        if (updated.longitude !== undefined) firestorePayload.longitude = updated.longitude;
+        if (updated.accuracy !== undefined) firestorePayload.accuracy = updated.accuracy;
+        if (updated.city !== undefined) firestorePayload.city = updated.city;
+        if (updated.district !== undefined) firestorePayload.district = updated.district;
+        if (updated.state !== undefined) firestorePayload.state = updated.state;
+        if (updated.pincode !== undefined) firestorePayload.pincode = updated.pincode;
+        if (updated.locationSource !== undefined) firestorePayload.locationSource = updated.locationSource;
+        if (updated.serviceAreaStatus !== undefined) firestorePayload.serviceAreaStatus = updated.serviceAreaStatus;
+
+        await updateDoc(doc(db, 'users', user.id), firestorePayload);
       } catch (e) {
         console.warn('Error updating location in Firestore:', e);
       }

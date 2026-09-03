@@ -17,17 +17,17 @@ export const BottomNav: React.FC = () => {
   const isProfileActive = currentView === 'profile' || currentView === 'settings' || currentView === 'saved';
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E8E4DA] px-2 py-1.5 flex items-center justify-around max-w-md mx-auto shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#15211B]/95 backdrop-blur-md border-t border-[#E8E4DA] dark:border-white/10 px-2 py-1.5 flex items-center justify-around max-w-md mx-auto shadow-lg transition-colors">
       {/* Home */}
       <button
         id="nav-home"
         onClick={() => navigate('home')}
         className="flex flex-col items-center justify-center py-1 px-3 min-w-[56px] transition-all cursor-pointer"
       >
-        <div className={`p-1 rounded-xl transition-colors ${isHomeActive ? 'text-[#063B2C]' : 'text-[#64748B]'}`}>
+        <div className={`p-1 rounded-xl transition-colors ${isHomeActive ? 'text-[#063B2C] dark:text-[#4ECCA3]' : 'text-[#64748B] dark:text-gray-400'}`}>
           <Home className={`w-5 h-5 ${isHomeActive ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
         </div>
-        <span className={`text-[11px] font-medium tracking-tight ${isHomeActive ? 'text-[#063B2C] font-bold' : 'text-[#64748B]'}`}>
+        <span className={`text-[11px] font-medium tracking-tight ${isHomeActive ? 'text-[#063B2C] dark:text-[#4ECCA3] font-bold' : 'text-[#64748B] dark:text-gray-400'}`}>
           Home
         </span>
       </button>
@@ -38,10 +38,10 @@ export const BottomNav: React.FC = () => {
         onClick={() => navigate('discover')}
         className="flex flex-col items-center justify-center py-1 px-3 min-w-[56px] transition-all cursor-pointer"
       >
-        <div className={`p-1 rounded-xl transition-colors ${isDiscoverActive ? 'bg-[#063B2C] text-white px-3' : 'text-[#64748B]'}`}>
+        <div className={`p-1 rounded-xl transition-colors ${isDiscoverActive ? 'bg-[#063B2C] text-white dark:bg-[#1C4532] dark:text-[#4ECCA3] px-3' : 'text-[#64748B] dark:text-gray-400'}`}>
           <Compass className={`w-5 h-5 ${isDiscoverActive ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
         </div>
-        <span className={`text-[11px] font-medium tracking-tight ${isDiscoverActive ? 'text-[#063B2C] font-bold' : 'text-[#64748B]'}`}>
+        <span className={`text-[11px] font-medium tracking-tight ${isDiscoverActive ? 'text-[#063B2C] dark:text-[#4ECCA3] font-bold' : 'text-[#64748B] dark:text-gray-400'}`}>
           Discover
         </span>
       </button>
@@ -54,14 +54,14 @@ export const BottomNav: React.FC = () => {
       >
         <div className="relative">
           <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md transition-transform group-active:scale-95 ${
-            isHelpActive ? 'bg-[#063B2C] text-white ring-4 ring-[#E6F4EA]' : 'bg-[#063B2C] text-white'
+            isHelpActive ? 'bg-[#063B2C] text-white ring-4 ring-[#E6F4EA] dark:ring-[#1E3A2B]' : 'bg-[#063B2C] text-white'
           }`}>
             <Radio className="w-6 h-6 animate-pulse-subtle" />
           </div>
           {/* Subtle pulse badge */}
-          <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-[#D9383A] border-2 border-white rounded-full"></span>
+          <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-[#D9383A] border-2 border-white dark:border-[#15211B] rounded-full"></span>
         </div>
-        <span className={`text-[11px] font-bold tracking-tight mt-1 ${isHelpActive ? 'text-[#063B2C]' : 'text-[#063B2C]'}`}>
+        <span className={`text-[11px] font-bold tracking-tight mt-1 ${isHelpActive ? 'text-[#063B2C] dark:text-[#4ECCA3]' : 'text-[#063B2C] dark:text-[#4ECCA3]'}`}>
           Help
         </span>
       </button>
@@ -72,13 +72,13 @@ export const BottomNav: React.FC = () => {
         onClick={() => navigate('alerts')}
         className="flex flex-col items-center justify-center py-1 px-3 min-w-[56px] transition-all cursor-pointer relative"
       >
-        <div className={`p-1 rounded-xl transition-colors ${isAlertsActive ? 'bg-[#063B2C] text-white px-3' : 'text-[#64748B]'}`}>
+        <div className={`p-1 rounded-xl transition-colors ${isAlertsActive ? 'bg-[#063B2C] text-white dark:bg-[#1C4532] dark:text-[#4ECCA3] px-3' : 'text-[#64748B] dark:text-gray-400'}`}>
           <Bell className={`w-5 h-5 ${isAlertsActive ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
         </div>
         {unreadAlerts > 0 && !isAlertsActive && (
           <span className="absolute top-1 right-3.5 w-2 h-2 bg-[#D9383A] rounded-full"></span>
         )}
-        <span className={`text-[11px] font-medium tracking-tight ${isAlertsActive ? 'text-[#063B2C] font-bold' : 'text-[#64748B]'}`}>
+        <span className={`text-[11px] font-medium tracking-tight ${isAlertsActive ? 'text-[#063B2C] dark:text-[#4ECCA3] font-bold' : 'text-[#64748B] dark:text-gray-400'}`}>
           Alerts
         </span>
       </button>
@@ -89,10 +89,10 @@ export const BottomNav: React.FC = () => {
         onClick={() => navigate('profile')}
         className="flex flex-col items-center justify-center py-1 px-3 min-w-[56px] transition-all cursor-pointer"
       >
-        <div className={`p-1 rounded-xl transition-colors ${isProfileActive ? 'text-[#063B2C]' : 'text-[#64748B]'}`}>
+        <div className={`p-1 rounded-xl transition-colors ${isProfileActive ? 'text-[#063B2C] dark:text-[#4ECCA3]' : 'text-[#64748B] dark:text-gray-400'}`}>
           <User className={`w-5 h-5 ${isProfileActive ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
         </div>
-        <span className={`text-[11px] font-medium tracking-tight ${isProfileActive ? 'text-[#063B2C] font-bold' : 'text-[#64748B]'}`}>
+        <span className={`text-[11px] font-medium tracking-tight ${isProfileActive ? 'text-[#063B2C] dark:text-[#4ECCA3] font-bold' : 'text-[#64748B] dark:text-gray-400'}`}>
           Profile
         </span>
       </button>
