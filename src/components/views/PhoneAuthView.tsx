@@ -136,8 +136,8 @@ export const PhoneAuthView: React.FC = () => {
         {/* User-Friendly Writing CAPTCHA (Canvas Security Characters) */}
         <WritingCaptcha onVerifyChange={setIsCaptchaValid} />
 
-        {/* Hidden reCAPTCHA DOM anchor */}
-        <div id="recaptcha-container" className="hidden"></div>
+        {/* Firebase Invisible reCAPTCHA DOM Anchor */}
+        <div id="recaptcha-container"></div>
 
         {/* Submit Button */}
         <button
