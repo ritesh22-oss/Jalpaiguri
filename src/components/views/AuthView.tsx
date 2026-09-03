@@ -134,18 +134,18 @@ export const AuthView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#11241C] flex flex-col justify-between p-4 max-w-md mx-auto select-none relative shadow-2xl">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] text-[#11241C] dark:text-white flex flex-col justify-between p-4 max-w-md mx-auto select-none relative shadow-2xl transition-colors">
       {/* Top Bar */}
       <div className="w-full flex items-center justify-between pt-2 pb-1">
         <button
           onClick={() => navigate('onboarding')}
-          className="p-1.5 -ml-1 text-gray-700 hover:text-black active:scale-95 transition-all cursor-pointer rounded-full hover:bg-gray-100"
+          className="p-1.5 -ml-1 text-gray-700 dark:text-[#A2B3AA] hover:text-black dark:hover:text-white active:scale-95 transition-all cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-white/10"
           aria-label="Go Back"
         >
           <ChevronLeft className="w-6 h-6 stroke-[2.2]" />
         </button>
 
-        <h1 className="text-base font-extrabold text-gray-900 tracking-tight">
+        <h1 className="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">
           Authentication & Access
         </h1>
 
@@ -160,7 +160,7 @@ export const AuthView: React.FC = () => {
         </div>
 
         {/* Mode Selector Tabs: Citizen Access vs Login as Admin */}
-        <div className="w-full grid grid-cols-2 p-1 bg-[#ECE8DF] rounded-2xl mb-4">
+        <div className="w-full grid grid-cols-2 p-1 bg-[#ECE8DF] dark:bg-[#121E19] rounded-2xl mb-4 transition-colors">
           <button
             type="button"
             id="tab-citizen-access"
@@ -171,11 +171,11 @@ export const AuthView: React.FC = () => {
             }}
             className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               authMode === 'citizen'
-                ? 'bg-white text-[#11241C] shadow-xs'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-white dark:bg-[#17231E] text-[#11241C] dark:text-white shadow-xs'
+                : 'text-gray-600 dark:text-[#A2B3AA] hover:text-gray-900 dark:hover:text-white'
             }`}
           >
-            <Fingerprint className="w-3.5 h-3.5 text-[#063B2C]" />
+            <Fingerprint className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400" />
             <span>Citizen Access</span>
           </button>
 
@@ -189,8 +189,8 @@ export const AuthView: React.FC = () => {
             }}
             className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               authMode === 'admin'
-                ? 'bg-[#063B2C] text-white shadow-xs'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-[#063B2C] dark:bg-emerald-600 text-white shadow-xs'
+                : 'text-gray-600 dark:text-[#A2B3AA] hover:text-gray-900 dark:hover:text-white'
             }`}
           >
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
@@ -201,15 +201,15 @@ export const AuthView: React.FC = () => {
         {/* Status Alerts */}
         <div className="w-full space-y-2 mb-3">
           {errorMsg && (
-            <div className="bg-rose-50 border border-rose-200 rounded-2xl p-3 text-xs text-rose-900 flex items-start gap-2.5 animate-in fade-in duration-200">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+            <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/40 rounded-2xl p-3 text-xs text-rose-900 dark:text-rose-200 flex items-start gap-2.5 animate-in fade-in duration-200">
+              <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
               <p className="text-[11px] font-semibold leading-relaxed">{errorMsg}</p>
             </div>
           )}
 
           {successMsg && (
-            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-xs text-emerald-900 flex items-center gap-2.5 font-bold animate-in fade-in duration-200">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 rounded-2xl p-3 text-xs text-emerald-900 dark:text-emerald-200 flex items-center gap-2.5 font-bold animate-in fade-in duration-200">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
               <p className="text-xs leading-snug">{successMsg}</p>
             </div>
           )}
@@ -219,13 +219,13 @@ export const AuthView: React.FC = () => {
         {authMode === 'citizen' && (
           <div className="w-full space-y-4 animate-in fade-in duration-150">
             {/* 1. Google Auth for Every User */}
-            <div className="bg-white rounded-2xl p-4 border border-[#E8E4DA] shadow-xs">
+            <div className="bg-white dark:bg-[#17231E] rounded-2xl p-4 border border-[#E8E4DA] dark:border-white/10 shadow-xs transition-colors">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                <span className="text-xs font-bold text-gray-500 dark:text-[#A2B3AA] uppercase tracking-wider">
                   Universal Google Sign-In
                 </span>
               </div>
-              <p className="text-xs text-gray-600 mb-3">
+              <p className="text-xs text-gray-600 dark:text-[#A2B3AA] mb-3">
                 Every citizen can sign in immediately using their personal Google account.
               </p>
 
@@ -272,37 +272,37 @@ export const AuthView: React.FC = () => {
 
             {/* Divider */}
             <div className="relative flex py-1 items-center">
-              <div className="grow border-t border-gray-300"></div>
-              <span className="shrink mx-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <div className="grow border-t border-gray-300 dark:border-white/10"></div>
+              <span className="shrink mx-3 text-xs font-semibold text-gray-500 dark:text-[#A2B3AA] uppercase tracking-wider">
                 or Biometric Privacy
               </span>
-              <div className="grow border-t border-gray-300"></div>
+              <div className="grow border-t border-gray-300 dark:border-white/10"></div>
             </div>
 
             {/* 2. Fingerprint Sign Up & Biometric Login Section */}
-            <div className="bg-white rounded-2xl p-4 border border-[#E8E4DA] shadow-xs space-y-3">
+            <div className="bg-white dark:bg-[#17231E] rounded-2xl p-4 border border-[#E8E4DA] dark:border-white/10 shadow-xs space-y-3 transition-colors">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#E6F4EA] flex items-center justify-center text-[#063B2C]">
+                  <div className="w-7 h-7 rounded-lg bg-[#E6F4EA] dark:bg-emerald-950/60 flex items-center justify-center text-[#063B2C] dark:text-emerald-400">
                     <Fingerprint className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-extrabold text-[#11241C]">
+                    <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white">
                       Fingerprint Biometrics
                     </h3>
-                    <p className="text-[10px] text-emerald-700 font-bold">
+                    <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold">
                       Hardware Bound • Strict Privacy
                     </p>
                   </div>
                 </div>
-                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-full border border-emerald-300">
+                <span className="text-[10px] bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-extrabold px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700">
                   {enrolledFingerprint ? 'Enrolled' : 'Ready'}
                 </span>
               </div>
 
               {/* Strict Privacy Guarantee Description */}
-              <div className="bg-[#FAF8F5] rounded-xl p-2.5 text-[11px] text-gray-600 border border-[#E8E4DA] flex items-start gap-2">
-                <Lock className="w-3.5 h-3.5 text-[#063B2C] shrink-0 mt-0.5" />
+              <div className="bg-[#FAF8F5] dark:bg-[#121E19] rounded-xl p-2.5 text-[11px] text-gray-600 dark:text-[#A2B3AA] border border-[#E8E4DA] dark:border-white/10 flex items-start gap-2 transition-colors">
+                <Lock className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400 shrink-0 mt-0.5" />
                 <p className="leading-relaxed">
                   Once your fingerprint is scanned, it is cryptographically locked to this device. No
                   one can log in with a different fingerprint.
@@ -312,26 +312,26 @@ export const AuthView: React.FC = () => {
               {/* If Fingerprint is ALREADY enrolled on device */}
               {enrolledFingerprint ? (
                 <div className="space-y-3 pt-1">
-                  <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-center justify-between">
+                  <div className="p-3 bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 rounded-xl flex items-center justify-between">
                     <div>
-                      <span className="text-[10px] font-bold uppercase text-emerald-800 tracking-wider block">
+                      <span className="text-[10px] font-bold uppercase text-emerald-800 dark:text-emerald-300 tracking-wider block">
                         Registered Citizen
                       </span>
-                      <p className="text-sm font-black text-gray-900">
+                      <p className="text-sm font-black text-gray-900 dark:text-white">
                         {enrolledFingerprint.userName}
                       </p>
-                      <span className="text-[10px] text-gray-500">
+                      <span className="text-[10px] text-gray-500 dark:text-[#A2B3AA]">
                         Device Key: {enrolledFingerprint.credentialId.slice(0, 16)}...
                       </span>
                     </div>
-                    <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="w-6 h-6 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   </div>
 
                   {/* Primary Login Button with Enrolled Fingerprint */}
                   <button
                     id="btn-login-with-fingerprint"
                     onClick={handleStartFingerprintLogin}
-                    className="w-full h-12 rounded-xl bg-[#063B2C] hover:bg-[#084D3A] active:scale-98 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+                    className="w-full h-12 rounded-xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] active:scale-98 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
                   >
                     <Fingerprint className="w-5 h-5 text-emerald-300" />
                     <span>Touch Sensor to Login</span>
@@ -343,12 +343,12 @@ export const AuthView: React.FC = () => {
                         removeFingerprint();
                         setSuccessMsg('Enrolled fingerprint cleared from this device.');
                       }}
-                      className="text-[11px] text-gray-500 hover:text-rose-600 flex items-center gap-1 cursor-pointer transition-colors"
+                      className="text-[11px] text-gray-500 dark:text-[#A2B3AA] hover:text-rose-600 dark:hover:text-rose-400 flex items-center gap-1 cursor-pointer transition-colors"
                     >
                       <RotateCcw className="w-3 h-3" />
                       <span>Re-enroll New Fingerprint</span>
                     </button>
-                    <span className="text-[10px] text-gray-400">
+                    <span className="text-[10px] text-gray-400 dark:text-gray-500">
                       Enrolled on {new Date(enrolledFingerprint.enrolledAt).toLocaleDateString()}
                     </span>
                   </div>
@@ -357,7 +357,7 @@ export const AuthView: React.FC = () => {
                 /* If NO Fingerprint is enrolled yet: Sign Up with Fingerprint */
                 <form onSubmit={handleStartFingerprintSignUp} className="space-y-3 pt-1">
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1">
+                    <label className="block text-[11px] font-bold text-gray-700 dark:text-[#A2B3AA] mb-1">
                       Citizen Full Name
                     </label>
                     <input
@@ -366,14 +366,14 @@ export const AuthView: React.FC = () => {
                       value={citizenName}
                       onChange={(e) => setCitizenName(e.target.value)}
                       placeholder="e.g. Sourav Sengupta"
-                      className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border border-gray-300 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#063B2C] focus:bg-white transition-all"
+                      className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-[#121E19] border border-gray-300 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[#063B2C] dark:focus:border-emerald-400 focus:bg-white dark:focus:bg-[#17231E] transition-all"
                     />
                   </div>
 
                   <button
                     id="btn-signup-with-fingerprint"
                     type="submit"
-                    className="w-full h-12 rounded-xl bg-[#063B2C] hover:bg-[#084D3A] active:scale-98 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+                    className="w-full h-12 rounded-xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] active:scale-98 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
                   >
                     <Fingerprint className="w-5 h-5 text-emerald-300" />
                     <span>Sign Up with Fingerprint</span>
@@ -384,8 +384,8 @@ export const AuthView: React.FC = () => {
 
             {/* Retired Phone Auth Notice */}
             <div className="text-center pt-1">
-              <span className="text-[11px] text-gray-500 inline-flex items-center gap-1">
-                <Info className="w-3.5 h-3.5 text-gray-400" />
+              <span className="text-[11px] text-gray-500 dark:text-[#A2B3AA] inline-flex items-center gap-1">
+                <Info className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                 Phone OTP authentication has been replaced with biometric privacy.
               </span>
             </div>
@@ -395,7 +395,7 @@ export const AuthView: React.FC = () => {
         {/* ----------------- TAB 2: LOGIN AS ADMIN ----------------- */}
         {authMode === 'admin' && (
           <div className="w-full space-y-4 animate-in fade-in duration-150">
-            <div className="bg-[#063B2C] text-white rounded-3xl p-5 shadow-lg border border-[#084D3A] space-y-4">
+            <div className="bg-[#063B2C] dark:bg-[#082E1E] text-white rounded-3xl p-5 shadow-lg border border-[#084D3A] dark:border-emerald-800/40 space-y-4 transition-colors">
               <div className="flex items-start justify-between">
                 <div className="w-12 h-12 rounded-2xl bg-[#0F4F3C] border border-[#17664E] flex items-center justify-center text-emerald-300 shadow-inner">
                   <ShieldCheck className="w-7 h-7" />
@@ -415,7 +415,7 @@ export const AuthView: React.FC = () => {
               </div>
 
               {/* Strict Security Enforcement Card */}
-              <div className="bg-[#03231A] rounded-2xl p-4 border border-[#114637] space-y-2.5">
+              <div className="bg-[#03231A] dark:bg-[#021811] rounded-2xl p-4 border border-[#114637] space-y-2.5">
                 <div className="flex items-center gap-2 text-emerald-300 text-xs font-bold">
                   <ShieldAlert className="w-4 h-4 text-emerald-400 shrink-0" />
                   <span>Municipal Officer Identity Gateway</span>
@@ -473,7 +473,7 @@ export const AuthView: React.FC = () => {
             <div className="text-center">
               <button
                 onClick={() => setAuthMode('citizen')}
-                className="text-xs text-gray-500 hover:text-gray-900 font-semibold cursor-pointer underline underline-offset-2"
+                className="text-xs text-gray-500 dark:text-[#A2B3AA] hover:text-gray-900 dark:hover:text-white font-semibold cursor-pointer underline underline-offset-2"
               >
                 Not an admin? Return to Citizen Access
               </button>
@@ -495,7 +495,7 @@ export const AuthView: React.FC = () => {
 
       {/* Bottom iOS Home Indicator */}
       <div className="w-full flex justify-center pb-1 pt-3">
-        <div className="w-32 h-1 bg-black/40 rounded-full"></div>
+        <div className="w-32 h-1 bg-black/40 dark:bg-white/40 rounded-full"></div>
       </div>
     </div>
   );

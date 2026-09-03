@@ -76,32 +76,32 @@ export const ProfileSetupView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#11241C] flex flex-col justify-between p-5 max-w-md mx-auto select-none relative shadow-2xl">
+    <div className="min-h-screen bg-white dark:bg-[#0F1A15] text-[#11241C] dark:text-white flex flex-col justify-between p-5 max-w-md mx-auto select-none relative shadow-2xl transition-colors">
       {/* Top Header Bar with Back button, Title & Avatar Icon */}
       <div className="w-full flex items-center justify-between pt-2 pb-2">
         <button
-          onClick={() => navigate('otp')}
-          className="p-1 -ml-1 text-gray-800 hover:text-black active:scale-95 transition-all cursor-pointer"
+          onClick={() => navigate(user?.phone ? 'otp' : 'auth')}
+          className="p-1 -ml-1 text-gray-800 dark:text-[#A2B3AA] hover:text-black dark:hover:text-white active:scale-95 transition-all cursor-pointer"
           aria-label="Go Back"
         >
           <ChevronLeft className="w-6 h-6 stroke-[2.2]" />
         </button>
 
-        <h1 className="text-base font-bold text-gray-900 tracking-tight">
+        <h1 className="text-base font-bold text-gray-900 dark:text-white tracking-tight">
           Complete Profile
         </h1>
 
         {/* Profile Avatar Badge matching mockup */}
-        <div className="w-7 h-7 rounded-full bg-[#CBD5E1] flex items-center justify-center text-gray-500 shadow-2xs">
-          <UserIcon className="w-4 h-4 text-[#64748B] fill-[#64748B]" />
+        <div className="w-7 h-7 rounded-full bg-[#CBD5E1] dark:bg-[#1E2D27] flex items-center justify-center text-gray-500 shadow-2xs">
+          <UserIcon className="w-4 h-4 text-[#64748B] dark:text-[#A2B3AA] fill-[#64748B] dark:fill-[#A2B3AA]" />
         </div>
       </div>
 
       {/* Main Content Area */}
       <div className="w-full px-1 my-auto py-2">
         {errorMsg && (
-          <div className="mb-3 bg-rose-50 border border-rose-200 rounded-xl p-2.5 text-xs text-rose-800 flex items-center gap-2 animate-in fade-in duration-200">
-            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          <div className="mb-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/40 rounded-xl p-2.5 text-xs text-rose-800 dark:text-rose-200 flex items-center gap-2 animate-in fade-in duration-200">
+            <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
             <p className="text-xs">{errorMsg}</p>
           </div>
         )}
@@ -109,7 +109,7 @@ export const ProfileSetupView: React.FC = () => {
         <form onSubmit={handleContinue} className="space-y-3.5">
           {/* 1. Full Name */}
           <div>
-            <label className="block text-xs font-semibold text-gray-900 mb-1.5">
+            <label className="block text-xs font-semibold text-gray-900 dark:text-white mb-1.5">
               Full Name
             </label>
             <input
@@ -117,21 +117,21 @@ export const ProfileSetupView: React.FC = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Priya Sharma"
-              className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#2F74E9] focus:ring-1 focus:ring-[#2F74E9] transition-all shadow-2xs"
+              className="w-full bg-white dark:bg-[#17231E] border border-gray-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[#2F74E9] focus:ring-1 focus:ring-[#2F74E9] transition-all shadow-2xs"
             />
           </div>
 
           {/* 2. Real-Time Location Card */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold text-gray-900">
+              <label className="block text-xs font-semibold text-gray-900 dark:text-white">
                 Live Location & Area
               </label>
               <button
                 type="button"
                 onClick={handleDetectGps}
                 disabled={gpsLoading}
-                className="text-[11px] font-bold text-[#2F74E9] hover:text-[#1D4ED8] flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                className="text-[11px] font-bold text-[#2F74E9] dark:text-blue-400 hover:text-[#1D4ED8] flex items-center gap-1 cursor-pointer disabled:opacity-50"
               >
                 {gpsLoading ? (
                   <Loader2 className="w-3 h-3 animate-spin" />
@@ -142,17 +142,17 @@ export const ProfileSetupView: React.FC = () => {
               </button>
             </div>
 
-            <div className="bg-[#F8FAFC] border border-gray-200 rounded-xl p-3 space-y-2">
+            <div className="bg-[#F8FAFC] dark:bg-[#17231E] border border-gray-200 dark:border-white/10 rounded-xl p-3 space-y-2 transition-colors">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-start gap-2 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
                     <MapPin className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-gray-900 truncate">
+                    <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
                       {location.name}
                     </p>
-                    <p className="text-[11px] text-gray-500">
+                    <p className="text-[11px] text-gray-500 dark:text-[#A2B3AA]">
                       {location.isApproximate ? 'Locality selected' : `Realtime GPS: ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`}
                     </p>
                   </div>
@@ -161,14 +161,14 @@ export const ProfileSetupView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsLocationSelectorOpen(true)}
-                  className="px-2 py-1 text-[11px] font-bold text-[#2F74E9] bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors shrink-0 cursor-pointer"
+                  className="px-2 py-1 text-[11px] font-bold text-[#2F74E9] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors shrink-0 cursor-pointer"
                 >
                   Change
                 </button>
               </div>
 
               {!location.isApproximate && location.accuracy && (
-                <div className="flex items-center gap-1 text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md font-medium">
+                <div className="flex items-center gap-1 text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md font-medium">
                   <Sparkles className="w-3 h-3" />
                   <span>Real GPS Accuracy: ±{location.accuracy}m</span>
                 </div>
@@ -178,7 +178,7 @@ export const ProfileSetupView: React.FC = () => {
 
           {/* 3. Age with Stepper Controls */}
           <div>
-            <label className="block text-xs font-semibold text-gray-900 mb-1.5">
+            <label className="block text-xs font-semibold text-gray-900 dark:text-white mb-1.5">
               Age
             </label>
             <div className="relative">
@@ -189,20 +189,20 @@ export const ProfileSetupView: React.FC = () => {
                 value={age}
                 onChange={(e) => setAge(e.target.value === '' ? '' : parseInt(e.target.value) || 18)}
                 placeholder="e.g., 28"
-                className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#2F74E9] focus:ring-1 focus:ring-[#2F74E9] transition-all shadow-2xs pr-9"
+                className="w-full bg-white dark:bg-[#17231E] border border-gray-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[#2F74E9] focus:ring-1 focus:ring-[#2F74E9] transition-all shadow-2xs pr-9"
               />
               <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex flex-col items-center select-none">
                 <button
                   type="button"
                   onClick={() => setAge((prev) => (typeof prev === 'number' ? Math.min(100, prev + 1) : 28))}
-                  className="p-0.5 text-gray-400 hover:text-gray-700 cursor-pointer"
+                  className="p-0.5 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-white cursor-pointer"
                 >
                   <ChevronUp className="w-3.5 h-3.5 stroke-[2.5]" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setAge((prev) => (typeof prev === 'number' ? Math.max(15, prev - 1) : 28))}
-                  className="p-0.5 text-gray-400 hover:text-gray-700 cursor-pointer -mt-1"
+                  className="p-0.5 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-white cursor-pointer -mt-1"
                 >
                   <ChevronDown className="w-3.5 h-3.5 stroke-[2.5]" />
                 </button>
@@ -212,7 +212,7 @@ export const ProfileSetupView: React.FC = () => {
 
           {/* 4. Gender Dropdown & Segmented Switcher */}
           <div>
-            <label className="block text-xs font-semibold text-gray-900 mb-1.5">
+            <label className="block text-xs font-semibold text-gray-900 dark:text-white mb-1.5">
               Gender
             </label>
             {/* Dropdown style */}
@@ -220,14 +220,14 @@ export const ProfileSetupView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsGenderDropdownOpen(!isGenderDropdownOpen)}
-                className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 flex items-center justify-between shadow-2xs hover:border-gray-400 focus:outline-none focus:border-[#2F74E9] transition-all cursor-pointer"
+                className="w-full bg-white dark:bg-[#17231E] border border-gray-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white flex items-center justify-between shadow-2xs hover:border-gray-400 dark:hover:border-white/20 focus:outline-none focus:border-[#2F74E9] transition-all cursor-pointer"
               >
                 <span>{gender}</span>
                 <ChevronDown className="w-4 h-4 text-gray-500 stroke-[2]" />
               </button>
 
               {isGenderDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#17231E] border border-gray-200 dark:border-white/10 rounded-xl shadow-lg z-30 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
                   {genderOptions.map((g) => (
                     <button
                       key={g}
@@ -236,8 +236,8 @@ export const ProfileSetupView: React.FC = () => {
                         setGender(g);
                         setIsGenderDropdownOpen(false);
                       }}
-                      className={`w-full px-3.5 py-2 text-left text-sm flex items-center justify-between hover:bg-gray-50 transition-colors ${
-                        gender === g ? 'font-bold text-[#2F74E9] bg-blue-50/50' : 'text-gray-700'
+                      className={`w-full px-3.5 py-2 text-left text-sm flex items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors ${
+                        gender === g ? 'font-bold text-[#2F74E9] bg-blue-50/50 dark:bg-blue-950/40' : 'text-gray-700 dark:text-[#A2B3AA]'
                       }`}
                     >
                       <span>{g}</span>
@@ -249,7 +249,7 @@ export const ProfileSetupView: React.FC = () => {
             </div>
 
             {/* Segmented Pill Selector */}
-            <div className="bg-[#ECEEF2] p-1 rounded-xl flex items-center gap-1 shadow-inner">
+            <div className="bg-[#ECEEF2] dark:bg-[#121E19] p-1 rounded-xl flex items-center gap-1 shadow-inner transition-colors">
               {genderOptions.map((g) => {
                 const isSelected = gender === g;
                 return (
@@ -260,7 +260,7 @@ export const ProfileSetupView: React.FC = () => {
                     className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer select-none ${
                       isSelected
                         ? 'bg-[#2F74E9] text-white shadow-xs font-bold'
-                        : 'text-gray-700 hover:text-gray-900'
+                        : 'text-gray-700 dark:text-[#A2B3AA] hover:text-gray-900 dark:hover:text-white'
                     }`}
                   >
                     {g}
@@ -272,13 +272,13 @@ export const ProfileSetupView: React.FC = () => {
 
           {/* 5. Blood Group Dropdown Selector */}
           <div className="relative">
-            <label className="block text-xs font-semibold text-gray-900 mb-1.5">
+            <label className="block text-xs font-semibold text-gray-900 dark:text-white mb-1.5">
               Blood Group
             </label>
             <button
               type="button"
               onClick={() => setIsBloodGroupOpen(!isBloodGroupOpen)}
-              className="w-full bg-white border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 flex items-center justify-between shadow-2xs hover:border-gray-400 focus:outline-none focus:border-[#2F74E9] transition-all cursor-pointer"
+              className="w-full bg-white dark:bg-[#17231E] border border-gray-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white flex items-center justify-between shadow-2xs hover:border-gray-400 dark:hover:border-white/20 focus:outline-none focus:border-[#2F74E9] transition-all cursor-pointer"
             >
               <span>{bloodGroup}</span>
               <ChevronDown className="w-4 h-4 text-gray-500 stroke-[2]" />
@@ -286,7 +286,7 @@ export const ProfileSetupView: React.FC = () => {
 
             {/* Dropdown Menu for Blood Groups */}
             {isBloodGroupOpen && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-30 p-2 grid grid-cols-4 gap-1.5 animate-in fade-in zoom-in-95 duration-150">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#17231E] border border-gray-200 dark:border-white/10 rounded-xl shadow-lg z-30 p-2 grid grid-cols-4 gap-1.5 animate-in fade-in zoom-in-95 duration-150">
                 {bloodGroups.map((bg) => (
                   <button
                     key={bg}
@@ -298,7 +298,7 @@ export const ProfileSetupView: React.FC = () => {
                     className={`py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                       bloodGroup === bg
                         ? 'bg-[#2F74E9] text-white shadow-xs'
-                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                        : 'bg-gray-50 dark:bg-[#121E19] text-gray-700 dark:text-[#A2B3AA] hover:bg-gray-100 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10'
                     }`}
                   >
                     {bg}
@@ -331,7 +331,7 @@ export const ProfileSetupView: React.FC = () => {
 
       {/* Bottom iOS Home Indicator */}
       <div className="w-full flex justify-center pb-1 pt-2">
-        <div className="w-32 h-1 bg-black/80 rounded-full"></div>
+        <div className="w-32 h-1 bg-black/80 dark:bg-white/60 rounded-full"></div>
       </div>
     </div>
   );

@@ -1,14 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { UserLocation, LocationStatus } from '../types';
 import {
-  JALPAIGURI_DEFAULT_LOCATION,
-  JALPAIGURI_LOCALITIES,
-  JALPAIGURI_SERVICE_REGION,
-  isWithinJalpaiguriRegion,
-  LocalityInfo,
+  SERVICE_AREA_MODE,
+  SUPPORTED_SERVICE_AREA,
+  validateServiceArea,
   calculateHaversineDistance,
-  formatDistanceString
-} from '../data/jalpaiguriLocalities';
+  formatDistanceString,
+  ServiceAreaMode,
+  ServiceAreaValidationResult
+} from '../utils/serviceArea';
+import { JALPAIGURI_LOCALITIES, LocalityInfo } from '../data/jalpaiguriLocalities';
 
 export interface ExtendedUserLocation extends UserLocation {
   city?: string;
@@ -21,9 +22,10 @@ export interface ExtendedUserLocation extends UserLocation {
   altitude?: number | null;
   speed?: number | null;
   heading?: number | null;
-  locationSource?: 'gps' | 'manual';
+  locationSource?: 'gps' | 'manual' | 'simulated';
   isLowAccuracy?: boolean;
   accuracyWarning?: string | null;
+  serviceAreaStatus?: 'inside' | 'outside';
   addressDetails?: {
     road?: string;
     neighbourhood?: string;
@@ -50,9 +52,16 @@ export interface ReverseGeocodeResult {
 }
 
 interface LocationContextType {
-  location: ExtendedUserLocation;
+  location: ExtendedUserLocation | null;
+  verifiedGpsLocation: ExtendedUserLocation | null;
   status: LocationStatus;
   errorMessage: string | null;
+  serviceAreaMode: ServiceAreaMode;
+  setServiceAreaMode: (mode: ServiceAreaMode) => void;
+  serviceAreaStatus: 'inside' | 'outside' | 'pending';
+  serviceAreaValidation: ServiceAreaValidationResult | null;
+  isWithinServiceRegion: boolean;
+  distanceToServiceRegionKm: number;
   isLocationSelectorOpen: boolean;
   setIsLocationSelectorOpen: (open: boolean) => void;
   isLiveTracking: boolean;
@@ -61,21 +70,18 @@ interface LocationContextType {
   requestCurrentLocation: () => Promise<{ success: boolean; locality?: string; location?: ExtendedUserLocation; error?: string }>;
   refreshLocation: () => Promise<{ success: boolean; locality?: string; error?: string }>;
   setManualLocation: (loc: LocalityInfo | { name: string; locality: string; lat: number; lng: number; city?: string; state?: string }) => void;
+  setSimulatedLocation: (preset: 'JALPAIGURI' | 'CHENNAI' | 'KOLKATA' | 'SILIGURI' | 'RESET') => void;
   getDistanceTo: (targetLat: number, targetLng: number) => { distanceKm: number; distanceText: string };
   localities: LocalityInfo[];
-  serviceRegion: typeof JALPAIGURI_SERVICE_REGION;
-  isWithinServiceRegion: boolean;
-  distanceToServiceRegionKm: number;
 }
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
 
-// Robust Reverse Geocoding calling dedicated server-side proxy with fallback
+// Real reverse geocoding via dedicated server-side proxy
 async function reverseGeocodeCoordinates(lat: number, lng: number): Promise<ReverseGeocodeResult> {
-  // 1. First priority: Server-side dedicated proxy route
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), 7000);
 
     const res = await fetch(`/api/location/reverse-geocode?lat=${lat}&lng=${lng}`, {
       signal: controller.signal,
@@ -109,103 +115,135 @@ async function reverseGeocodeCoordinates(lat: number, lng: number): Promise<Reve
       }
     }
   } catch (serverErr) {
-    console.warn('[REVERSE GEOCODE] Server proxy unavailable, trying fallback:', serverErr);
+    console.warn('[REVERSE GEOCODE] Server proxy call failed or timed out:', serverErr);
   }
 
-  // 2. Intelligent Regional Fallback: Detect if coordinates belong to known Indian Metros or regions
-  const KNOWN_REGIONS = [
-    { name: 'Chennai', state: 'Tamil Nadu', lat: 13.0827, lng: 80.2707, radiusKm: 80 },
-    { name: 'Bengaluru', state: 'Karnataka', lat: 12.9716, lng: 77.5946, radiusKm: 70 },
-    { name: 'Kolkata', state: 'West Bengal', lat: 22.5726, lng: 88.3639, radiusKm: 60 },
-    { name: 'Jalpaiguri', state: 'West Bengal', lat: 26.5414, lng: 88.7196, radiusKm: 35 },
-    { name: 'Siliguri', state: 'West Bengal', lat: 26.7271, lng: 88.3953, radiusKm: 40 },
-    { name: 'Mumbai', state: 'Maharashtra', lat: 19.0760, lng: 72.8777, radiusKm: 80 },
-    { name: 'Delhi', state: 'Delhi', lat: 28.6139, lng: 77.2090, radiusKm: 70 },
-    { name: 'Hyderabad', state: 'Telangana', lat: 17.3850, lng: 78.4867, radiusKm: 70 },
-    { name: 'Pune', state: 'Maharashtra', lat: 18.5204, lng: 73.8567, radiusKm: 50 },
-    { name: 'Coimbatore', state: 'Tamil Nadu', lat: 11.0168, lng: 76.9558, radiusKm: 45 },
-    { name: 'Madurai', state: 'Tamil Nadu', lat: 9.9252, lng: 78.1198, radiusKm: 40 },
-    { name: 'Kochi', state: 'Kerala', lat: 9.9312, lng: 76.2673, radiusKm: 45 }
+  // Client-side regional boundary fallback if server reverse geocode is unreachable
+  const REGIONAL_REFERENCE = [
+    { city: 'Chennai', district: 'Chennai', state: 'Tamil Nadu', lat: 13.0827, lng: 80.2707, radiusKm: 70 },
+    { city: 'Bengaluru', district: 'Bangalore Urban', state: 'Karnataka', lat: 12.9716, lng: 77.5946, radiusKm: 60 },
+    { city: 'Kolkata', district: 'Kolkata', state: 'West Bengal', lat: 22.5726, lng: 88.3639, radiusKm: 50 },
+    { city: 'Jalpaiguri', district: 'Jalpaiguri', state: 'West Bengal', lat: 26.5414, lng: 88.7196, radiusKm: 30 },
+    { city: 'Siliguri', district: 'Darjeeling', state: 'West Bengal', lat: 26.7271, lng: 88.3953, radiusKm: 35 },
+    { city: 'Mumbai', district: 'Mumbai City', state: 'Maharashtra', lat: 19.0760, lng: 72.8777, radiusKm: 65 },
+    { city: 'Delhi', district: 'New Delhi', state: 'Delhi', lat: 28.6139, lng: 77.2090, radiusKm: 60 },
+    { city: 'Hyderabad', district: 'Hyderabad', state: 'Telangana', lat: 17.3850, lng: 78.4867, radiusKm: 60 }
   ];
 
-  for (const reg of KNOWN_REGIONS) {
+  for (const reg of REGIONAL_REFERENCE) {
     const d = calculateHaversineDistance(lat, lng, reg.lat, reg.lng);
     if (d <= reg.radiusKm) {
       return {
-        formattedName: `${reg.name}, ${reg.state}`,
-        locality: reg.name,
-        city: reg.name,
-        district: reg.name,
+        formattedName: `${reg.city}, ${reg.state}`,
+        locality: reg.city,
+        city: reg.city,
+        district: reg.district,
         state: reg.state,
         country: 'India',
         pincode: '',
         road: '',
-        source: 'regional-resolver'
+        source: 'regional-fallback'
       };
     }
   }
 
-  // 3. Generic geographic coordinates representation (Never fake Kadamtala!)
-  const coordLabel = `Location (${lat.toFixed(3)}°, ${lng.toFixed(3)}°)`;
   return {
-    formattedName: coordLabel,
-    locality: coordLabel,
-    city: '',
+    formattedName: `Location (${lat.toFixed(4)}°, ${lng.toFixed(4)}°)`,
+    locality: `Coordinates ${lat.toFixed(2)}, ${lng.toFixed(2)}`,
+    city: 'Detected Area',
     district: '',
     state: '',
     country: 'India',
     pincode: '',
     road: '',
-    source: 'coordinate-fallback'
+    source: 'raw-coordinates'
   };
 }
 
 export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [location, setLocation] = useState<ExtendedUserLocation>(() => {
+  const [serviceAreaMode, setServiceAreaMode] = useState<ServiceAreaMode>(() => {
+    try {
+      const saved = localStorage.getItem('jpg_service_area_mode');
+      if (saved === 'JALPAIGURI_CITY' || saved === 'JALPAIGURI_DISTRICT') {
+        return saved;
+      }
+    } catch (e) {}
+    return SERVICE_AREA_MODE;
+  });
+
+  const [location, setLocation] = useState<ExtendedUserLocation | null>(() => {
     try {
       const saved = localStorage.getItem('jpg_user_location');
       if (saved) {
         const parsed = JSON.parse(saved);
-        // If parsed location is valid and not a stale default Kadamtala without coordinates
         if (parsed && typeof parsed.lat === 'number' && typeof parsed.lng === 'number') {
           return parsed;
         }
       }
     } catch (e) {
-      console.warn('Error reading cached location:', e);
+      console.warn('Error reading saved location:', e);
     }
-
-    // Default initial location: Marked explicitly as unverified default
-    return {
-      name: JALPAIGURI_DEFAULT_LOCATION.name,
-      locality: JALPAIGURI_DEFAULT_LOCATION.locality,
-      city: 'Jalpaiguri',
-      state: 'West Bengal',
-      country: 'India',
-      lat: JALPAIGURI_DEFAULT_LOCATION.lat,
-      lng: JALPAIGURI_DEFAULT_LOCATION.lng,
-      isApproximate: true,
-      locationSource: 'manual',
-      updatedAt: new Date().toISOString()
-    };
+    return null;
   });
 
-  const [status, setStatus] = useState<LocationStatus>('idle');
+  // Track the ground-truth verified GPS reading (distinct from any manual info view)
+  const [verifiedGpsLocation, setVerifiedGpsLocation] = useState<ExtendedUserLocation | null>(() => {
+    try {
+      const saved = localStorage.getItem('jpg_verified_gps_location');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.locationSource === 'gps') {
+          return parsed;
+        }
+      }
+    } catch (e) {}
+    return null;
+  });
+
+  const [status, setStatus] = useState<LocationStatus>('detecting');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLocationSelectorOpen, setIsLocationSelectorOpen] = useState<boolean>(false);
   const [isLiveTracking, setIsLiveTracking] = useState<boolean>(false);
   const watchIdRef = useRef<number | null>(null);
 
-  // Sync to local storage
+  // Calculate geospatial service area validation based on ground truth verified location or current location
+  const activeGeoLocation = location;
+  const serviceAreaValidation: ServiceAreaValidationResult | null = activeGeoLocation
+    ? validateServiceArea(activeGeoLocation.lat, activeGeoLocation.lng, serviceAreaMode)
+    : null;
+
+  const serviceAreaStatus: 'inside' | 'outside' | 'pending' = serviceAreaValidation
+    ? serviceAreaValidation.serviceAreaStatus
+    : (status === 'detecting' ? 'pending' : 'outside');
+
+  const isWithinServiceRegion = serviceAreaStatus === 'inside';
+
+  // Persist mode changes
   useEffect(() => {
     try {
-      localStorage.setItem('jpg_user_location', JSON.stringify(location));
-    } catch (e) {
-      console.warn('Error storing location:', e);
+      localStorage.setItem('jpg_service_area_mode', serviceAreaMode);
+    } catch (e) {}
+  }, [serviceAreaMode]);
+
+  // Persist location
+  useEffect(() => {
+    if (location) {
+      try {
+        localStorage.setItem('jpg_user_location', JSON.stringify(location));
+      } catch (e) {}
     }
   }, [location]);
 
-  // Request browser / device location via native Geolocation API with real coordinates & reverse geocoding
+  // Persist verified GPS location
+  useEffect(() => {
+    if (verifiedGpsLocation) {
+      try {
+        localStorage.setItem('jpg_verified_gps_location', JSON.stringify(verifiedGpsLocation));
+      } catch (e) {}
+    }
+  }, [verifiedGpsLocation]);
+
+  // Real GPS detection via native Geolocation API
   const requestCurrentLocation = useCallback(async (): Promise<{ success: boolean; locality?: string; location?: ExtendedUserLocation; error?: string }> => {
     setStatus('detecting');
     setErrorMessage(null);
@@ -218,7 +256,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     return new Promise((resolve) => {
-      // Prompt specification: enableHighAccuracy: true, timeout: 15000, maximumAge: 0
       const options: PositionOptions = {
         enableHighAccuracy: true,
         timeout: 15000,
@@ -229,19 +266,19 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         async (position) => {
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
-          const accuracy = position.coords.accuracy;
+          const accuracy = Math.round(position.coords.accuracy);
           const altitude = position.coords.altitude;
           const speed = position.coords.speed;
           const heading = position.coords.heading;
 
-          // Check accuracy: if > 1000m, flag low accuracy warning
           const isLowAccuracy = accuracy > 1000;
           const accuracyWarning = isLowAccuracy
-            ? `Your location accuracy is ±${Math.round(accuracy)}m. Location may be approximate.`
+            ? `Your location accuracy is ±${accuracy}m. Location may be approximate.`
             : null;
 
-          // Perform real reverse geocoding on the EXACT device coordinates
+          // Real reverse geocoding on the EXACT device coordinates
           const geoResult = await reverseGeocodeCoordinates(lat, lng);
+          const validation = validateServiceArea(lat, lng, serviceAreaMode);
 
           const newLoc: ExtendedUserLocation = {
             name: geoResult.formattedName,
@@ -254,7 +291,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             road: geoResult.road,
             lat,
             lng,
-            accuracy: Math.round(accuracy),
+            accuracy,
             altitude,
             speed,
             heading,
@@ -263,30 +300,33 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             locationSource: 'gps',
             isLowAccuracy,
             accuracyWarning,
+            serviceAreaStatus: validation.serviceAreaStatus,
             updatedAt: new Date().toISOString()
           };
 
           setLocation(newLoc);
+          setVerifiedGpsLocation(newLoc);
           setStatus('found');
           setErrorMessage(null);
-          console.log(`[DEVICE GPS SUCCESS] ${lat}, ${lng} (±${Math.round(accuracy)}m) -> ${geoResult.formattedName} [${geoResult.city}, ${geoResult.state}]`);
+
+          console.log(`[GPS DETECTED] (${lat.toFixed(4)}, ${lng.toFixed(4)}) -> ${geoResult.formattedName} -> Service Area: ${validation.serviceAreaStatus.toUpperCase()}`);
           resolve({ success: true, locality: geoResult.locality, location: newLoc });
         },
         (error) => {
-          let userFriendlyError = 'Unable to detect your device location.';
+          let userFriendlyError = 'Location permission is required to verify whether Jalpaiguri Connect is available in your area.';
           let newStatus: LocationStatus = 'error';
 
           switch (error.code) {
             case error.PERMISSION_DENIED:
-              userFriendlyError = 'Location permission is turned off. Please enable location access in your browser or device settings.';
+              userFriendlyError = 'Location permission is turned off. Please allow location access to check service availability.';
               newStatus = 'permission_denied';
               break;
             case error.POSITION_UNAVAILABLE:
-              userFriendlyError = 'GPS signal unavailable. Please ensure location services are enabled on your device.';
+              userFriendlyError = 'GPS signal unavailable. Please ensure device location services are enabled.';
               newStatus = 'unavailable';
               break;
             case error.TIMEOUT:
-              userFriendlyError = 'Location request timed out. Please tap Try Again.';
+              userFriendlyError = 'Location request timed out. Please tap Check Location Again.';
               newStatus = 'timeout';
               break;
             default:
@@ -296,20 +336,18 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
           setStatus(newStatus);
           setErrorMessage(userFriendlyError);
-          console.warn('[DEVICE GPS ERROR]', error.code, userFriendlyError);
           resolve({ success: false, error: userFriendlyError });
         },
         options
       );
     });
-  }, []);
+  }, [serviceAreaMode]);
 
-  // Location Refresh alias (dedicated function for Profile / Location settings)
   const refreshLocation = useCallback(async () => {
     return await requestCurrentLocation();
   }, [requestCurrentLocation]);
 
-  // Continuous Real-Time GPS Tracking via watchPosition
+  // Live GPS tracking via watchPosition
   const startLiveTracking = useCallback(() => {
     if (!navigator.geolocation) {
       setStatus('unavailable');
@@ -322,7 +360,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     setIsLiveTracking(true);
-    setStatus('detecting');
 
     watchIdRef.current = navigator.geolocation.watchPosition(
       async (pos) => {
@@ -331,11 +368,10 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const accuracy = Math.round(pos.coords.accuracy);
 
         setLocation((prev) => {
-          // If moved significantly or if previous location was manual, update
-          const dist = calculateHaversineDistance(prev.lat, prev.lng, lat, lng);
-          if (dist > 0.05 || prev.locationSource !== 'gps') {
+          if (!prev || calculateHaversineDistance(prev.lat, prev.lng, lat, lng) > 0.05) {
             reverseGeocodeCoordinates(lat, lng).then((geo) => {
-              setLocation({
+              const validation = validateServiceArea(lat, lng, serviceAreaMode);
+              const updated: ExtendedUserLocation = {
                 name: geo.formattedName,
                 locality: geo.locality,
                 city: geo.city,
@@ -353,37 +389,24 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 addressDetails: geo.details,
                 isApproximate: false,
                 locationSource: 'gps',
+                serviceAreaStatus: validation.serviceAreaStatus,
                 updatedAt: new Date().toISOString()
-              });
+              };
+              setLocation(updated);
+              setVerifiedGpsLocation(updated);
             });
           }
-
-          return {
-            ...prev,
-            lat,
-            lng,
-            accuracy,
-            altitude: pos.coords.altitude,
-            speed: pos.coords.speed,
-            heading: pos.coords.heading,
-            isApproximate: false,
-            locationSource: 'gps',
-            updatedAt: new Date().toISOString()
-          };
+          return prev;
         });
 
         setStatus('found');
       },
       (err) => {
-        console.warn('[REALTIME GPS] Watch position notice:', err.message);
+        console.warn('[REALTIME GPS] Watch error:', err.message);
       },
-      {
-        enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: 15000
-      }
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
     );
-  }, []);
+  }, [serviceAreaMode]);
 
   const stopLiveTracking = useCallback(() => {
     if (watchIdRef.current !== null) {
@@ -393,7 +416,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setIsLiveTracking(false);
   }, []);
 
-  // Clean up watch on unmount
   useEffect(() => {
     return () => {
       if (watchIdRef.current !== null) {
@@ -402,18 +424,12 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
   }, []);
 
-  // Auto-detect realtime location silently on mount if permission exists
+  // On initial mount, immediately attempt to detect real device GPS
   useEffect(() => {
-    if (typeof window !== 'undefined' && navigator.permissions && navigator.permissions.query) {
-      navigator.permissions.query({ name: 'geolocation' as PermissionName }).then((result) => {
-        if (result.state === 'granted') {
-          requestCurrentLocation();
-        }
-      }).catch(() => {});
-    }
+    requestCurrentLocation();
   }, [requestCurrentLocation]);
 
-  // Set manual location selection without locking user permanently
+  // Manual location for general informational view (explicitly marked as manual)
   const setManualLocation = useCallback((loc: LocalityInfo | { name: string; locality: string; lat: number; lng: number; city?: string; state?: string }) => {
     stopLiveTracking();
     const localityName = 'shortName' in loc ? loc.shortName : loc.locality;
@@ -421,16 +437,20 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const city = 'city' in loc && loc.city ? loc.city : 'Jalpaiguri';
     const state = 'state' in loc && loc.state ? loc.state : 'West Bengal';
 
+    const validation = validateServiceArea(loc.lat, loc.lng, serviceAreaMode);
+
     const newLoc: ExtendedUserLocation = {
       name: rawName,
       locality: localityName,
       city,
+      district: 'Jalpaiguri',
       state,
       country: 'India',
       lat: loc.lat,
       lng: loc.lng,
       isApproximate: true,
       locationSource: 'manual',
+      serviceAreaStatus: validation.serviceAreaStatus,
       updatedAt: new Date().toISOString()
     };
 
@@ -438,35 +458,74 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setStatus('manual');
     setErrorMessage(null);
     setIsLocationSelectorOpen(false);
-  }, [stopLiveTracking]);
+  }, [stopLiveTracking, serviceAreaMode]);
 
-  // Calculate distance from user's current GPS/selected location to target
+  // Developer & Tester Simulation Preset Switcher
+  const setSimulatedLocation = useCallback((preset: 'JALPAIGURI' | 'CHENNAI' | 'KOLKATA' | 'SILIGURI' | 'RESET') => {
+    stopLiveTracking();
+    if (preset === 'RESET') {
+      requestCurrentLocation();
+      return;
+    }
+
+    const PRESETS = {
+      JALPAIGURI: { name: 'Kadamtala, Jalpaiguri', locality: 'Kadamtala', city: 'Jalpaiguri', district: 'Jalpaiguri', state: 'West Bengal', lat: 26.5218, lng: 88.7289 },
+      CHENNAI: { name: 'T. Nagar, Chennai', locality: 'T. Nagar', city: 'Chennai', district: 'Chennai', state: 'Tamil Nadu', lat: 13.0418, lng: 80.2341 },
+      KOLKATA: { name: 'Park Street, Kolkata', locality: 'Park Street', city: 'Kolkata', district: 'Kolkata', state: 'West Bengal', lat: 22.5535, lng: 88.3518 },
+      SILIGURI: { name: 'Sevoke Road, Siliguri', locality: 'Sevoke Road', city: 'Siliguri', district: 'Darjeeling', state: 'West Bengal', lat: 26.7271, lng: 88.3953 }
+    };
+
+    const target = PRESETS[preset];
+    const validation = validateServiceArea(target.lat, target.lng, serviceAreaMode);
+
+    const simLoc: ExtendedUserLocation = {
+      name: target.name,
+      locality: target.locality,
+      city: target.city,
+      district: target.district,
+      state: target.state,
+      country: 'India',
+      lat: target.lat,
+      lng: target.lng,
+      accuracy: 15,
+      isApproximate: false,
+      locationSource: 'simulated',
+      serviceAreaStatus: validation.serviceAreaStatus,
+      updatedAt: new Date().toISOString()
+    };
+
+    setLocation(simLoc);
+    setVerifiedGpsLocation(simLoc);
+    setStatus('found');
+    setErrorMessage(null);
+  }, [stopLiveTracking, requestCurrentLocation, serviceAreaMode]);
+
   const getDistanceTo = useCallback(
     (targetLat: number, targetLng: number) => {
-      const distanceKm = calculateHaversineDistance(location.lat, location.lng, targetLat, targetLng);
+      const currentLat = location ? location.lat : 26.5414;
+      const currentLng = location ? location.lng : 88.7196;
+      const distanceKm = calculateHaversineDistance(currentLat, currentLng, targetLat, targetLng);
       return {
         distanceKm,
         distanceText: formatDistanceString(distanceKm)
       };
     },
-    [location.lat, location.lng]
-  );
-
-  // Separate user location from Jalpaiguri service region
-  const isWithinServiceRegion = isWithinJalpaiguriRegion(location.lat, location.lng);
-  const distanceToServiceRegionKm = calculateHaversineDistance(
-    location.lat,
-    location.lng,
-    JALPAIGURI_SERVICE_REGION.lat,
-    JALPAIGURI_SERVICE_REGION.lng
+    [location]
   );
 
   return (
     <LocationContext.Provider
       value={{
         location,
+        verifiedGpsLocation,
         status,
         errorMessage,
+        serviceAreaMode,
+        setServiceAreaMode,
+        serviceAreaStatus,
+        serviceAreaValidation,
+        isWithinServiceRegion,
+        distanceToServiceRegionKm: serviceAreaValidation?.centerDistanceKm || 0,
         isLocationSelectorOpen,
         setIsLocationSelectorOpen,
         isLiveTracking,
@@ -475,11 +534,9 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         requestCurrentLocation,
         refreshLocation,
         setManualLocation,
+        setSimulatedLocation,
         getDistanceTo,
-        localities: JALPAIGURI_LOCALITIES,
-        serviceRegion: JALPAIGURI_SERVICE_REGION,
-        isWithinServiceRegion,
-        distanceToServiceRegionKm
+        localities: JALPAIGURI_LOCALITIES
       }}
     >
       {children}

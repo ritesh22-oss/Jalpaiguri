@@ -75,18 +75,18 @@ export const ReportProblemView: React.FC = () => {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-[#FAF8F5] p-6 flex flex-col justify-between max-w-md mx-auto select-none">
+      <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] p-6 flex flex-col justify-between max-w-md mx-auto select-none transition-colors">
         <div className="pt-12 text-center space-y-4">
-          <div className="w-20 h-20 bg-[#E6F4EA] text-[#063B2C] rounded-full flex items-center justify-center mx-auto shadow-sm">
+          <div className="w-20 h-20 bg-[#E6F4EA] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-400 border border-transparent dark:border-emerald-800/40 rounded-full flex items-center justify-center mx-auto shadow-sm">
             <CheckCircle2 className="w-10 h-10" />
           </div>
-          <h2 className="text-2xl font-extrabold text-[#11241C] tracking-tight">
+          <h2 className="text-2xl font-extrabold text-[#11241C] dark:text-white tracking-tight">
             Report Submitted Successfully!
           </h2>
-          <div className="inline-block bg-white px-4 py-2 rounded-xl border border-[#D2CEBE] text-sm font-bold text-[#063B2C]">
+          <div className="inline-block bg-white dark:bg-[#17231E] px-4 py-2 rounded-xl border border-[#D2CEBE] dark:border-white/10 text-sm font-bold text-[#063B2C] dark:text-emerald-400">
             Report ID: {submittedReportId}
           </div>
-          <p className="text-sm text-[#55685F] leading-relaxed max-w-[280px] mx-auto">
+          <p className="text-sm text-[#55685F] dark:text-[#A2B3AA] leading-relaxed max-w-[280px] mx-auto">
             Your report has been logged and assigned to Jalpaiguri Municipal Ward officers for inspection.
           </p>
         </div>
@@ -94,13 +94,13 @@ export const ReportProblemView: React.FC = () => {
         <div className="space-y-3 pb-6">
           <button
             onClick={() => navigate('report-tracking', { reportId: submittedReportId })}
-            className="w-full py-4 rounded-2xl bg-[#063B2C] text-white font-bold text-sm shadow-md hover:bg-[#084D3A] cursor-pointer"
+            className="w-full py-4 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-sm shadow-md hover:bg-[#084D3A] cursor-pointer"
           >
             Track Status
           </button>
           <button
             onClick={goBack}
-            className="w-full py-3.5 rounded-2xl bg-white border border-[#D2CEBE] text-[#11241C] font-bold text-sm hover:bg-[#FAF8F5] cursor-pointer"
+            className="w-full py-3.5 rounded-2xl bg-white dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 text-[#11241C] dark:text-white font-bold text-sm hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] cursor-pointer"
           >
             Back to Home
           </button>
@@ -110,17 +110,17 @@ export const ReportProblemView: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] pb-28 max-w-md mx-auto select-none">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 max-w-md mx-auto select-none transition-colors">
       {/* Exact Header matching Screenshot */}
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 backdrop-blur-md px-4 py-3 flex items-center gap-4">
+      <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0F1A15]/90 backdrop-blur-md px-4 py-3 flex items-center gap-4 border-b border-[#E8E4DA]/50 dark:border-white/10 transition-colors">
         <button
           onClick={goBack}
-          className="w-10 h-10 rounded-full bg-white border border-[#E8E4DA] flex items-center justify-center text-[#11241C] shadow-sm hover:bg-[#F3F0E6] active:scale-95 transition-all cursor-pointer"
+          className="w-10 h-10 rounded-full bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-sm hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
           aria-label="Go back"
         >
           <ArrowLeft className="w-5 h-5 stroke-[2]" />
         </button>
-        <h1 className="text-lg font-bold text-[#11241C] tracking-tight">
+        <h1 className="text-lg font-bold text-[#11241C] dark:text-white tracking-tight">
           Report Problem
         </h1>
       </header>
@@ -128,17 +128,17 @@ export const ReportProblemView: React.FC = () => {
       <form onSubmit={handleSubmit} className="p-5 space-y-6">
         {/* Big Heading */}
         <div className="text-center pt-1 pb-2">
-          <h2 className="text-3xl font-extrabold text-[#063B2C] tracking-tight">
+          <h2 className="text-3xl font-extrabold text-[#063B2C] dark:text-emerald-400 tracking-tight">
             What needs fixing?
           </h2>
-          <p className="text-sm text-[#55685F] mt-1.5 leading-relaxed">
+          <p className="text-sm text-[#55685F] dark:text-[#A2B3AA] mt-1.5 leading-relaxed">
             Help us improve Jalpaiguri by reporting local civic issues.
           </p>
         </div>
 
         {/* 1. Select Category */}
         <div className="space-y-3">
-          <label className="block text-sm font-bold text-[#11241C]">
+          <label className="block text-sm font-bold text-[#11241C] dark:text-white">
             1. Select Category
           </label>
           <div className="grid grid-cols-2 gap-2.5">
@@ -151,11 +151,11 @@ export const ReportProblemView: React.FC = () => {
                   onClick={() => setCategory(cat.id)}
                   className={`flex items-center gap-2.5 py-3 px-4 rounded-full border text-xs font-bold transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-[#063B2C] text-white border-[#063B2C] shadow-xs'
-                      : 'bg-white text-[#11241C] border-[#D2CEBE] hover:bg-[#FAF8F5]'
+                      ? 'bg-[#063B2C] dark:bg-emerald-600 text-white border-[#063B2C] dark:border-emerald-600 shadow-xs'
+                      : 'bg-white dark:bg-[#17231E] text-[#11241C] dark:text-white border-[#D2CEBE] dark:border-white/10 hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A]'
                   }`}
                 >
-                  <span className={isSelected ? 'text-white' : 'text-[#063B2C]'}>
+                  <span className={isSelected ? 'text-white' : 'text-[#063B2C] dark:text-emerald-400'}>
                     {cat.icon}
                   </span>
                   <span>{cat.label}</span>
@@ -167,7 +167,7 @@ export const ReportProblemView: React.FC = () => {
 
         {/* 2. Add a Photo */}
         <div className="space-y-3">
-          <label className="block text-sm font-bold text-[#11241C]">
+          <label className="block text-sm font-bold text-[#11241C] dark:text-white">
             2. Add a Photo
           </label>
           <input
@@ -180,7 +180,7 @@ export const ReportProblemView: React.FC = () => {
 
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="w-full h-36 border-2 border-dashed border-[#B8B4A4] rounded-3xl bg-white flex flex-col items-center justify-center p-4 hover:border-[#063B2C] hover:bg-[#FAF8F5] transition-all cursor-pointer relative overflow-hidden"
+            className="w-full h-36 border-2 border-dashed border-[#B8B4A4] dark:border-white/20 rounded-3xl bg-white dark:bg-[#17231E] flex flex-col items-center justify-center p-4 hover:border-[#063B2C] dark:hover:border-emerald-500 hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] transition-all cursor-pointer relative overflow-hidden"
           >
             {photoPreview ? (
               <div className="relative w-full h-full flex items-center justify-center">
@@ -195,10 +195,10 @@ export const ReportProblemView: React.FC = () => {
               </div>
             ) : (
               <div className="text-center space-y-2">
-                <div className="w-10 h-10 rounded-full bg-[#FAF8F5] text-[#11241C] flex items-center justify-center mx-auto">
+                <div className="w-10 h-10 rounded-full bg-[#FAF8F5] dark:bg-[#121E19] text-[#11241C] dark:text-white flex items-center justify-center mx-auto">
                   <Camera className="w-6 h-6 stroke-[1.8]" />
                 </div>
-                <span className="text-xs font-semibold text-[#55685F] block">
+                <span className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA] block">
                   Tap to upload
                 </span>
               </div>
@@ -208,17 +208,17 @@ export const ReportProblemView: React.FC = () => {
 
         {/* 3. Location */}
         <div className="space-y-3">
-          <label className="block text-sm font-bold text-[#11241C]">
+          <label className="block text-sm font-bold text-[#11241C] dark:text-white">
             3. Location
           </label>
-          <div className="w-full bg-white border border-[#D2CEBE] rounded-2xl px-4 py-3.5 flex items-center justify-between shadow-xs">
+          <div className="w-full bg-white dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 rounded-2xl px-4 py-3.5 flex items-center justify-between shadow-xs transition-colors">
             <div className="flex items-center gap-2.5 min-w-0">
-              <MapPin className="w-5 h-5 text-[#063B2C] shrink-0" />
+              <MapPin className="w-5 h-5 text-[#063B2C] dark:text-emerald-400 shrink-0" />
               <input
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="font-bold text-xs sm:text-sm text-[#11241C] bg-transparent focus:outline-none truncate w-full"
+                className="font-bold text-xs sm:text-sm text-[#11241C] dark:text-white bg-transparent focus:outline-none truncate w-full"
               />
             </div>
             <button
@@ -227,7 +227,7 @@ export const ReportProblemView: React.FC = () => {
                 const manual = prompt('Enter exact area or ward in Jalpaiguri:', location);
                 if (manual) setLocation(manual);
               }}
-              className="text-xs font-extrabold text-[#063B2C] uppercase tracking-wider pl-2 hover:underline cursor-pointer"
+              className="text-xs font-extrabold text-[#063B2C] dark:text-emerald-400 uppercase tracking-wider pl-2 hover:underline cursor-pointer"
             >
               EDIT
             </button>
@@ -236,7 +236,7 @@ export const ReportProblemView: React.FC = () => {
 
         {/* 4. Description */}
         <div className="space-y-3">
-          <label className="block text-sm font-bold text-[#11241C]">
+          <label className="block text-sm font-bold text-[#11241C] dark:text-white">
             4. Description
           </label>
           <textarea
@@ -244,7 +244,7 @@ export const ReportProblemView: React.FC = () => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Provide more details about the issue..."
-            className="w-full bg-white border border-[#D2CEBE] rounded-2xl p-4 text-sm font-medium text-[#11241C] placeholder:text-[#8C9B93] focus:outline-none focus:border-[#063B2C] shadow-xs resize-none"
+            className="w-full bg-white dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 rounded-2xl p-4 text-sm font-medium text-[#11241C] dark:text-white placeholder:text-[#8C9B93] dark:placeholder:text-[#A2B3AA] focus:outline-none focus:border-[#063B2C] dark:focus:border-emerald-500 shadow-xs resize-none transition-colors"
           ></textarea>
         </div>
 
@@ -253,7 +253,7 @@ export const ReportProblemView: React.FC = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-[#063B2C] text-white font-bold text-sm py-4 px-6 rounded-2xl flex items-center justify-center gap-2.5 shadow-md hover:bg-[#084D3A] active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+            className="w-full bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-sm py-4 px-6 rounded-2xl flex items-center justify-center gap-2.5 shadow-md hover:bg-[#084D3A] active:scale-98 transition-all cursor-pointer disabled:opacity-50"
           >
             <Send className="w-4 h-4 fill-white rotate-45" />
             <span>{isSubmitting ? 'Submitting Report…' : 'Submit Report'}</span>

@@ -1,3 +1,21 @@
+import {
+  SERVICE_AREA_MODE,
+  SUPPORTED_SERVICE_AREA,
+  validateServiceArea,
+  ServiceAreaMode,
+  calculateHaversineDistance,
+  ServiceAreaValidationResult
+} from '../utils/serviceArea';
+
+export {
+  SERVICE_AREA_MODE,
+  SUPPORTED_SERVICE_AREA,
+  validateServiceArea,
+  calculateHaversineDistance,
+  type ServiceAreaMode,
+  type ServiceAreaValidationResult
+};
+
 export interface LocalityInfo {
   id: string;
   name: string;
@@ -160,18 +178,6 @@ export const JALPAIGURI_LOCALITIES: LocalityInfo[] = [
   }
 ];
 
-// Haversine distance calculator in kilometers
-export function calculateHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371; // Earth's radius in km
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
 
 export function formatDistanceString(distanceKm: number): string {
   if (distanceKm < 1) {
@@ -193,11 +199,21 @@ export const JALPAIGURI_SERVICE_REGION = {
 };
 
 export function isWithinJalpaiguriRegion(lat: number, lng: number): boolean {
-  return calculateHaversineDistance(lat, lng, JALPAIGURI_SERVICE_REGION.lat, JALPAIGURI_SERVICE_REGION.lng) <= JALPAIGURI_SERVICE_REGION.radiusKm;
+  return validateServiceArea(lat, lng).isInside;
 }
 
 // Find closest locality name in Jalpaiguri (only valid if within the Jalpaiguri service region)
 export function getClosestLocalityName(lat: number, lng: number): { locality: string; fullName: string; distanceKm: number; isWithinRegion: boolean } {
+  const validation = validateServiceArea(lat, lng);
+  if (!validation.isInside) {
+    return {
+      locality: 'Outside Jalpaiguri',
+      fullName: 'Outside Jalpaiguri Service Area',
+      distanceKm: validation.centerDistanceKm,
+      isWithinRegion: false
+    };
+  }
+
   let closest = JALPAIGURI_LOCALITIES[0];
   let minDistance = calculateHaversineDistance(lat, lng, closest.lat, closest.lng);
 
@@ -209,12 +225,10 @@ export function getClosestLocalityName(lat: number, lng: number): { locality: st
     }
   }
 
-  const isWithin = minDistance <= JALPAIGURI_SERVICE_REGION.radiusKm;
-
   return {
-    locality: isWithin ? closest.shortName : 'Outside Jalpaiguri',
-    fullName: isWithin ? `${closest.name}, Jalpaiguri` : 'Outside Jalpaiguri Service Area',
+    locality: closest.shortName,
+    fullName: `${closest.name}, Jalpaiguri`,
     distanceKm: minDistance,
-    isWithinRegion: isWithin
+    isWithinRegion: true
   };
 }

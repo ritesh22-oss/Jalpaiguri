@@ -51,6 +51,10 @@ export type ViewType =
   | 'admin-dashboard'
   | 'ai-chat'
   | 'maps-explorer'
+  | 'safety-sos'
+  | 'sexual-violence-support'
+  | 'outside-area'
+  | 'location-permission-required'
   | 'faq';
 
 export type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | "I don't know";
@@ -61,6 +65,7 @@ export type LocationStatus =
   | 'permission_request'
   | 'found'
   | 'permission_denied'
+  | 'denied'
   | 'unavailable'
   | 'timeout'
   | 'error'
@@ -82,7 +87,7 @@ export interface UserLocation {
   altitude?: number | null;
   speed?: number | null;
   heading?: number | null;
-  locationSource?: 'gps' | 'manual';
+  locationSource?: 'gps' | 'manual' | 'simulated';
   updatedAt?: string;
 }
 
@@ -145,6 +150,16 @@ export interface UserProfile {
   bloodGroup?: BloodGroup;
   location: string;
   coordinates?: { lat: number; lng: number };
+  latitude?: number;
+  longitude?: number;
+  accuracy?: number;
+  city?: string;
+  district?: string;
+  state?: string;
+  pincode?: string;
+  locationSource?: 'gps' | 'manual';
+  locationUpdatedAt?: string;
+  serviceAreaStatus?: 'inside' | 'outside';
   avatarUrl?: string;
   isVolunteer?: boolean;
   isBloodDonor?: boolean;
@@ -153,6 +168,72 @@ export interface UserProfile {
   fingerprintEnrolled?: boolean;
   fingerprintCredentialId?: string;
   createdAt: string;
+}
+
+export type EmergencyEventType = 'SAFETY_SOS' | 'MEDICAL_EMERGENCY' | 'ACCIDENT' | 'TEST_SIMULATION';
+
+export interface EmergencyEvent {
+  id: string;
+  user_id: string;
+  userName?: string;
+  event_type: EmergencyEventType;
+  created_at: string;
+  latitude: number;
+  longitude: number;
+  accuracy?: number;
+  city: string;
+  district?: string;
+  state: string;
+  status: 'ACTIVE' | 'CANCELLED' | 'RESOLVED' | 'TEST_SIMULATION';
+  isTestMode?: boolean;
+  cancelled_at?: string | null;
+  cancellation_reason?: string | null;
+  resolved_at?: string | null;
+  device_status?: string;
+  alerts_sent_trusted?: boolean;
+  alerts_sent_nearby?: boolean;
+  nearby_recipients_count?: number;
+}
+
+export interface EmergencyAlertRecipient {
+  id: string;
+  event_id: string;
+  recipient_user_id: string;
+  recipient_type: 'TRUSTED_CONTACT' | 'NEARBY_COMMUNITY';
+  sent_at: string;
+  delivered_at?: string | null;
+  read_at?: string | null;
+}
+
+export interface TrustedContact {
+  id: string;
+  name: string;
+  phone: string;
+  relationship: 'Parent' | 'Sibling' | 'Spouse' | 'Child' | 'Friend' | 'Guardian' | 'Other';
+  isEmergencyAlertContact: boolean;
+  addedAt: string;
+}
+
+export interface SafetySettings {
+  shakeToSosEnabled: boolean;
+  instantSosEnabled: boolean;
+  nearbyAlertsEnabled: boolean;
+  nearbyAlertRadiusKm: 0.5 | 1 | 2 | 5;
+  locationSharingEnabled: boolean;
+  emergencyNotificationSound: boolean;
+  hasSeenSafetyDisclaimer: boolean;
+}
+
+export interface PrivateIncidentNote {
+  id: string;
+  referenceNumber: string;
+  date: string;
+  time: string;
+  approximateLocation: string;
+  category: 'Immediate Danger' | 'Harassment' | 'Assault' | 'Stalking' | 'Domestic Violence' | 'Other';
+  notes: string;
+  createdAt: string;
+  isEncryptedLocally: boolean;
 }
 
 // Internal municipal administrator access verification (strictly private, never exposed to UI)
