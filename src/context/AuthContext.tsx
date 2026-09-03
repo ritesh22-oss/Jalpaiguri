@@ -277,12 +277,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log(`[FIREBASE AUTH] Dispatching real SMS OTP to ${e164Phone}...`);
       const confirmation = await signInWithPhoneNumber(auth, e164Phone, verifier);
       setConfirmationResult(confirmation);
-      console.log(`[FIREBASE AUTH] SMS OTP dispatched successfully to ${e164Phone}`);
+      setActiveOtp(null);
+      console.log(`[FIREBASE AUTH] Real SMS OTP dispatched successfully to ${e164Phone}`);
 
       setIsLoading(false);
       return {
         success: true,
-        message: `Verification code sent to ${displayPhone}`
+        message: `Real SMS verification code dispatched to ${displayPhone} via Firebase. Check your phone's Messages app!`
       };
     } catch (fbErr: any) {
       console.warn('[FIREBASE AUTH] Notice on carrier SMS dispatch:', fbErr);
@@ -290,18 +291,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Cleanly reset the existing verifier on error
       clearRecaptchaVerifier();
 
-      // If Firebase carrier SMS is blocked due to quotas or recaptcha challenge,
-      // generate a resilient 6-digit verification code so the citizen can continue smoothly
+      // Extract specific Firebase error explanation
+      let hint = '';
+      if (fbErr.code === 'auth/unauthorized-domain') {
+        hint = ' (Authorized domain needed in Firebase Console)';
+      } else if (fbErr.code === 'auth/quota-exceeded') {
+        hint = ' (Daily Firebase SMS quota reached)';
+      } else if (fbErr.code === 'auth/too-many-requests') {
+        hint = ' (Too many attempts, please wait a moment)';
+      }
+
+      // If Firebase carrier SMS encounters domain whitelist or carrier limits,
+      // provide fallback code so the user can continue smoothly without getting stuck
       const fallbackCode = Math.floor(100000 + Math.random() * 900000).toString();
       setActiveOtp(fallbackCode);
       setIsLoading(false);
 
-      console.log(`[AUTH VERIFICATION] Generated 6-digit verification code: ${fallbackCode} for ${displayPhone}`);
+      console.log(`[AUTH VERIFICATION] Fallback code: ${fallbackCode} for ${displayPhone}${hint}`);
 
       return {
         success: true,
         otp: fallbackCode,
-        message: `Verification code generated for ${displayPhone}: ${fallbackCode}`
+        message: `Code generated for ${displayPhone}: ${fallbackCode}${hint}`
       };
     }
   };
