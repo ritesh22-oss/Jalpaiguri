@@ -181,8 +181,23 @@ export function formatDistanceString(distanceKm: number): string {
   return `${distanceKm.toFixed(1)} km`;
 }
 
-// Find closest locality name in Jalpaiguri
-export function getClosestLocalityName(lat: number, lng: number): { locality: string; fullName: string; distanceKm: number } {
+export const JALPAIGURI_SERVICE_REGION = {
+  name: 'Jalpaiguri Civic & Municipal Region',
+  city: 'Jalpaiguri',
+  district: 'Jalpaiguri',
+  state: 'West Bengal',
+  country: 'India',
+  lat: 26.5414,
+  lng: 88.7196,
+  radiusKm: 35
+};
+
+export function isWithinJalpaiguriRegion(lat: number, lng: number): boolean {
+  return calculateHaversineDistance(lat, lng, JALPAIGURI_SERVICE_REGION.lat, JALPAIGURI_SERVICE_REGION.lng) <= JALPAIGURI_SERVICE_REGION.radiusKm;
+}
+
+// Find closest locality name in Jalpaiguri (only valid if within the Jalpaiguri service region)
+export function getClosestLocalityName(lat: number, lng: number): { locality: string; fullName: string; distanceKm: number; isWithinRegion: boolean } {
   let closest = JALPAIGURI_LOCALITIES[0];
   let minDistance = calculateHaversineDistance(lat, lng, closest.lat, closest.lng);
 
@@ -194,9 +209,12 @@ export function getClosestLocalityName(lat: number, lng: number): { locality: st
     }
   }
 
+  const isWithin = minDistance <= JALPAIGURI_SERVICE_REGION.radiusKm;
+
   return {
-    locality: closest.shortName,
-    fullName: `${closest.name}, Jalpaiguri`,
-    distanceKm: minDistance
+    locality: isWithin ? closest.shortName : 'Outside Jalpaiguri',
+    fullName: isWithin ? `${closest.name}, Jalpaiguri` : 'Outside Jalpaiguri Service Area',
+    distanceKm: minDistance,
+    isWithinRegion: isWithin
   };
 }

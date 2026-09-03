@@ -13,7 +13,8 @@ import {
   AppNotification,
   ServiceRequest,
   WorkerFilterState,
-  ChatMessage
+  ChatMessage,
+  isAuthorizedAdminEmail
 } from '../types';
 import { OFFICIAL_DOCTORS, OFFICIAL_HOSPITALS } from '../data/directoryData';
 import { db, isFirebaseConfigured, apiFetch } from '../lib/firebase';
@@ -798,6 +799,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const approveWorkerVerification = async (id: string) => {
+    // Verify administrative authority before executing approval
+    try {
+      const stored = localStorage.getItem('jpg_user_profile');
+      const profile = stored ? JSON.parse(stored) : null;
+      if (!profile || !isAuthorizedAdminEmail(profile?.email)) {
+        console.warn('[SECURITY] Blocked unauthorized worker approval attempt');
+        showToast('Access Denied: Administrative authority required.', 'error');
+        return;
+      }
+    } catch {
+      // Fallback
+    }
+
     setAdminVerificationQueue((prev) => prev.map((v) => (v.id === id ? { ...v, status: 'Approved' } : v)));
     showToast('Worker profile verified and approved!', 'success');
 

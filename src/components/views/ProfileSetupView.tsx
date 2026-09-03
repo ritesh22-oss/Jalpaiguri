@@ -17,11 +17,11 @@ import { useLocation } from '../../context/LocationContext';
 import { BloodGroup } from '../../types';
 
 export const ProfileSetupView: React.FC = () => {
-  const { user, completeUserProfile } = useAuth();
+  const { user, firebaseUser, completeUserProfile } = useAuth();
   const { navigate, replaceView } = useNav();
   const { location, requestCurrentLocation, status, setIsLocationSelectorOpen } = useLocation();
 
-  const [name, setName] = useState(user?.name || '');
+  const [name, setName] = useState(user?.name || firebaseUser?.displayName || '');
   const [age, setAge] = useState<number | ''>(user?.age || '');
   const [gender, setGender] = useState<'Male' | 'Female' | 'Other'>('Female');
   const [bloodGroup, setBloodGroup] = useState<BloodGroup>(user?.bloodGroup || 'A+');
@@ -30,6 +30,12 @@ export const ProfileSetupView: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [gpsLoading, setGpsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  React.useEffect(() => {
+    if (!name && (user?.name || firebaseUser?.displayName)) {
+      setName(user?.name || firebaseUser?.displayName || '');
+    }
+  }, [user?.name, firebaseUser?.displayName]);
 
   const bloodGroups: BloodGroup[] = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   const genderOptions = ['Male', 'Female', 'Other'] as const;
