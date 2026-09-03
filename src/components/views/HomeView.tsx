@@ -336,11 +336,11 @@ export const HomeView: React.FC = () => {
                   <MapPin className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 </div>
                 <span className="text-[9px] font-bold bg-[#E6F4EA] dark:bg-[#1C4532] text-[#063B2C] dark:text-[#4ECCA3] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                  Maps Live
+                  Places Live
                 </span>
               </div>
               <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white mt-2.5 leading-snug">
-                Maps Grounding
+                Explore Places
               </h3>
               <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA] mt-0.5 leading-tight">
                 Verified clinics, stores, transport & tourist spots.
@@ -558,52 +558,51 @@ export const HomeView: React.FC = () => {
           <LiveJalpaiguriMap height={200} showDetails={true} />
         </div>
 
-        {/* Live Local Alerts */}
+        {/* Live Traffic & Waterlogging Highlights */}
         <div>
           <div className="flex items-center justify-between mb-3 px-1">
-            <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white tracking-tight flex items-center gap-1.5">
-              <AlertTriangle className="w-4 h-4 text-[#D9383A]" />
-              <span>Local Updates</span>
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white tracking-tight flex items-center gap-1.5">
+                <Navigation className="w-4 h-4 text-[#063B2C] dark:text-[#4ECCA3]" />
+                <span>Live Traffic & Waterlogging</span>
+              </h3>
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-black uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                <span>Live</span>
+              </span>
+            </div>
             <button
               onClick={() => navigate('alerts')}
-              className="text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] hover:underline cursor-pointer"
+              className="text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] hover:underline cursor-pointer flex items-center gap-0.5"
             >
-              Open Map
+              <span>Full Map</span>
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          {localAlerts.length > 0 ? (
-            <div
-              onClick={() => navigate('alerts')}
-              className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs hover:border-[#063B2C] dark:hover:border-emerald-500 transition-all cursor-pointer"
-            >
-              <div className="flex items-center justify-between text-xs font-bold mb-1.5">
-                <span className="text-[#D9383A] bg-[#FFEBEA] dark:bg-red-950/50 px-2.5 py-0.5 rounded-full">
-                  {localAlerts[0].category}
-                </span>
-                <span className="text-[#8C9B93] dark:text-[#73857C] font-medium">{localAlerts[0].timeAgo}</span>
-              </div>
-              <h4 className="font-extrabold text-sm text-[#11241C] dark:text-white">
-                {localAlerts[0].title}
-              </h4>
-              <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] mt-1 line-clamp-2">
-                {localAlerts[0].description} ({localAlerts[0].confirmedCount} citizens confirmed).
-              </p>
-            </div>
-          ) : (
-            <div
-              onClick={() => navigate('alerts')}
-              className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs hover:border-[#063B2C] dark:hover:border-emerald-500 transition-all cursor-pointer text-center"
-            >
-              <p className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA]">
-                No active traffic or weather hazards reported right now in Jalpaiguri.
-              </p>
-              <span className="text-[11px] font-bold text-[#063B2C] dark:text-[#4ECCA3] underline mt-1 inline-block">
-                View Community Map & Report
+          <div
+            onClick={() => navigate('alerts')}
+            className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs hover:border-[#063B2C] dark:hover:border-emerald-500 transition-all cursor-pointer group space-y-2.5"
+          >
+            <div className="flex items-center justify-between text-xs font-bold">
+              <span className="text-[#063B2C] dark:text-[#34D399] bg-[#E6F4EA] dark:bg-[#1C4532] px-2.5 py-0.5 rounded-full">
+                Google Traffic Layer
+              </span>
+              <span className="text-[11px] text-[#8C9B93] dark:text-[#73857C] font-medium flex items-center gap-1">
+                <span>Real-time Speeds</span>
               </span>
             </div>
-          )}
+            <h4 className="font-extrabold text-sm text-[#11241C] dark:text-white group-hover:text-[#063B2C] dark:group-hover:text-[#4ECCA3] transition-colors">
+              Monitored Transit Corridors & Drainage
+            </h4>
+            <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] leading-relaxed">
+              Real-time Google Maps traffic on NH-27 Teesta Bridge, Dinbazar, Kadamtala & Mohitnagar. Verified municipal flood & waterlogging telemetry.
+            </p>
+            <div className="pt-2 border-t border-[#F0ECE1] dark:border-white/10 flex items-center justify-between text-[11px] font-bold text-[#063B2C] dark:text-[#4ECCA3]">
+              <span>Toggle Traffic & Waterlogging Overlays</span>
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
