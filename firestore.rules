@@ -124,5 +124,31 @@ service cloud.firestore {
       allow read: if isSignedIn() || isAdmin();
       allow write: if isAdmin() || isSignedIn();
     }
+
+    // Local Shops (Strict owner separation + Admin moderation)
+    match /shops/{shopId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if (isSignedIn() && resource.data.ownerId == request.auth.uid && request.resource.data.ownerId == resource.data.ownerId) || isAdmin();
+      allow delete: if (isSignedIn() && resource.data.ownerId == request.auth.uid) || isAdmin();
+    }
+
+    // Shop Products (Only owner of product/shop or Admin can edit/delete)
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if (isSignedIn() && resource.data.ownerId == request.auth.uid) || isAdmin();
+    }
+
+    // Citizen Shopping Lists
+    match /shopping_lists/{listId} {
+      allow read, write: if isSignedIn() && (request.auth.uid == listId || (resource != null && resource.data.userId == request.auth.uid) || request.resource.data.userId == request.auth.uid);
+    }
+
+    // Shop Inquiries (Analytics tracking)
+    match /shop_inquiries/{inquiryId} {
+      allow read: if isSignedIn();
+      allow create: if true;
+    }
   }
 }

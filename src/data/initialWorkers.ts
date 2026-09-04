@@ -1,0 +1,153 @@
+import { Worker } from '../types';
+
+export const INITIAL_WORKERS: Worker[] = [
+  {
+    id: 'worker-masi-1',
+    name: 'Saraswati Barman',
+    profession: 'Household Helper (মাসি)',
+    category: 'Masi / Household Helper',
+    avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80',
+    verified: true,
+    rating: 4.9,
+    reviewCount: 48,
+    distance: '0.8 km',
+    availability: 'Available Morning',
+    startingPrice: '₹150 / visit',
+    monthlyRate: '₹1,800 / month',
+    phone: '+91 98321 00192',
+    experienceYears: 7,
+    experience: '7 years in Kadamtala & Hakimpara households',
+    location: 'Kadamtala, Jalpaiguri',
+    serviceArea: 'Kadamtala, Hakimpara, Mohitnagar',
+    skills: ['Morning Utensils Cleaning', 'Floor Sweeping & Mopping', 'Vegetable Cutting', 'Dusting', 'Cloth Washing'],
+    description: 'Punctual, trustworthy and polite household helper. Available for morning slots (7:00 AM – 11:30 AM). Thoroughly police-verified and reference-checked in Kadamtala.',
+    completedJobs: 132,
+    reviews: [
+      { author: 'Sunita Roy (Hakimpara)', rating: 5, date: '3 days ago', comment: 'Very gentle and cleans thoroughly every single morning without taking sudden leaves.' },
+      { author: 'Prabir Sen (Kadamtala)', rating: 5, date: '2 weeks ago', comment: 'Extremely punctual and trustworthy family helper.' }
+    ]
+  },
+  {
+    id: 'worker-maid-2',
+    name: 'Parul Das',
+    profession: 'Full-Time Domestic Helper (কাজের দিদি)',
+    category: 'Maid / Domestic Helper',
+    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80',
+    verified: true,
+    rating: 4.8,
+    reviewCount: 36,
+    distance: '1.2 km',
+    availability: 'Available Today',
+    startingPrice: '₹200 / visit',
+    monthlyRate: '₹2,500 / month',
+    phone: '+91 94342 11984',
+    experienceYears: 6,
+    experience: '6 years domestic housekeeping in DBC Road & Silpasamiti Para',
+    location: 'Silpasamiti Para, Jalpaiguri',
+    serviceArea: 'Silpasamiti Para, Dinbazar, DBC Road',
+    skills: ['Complete Housekeeping', 'Kitchen Deep Cleaning', 'Washing Machine Operations', 'Ironing', 'Dishes & Floors'],
+    description: 'Expert domestic helper offering dependable housekeeping and kitchen cleaning. Available for regular monthly shifts or one-day emergency domestic help.',
+    completedJobs: 98,
+    reviews: [
+      { author: 'Meenakshi Ghosh', rating: 5, date: '1 week ago', comment: 'Parul di is very hardworking and takes complete ownership of house cleaning.' }
+    ]
+  },
+  {
+    id: 'worker-attendant-3',
+    name: 'Gita Sarkar',
+    profession: 'Elderly Care & Patient Attendant (রোগী ও বয়স্ক সেবা)',
+    category: 'Elderly Care / Patient Attendant',
+    avatarUrl: 'https://images.unsplash.com/photo-1594824813589-73d843817173?w=400&auto=format&fit=crop&q=80',
+    verified: true,
+    rating: 5.0,
+    reviewCount: 29,
+    distance: '1.5 km',
+    availability: 'Full Day',
+    startingPrice: '₹600 / day',
+    monthlyRate: '₹14,000 / month',
+    phone: '+91 98320 77312',
+    experienceYears: 9,
+    experience: '9 years certified geriatric care near Jalpaiguri Sadar Hospital',
+    location: 'DBC Road, Jalpaiguri',
+    serviceArea: 'Jalpaiguri Town & Sadar Hospital vicinity',
+    skills: ['Bed-ridden Patient Care', 'BP & Sugar Monitoring', 'Medication Schedule Management', 'Mobility Assistance', 'Gentle Feeding & Bathing'],
+    description: 'Certified caregiver with compassionate approach for senior citizens, post-surgery patients, and bed-ridden elders. Trained in emergency response and medication routines.',
+    completedJobs: 84,
+    reviews: [
+      { author: 'Dr. Debabrata Roy', rating: 5, date: '5 days ago', comment: 'Looked after my elderly mother with great kindness, patience, and medical attentiveness.' }
+    ]
+  },
+  {
+    id: 'worker-cook-4',
+    name: 'Gouranga Paul (Maharaj)',
+    profession: 'Authentic Bengali Cook (ঠাকুর / রাঁধুনি)',
+    category: 'Cook / Maharaj',
+    avatarUrl: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&auto=format&fit=crop&q=80',
+    verified: true,
+    rating: 4.9,
+    reviewCount: 52,
+    distance: '0.9 km',
+    availability: 'Available Evening',
+    startingPrice: '₹350 / meal',
+    monthlyRate: '₹3,200 / month',
+    phone: '+91 97330 88210',
+    experienceYears: 12,
+    experience: '12 years traditional Bengali caterer and daily household cook',
+    location: 'Dinbazar, Jalpaiguri',
+    serviceArea: 'Kadamtala, Dinbazar, Hakimpara, Mohitnagar',
+    skills: ['Traditional Bengali Shukto & Machher Jhol', 'Mutton Kosha & Chicken Curry', 'Niramish Bhog & Puja Cooking', 'Soft Rotis & Dal', 'Party Catering'],
+    description: 'Renowned local cook specializing in authentic, hygienic Bengali home cooking with balanced oil and spices. Available for daily family cooking (morning or evening) and weekend special lunches.',
+    completedJobs: 175,
+    reviews: [
+      { author: 'Anirban Mukherjee', rating: 5, date: 'Yesterday', comment: 'Gouranga da makes restaurant-quality fish curry and soft rotis without excess oil. Highly recommended!' }
+    ]
+  },
+  {
+    id: 'worker-elec-5',
+    name: 'Biplab Barman',
+    profession: 'Licensed Electrician (WBSEDCL Certified)',
+    category: 'Electrician',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80',
+    verified: true,
+    rating: 4.9,
+    reviewCount: 78,
+    distance: '1.1 km',
+    availability: 'Available Now',
+    startingPrice: '₹200 / visit',
+    phone: '+91 94340 66219',
+    experienceYears: 8,
+    experience: '8 years residential wiring & inverter setup',
+    location: 'Kadamtala, Jalpaiguri',
+    serviceArea: 'Entire Jalpaiguri Municipality',
+    skills: ['MCB Tripping Repair', 'House Wiring', 'Ceiling Fan & Geyser Fitting', 'Inverter Installation', 'Short Circuit Troubleshooting'],
+    description: 'Fast emergency electrician ready with complete tools and testing meters. Prompt response within 30 minutes in Jalpaiguri.',
+    completedJobs: 210,
+    reviews: [
+      { author: 'Tanmay Das', rating: 5, date: '3 days ago', comment: 'Fixed our meter line and short circuit within 20 minutes in rainy weather.' }
+    ]
+  },
+  {
+    id: 'worker-plumb-6',
+    name: 'Ratan Das',
+    profession: 'Master Plumber & Pipe Fitter',
+    category: 'Plumber',
+    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80',
+    verified: true,
+    rating: 4.8,
+    reviewCount: 64,
+    distance: '1.4 km',
+    availability: 'Available Today',
+    startingPrice: '₹250 / visit',
+    phone: '+91 98322 99401',
+    experienceYears: 10,
+    experience: '10 years plumbing in Jalpaiguri apartments and Sadar Hospital area',
+    location: 'Silpasamiti Para, Jalpaiguri',
+    serviceArea: 'Silpasamiti Para, DBC Road, Dinbazar',
+    skills: ['Water Motor Repair', 'Overhead Tank Cleaning', 'Bathroom Sanitary Fittings', 'Underground Pipe Leakage Repair'],
+    description: 'Reliable plumbing expert with motorized drain cleaners and replacement fittings.',
+    completedJobs: 160,
+    reviews: [
+      { author: 'Swapan Paul', rating: 5, date: 'Last week', comment: 'Fixed motor suction failure quickly. Very honest charges.' }
+    ]
+  }
+];

@@ -47,6 +47,13 @@ import { SafetySosView } from './components/views/SafetySosView';
 import { SexualViolenceSupportView } from './components/views/SexualViolenceSupportView';
 import { ThemeProvider } from './context/ThemeContext';
 
+// Shop Marketplace & Merchant Platform
+import { ShopMarketplaceView } from './components/shops/ShopMarketplaceView';
+import { ShopDetailView } from './components/shops/ShopDetailView';
+import { AddShopWizardView } from './components/shops/AddShopWizardView';
+import { MerchantDashboardView } from './components/shops/MerchantDashboardView';
+import { SmartShoppingSearchView } from './components/shops/SmartShoppingSearchView';
+
 // Common Components & Modals
 import { BottomNav } from './components/common/BottomNav';
 import { FiltersBottomSheet } from './components/common/FiltersBottomSheet';
@@ -180,8 +187,17 @@ const AppContent: React.FC = () => {
       case 'list-property':
         return <RentalsView />;
       case 'businesses':
+      case 'shop-marketplace':
+        return <ShopMarketplaceView />;
       case 'business-detail':
-        return <BusinessesView />;
+      case 'shop-detail':
+        return <ShopDetailView />;
+      case 'add-shop':
+        return <AddShopWizardView />;
+      case 'merchant-dashboard':
+        return <MerchantDashboardView />;
+      case 'smart-shopping-search':
+        return <SmartShoppingSearchView />;
       case 'government':
         return <GovernmentServicesView />;
       case 'lost-found':
@@ -225,7 +241,8 @@ const AppContent: React.FC = () => {
     'sexual-violence-support',
     'chat',
     'ai-chat',
-    'admin-dashboard'
+    'admin-dashboard',
+    'add-shop'
   ];
   const showBottomNav = !hideBottomNavViews.includes(currentView);
   const { isBengali } = useLanguage();

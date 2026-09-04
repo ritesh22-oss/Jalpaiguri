@@ -55,7 +55,12 @@ export type ViewType =
   | 'sexual-violence-support'
   | 'outside-area'
   | 'location-permission-required'
-  | 'faq';
+  | 'faq'
+  | 'shop-marketplace'
+  | 'add-shop'
+  | 'merchant-dashboard'
+  | 'shop-detail'
+  | 'smart-shopping-search';
 
 export type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | "I don't know";
 
@@ -164,7 +169,7 @@ export interface UserProfile {
   isVolunteer?: boolean;
   isBloodDonor?: boolean;
   language: 'English' | 'বাংলা' | 'हिन्दी';
-  role?: 'citizen' | 'admin' | 'worker';
+  role?: 'citizen' | 'admin' | 'worker' | 'shop_owner';
   fingerprintEnrolled?: boolean;
   fingerprintCredentialId?: string;
   createdAt: string;
@@ -255,14 +260,29 @@ export interface Worker {
   id: string;
   name: string;
   profession: string;
-  category: 'Electrician' | 'Plumber' | 'Carpenter' | 'Painter' | 'Mason' | 'Cook' | 'Cleaner' | 'AC Technician' | 'Mechanic' | 'Other';
+  category:
+    | 'Electrician'
+    | 'Plumber'
+    | 'Carpenter'
+    | 'Painter'
+    | 'Mason'
+    | 'Cook'
+    | 'Cleaner'
+    | 'AC Technician'
+    | 'Mechanic'
+    | 'Masi / Household Helper'
+    | 'Maid / Domestic Helper'
+    | 'Elderly Care / Patient Attendant'
+    | 'Cook / Maharaj'
+    | 'Other';
   avatarUrl: string;
   verified: boolean;
   rating: number;
   reviewCount: number;
   distance: string;
-  availability: 'Available Now' | 'Available Today' | 'Busy';
+  availability: 'Available Now' | 'Available Today' | 'Available Morning' | 'Available Evening' | 'Full Day' | 'Busy';
   startingPrice: string;
+  monthlyRate?: string;
   phone: string;
   experienceYears?: number;
   experience?: string;
@@ -529,5 +549,120 @@ export interface ExplorePlaceItem {
   features?: string[];
   distanceKm?: number;
   distanceText?: string;
+}
+
+export type ShopCategory =
+  | 'All'
+  | 'Grocery'
+  | 'Pharmacy'
+  | 'Electronics'
+  | 'Clothing'
+  | 'Bakery & Sweets'
+  | 'Hardware'
+  | 'Books & Stationery'
+  | 'Personal Care'
+  | 'Dairy'
+  | 'Fresh Meat & Fish'
+  | 'Other';
+
+export interface Shop {
+  id: string;
+  ownerId: string;
+  ownerName: string;
+  ownerPhone: string;
+  phone?: string;
+  ownerEmail?: string;
+  whatsappNumber?: string;
+  name: string;
+  nameBn?: string;
+  nameBengali?: string;
+  category: ShopCategory | string;
+  categories?: string[];
+  subcategories?: string[];
+  description: string;
+  locality: string;
+  address: string;
+  landmark?: string;
+  pincode: string;
+  lat: number;
+  lng: number;
+  distanceKm?: number;
+  distanceText?: string;
+  distance?: string;
+  openingTime?: string;
+  closingTime?: string;
+  openingHours?: { open: string; close: string; weeklyOff?: string };
+  weeklyOff?: string;
+  homeDelivery?: boolean;
+  deliveryAvailable?: boolean;
+  minOrderAmount?: number;
+  freeDeliveryAbove?: number;
+  deliveryRadiusKm?: number;
+  paymentMethods: string[];
+  upiId?: string;
+  photoUrl?: string;
+  insidePhotoUrl?: string;
+  logoUrl?: string;
+  isVerified: boolean;
+  status: 'pending' | 'verified' | 'rejected' | 'suspended';
+  featured?: boolean;
+  isFeatured?: boolean;
+  isOpen: boolean;
+  rating: number;
+  reviewCount: number;
+  subscriptionPlan: 'free' | 'monthly' | 'yearly';
+  subscriptionExpiresAt?: string;
+  qrCodeDeepLink?: string;
+  totalViews?: number;
+  inquiryClicks?: number;
+  analytics?: { views?: number; callClicks?: number; whatsappClicks?: number; directionsClicks?: number };
+  createdAt: string;
+  updatedAt: string;
+  productCount?: number;
+}
+
+export interface Product {
+  id: string;
+  shopId: string;
+  ownerId: string;
+  name: string;
+  nameBn?: string;
+  nameBengali?: string;
+  category: string;
+  price: number;
+  discountPrice?: number;
+  unit: string; // 'kg', 'g', 'pc', 'packet', 'liter', 'ml', etc.
+  inStock: boolean;
+  photoUrl?: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ShoppingListItem {
+  id: string;
+  name: string;
+  quantity?: string;
+  checked: boolean;
+}
+
+export interface MatchedShopResult {
+  shop: Shop;
+  matchedCount: number;
+  totalItems: number;
+  matchedProducts: Product[];
+  missingItems: string[];
+  distanceKm: number;
+  distanceText: string;
+}
+
+export interface MerchantSubscription {
+  planId: 'free' | 'monthly' | 'yearly';
+  name: string;
+  nameBn: string;
+  price: number;
+  durationMonths: number;
+  features: string[];
+  isPopular?: boolean;
 }
 

@@ -5,6 +5,12 @@ import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 import { apiKeyService } from './server/apiKeyService';
+import {
+  shopStore,
+  extractProductsWithGemini,
+  generateShopDescriptionWithGemini,
+  JALPAIGURI_VALID_PINS
+} from './server/shopStore';
 
 dotenv.config();
 
@@ -1283,6 +1289,159 @@ app.get('/api/blood/requests', (req: Request, res: Response) => {
   res.json(memoryDb.bloodRequests);
 });
 
+// Workers Directory API (Including Masi / Household Helpers, Maids, Attendants, Cooks)
+app.get('/api/workers', (req: Request, res: Response) => {
+  if (memoryDb.workers.length === 0) {
+    memoryDb.workers = [
+      {
+        id: 'worker-masi-1',
+        name: 'Saraswati Barman',
+        profession: 'Household Helper (মাসি)',
+        category: 'Masi / Household Helper',
+        avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80',
+        verified: true,
+        rating: 4.9,
+        reviewCount: 48,
+        distance: '0.8 km',
+        availability: 'Available Morning',
+        startingPrice: '₹150 / visit',
+        monthlyRate: '₹1,800 / month',
+        phone: '+91 98321 00192',
+        experienceYears: 7,
+        experience: '7 years in Kadamtala & Hakimpara households',
+        location: 'Kadamtala, Jalpaiguri',
+        serviceArea: 'Kadamtala, Hakimpara, Mohitnagar',
+        skills: ['Morning Utensils Cleaning', 'Floor Sweeping & Mopping', 'Vegetable Cutting', 'Dusting', 'Cloth Washing'],
+        description: 'Punctual, trustworthy and polite household helper. Available for morning slots (7:00 AM – 11:30 AM). Police verified.',
+        completedJobs: 132
+      },
+      {
+        id: 'worker-maid-2',
+        name: 'Parul Das',
+        profession: 'Full-Time Domestic Helper (কাজের দিদি)',
+        category: 'Maid / Domestic Helper',
+        avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80',
+        verified: true,
+        rating: 4.8,
+        reviewCount: 36,
+        distance: '1.2 km',
+        availability: 'Available Today',
+        startingPrice: '₹200 / visit',
+        monthlyRate: '₹2,500 / month',
+        phone: '+91 94342 11984',
+        experienceYears: 6,
+        experience: '6 years domestic housekeeping in DBC Road & Silpasamiti Para',
+        location: 'Silpasamiti Para, Jalpaiguri',
+        serviceArea: 'Silpasamiti Para, Dinbazar, DBC Road',
+        skills: ['Complete Housekeeping', 'Kitchen Deep Cleaning', 'Washing Machine Operations', 'Dishes & Floors'],
+        description: 'Dependable domestic housekeeping and kitchen cleaning. Available for regular monthly shifts or one-day emergency domestic help.',
+        completedJobs: 98
+      },
+      {
+        id: 'worker-attendant-3',
+        name: 'Gita Sarkar',
+        profession: 'Elderly Care & Patient Attendant (রোগী ও বয়স্ক সেবা)',
+        category: 'Elderly Care / Patient Attendant',
+        avatarUrl: 'https://images.unsplash.com/photo-1594824813589-73d843817173?w=400&auto=format&fit=crop&q=80',
+        verified: true,
+        rating: 5.0,
+        reviewCount: 29,
+        distance: '1.5 km',
+        availability: 'Full Day',
+        startingPrice: '₹600 / day',
+        monthlyRate: '₹14,000 / month',
+        phone: '+91 98320 77312',
+        experienceYears: 9,
+        experience: '9 years certified geriatric care near Jalpaiguri Sadar Hospital',
+        location: 'DBC Road, Jalpaiguri',
+        serviceArea: 'Jalpaiguri Town & Sadar Hospital vicinity',
+        skills: ['Bed-ridden Patient Care', 'BP & Sugar Monitoring', 'Medication Schedule Management', 'Mobility Assistance'],
+        description: 'Certified caregiver with compassionate approach for senior citizens, post-surgery patients, and bed-ridden elders.',
+        completedJobs: 84
+      },
+      {
+        id: 'worker-cook-4',
+        name: 'Gouranga Paul (Maharaj)',
+        profession: 'Authentic Bengali Cook (ঠাকুর / রাঁধুনি)',
+        category: 'Cook / Maharaj',
+        avatarUrl: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&auto=format&fit=crop&q=80',
+        verified: true,
+        rating: 4.9,
+        reviewCount: 52,
+        distance: '0.9 km',
+        availability: 'Available Evening',
+        startingPrice: '₹350 / meal',
+        monthlyRate: '₹3,200 / month',
+        phone: '+91 97330 88210',
+        experienceYears: 12,
+        experience: '12 years traditional Bengali cook and daily household chef',
+        location: 'Dinbazar, Jalpaiguri',
+        serviceArea: 'Kadamtala, Dinbazar, Hakimpara, Mohitnagar',
+        skills: ['Traditional Bengali Shukto & Machher Jhol', 'Mutton Kosha & Chicken Curry', 'Niramish Bhog & Puja Cooking', 'Soft Rotis'],
+        description: 'Renowned local cook specializing in authentic, hygienic Bengali home cooking with balanced oil and spices.',
+        completedJobs: 175
+      },
+      {
+        id: 'worker-elec-5',
+        name: 'Biplab Barman',
+        profession: 'Licensed Electrician (WBSEDCL Certified)',
+        category: 'Electrician',
+        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80',
+        verified: true,
+        rating: 4.9,
+        reviewCount: 78,
+        distance: '1.1 km',
+        availability: 'Available Now',
+        startingPrice: '₹200 / visit',
+        phone: '+91 94340 66219',
+        experienceYears: 8,
+        experience: '8 years residential wiring & inverter setup',
+        location: 'Kadamtala, Jalpaiguri',
+        serviceArea: 'Entire Jalpaiguri Municipality',
+        skills: ['MCB Tripping Repair', 'House Wiring', 'Ceiling Fan & Geyser Fitting', 'Inverter Installation'],
+        description: 'Fast emergency electrician ready with complete tools and testing meters in Jalpaiguri.',
+        completedJobs: 210
+      },
+      {
+        id: 'worker-plumb-6',
+        name: 'Ratan Das',
+        profession: 'Master Plumber & Pipe Fitter',
+        category: 'Plumber',
+        avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80',
+        verified: true,
+        rating: 4.8,
+        reviewCount: 64,
+        distance: '1.4 km',
+        availability: 'Available Today',
+        startingPrice: '₹250 / visit',
+        phone: '+91 98322 99401',
+        experienceYears: 10,
+        experience: '10 years plumbing in Jalpaiguri apartments and Sadar Hospital area',
+        location: 'Silpasamiti Para, Jalpaiguri',
+        serviceArea: 'Silpasamiti Para, DBC Road, Dinbazar',
+        skills: ['Water Motor Repair', 'Overhead Tank Cleaning', 'Bathroom Sanitary Fittings', 'Leakage Repair'],
+        description: 'Reliable plumbing expert with motorized drain cleaners and replacement fittings.',
+        completedJobs: 160
+      }
+    ];
+  }
+  res.json(memoryDb.workers);
+});
+
+app.post('/api/workers', (req: Request, res: Response) => {
+  const newWorker = {
+    ...req.body,
+    id: `worker-${Date.now()}`,
+    verified: false,
+    rating: 5.0,
+    reviewCount: 0,
+    distance: '1.0 km'
+  };
+  memoryDb.workers.unshift(newWorker);
+  broadcastRealtime('worker_created', newWorker);
+  res.status(201).json(newWorker);
+});
+
 // ==========================================
 // GEOGRAPHIC BOUNDARY & SERVICE AREA VALIDATION
 // ==========================================
@@ -1582,6 +1741,289 @@ app.post('/api/emergency/incident-notes', (req: Request, res: Response) => {
   });
 
   return res.status(201).json({ success: true, referenceNumber: note.referenceNumber });
+});
+
+// ==========================================
+// JALPAIGURI LOCAL MARKETPLACE & SHOP OWNER API
+// ==========================================
+
+// 1. Get Shops (Public / Filtered)
+app.get('/api/shops', (req: Request, res: Response) => {
+  try {
+    const {
+      category,
+      openNow,
+      verifiedOnly,
+      homeDeliveryOnly,
+      rating4Only,
+      search,
+      userLat,
+      userLng
+    } = req.query;
+
+    const shops = shopStore.getAllShops({
+      category: category as string,
+      openNow: openNow === 'true',
+      verifiedOnly: verifiedOnly === 'true',
+      homeDeliveryOnly: homeDeliveryOnly === 'true',
+      rating4Only: rating4Only === 'true',
+      search: search as string,
+      userLat: userLat ? parseFloat(userLat as string) : undefined,
+      userLng: userLng ? parseFloat(userLng as string) : undefined
+    });
+
+    res.json(shops);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to fetch shops.' });
+  }
+});
+
+// 2. Get Shop Detail by ID
+app.get('/api/shops/:id', (req: Request, res: Response) => {
+  const shopData = shopStore.getShopById(req.params.id);
+  if (!shopData) {
+    return res.status(404).json({ error: 'Shop not found in Jalpaiguri.' });
+  }
+  shopStore.incrementShopViews(req.params.id);
+  res.json(shopData);
+});
+
+// 3. Get Shops Owned by User
+app.get('/api/shops/owner/:ownerId', (req: Request, res: Response) => {
+  const shops = shopStore.getShopsByOwner(req.params.ownerId);
+  res.json(shops);
+});
+
+// 4. Register New Shop (+ Add Shop Flow)
+app.post('/api/shops', (req: Request, res: Response) => {
+  try {
+    const { name, ownerId, ownerPhone, category, locality, address, pincode, lat, lng } = req.body;
+
+    if (!name || !ownerId || !ownerPhone || !category || !locality || !address || !pincode) {
+      return res.status(400).json({ error: 'All mandatory fields including Name, Category, Locality, Address, and PIN code are required.' });
+    }
+
+    // Jalpaiguri Service Boundary & PIN code check
+    const pinStr = String(pincode).trim();
+    if (!JALPAIGURI_VALID_PINS.includes(pinStr)) {
+      return res.status(400).json({
+        error: `PIN code ${pinStr} is outside Jalpaiguri district service area. Jalpaiguri Connect supports pincodes 735101 to 735228.`
+      });
+    }
+
+    const shop = shopStore.createShop(req.body);
+    broadcastRealtime('new_shop_registered', { shopId: shop.id, name: shop.name });
+    res.status(201).json(shop);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || 'Failed to create shop.' });
+  }
+});
+
+// 5. Update Shop Details (Owner/Admin only)
+app.put('/api/shops/:id', (req: Request, res: Response) => {
+  try {
+    const userId = (req.headers['x-user-id'] as string) || req.body.ownerId;
+    const isAdmin = req.headers['x-is-admin'] === 'true';
+
+    if (!userId && !isAdmin) {
+      return res.status(401).json({ error: 'Authentication required.' });
+    }
+
+    const updated = shopStore.updateShop(req.params.id, req.body, userId, isAdmin);
+    if (!updated) {
+      return res.status(404).json({ error: 'Shop not found.' });
+    }
+
+    res.json(updated);
+  } catch (err: any) {
+    res.status(403).json({ error: err.message || 'Unauthorized.' });
+  }
+});
+
+// 6. Live Toggle Shop Open/Closed Status
+app.patch('/api/shops/:id/toggle-open', (req: Request, res: Response) => {
+  try {
+    const userId = (req.headers['x-user-id'] as string) || req.body.ownerId;
+    const isAdmin = req.headers['x-is-admin'] === 'true';
+
+    if (!userId && !isAdmin) {
+      return res.status(401).json({ error: 'Authentication required.' });
+    }
+
+    const updated = shopStore.toggleShopOpen(req.params.id, userId, isAdmin);
+    if (!updated) {
+      return res.status(404).json({ error: 'Shop not found.' });
+    }
+
+    res.json(updated);
+  } catch (err: any) {
+    res.status(403).json({ error: err.message || 'Unauthorized.' });
+  }
+});
+
+// 7. Track Inquiry Click (Call, WhatsApp, Directions, Share)
+app.post('/api/shops/:id/inquiry', (req: Request, res: Response) => {
+  const { type } = req.body;
+  if (!type || !['call', 'whatsapp', 'directions', 'share'].includes(type)) {
+    return res.status(400).json({ error: 'Valid inquiry type (call, whatsapp, directions, share) is required.' });
+  }
+
+  shopStore.recordInquiry(req.params.id, type);
+  res.json({ success: true, shopId: req.params.id, type });
+});
+
+// 8. Global Product Search ("Find Where It's Available")
+app.get('/api/products/search', (req: Request, res: Response) => {
+  try {
+    const query = (req.query.q as string) || '';
+    const userLat = req.query.userLat ? parseFloat(req.query.userLat as string) : undefined;
+    const userLng = req.query.userLng ? parseFloat(req.query.userLng as string) : undefined;
+
+    const results = shopStore.searchProducts(query, userLat, userLng);
+    res.json(results);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Product search failed.' });
+  }
+});
+
+// 9. Add Product to Shop
+app.post('/api/products', (req: Request, res: Response) => {
+  try {
+    const userId = (req.headers['x-user-id'] as string) || req.body.ownerId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Owner authentication required.' });
+    }
+
+    const product = shopStore.addProduct(req.body, userId);
+    res.status(201).json(product);
+  } catch (err: any) {
+    res.status(403).json({ error: err.message || 'Failed to add product.' });
+  }
+});
+
+// 10. Update Product
+app.put('/api/products/:id', (req: Request, res: Response) => {
+  try {
+    const userId = (req.headers['x-user-id'] as string) || req.body.ownerId;
+    const isAdmin = req.headers['x-is-admin'] === 'true';
+
+    const updated = shopStore.updateProduct(req.params.id, req.body, userId, isAdmin);
+    if (!updated) {
+      return res.status(404).json({ error: 'Product not found.' });
+    }
+    res.json(updated);
+  } catch (err: any) {
+    res.status(403).json({ error: err.message || 'Failed to update product.' });
+  }
+});
+
+// 11. Delete Product
+app.delete('/api/products/:id', (req: Request, res: Response) => {
+  try {
+    const userId = (req.headers['x-user-id'] as string) || (req.query.ownerId as string);
+    const isAdmin = req.headers['x-is-admin'] === 'true';
+
+    const success = shopStore.deleteProduct(req.params.id, userId, isAdmin);
+    if (!success) {
+      return res.status(404).json({ error: 'Product not found.' });
+    }
+    res.json({ success: true, deletedId: req.params.id });
+  } catch (err: any) {
+    res.status(403).json({ error: err.message || 'Failed to delete product.' });
+  }
+});
+
+// 12. Smart Shopping List Matcher
+app.post('/api/shopping-list/match-shops', (req: Request, res: Response) => {
+  try {
+    const { items, userLat, userLng } = req.body;
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'List of items is required.' });
+    }
+
+    const matches = shopStore.matchShoppingList(items, userLat, userLng);
+    res.json(matches);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Matching failed.' });
+  }
+});
+
+// 13. Merchant Subscription Upgrade
+app.post('/api/shops/:id/subscribe', (req: Request, res: Response) => {
+  try {
+    const { plan, ownerId } = req.body;
+    if (!['monthly', 'yearly'].includes(plan)) {
+      return res.status(400).json({ error: 'Plan must be monthly or yearly.' });
+    }
+
+    const updated = shopStore.subscribeShop(req.params.id, plan, ownerId);
+    if (!updated) {
+      return res.status(404).json({ error: 'Shop not found.' });
+    }
+
+    res.json({
+      success: true,
+      shop: updated,
+      message: `Successfully upgraded to ${plan} merchant plan! Verified badge and priority listings are now active.`
+    });
+  } catch (err: any) {
+    res.status(403).json({ error: err.message || 'Subscription failed.' });
+  }
+});
+
+// 14. AI Smart Product Import (Gemini 3.8 Flash)
+app.post('/api/ai/extract-products', async (req: Request, res: Response) => {
+  try {
+    const { text, imageBase64 } = req.body;
+    if (!text && !imageBase64) {
+      return res.status(400).json({ error: 'Please provide bill text, menu, handwritten list, or product image.' });
+    }
+
+    const items = await extractProductsWithGemini(text || '', imageBase64);
+    res.json({ success: true, count: items.length, items });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'AI extraction failed.' });
+  }
+});
+
+// 15. AI Shop Tagline and Description Generator
+app.post('/api/ai/generate-shop-description', async (req: Request, res: Response) => {
+  try {
+    const { name, category, locality } = req.body;
+    if (!name) {
+      return res.status(400).json({ error: 'Shop name is required.' });
+    }
+
+    const generated = await generateShopDescriptionWithGemini(
+      name,
+      category || 'Retail Store',
+      locality || 'Jalpaiguri'
+    );
+    res.json(generated);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'AI generation failed.' });
+  }
+});
+
+// 16. Admin Shop Moderation Endpoints
+app.get('/api/admin/shops', (req: Request, res: Response) => {
+  const status = req.query.status as string;
+  const shops = shopStore.adminGetShops(status);
+  res.json(shops);
+});
+
+app.post('/api/admin/shops/:id/moderate', (req: Request, res: Response) => {
+  const { action } = req.body;
+  if (!['verify', 'reject', 'suspend', 'feature', 'unfeature'].includes(action)) {
+    return res.status(400).json({ error: 'Invalid moderation action.' });
+  }
+
+  const updated = shopStore.adminModerateShop(req.params.id, action);
+  if (!updated) {
+    return res.status(404).json({ error: 'Shop not found.' });
+  }
+
+  res.json({ success: true, shop: updated });
 });
 
 
