@@ -14,12 +14,14 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useNav } from '../../context/NavigationContext';
 import { useLocation } from '../../context/LocationContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { BloodGroup } from '../../types';
 
 export const ProfileSetupView: React.FC = () => {
   const { user, firebaseUser, completeUserProfile } = useAuth();
   const { navigate, replaceView } = useNav();
   const { location, requestCurrentLocation, status, setIsLocationSelectorOpen } = useLocation();
+  const { isBengali, language, setLanguage, formatNumber, tLocality } = useLanguage();
 
   const [name, setName] = useState(user?.name || firebaseUser?.displayName || '');
   const [age, setAge] = useState<number | ''>(user?.age || '');
@@ -40,6 +42,13 @@ export const ProfileSetupView: React.FC = () => {
   const bloodGroups: BloodGroup[] = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   const genderOptions = ['Male', 'Female', 'Other'] as const;
 
+  const getGenderLabel = (g: 'Male' | 'Female' | 'Other') => {
+    if (!isBengali) return g;
+    if (g === 'Male') return 'পুরুষ';
+    if (g === 'Female') return 'মহিলা';
+    return 'অন্যান্য';
+  };
+
   const handleDetectGps = async () => {
     setGpsLoading(true);
     await requestCurrentLocation();
@@ -49,7 +58,7 @@ export const ProfileSetupView: React.FC = () => {
   const handleContinue = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      setErrorMsg('Please enter your full name.');
+      setErrorMsg(isBengali ? 'অনুগ্রহ করে আপনার পুরো নাম লিখুন।' : 'Please enter your full name.');
       return;
     }
 
@@ -71,13 +80,13 @@ export const ProfileSetupView: React.FC = () => {
       replaceView('home');
     } catch (err: any) {
       setLoading(false);
-      setErrorMsg('Failed to save profile. Please try again.');
+      setErrorMsg(isBengali ? 'প্রোফাইল সংরক্ষণ করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।' : 'Failed to save profile. Please try again.');
     }
   };
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0F1A15] text-[#11241C] dark:text-white flex flex-col justify-between p-5 max-w-md mx-auto select-none relative shadow-2xl transition-colors">
-      {/* Top Header Bar with Back button, Title & Avatar Icon */}
+      {/* Top Header Bar with Back button, Title & Language Switcher */}
       <div className="w-full flex items-center justify-between pt-2 pb-2">
         <button
           onClick={() => navigate(user?.phone ? 'otp' : 'auth')}
@@ -88,12 +97,17 @@ export const ProfileSetupView: React.FC = () => {
         </button>
 
         <h1 className="text-base font-bold text-gray-900 dark:text-white tracking-tight">
-          Complete Profile
+          {isBengali ? 'প্রোফাইল সম্পন্ন করুন' : 'Complete Profile'}
         </h1>
 
-        {/* Profile Avatar Badge matching mockup */}
-        <div className="w-7 h-7 rounded-full bg-[#CBD5E1] dark:bg-[#1E2D27] flex items-center justify-center text-gray-500 shadow-2xs">
-          <UserIcon className="w-4 h-4 text-[#64748B] dark:text-[#A2B3AA] fill-[#64748B] dark:fill-[#A2B3AA]" />
+        {/* Language Switcher */}
+        <div className="flex items-center bg-[#E8E4DA] dark:bg-white/10 p-0.5 rounded-full">
+          <button
+            onClick={() => setLanguage(language === 'bn' ? 'en' : 'bn')}
+            className="text-[11px] font-bold px-2 py-0.5 rounded-full text-[#063B2C] dark:text-emerald-300 hover:bg-white/50 cursor-pointer"
+          >
+            {language === 'bn' ? 'EN' : 'বাংলা'}
+          </button>
         </div>
       </div>
 
@@ -110,13 +124,13 @@ export const ProfileSetupView: React.FC = () => {
           {/* 1. Full Name */}
           <div>
             <label className="block text-xs font-semibold text-gray-900 dark:text-white mb-1.5">
-              Full Name
+              {isBengali ? 'পুরো নাম' : 'Full Name'}
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Priya Sharma"
+              placeholder={isBengali ? 'যেমন: প্রিয় শর্মা' : 'e.g., Priya Sharma'}
               className="w-full bg-white dark:bg-[#17231E] border border-gray-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[#2F74E9] focus:ring-1 focus:ring-[#2F74E9] transition-all shadow-2xs"
             />
           </div>
@@ -125,7 +139,7 @@ export const ProfileSetupView: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-xs font-semibold text-gray-900 dark:text-white">
-                Live Location & Area
+                {isBengali ? 'বর্তমান অবস্থান ও এলাকা' : 'Live Location & Area'}
               </label>
               <button
                 type="button"
@@ -138,7 +152,7 @@ export const ProfileSetupView: React.FC = () => {
                 ) : (
                   <Navigation className="w-3 h-3" />
                 )}
-                <span>Detect Real GPS</span>
+                <span>{isBengali ? 'সরাসরি জিপিএস' : 'Detect Real GPS'}</span>
               </button>
             </div>
 
@@ -150,10 +164,12 @@ export const ProfileSetupView: React.FC = () => {
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
-                      {location.name}
+                      {tLocality(location.name)}
                     </p>
                     <p className="text-[11px] text-gray-500 dark:text-[#A2B3AA]">
-                      {location.isApproximate ? 'Locality selected' : `Realtime GPS: ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`}
+                      {location.isApproximate
+                        ? (isBengali ? 'এলাকা নির্বাচিত' : 'Locality selected')
+                        : `${isBengali ? 'সরাসরি জিপিএস' : 'Realtime GPS'}: ${formatNumber(location.lat.toFixed(4))}, ${formatNumber(location.lng.toFixed(4))}`}
                     </p>
                   </div>
                 </div>
@@ -163,14 +179,18 @@ export const ProfileSetupView: React.FC = () => {
                   onClick={() => setIsLocationSelectorOpen(true)}
                   className="px-2 py-1 text-[11px] font-bold text-[#2F74E9] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors shrink-0 cursor-pointer"
                 >
-                  Change
+                  {isBengali ? 'পরিবর্তন' : 'Change'}
                 </button>
               </div>
 
               {!location.isApproximate && location.accuracy && (
                 <div className="flex items-center gap-1 text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md font-medium">
                   <Sparkles className="w-3 h-3" />
-                  <span>Real GPS Accuracy: ±{location.accuracy}m</span>
+                  <span>
+                    {isBengali
+                      ? `জিপিএস সঠিকতা: ±${formatNumber(location.accuracy)} মিটার`
+                      : `Real GPS Accuracy: ±${location.accuracy}m`}
+                  </span>
                 </div>
               )}
             </div>
@@ -179,7 +199,7 @@ export const ProfileSetupView: React.FC = () => {
           {/* 3. Age with Stepper Controls */}
           <div>
             <label className="block text-xs font-semibold text-gray-900 dark:text-white mb-1.5">
-              Age
+              {isBengali ? 'বয়স' : 'Age'}
             </label>
             <div className="relative">
               <input
@@ -188,7 +208,7 @@ export const ProfileSetupView: React.FC = () => {
                 max={100}
                 value={age}
                 onChange={(e) => setAge(e.target.value === '' ? '' : parseInt(e.target.value) || 18)}
-                placeholder="e.g., 28"
+                placeholder={isBengali ? 'যেমন: ২৮' : 'e.g., 28'}
                 className="w-full bg-white dark:bg-[#17231E] border border-gray-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[#2F74E9] focus:ring-1 focus:ring-[#2F74E9] transition-all shadow-2xs pr-9"
               />
               <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex flex-col items-center select-none">
@@ -213,7 +233,7 @@ export const ProfileSetupView: React.FC = () => {
           {/* 4. Gender Dropdown & Segmented Switcher */}
           <div>
             <label className="block text-xs font-semibold text-gray-900 dark:text-white mb-1.5">
-              Gender
+              {isBengali ? 'লিঙ্গ' : 'Gender'}
             </label>
             {/* Dropdown style */}
             <div className="relative mb-2">
@@ -222,7 +242,7 @@ export const ProfileSetupView: React.FC = () => {
                 onClick={() => setIsGenderDropdownOpen(!isGenderDropdownOpen)}
                 className="w-full bg-white dark:bg-[#17231E] border border-gray-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white flex items-center justify-between shadow-2xs hover:border-gray-400 dark:hover:border-white/20 focus:outline-none focus:border-[#2F74E9] transition-all cursor-pointer"
               >
-                <span>{gender}</span>
+                <span>{getGenderLabel(gender)}</span>
                 <ChevronDown className="w-4 h-4 text-gray-500 stroke-[2]" />
               </button>
 
@@ -240,7 +260,7 @@ export const ProfileSetupView: React.FC = () => {
                         gender === g ? 'font-bold text-[#2F74E9] bg-blue-50/50 dark:bg-blue-950/40' : 'text-gray-700 dark:text-[#A2B3AA]'
                       }`}
                     >
-                      <span>{g}</span>
+                      <span>{getGenderLabel(g)}</span>
                       {gender === g && <Check className="w-4 h-4 text-[#2F74E9]" />}
                     </button>
                   ))}
@@ -263,7 +283,7 @@ export const ProfileSetupView: React.FC = () => {
                         : 'text-gray-700 dark:text-[#A2B3AA] hover:text-gray-900 dark:hover:text-white'
                     }`}
                   >
-                    {g}
+                    {getGenderLabel(g)}
                   </button>
                 );
               })}
@@ -273,7 +293,7 @@ export const ProfileSetupView: React.FC = () => {
           {/* 5. Blood Group Dropdown Selector */}
           <div className="relative">
             <label className="block text-xs font-semibold text-gray-900 dark:text-white mb-1.5">
-              Blood Group
+              {isBengali ? 'রক্তের গ্রুপ' : 'Blood Group'}
             </label>
             <button
               type="button"
@@ -319,10 +339,10 @@ export const ProfileSetupView: React.FC = () => {
               {loading ? (
                 <div className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin text-white" />
-                  <span>Saving Profile...</span>
+                  <span>{isBengali ? 'প্রোফাইল সংরক্ষণ হচ্ছে...' : 'Saving Profile...'}</span>
                 </div>
               ) : (
-                <span>Continue</span>
+                <span>{isBengali ? 'এগিয়ে যান' : 'Continue'}</span>
               )}
             </button>
           </div>

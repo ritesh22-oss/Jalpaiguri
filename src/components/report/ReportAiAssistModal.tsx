@@ -10,6 +10,7 @@ import {
   Info
 } from 'lucide-react';
 import { CivicCategory } from '../../types';
+import { apiClient } from '../../services/apiClient';
 
 interface ReportAiAssistModalProps {
   isOpen: boolean;
@@ -44,21 +45,12 @@ export const ReportAiAssistModal: React.FC<ReportAiAssistModalProps> = ({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/reports/enhance-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          description: originalDescription,
-          category,
-          location
-        })
+      const data = await apiClient.enhanceCivicReport({
+        description: originalDescription,
+        category,
+        location
       });
 
-      if (!res.ok) {
-        throw new Error(`Server returned ${res.status}`);
-      }
-
-      const data: AiEnhanceResult = await res.json();
       setResult(data);
       setEditedText(data.enhancedDescription || originalDescription);
     } catch (err: any) {

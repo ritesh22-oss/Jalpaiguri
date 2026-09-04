@@ -8,12 +8,14 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useNav } from '../../context/NavigationContext';
 import { useExpo } from '../../context/ExpoContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { WritingCaptcha } from '../common/WritingCaptcha';
 
 export const PhoneAuthView: React.FC = () => {
   const { sendPhoneOtp, pendingPhone, setPendingPhone } = useAuth();
   const { navigate } = useNav();
   const { triggerHaptic, triggerPushNotification, setLatestOtp } = useExpo();
+  const { isBengali, language, setLanguage, formatNumber } = useLanguage();
 
   const [rawPhone, setRawPhone] = useState(() => {
     if (pendingPhone) {
@@ -32,13 +34,13 @@ export const PhoneAuthView: React.FC = () => {
 
     if (digitsOnly.length < 10) {
       triggerHaptic('warning');
-      setErrorMsg('Please enter a valid 10-digit mobile number.');
+      setErrorMsg(isBengali ? 'অনুগ্রহ করে একটি সঠিক ১০-সংখ্যার মোবাইল নম্বর লিখুন।' : 'Please enter a valid 10-digit mobile number.');
       return;
     }
 
     if (!isCaptchaValid) {
       triggerHaptic('warning');
-      setErrorMsg('Please enter the security characters correctly before continuing.');
+      setErrorMsg(isBengali ? 'এগিয়ে যাওয়ার আগে নিরাপত্তা অক্ষরগুলি সঠিকভাবে লিখুন।' : 'Please enter the security characters correctly before continuing.');
       return;
     }
 
@@ -57,23 +59,23 @@ export const PhoneAuthView: React.FC = () => {
         if (res.otp) {
           setLatestOtp(res.otp);
           triggerPushNotification({
-            appTitle: 'Messages',
+            appTitle: isBengali ? 'বার্তা' : 'Messages',
             category: 'SMS',
-            title: 'Jalpaiguri Connect Verification',
-            body: `Your verification code is ${res.otp}. Tap to auto-fill.`,
+            title: isBengali ? 'জলপাইগুড়ি কানেক্ট যাচাইকরণ' : 'Jalpaiguri Connect Verification',
+            body: isBengali ? `আপনার ওটিপি কোড হলো ${res.otp}। স্বয়ংক্রিয়ভাবে পূরণ করতে ট্যাপ করুন।` : `Your verification code is ${res.otp}. Tap to auto-fill.`,
             code: res.otp,
-            actionLabel: 'Auto-Fill'
+            actionLabel: isBengali ? 'স্বয়ংক্রিয় পূরণ' : 'Auto-Fill'
           });
         }
         navigate('otp');
       } else {
         triggerHaptic('warning');
-        setErrorMsg(res?.message || 'Failed to send SMS code. Please check the number and try again.');
+        setErrorMsg(res?.message || (isBengali ? 'এসএমএস কোড পাঠানো যায়নি। নম্বরটি যাচাই করে আবার চেষ্টা করুন।' : 'Failed to send SMS code. Please check the number and try again.'));
       }
     } catch (err: any) {
       setLoading(false);
       triggerHaptic('warning');
-      setErrorMsg(err?.message || 'Failed to send SMS code. Please check your network and retry.');
+      setErrorMsg(err?.message || (isBengali ? 'এসএমএস পাঠাতে ব্যর্থ হয়েছে। ইন্টারনেট সংযোগ পরীক্ষা করে পুনরায় চেষ্টা করুন।' : 'Failed to send SMS code. Please check your network and retry.'));
     }
   };
 
@@ -89,10 +91,17 @@ export const PhoneAuthView: React.FC = () => {
         </button>
 
         <h1 className="text-base font-bold text-gray-900 dark:text-white tracking-tight">
-          Phone Sign In
+          {isBengali ? 'ফোন নম্বর দিয়ে প্রবেশ' : 'Phone Sign In'}
         </h1>
 
-        <div className="w-6"></div>
+        <div className="flex items-center bg-[#E8E4DA] dark:bg-white/10 p-0.5 rounded-full">
+          <button
+            onClick={() => setLanguage(language === 'bn' ? 'en' : 'bn')}
+            className="text-[11px] font-bold px-2 py-0.5 rounded-full text-[#063B2C] dark:text-emerald-300 hover:bg-white/50 cursor-pointer"
+          >
+            {language === 'bn' ? 'EN' : 'বাংলা'}
+          </button>
+        </div>
       </div>
 
       {/* Phone Number Input & Writing CAPTCHA Card */}
@@ -106,7 +115,7 @@ export const PhoneAuthView: React.FC = () => {
 
         <div className="space-y-1.5">
           <label className="block text-xs font-semibold text-gray-700 dark:text-[#A2B3AA]">
-            Enter your mobile number
+            {isBengali ? 'আপনার মোবাইল নম্বর লিখুন' : 'Enter your mobile number'}
           </label>
           <div className="w-full bg-white dark:bg-[#17231E] border border-gray-300 dark:border-white/10 rounded-2xl p-1.5 flex items-center shadow-2xs focus-within:border-[#3B82F6] focus-within:ring-2 focus-within:ring-blue-100 dark:focus-within:ring-blue-900/40 transition-all">
             <div className="flex items-center gap-1 pl-2.5 pr-2 py-1.5 shrink-0 select-none">
@@ -148,10 +157,10 @@ export const PhoneAuthView: React.FC = () => {
           {loading ? (
             <div className="flex items-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin text-white" />
-              <span>Sending Code...</span>
+              <span>{isBengali ? 'কোড পাঠানো হচ্ছে...' : 'Sending Code...'}</span>
             </div>
           ) : (
-            <span>Send OTP / Continue</span>
+            <span>{isBengali ? 'ওটিপি পাঠান / এগিয়ে যান' : 'Send OTP / Continue'}</span>
           )}
         </button>
       </form>

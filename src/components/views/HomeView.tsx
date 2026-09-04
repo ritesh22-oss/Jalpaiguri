@@ -31,6 +31,7 @@ import { useNav } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { useLocation } from '../../context/LocationContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { JalpaiguriLogo } from '../common/JalpaiguriLogo';
 import { LiveJalpaiguriMap } from '../common/LiveJalpaiguriMap';
 import { UNIFIED_NEARBY_DIRECTORY } from '../../data/nearbyServicesDirectory';
@@ -42,17 +43,26 @@ export const HomeView: React.FC = () => {
   const { user, firebaseUser } = useAuth();
   const { workers, doctors, localAlerts, civicReports, isRealtimeConnected, refreshData } = useApp();
   const { location, status, setIsLocationSelectorOpen, requestCurrentLocation } = useLocation();
+  const { isBengali, t, tLocality, tCategory } = useLanguage();
 
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
 
-  const placeholders = [
-    'Find a worker, doctor, shop or service...',
-    'Need an electrician in Kadamtala?',
-    'Need 24x7 blood donor or hospital?',
-    'Find local shop or job vacancies...',
-    'Auto / Toto or bike mechanic near you...'
-  ];
+  const placeholders = isBengali
+    ? [
+        'কর্মী, ডাক্তার, দোকান বা পরিষেবা খুঁজুন...',
+        'কদমতলায় ইলেকট্রিশিয়ান প্রয়োজন?',
+        '২৪x৭ রক্তদাতা বা হাসপাতাল প্রয়োজন?',
+        'স্থানীয় দোকান বা কাজের সুযোগ খুঁজুন...',
+        'নিকটস্থ অটো/টোটো বা বাইক মেকানিক...'
+      ]
+    : [
+        'Find a worker, doctor, shop or service...',
+        'Need an electrician in Kadamtala?',
+        'Need 24x7 blood donor or hospital?',
+        'Find local shop or job vacancies...',
+        'Auto / Toto or bike mechanic near you...'
+      ];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -64,12 +74,17 @@ export const HomeView: React.FC = () => {
   // Calculate dynamic time of day greeting
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
+    if (isBengali) {
+      if (hour < 12) return 'সুপ্রভাত';
+      if (hour < 17) return 'শুভ অপরাহ্ন';
+      return 'শুভ সন্ধ্যা';
+    }
     if (hour < 12) return 'Good morning';
     if (hour < 17) return 'Good afternoon';
     return 'Good evening';
-  }, []);
+  }, [isBengali]);
 
-  const userName = user?.name ? user.name.split(' ')[0] : 'Citizen';
+  const userName = user?.name ? user.name.split(' ')[0] : (isBengali ? 'নাগরিক' : 'Citizen');
 
   // Calculate dynamic nearby items for horizontal scroll
   const nearbyFeatured = useMemo(() => {
@@ -93,18 +108,18 @@ export const HomeView: React.FC = () => {
   };
 
   const quickServices = [
-    { id: 'srv-workers', label: 'Workers', icon: <Wrench className="w-5 h-5 text-[#063B2C]" />, view: 'nearby' as const, cat: 'Workers' as NearbyCategoryType, bg: 'bg-[#E6F4EA]' },
-    { id: 'srv-medical', label: 'Medical', icon: <Stethoscope className="w-5 h-5 text-[#0A58CA]" />, view: 'nearby' as const, cat: 'Medical' as NearbyCategoryType, bg: 'bg-[#EBF2FC]' },
-    { id: 'srv-blood', label: 'Blood', icon: <Droplet className="w-5 h-5 text-[#D9383A]" />, view: 'nearby' as const, cat: 'Blood' as NearbyCategoryType, bg: 'bg-[#FFEBEA]' },
-    { id: 'srv-jobs', label: 'Jobs', icon: <Briefcase className="w-5 h-5 text-[#854D0E]" />, view: 'nearby' as const, cat: 'Jobs' as NearbyCategoryType, bg: 'bg-[#FEF9C3]' },
-    { id: 'srv-vehicle', label: 'Vehicle', icon: <Car className="w-5 h-5 text-[#475569]" />, view: 'nearby' as const, cat: 'Vehicle' as NearbyCategoryType, bg: 'bg-[#F1F5F9]' },
-    { id: 'srv-animal', label: 'Animal Help', icon: <PawPrint className="w-5 h-5 text-[#15803D]" />, view: 'nearby' as const, cat: 'Animal' as NearbyCategoryType, bg: 'bg-[#DCFCE7]' },
-    { id: 'srv-pharmacy', label: 'Pharmacies', icon: <Pill className="w-5 h-5 text-[#0891B2]" />, view: 'medical' as const, cat: 'Medical' as NearbyCategoryType, bg: 'bg-[#CFFAFE]' },
-    { id: 'srv-rentals', label: 'Rentals', icon: <HomeIcon className="w-5 h-5 text-[#7C3AED]" />, view: 'nearby' as const, cat: 'Rentals' as NearbyCategoryType, bg: 'bg-[#F3E8FF]' },
-    { id: 'srv-businesses', label: 'Shops', icon: <Store className="w-5 h-5 text-[#BE123C]" />, view: 'nearby' as const, cat: 'Shops' as NearbyCategoryType, bg: 'bg-[#FFE4E6]' },
-    { id: 'srv-govt', label: 'Government', icon: <Landmark className="w-5 h-5 text-[#334155]" />, view: 'government' as const, cat: 'Services' as NearbyCategoryType, bg: 'bg-[#F1F5F9]' },
-    { id: 'srv-lostfound', label: 'Lost & Found', icon: <HelpCircle className="w-5 h-5 text-[#D97706]" />, view: 'lost-found' as const, cat: 'Services' as NearbyCategoryType, bg: 'bg-[#FEF3C7]' },
-    { id: 'srv-report', label: 'Report Issue', icon: <AlertTriangle className="w-5 h-5 text-[#D9383A]" />, view: 'report-problem' as const, cat: 'Services' as NearbyCategoryType, bg: 'bg-[#FEE2E2]' }
+    { id: 'srv-workers', label: isBengali ? 'কর্মী' : 'Workers', icon: <Wrench className="w-5 h-5 text-[#063B2C]" />, view: 'nearby' as const, cat: 'Workers' as NearbyCategoryType, bg: 'bg-[#E6F4EA]' },
+    { id: 'srv-medical', label: isBengali ? 'চিকিৎসা' : 'Medical', icon: <Stethoscope className="w-5 h-5 text-[#0A58CA]" />, view: 'nearby' as const, cat: 'Medical' as NearbyCategoryType, bg: 'bg-[#EBF2FC]' },
+    { id: 'srv-blood', label: isBengali ? 'রক্ত' : 'Blood', icon: <Droplet className="w-5 h-5 text-[#D9383A]" />, view: 'nearby' as const, cat: 'Blood' as NearbyCategoryType, bg: 'bg-[#FFEBEA]' },
+    { id: 'srv-jobs', label: isBengali ? 'চাকরি' : 'Jobs', icon: <Briefcase className="w-5 h-5 text-[#854D0E]" />, view: 'nearby' as const, cat: 'Jobs' as NearbyCategoryType, bg: 'bg-[#FEF9C3]' },
+    { id: 'srv-vehicle', label: isBengali ? 'যানবাহন' : 'Vehicle', icon: <Car className="w-5 h-5 text-[#475569]" />, view: 'nearby' as const, cat: 'Vehicle' as NearbyCategoryType, bg: 'bg-[#F1F5F9]' },
+    { id: 'srv-animal', label: isBengali ? 'প্রাণী সেবা' : 'Animal Help', icon: <PawPrint className="w-5 h-5 text-[#15803D]" />, view: 'nearby' as const, cat: 'Animal' as NearbyCategoryType, bg: 'bg-[#DCFCE7]' },
+    { id: 'srv-pharmacy', label: isBengali ? 'ফার্মেসি' : 'Pharmacies', icon: <Pill className="w-5 h-5 text-[#0891B2]" />, view: 'medical' as const, cat: 'Medical' as NearbyCategoryType, bg: 'bg-[#CFFAFE]' },
+    { id: 'srv-rentals', label: isBengali ? 'ভাড়া' : 'Rentals', icon: <HomeIcon className="w-5 h-5 text-[#7C3AED]" />, view: 'nearby' as const, cat: 'Rentals' as NearbyCategoryType, bg: 'bg-[#F3E8FF]' },
+    { id: 'srv-businesses', label: isBengali ? 'দোকান' : 'Shops', icon: <Store className="w-5 h-5 text-[#BE123C]" />, view: 'nearby' as const, cat: 'Shops' as NearbyCategoryType, bg: 'bg-[#FFE4E6]' },
+    { id: 'srv-govt', label: isBengali ? 'সরকারি' : 'Government', icon: <Landmark className="w-5 h-5 text-[#334155]" />, view: 'government' as const, cat: 'Services' as NearbyCategoryType, bg: 'bg-[#F1F5F9]' },
+    { id: 'srv-lostfound', label: isBengali ? 'হারানো ও প্রাপ্তি' : 'Lost & Found', icon: <HelpCircle className="w-5 h-5 text-[#D97706]" />, view: 'lost-found' as const, cat: 'Services' as NearbyCategoryType, bg: 'bg-[#FEF3C7]' },
+    { id: 'srv-report', label: isBengali ? 'অভিযোগ' : 'Report Issue', icon: <AlertTriangle className="w-5 h-5 text-[#D9383A]" />, view: 'report-problem' as const, cat: 'Services' as NearbyCategoryType, bg: 'bg-[#FEE2E2]' }
   ];
 
   return (
@@ -126,7 +141,7 @@ export const HomeView: React.FC = () => {
                   className="flex items-center gap-1 text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] cursor-pointer hover:underline"
                 >
                   <MapPin className="w-3.5 h-3.5 text-[#063B2C] dark:text-[#4ECCA3] shrink-0" />
-                  <span className="truncate max-w-[150px]">{location.name || `${location.locality}, ${location.city || ''}`}</span>
+                  <span className="truncate max-w-[150px]">{tLocality(location.name || `${location.locality}, ${location.city || ''}`)}</span>
                 </div>
                 <div
                   onClick={() => refreshData()}
@@ -137,7 +152,7 @@ export const HomeView: React.FC = () => {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
                   </span>
-                  <span>Live</span>
+                  <span>{isBengali ? 'লাইভ' : 'Live'}</span>
                 </div>
               </div>
             </div>
@@ -173,7 +188,7 @@ export const HomeView: React.FC = () => {
                 onClick={() => navigate('auth')}
                 className="text-xs font-extrabold text-white bg-[#063B2C] dark:bg-emerald-600 px-3.5 py-1.5 rounded-full shadow-xs hover:bg-[#084D3A] cursor-pointer"
               >
-                Sign In
+                {isBengali ? 'সাইন ইন' : 'Sign In'}
               </button>
             )}
           </div>
@@ -185,7 +200,7 @@ export const HomeView: React.FC = () => {
             <div className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-[#063B2C] dark:text-[#4ECCA3]" />
               <span className="text-xs font-extrabold text-[#11241C] dark:text-white">
-                Your Location
+                {isBengali ? 'আপনার অবস্থান' : 'Your Location'}
               </span>
             </div>
 
@@ -193,7 +208,7 @@ export const HomeView: React.FC = () => {
               onClick={() => setIsLocationSelectorOpen(true)}
               className="text-[11px] font-extrabold text-[#063B2C] dark:text-[#4ECCA3] hover:underline cursor-pointer"
             >
-              Change Location
+              {isBengali ? 'স্থান পরিবর্তন' : 'Change Location'}
             </button>
           </div>
 
@@ -204,7 +219,7 @@ export const HomeView: React.FC = () => {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
               </span>
               <span className="text-xs font-bold text-[#11241C] dark:text-white truncate">
-                📍 {location.name}
+                📍 {tLocality(location.name || location.locality)}
               </span>
             </div>
 
@@ -216,12 +231,12 @@ export const HomeView: React.FC = () => {
               {isDetectingLocation ? (
                 <>
                   <Loader2 className="w-3 h-3 animate-spin" />
-                  <span>Locating...</span>
+                  <span>{isBengali ? 'শনাক্ত হচ্ছে...' : 'Locating...'}</span>
                 </>
               ) : (
                 <>
                   <Navigation className="w-3 h-3" />
-                  <span>Use GPS</span>
+                  <span>{isBengali ? 'জিপিএস ব্যবহার' : 'Use GPS'}</span>
                 </>
               )}
             </button>
@@ -231,7 +246,7 @@ export const HomeView: React.FC = () => {
         {/* "What do you need today?" & Search Bar */}
         <div className="space-y-1.5">
           <h3 className="text-xs font-extrabold text-[#55685F] dark:text-[#A2B3AA] uppercase tracking-wider px-0.5">
-            What do you need today?
+            {isBengali ? 'আজ আপনার কি প্রয়োজন?' : 'What do you need today?'}
           </h3>
           <div
             onClick={() => navigate('nearby')}
@@ -268,14 +283,14 @@ export const HomeView: React.FC = () => {
             <div>
               <div className="flex items-center gap-1.5">
                 <h3 className="text-sm font-extrabold text-[#8A1A1C] dark:text-red-300 tracking-tight">
-                  🆘 Safety SOS Hub
+                  {isBengali ? '🆘 সুরক্ষা এসওএস হাব' : '🆘 Safety SOS Hub'}
                 </h3>
                 <span className="text-[10px] font-bold bg-[#D9383A] text-white px-1.5 py-0.2 rounded-full">
                   112
                 </span>
               </div>
               <p className="text-[11px] text-[#632021] dark:text-red-200/80 font-medium">
-                Hold-to-SOS, Shake Detection & Trusted Contacts
+                {isBengali ? 'হোল্ড-এসওএস, ঝাঁকুনি শনাক্তকরণ ও জরুরি যোগাযোগ' : 'Hold-to-SOS, Shake Detection & Trusted Contacts'}
               </p>
             </div>
           </div>
@@ -284,13 +299,13 @@ export const HomeView: React.FC = () => {
               onClick={() => navigate('safety-sos')}
               className="bg-[#D9383A] hover:bg-[#B92628] text-white text-xs font-bold px-3 py-2 rounded-xl shadow-xs active:scale-95 transition-all cursor-pointer"
             >
-              SOS Hub
+              {isBengali ? 'এসওএস হাব' : 'SOS Hub'}
             </button>
             <button
               onClick={() => navigate('emergency')}
               className="bg-white dark:bg-[#17231E] border border-[#FECDCA] dark:border-red-900/50 text-[#D9383A] dark:text-red-400 hover:bg-[#FFEBEA] dark:hover:bg-red-950/40 text-xs font-bold px-2.5 py-2 rounded-xl active:scale-95 transition-all cursor-pointer"
             >
-              Services
+              {isBengali ? 'সেবাসমূহ' : 'Services'}
             </button>
           </div>
         </div>
@@ -312,15 +327,15 @@ export const HomeView: React.FC = () => {
                 </span>
               </div>
               <h3 className="text-sm font-extrabold mt-2.5 leading-snug">
-                Jalpaigi AI Chat
+                {isBengali ? 'জলপাইগি এআই চ্যাট' : 'Jalpaigi AI Chat'}
               </h3>
               <p className="text-[11px] text-emerald-100 mt-0.5 leading-tight">
-                Multi-turn civic helper with local insights & memory.
+                {isBengali ? 'স্থানীয় তথ্য ও নাগরিক সহায়তায় এআই সহকারী।' : 'Multi-turn civic helper with local insights & memory.'}
               </p>
             </div>
 
             <div className="pt-2 border-t border-white/20 flex items-center justify-between text-xs font-bold text-emerald-200">
-              <span>Start Chat</span>
+              <span>{isBengali ? 'চ্যাট শুরু করুন' : 'Start Chat'}</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
@@ -336,19 +351,19 @@ export const HomeView: React.FC = () => {
                   <MapPin className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 </div>
                 <span className="text-[9px] font-bold bg-[#E6F4EA] dark:bg-[#1C4532] text-[#063B2C] dark:text-[#4ECCA3] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                  Places Live
+                  {isBengali ? 'লাইভ স্থান' : 'Places Live'}
                 </span>
               </div>
               <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white mt-2.5 leading-snug">
-                Explore Places
+                {isBengali ? 'স্থান অন্বেষণ' : 'Explore Places'}
               </h3>
               <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA] mt-0.5 leading-tight">
-                Verified clinics, stores, transport & tourist spots.
+                {isBengali ? 'যাচাইকৃত ক্লিনিক, দোকান, পরিবহন ও দর্শনীয় স্থান।' : 'Verified clinics, stores, transport & tourist spots.'}
               </p>
             </div>
 
             <div className="pt-2 border-t border-[#F0ECE1] dark:border-white/10 flex items-center justify-between text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3]">
-              <span>Explore Places</span>
+              <span>{isBengali ? 'স্থান দেখুন' : 'Explore Places'}</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
@@ -359,17 +374,17 @@ export const HomeView: React.FC = () => {
           <div className="flex items-center justify-between mb-3 px-1">
             <div>
               <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white tracking-tight">
-                Nearby For You
+                {isBengali ? 'আপনার নিকটবর্তী' : 'Nearby For You'}
               </h3>
               <p className="text-[11px] font-semibold text-[#55685F] dark:text-[#A2B3AA]">
-                Sorted by distance from {location.locality}
+                {isBengali ? `${tLocality(location.locality)} থেকে দূরত্ব অনুসারে` : `Sorted by distance from ${location.locality}`}
               </p>
             </div>
             <button
               onClick={() => navigate('nearby')}
               className="text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] hover:underline cursor-pointer flex items-center gap-0.5"
             >
-              <span>Explore all</span>
+              <span>{isBengali ? 'সব দেখুন' : 'Explore all'}</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -385,7 +400,7 @@ export const HomeView: React.FC = () => {
                   {/* Category & Distance Header */}
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-[#E6F4EA] dark:bg-[#1C4532] text-[#063B2C] dark:text-[#4ECCA3] uppercase">
-                      {item.subcategory}
+                      {tCategory(item.subcategory)}
                     </span>
                     <span className="text-[11px] font-black text-[#063B2C] dark:text-[#4ECCA3] flex items-center gap-0.5">
                       <MapPin className="w-3 h-3" />
@@ -397,16 +412,16 @@ export const HomeView: React.FC = () => {
                     {item.name}
                   </h4>
                   <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA] line-clamp-1 mt-0.5">
-                    📍 {item.area}
+                    📍 {tLocality(item.area)}
                   </p>
                 </div>
 
                 <div className="pt-2 mt-2 border-t border-[#F0ECE1] dark:border-white/10 flex items-center justify-between">
                   <span className="text-[11px] font-bold text-[#11241C] dark:text-white">
-                    {item.startingPrice || item.salary || item.openStatus || 'Available'}
+                    {item.startingPrice || item.salary || item.openStatus || (isBengali ? 'উপলব্ধ' : 'Available')}
                   </span>
                   <span className="text-[11px] font-extrabold text-[#063B2C] dark:text-[#4ECCA3] flex items-center gap-0.5">
-                    <span>View</span>
+                    <span>{isBengali ? 'দেখুন' : 'View'}</span>
                     <ChevronRight className="w-3 h-3" />
                   </span>
                 </div>
@@ -419,13 +434,13 @@ export const HomeView: React.FC = () => {
         <div>
           <div className="flex items-center justify-between mb-3 px-1">
             <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white tracking-tight">
-              City Services
+              {isBengali ? 'শহরের পরিষেবা' : 'City Services'}
             </h3>
             <button
               onClick={() => navigate('nearby')}
               className="text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] hover:underline cursor-pointer"
             >
-              View all
+              {isBengali ? 'সব দেখুন' : 'View all'}
             </button>
           </div>
 
@@ -462,14 +477,14 @@ export const HomeView: React.FC = () => {
             <div className="flex items-center gap-1.5">
               <Landmark className="w-4 h-4 text-[#063B2C] dark:text-[#4ECCA3]" />
               <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white tracking-tight">
-                Popular Government Services
+                {isBengali ? 'জনপ্রিয় সরকারি পরিষেবা' : 'Popular Government Services'}
               </h3>
             </div>
             <button
               onClick={() => navigate('government')}
               className="text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] hover:underline cursor-pointer flex items-center gap-0.5"
             >
-              <span>View All</span>
+              <span>{isBengali ? 'সব দেখুন' : 'View All'}</span>
               <ChevronRight className="w-3 h-3" />
             </button>
           </div>
@@ -483,20 +498,20 @@ export const HomeView: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between gap-1 mb-2">
                   <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-[#E6F4EA] dark:bg-[#1C4532] text-[#063B2C] dark:text-[#4ECCA3] uppercase tracking-wider">
-                    Pay Online
+                    {isBengali ? 'অনলাইন পেমেন্ট' : 'Pay Online'}
                   </span>
                   <BadgeCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 </div>
                 <h4 className="font-extrabold text-xs text-[#11241C] dark:text-white leading-snug">
-                  Property Tax & Mutation
+                  {isBengali ? 'সম্পত্তি কর ও মিউটেশন' : 'Property Tax & Mutation'}
                 </h4>
                 <p className="text-[10px] text-[#55685F] dark:text-[#A2B3AA] line-clamp-2 mt-1 font-medium">
-                  Jalpaiguri Municipality portal for ward holding tax & receipts
+                  {isBengali ? 'হোল্ডিং ট্যাক্স ও রসিদের জন্য জলপাইগুড়ি পুরসভার পোর্টাল' : 'Jalpaiguri Municipality portal for ward holding tax & receipts'}
                 </p>
               </div>
 
               <div className="pt-2.5 mt-2 border-t border-[#F0ECE1] dark:border-white/10 flex items-center justify-between text-[10px] font-bold text-[#063B2C] dark:text-[#4ECCA3]">
-                <span>Official Government Portal</span>
+                <span>{isBengali ? 'অফিসিয়াল সরকারি পোর্টাল' : 'Official Government Portal'}</span>
                 <ExternalLink className="w-3 h-3" />
               </div>
             </div>
@@ -508,20 +523,20 @@ export const HomeView: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between gap-1 mb-2">
                   <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-[#E0F2FE] dark:bg-[#153448] text-[#0369A1] dark:text-[#70C1FF] uppercase tracking-wider">
-                    Official
+                    {isBengali ? 'অফিসিয়াল' : 'Official'}
                   </span>
                   <BadgeCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 </div>
                 <h4 className="font-extrabold text-xs text-[#11241C] dark:text-white leading-snug">
-                  Birth & Death Certificates
+                  {isBengali ? 'জন্ম ও মৃত্যু শংসাপত্র' : 'Birth & Death Certificates'}
                 </h4>
                 <p className="text-[10px] text-[#55685F] dark:text-[#A2B3AA] line-clamp-2 mt-1 font-medium">
-                  Janma-Mrityu Tathya WB verified digital civic certificates
+                  {isBengali ? 'জন্ম-মৃত্যু তথ্য পশ্চিমবঙ্গ ডিজিটাল নাগরিক শংসাপত্র' : 'Janma-Mrityu Tathya WB verified digital civic certificates'}
                 </p>
               </div>
 
               <div className="pt-2.5 mt-2 border-t border-[#F0ECE1] dark:border-white/10 flex items-center justify-between text-[10px] font-bold text-[#063B2C] dark:text-[#4ECCA3]">
-                <span>Official Government Portal</span>
+                <span>{isBengali ? 'অফিসিয়াল সরকারি পোর্টাল' : 'Official Government Portal'}</span>
                 <ExternalLink className="w-3 h-3" />
               </div>
             </div>
@@ -533,7 +548,7 @@ export const HomeView: React.FC = () => {
               className="w-full py-2.5 rounded-2xl bg-[#FAF8F5] dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 text-[#063B2C] dark:text-[#4ECCA3] font-extrabold text-xs hover:bg-[#E6F4EA] dark:hover:bg-[#1F312A] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
             >
               <Landmark className="w-3.5 h-3.5 text-[#063B2C] dark:text-[#4ECCA3]" />
-              <span>View All Government Services</span>
+              <span>{isBengali ? 'সকল সরকারি পরিষেবা দেখুন' : 'View All Government Services'}</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -544,13 +559,13 @@ export const HomeView: React.FC = () => {
           <div className="flex items-center justify-between mb-2.5 px-1">
             <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white tracking-tight flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-[#063B2C] dark:text-[#4ECCA3]" />
-              <span>Live Location & Civic Map</span>
+              <span>{isBengali ? 'লাইভ অবস্থান ও মানচিত্র' : 'Live Location & Civic Map'}</span>
             </h3>
             <button
               onClick={() => navigate('maps-explorer')}
               className="text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] hover:underline cursor-pointer flex items-center gap-0.5"
             >
-              <span>Explore Full Map</span>
+              <span>{isBengali ? 'সম্পূর্ণ মানচিত্র' : 'Explore Full Map'}</span>
               <ChevronRight className="w-3 h-3" />
             </button>
           </div>
@@ -564,18 +579,18 @@ export const HomeView: React.FC = () => {
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white tracking-tight flex items-center gap-1.5">
                 <Navigation className="w-4 h-4 text-[#063B2C] dark:text-[#4ECCA3]" />
-                <span>Live Traffic & Waterlogging</span>
+                <span>{isBengali ? 'লাইভ ট্রাফিক ও জলজট' : 'Live Traffic & Waterlogging'}</span>
               </h3>
               <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-black uppercase tracking-wider">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                <span>Live</span>
+                <span>{isBengali ? 'লাইভ' : 'Live'}</span>
               </span>
             </div>
             <button
               onClick={() => navigate('alerts')}
               className="text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] hover:underline cursor-pointer flex items-center gap-0.5"
             >
-              <span>Full Map</span>
+              <span>{isBengali ? 'সম্পূর্ণ মানচিত্র' : 'Full Map'}</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -586,20 +601,22 @@ export const HomeView: React.FC = () => {
           >
             <div className="flex items-center justify-between text-xs font-bold">
               <span className="text-[#063B2C] dark:text-[#34D399] bg-[#E6F4EA] dark:bg-[#1C4532] px-2.5 py-0.5 rounded-full">
-                Google Traffic Layer
+                {isBengali ? 'গুগল ট্রাফিক লেয়ার' : 'Google Traffic Layer'}
               </span>
               <span className="text-[11px] text-[#8C9B93] dark:text-[#73857C] font-medium flex items-center gap-1">
-                <span>Real-time Speeds</span>
+                <span>{isBengali ? 'রিয়েল-টাইম গতি' : 'Real-time Speeds'}</span>
               </span>
             </div>
             <h4 className="font-extrabold text-sm text-[#11241C] dark:text-white group-hover:text-[#063B2C] dark:group-hover:text-[#4ECCA3] transition-colors">
-              Monitored Transit Corridors & Drainage
+              {isBengali ? 'নজরদারিকৃত ট্রানজিট ও নিকাশী পথ' : 'Monitored Transit Corridors & Drainage'}
             </h4>
             <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] leading-relaxed">
-              Real-time Google Maps traffic on NH-27 Teesta Bridge, Dinbazar, Kadamtala & Mohitnagar. Verified municipal flood & waterlogging telemetry.
+              {isBengali
+                ? 'এনএইচ-২৭ তিস্তা সেতু, দিনবাজার, কদমতলা ও মোহিতনগরে রিয়েল-টাইম ট্রাফিক ও পুরসভার জলজটের তথ্য।'
+                : 'Real-time Google Maps traffic on NH-27 Teesta Bridge, Dinbazar, Kadamtala & Mohitnagar. Verified municipal flood & waterlogging telemetry.'}
             </p>
             <div className="pt-2 border-t border-[#F0ECE1] dark:border-white/10 flex items-center justify-between text-[11px] font-bold text-[#063B2C] dark:text-[#4ECCA3]">
-              <span>Toggle Traffic & Waterlogging Overlays</span>
+              <span>{isBengali ? 'ট্রাফিক ও জলজট ওভারলে দেখুন' : 'Toggle Traffic & Waterlogging Overlays'}</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>

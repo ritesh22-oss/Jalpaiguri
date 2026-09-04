@@ -8,6 +8,8 @@
  * - Fetches API key securely via server backend config endpoint
  */
 
+import { apiClient } from './apiClient';
+
 let gmpLoaderPromise: Promise<any> | null = null;
 
 export async function loadGoogleMapsJsApi(): Promise<any> {
@@ -26,14 +28,11 @@ export async function loadGoogleMapsJsApi(): Promise<any> {
         return resolve((window as any).google.maps);
       }
 
-      // 2. Fetch server-provided API key safely
+      // 2. Fetch server-provided API key safely via centralized apiClient
       let apiKey = '';
       try {
-        const res = await fetch('/api/config/maps-key');
-        if (res.ok) {
-          const data = await res.json();
-          apiKey = data.apiKey || '';
-        }
+        const config = await apiClient.getGoogleMapsKey();
+        apiKey = config?.apiKey || '';
       } catch {
         // Fallback without key or with prototype demo key
       }

@@ -40,6 +40,7 @@ import { useNav } from '../../context/NavigationContext';
 import { useApp } from '../../context/AppContext';
 import { useLocation } from '../../context/LocationContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { BloodGroup, isAuthorizedAdminEmail } from '../../types';
 import { FingerprintScannerModal } from '../common/FingerprintScannerModal';
 import { isFirebaseConfigured } from '../../lib/firebase';
@@ -57,7 +58,8 @@ export const ProfileView: React.FC = () => {
     removeFingerprint
   } = useAuth();
   const { navigate } = useNav();
-  const { civicReports, savedItemIds, language, setLanguage } = useApp();
+  const { civicReports, savedItemIds } = useApp();
+  const { language, setLanguage, isBengali, t, tLocality, formatNumber } = useLanguage();
   const {
     location,
     requestCurrentLocation,
@@ -99,10 +101,10 @@ export const ProfileView: React.FC = () => {
   const bloodGroups: BloodGroup[] = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', "I don't know"];
 
   const genderOptions = [
-    { id: 'Male' as const, label: 'Male', symbol: '♂', bg: 'bg-blue-100 text-blue-700' },
-    { id: 'Female' as const, label: 'Female', symbol: '♀', bg: 'bg-pink-100 text-pink-700' },
-    { id: 'Other' as const, label: 'Other', symbol: '⚧', bg: 'bg-purple-100 text-purple-700' },
-    { id: 'Prefer not to say' as const, label: 'Private', symbol: '🔒', bg: 'bg-slate-100 text-slate-700' }
+    { id: 'Male' as const, label: isBengali ? 'পুরুষ' : 'Male', symbol: '♂', bg: 'bg-blue-100 text-blue-700' },
+    { id: 'Female' as const, label: isBengali ? 'মহিলা' : 'Female', symbol: '♀', bg: 'bg-pink-100 text-pink-700' },
+    { id: 'Other' as const, label: isBengali ? 'অন্যান্য' : 'Other', symbol: '⚧', bg: 'bg-purple-100 text-purple-700' },
+    { id: 'Prefer not to say' as const, label: isBengali ? 'গোপনীয়' : 'Private', symbol: '🔒', bg: 'bg-slate-100 text-slate-700' }
   ];
 
   const handleOpenEdit = () => {
@@ -159,14 +161,14 @@ export const ProfileView: React.FC = () => {
     <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 max-w-md mx-auto select-none transition-colors">
       <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0F1A15]/90 backdrop-blur-md px-5 pt-6 pb-3 border-b border-[#E8E4DA]/50 dark:border-white/10 flex items-center justify-between transition-colors">
         <h1 className="text-2xl font-extrabold text-[#11241C] dark:text-white tracking-tight">
-          Citizen Profile
+          {isBengali ? 'নাগরিক প্রোফাইল' : 'Citizen Profile'}
         </h1>
         <div className="flex items-center gap-2">
           {/* Simple Light / Dark Mode Toggle Icon */}
           <button
             onClick={toggleTheme}
             className="w-8 h-8 rounded-full bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#55685F] dark:text-[#A2B3AA] hover:text-[#063B2C] dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] transition-colors cursor-pointer shadow-xs"
-            title={isDarkMode ? 'Switch to Bright Mode' : 'Switch to Dark Mode'}
+            title={isDarkMode ? (isBengali ? 'লাইট মোডে পরিবর্তন করুন' : 'Switch to Bright Mode') : (isBengali ? 'ডার্ক মোডে পরিবর্তন করুন' : 'Switch to Dark Mode')}
             aria-label="Toggle Bright/Dark Mode"
           >
             {isDarkMode ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4" />}
@@ -179,11 +181,11 @@ export const ProfileView: React.FC = () => {
                 className="text-xs font-bold text-white bg-[#063B2C] dark:bg-emerald-600 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 <LayoutDashboard className="w-3.5 h-3.5 text-emerald-300" />
-                <span>Admin Console</span>
+                <span>{isBengali ? 'অ্যাডমিন প্যানেল' : 'Admin Console'}</span>
               </button>
             ) : (
               <span className="text-[11px] font-bold text-[#063B2C] dark:text-[#4ECCA3] bg-[#E6F4EA] dark:bg-[#1C4532] px-3 py-1 rounded-full border border-[#C3E6D0] dark:border-emerald-800/60">
-                Citizen Verified
+                {isBengali ? 'যাচাইকৃত নাগরিক' : 'Citizen Verified'}
               </span>
             )
           ) : (
@@ -192,7 +194,7 @@ export const ProfileView: React.FC = () => {
               className="text-xs font-bold text-white bg-[#063B2C] dark:bg-emerald-600 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-xs cursor-pointer"
             >
               <LogIn className="w-3.5 h-3.5" />
-              <span>Sign In</span>
+              <span>{isBengali ? 'লগইন' : 'Sign In'}</span>
             </button>
           )}
         </div>
@@ -220,7 +222,7 @@ export const ProfileView: React.FC = () => {
                   <h2 className="text-lg font-extrabold text-[#11241C] dark:text-white leading-tight">{user?.name}</h2>
                   <p className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA] mt-0.5 flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5 text-[#063B2C] dark:text-[#4ECCA3]" />
-                    <span>{user?.location || 'Jalpaiguri, WB'}</span>
+                    <span>{user?.location ? tLocality(user.location) : (isBengali ? 'জলপাইগুড়ি, পঃবঃ' : 'Jalpaiguri, WB')}</span>
                   </p>
                   {(user?.email || firebaseUser?.email) && (
                     <p className="text-[11px] font-semibold text-[#55685F] dark:text-[#A2B3AA] mt-0.5 flex items-center gap-1">
@@ -231,7 +233,7 @@ export const ProfileView: React.FC = () => {
                   {user?.phone && (
                     <p className="text-[11px] font-semibold text-[#8C9B93] dark:text-[#73857C] mt-0.5 flex items-center gap-1">
                       <Phone className="w-3 h-3 text-[#55685F] dark:text-[#A2B3AA]" />
-                      <span>{user.phone}</span>
+                      <span>{formatNumber(user.phone)}</span>
                     </p>
                   )}
                 </div>
@@ -241,10 +243,10 @@ export const ProfileView: React.FC = () => {
               <button
                 onClick={handleOpenEdit}
                 className="py-1.5 px-3 rounded-2xl bg-[#FAF8F5] dark:bg-[#131F1A] border border-[#D2CEBE] dark:border-white/15 text-[#063B2C] dark:text-[#4ECCA3] hover:bg-[#E6F4EA] dark:hover:bg-[#1F312A] text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer active:scale-95 transition-all"
-                title="Edit Your Profile Manually"
+                title={isBengali ? 'প্রোফাইল সম্পাদনা করুন' : 'Edit Your Profile Manually'}
               >
                 <Edit3 className="w-3.5 h-3.5" />
-                <span>Edit</span>
+                <span>{isBengali ? 'সম্পাদনা' : 'Edit'}</span>
               </button>
             </div>
 
@@ -264,34 +266,34 @@ export const ProfileView: React.FC = () => {
 
               <span className="text-[11px] font-bold text-[#D9383A] dark:text-red-400 bg-[#FFEBEA] dark:bg-red-950/50 px-2.5 py-1 rounded-xl flex items-center gap-1 border border-transparent dark:border-red-900/40">
                 <Droplet className="w-3 h-3 fill-[#D9383A] dark:fill-red-400" />
-                <span>Blood: {user?.bloodGroup || 'O+'}</span>
+                <span>{isBengali ? 'রক্তের গ্রুপ:' : 'Blood:'} {user?.bloodGroup || 'O+'}</span>
               </span>
 
               {user?.age && (
                 <span className="text-[11px] font-bold text-[#854D0E] dark:text-amber-300 bg-[#FEF9C3] dark:bg-amber-950/40 px-2.5 py-1 rounded-xl flex items-center gap-1 border border-transparent dark:border-amber-900/40">
                   <Calendar className="w-3 h-3" />
-                  <span>Age: {user.age} yrs</span>
+                  <span>{isBengali ? `বয়স: ${formatNumber(user.age)} বছর` : `Age: ${user.age} yrs`}</span>
                 </span>
               )}
 
               {user?.gender && (
                 <span className="text-[11px] font-bold text-[#1E293B] dark:text-[#C5D2CB] bg-[#F1F5F9] dark:bg-[#1C2A24] px-2.5 py-1 rounded-xl">
-                  {user.gender === 'Male' && '♂ Male'}
-                  {user.gender === 'Female' && '♀ Female'}
-                  {user.gender === 'Other' && '⚧ Other'}
-                  {user.gender === 'Prefer not to say' && '🔒 Private'}
+                  {user.gender === 'Male' && (isBengali ? '♂ পুরুষ' : '♂ Male')}
+                  {user.gender === 'Female' && (isBengali ? '♀ মহিলা' : '♀ Female')}
+                  {user.gender === 'Other' && (isBengali ? '⚧ অন্যান্য' : '⚧ Other')}
+                  {user.gender === 'Prefer not to say' && (isBengali ? '🔒 গোপনীয়' : '🔒 Private')}
                 </span>
               )}
 
               <span className="text-[11px] font-bold text-[#063B2C] dark:text-[#4ECCA3] bg-[#E6F4EA] dark:bg-[#1C4532] px-2.5 py-1 rounded-xl flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3" />
-                <span>Verified Citizen</span>
+                <span>{isBengali ? 'যাচাইকৃত নাগরিক' : 'Verified Citizen'}</span>
               </span>
 
               {isFirebaseConfigured && (
                 <span className="text-[11px] font-bold text-[#063B2C] dark:text-[#4ECCA3] bg-[#E6F4EA] dark:bg-[#1C4532] px-2.5 py-1 rounded-xl flex items-center gap-1 border border-[#C3E6D0] dark:border-emerald-800/60">
                   <Database className="w-3 h-3 text-[#063B2C] dark:text-[#4ECCA3]" />
-                  <span>Firestore Persistent</span>
+                  <span>{isBengali ? 'ফায়ারস্টোর ক্লাউড সংযুক্ত' : 'Firestore Persistent'}</span>
                 </span>
               )}
             </div>
@@ -300,15 +302,17 @@ export const ProfileView: React.FC = () => {
           <div className="bg-gradient-to-br from-[#063B2C] to-[#0A5641] text-white rounded-3xl p-5 shadow-md space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold bg-white/20 px-2.5 py-1 rounded-full uppercase tracking-wider text-[#A7D7B9]">
-                Guest Mode
+                {isBengali ? 'অতিথি মোড' : 'Guest Mode'}
               </span>
               <span className="text-xs text-white/80">Jalpaiguri Connect</span>
             </div>
             <h2 className="text-lg font-black leading-tight">
-              Sign In to unlock full civic services
+              {isBengali ? 'সম্পূর্ণ নাগরিক সেবা পেতে লগইন করুন' : 'Sign In to unlock full civic services'}
             </h2>
             <p className="text-xs text-white/80 leading-relaxed">
-              Log in with your Google Account, Phone OTP, or Email to track requests, volunteer, and book local services.
+              {isBengali
+                ? 'আপনার গুগল অ্যাকাউন্ট, ফোন ওটিপি বা ইমেল দিয়ে প্রবেশ করে অভিযোগ ট্র্যাকিং, স্বেচ্ছাসেবী সেবা ও স্থানীয় সুবিধাসমূহ গ্রহণ করুন।'
+                : 'Log in with your Google Account, Phone OTP, or Email to track requests, volunteer, and book local services.'}
             </p>
             <div className="flex gap-2 pt-1">
               <button
@@ -316,7 +320,7 @@ export const ProfileView: React.FC = () => {
                 className="flex-1 bg-white text-[#063B2C] font-extrabold text-xs py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-xs hover:bg-[#FAF8F5] cursor-pointer"
               >
                 <LogIn className="w-4 h-4" />
-                <span>Sign In / Sign Up</span>
+                <span>{isBengali ? 'লগইন / সাইন আপ' : 'Sign In / Sign Up'}</span>
               </button>
             </div>
           </div>
@@ -330,18 +334,22 @@ export const ProfileView: React.FC = () => {
                 <Fingerprint className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-xs font-black text-[#11241C] dark:text-white">Biometric Privacy Key</h3>
-                <p className="text-[10px] text-emerald-800 dark:text-emerald-400 font-semibold">Hardware-bound fingerprint signature</p>
+                <h3 className="text-xs font-black text-[#11241C] dark:text-white">
+                  {isBengali ? 'বায়োমেট্রিক নিরাপত্তা চাবি' : 'Biometric Privacy Key'}
+                </h3>
+                <p className="text-[10px] text-emerald-800 dark:text-emerald-400 font-semibold">
+                  {isBengali ? 'ডিভাইসের সাথে সংযুক্ত আঙুলের ছাপ' : 'Hardware-bound fingerprint signature'}
+                </p>
               </div>
             </div>
             {enrolledFingerprint ? (
               <span className="text-[10px] bg-emerald-100 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-300 font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700 flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3" />
-                <span>Enrolled & Bound</span>
+                <span>{isBengali ? 'সংযুক্ত ও সুরক্ষিত' : 'Enrolled & Bound'}</span>
               </span>
             ) : (
               <span className="text-[10px] bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold px-2 py-0.5 rounded-full">
-                Not Enrolled
+                {isBengali ? 'সংযুক্ত নয়' : 'Not Enrolled'}
               </span>
             )}
           </div>
@@ -349,10 +357,12 @@ export const ProfileView: React.FC = () => {
           <div className="p-3 bg-[#FAF8F5] dark:bg-[#131F1A] border border-[#E8E4DA] dark:border-white/10 rounded-2xl text-[11px] text-gray-700 dark:text-[#C5D2CB] space-y-1">
             <p className="flex items-center gap-1.5 font-semibold text-gray-900 dark:text-white">
               <Lock className="w-3.5 h-3.5 text-[#063B2C] dark:text-[#4ECCA3]" />
-              <span>Strict Anti-Spoof Privacy Protection</span>
+              <span>{isBengali ? 'কঠোর জালিয়াতি বিরোধী নিরাপত্তা' : 'Strict Anti-Spoof Privacy Protection'}</span>
             </p>
             <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-relaxed">
-              Once your biometric fingerprint is scanned, no other person can log in using another fingerprint on this device.
+              {isBengali
+                ? 'একবার বায়োমেট্রিক ফিঙ্গারপ্রিন্ট সংরক্ষিত হলে, এই ডিভাইসে অন্য কেউ অন্য ফিঙ্গারপ্রিন্ট দিয়ে প্রবেশ করতে পারবে না।'
+                : 'Once your biometric fingerprint is scanned, no other person can log in using another fingerprint on this device.'}
             </p>
           </div>
 
@@ -373,15 +383,15 @@ export const ProfileView: React.FC = () => {
                   className="flex-1 py-2.5 px-3 rounded-xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                 >
                   <Fingerprint className="w-4 h-4 text-emerald-300" />
-                  <span>Verify Fingerprint</span>
+                  <span>{isBengali ? 'আঙুলের ছাপ যাচাই করুন' : 'Verify Fingerprint'}</span>
                 </button>
                 <button
                   onClick={() => {
                     removeFingerprint();
-                    setBioFeedback('Fingerprint cleared from this device.');
+                    setBioFeedback(isBengali ? 'এই ডিভাইস থেকে ফিঙ্গারপ্রিন্ট মুছে ফেলা হয়েছে।' : 'Fingerprint cleared from this device.');
                   }}
                   className="py-2.5 px-3 rounded-xl border border-gray-200 dark:border-white/15 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-bold cursor-pointer"
-                  title="Remove enrollment"
+                  title={isBengali ? 'সংযুক্ত ফিঙ্গারপ্রিন্ট সরান' : 'Remove enrollment'}
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                 </button>
@@ -395,7 +405,7 @@ export const ProfileView: React.FC = () => {
                 className="w-full py-2.5 px-3 rounded-xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <Fingerprint className="w-4 h-4 text-emerald-300" />
-                <span>Enroll Biometric Fingerprint</span>
+                <span>{isBengali ? 'বায়োমেট্রিক ফিঙ্গারপ্রিন্ট যুক্ত করুন' : 'Enroll Biometric Fingerprint'}</span>
               </button>
             )}
           </div>
@@ -412,8 +422,12 @@ export const ProfileView: React.FC = () => {
                 <FileSpreadsheet className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">My Civic Reports</h3>
-                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">{civicReports.length} reported issues</p>
+                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">
+                  {isBengali ? 'আমার পৌর অভিযোগসমূহ' : 'My Civic Reports'}
+                </h3>
+                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">
+                  {isBengali ? `${formatNumber(civicReports.length)} টি জমা করা অভিযোগ` : `${civicReports.length} reported issues`}
+                </p>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
@@ -428,8 +442,12 @@ export const ProfileView: React.FC = () => {
                 <Wrench className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">Join as Worker / Offer Services</h3>
-                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">Register as electrician, plumber, etc.</p>
+                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">
+                  {isBengali ? 'কর্মী হিসেবে যোগ দিন / সেবা প্রদান করুন' : 'Join as Worker / Offer Services'}
+                </h3>
+                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">
+                  {isBengali ? 'ইলেকট্রিশিয়ান, প্লাম্বার বা কারিগর হিসেবে নিবন্ধন' : 'Register as electrician, plumber, etc.'}
+                </p>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
@@ -444,8 +462,12 @@ export const ProfileView: React.FC = () => {
                 <Heart className="w-4 h-4 fill-current" />
               </div>
               <div>
-                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">Blood Donor Network</h3>
-                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">Active Donor Hub • {user?.bloodGroup || 'All Groups'}</p>
+                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">
+                  {isBengali ? 'রক্তদাতা নেটওয়ার্ক' : 'Blood Donor Network'}
+                </h3>
+                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">
+                  {isBengali ? `জরুরি রক্তদাতা কেন্দ্র • ${user?.bloodGroup || 'সব গ্রুপ'}` : `Active Donor Hub • ${user?.bloodGroup || 'All Groups'}`}
+                </p>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
@@ -461,8 +483,12 @@ export const ProfileView: React.FC = () => {
                 <Landmark className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">Government Services Hub</h3>
-                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">Property tax, certificates, land records & schemes</p>
+                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">
+                  {isBengali ? 'সরকারি নাগরিক সেবা কেন্দ্র' : 'Government Services Hub'}
+                </h3>
+                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">
+                  {isBengali ? 'পৌর কর, জন্ম সনদ, জমি রেকর্ড ও সরকারি প্রকল্প' : 'Property tax, certificates, land records & schemes'}
+                </p>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
@@ -478,8 +504,12 @@ export const ProfileView: React.FC = () => {
                 <HelpCircle className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">Frequently Asked Questions</h3>
-                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">Find quick answers about Jalpaiguri Connect</p>
+                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">
+                  {isBengali ? 'সাধারণ জিজ্ঞাসা (FAQ)' : 'Frequently Asked Questions'}
+                </h3>
+                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">
+                  {isBengali ? 'জলপাইগুড়ি কানেক্ট সম্পর্কে প্রয়োজনীয় উত্তর' : 'Find quick answers about Jalpaiguri Connect'}
+                </p>
               </div>
             </div>
             <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
@@ -490,7 +520,9 @@ export const ProfileView: React.FC = () => {
         <div className="bg-white dark:bg-[#17231E] rounded-3xl p-4 border border-[#E8E4DA] dark:border-white/10 shadow-xs flex items-center justify-between transition-colors">
           <div className="flex items-center gap-3">
             <Globe className="w-5 h-5 text-[#55685F] dark:text-[#A2B3AA]" />
-            <span className="text-xs font-bold text-[#11241C] dark:text-white">Language / ভাষা</span>
+            <span className="text-xs font-bold text-[#11241C] dark:text-white">
+              {isBengali ? 'ভাষা পরিবর্তন (Language)' : 'Language / ভাষা'}
+            </span>
           </div>
           <div className="flex gap-1 bg-[#FAF8F5] dark:bg-[#131F1A] p-1 rounded-xl border border-[#D2CEBE] dark:border-white/10">
             <button
@@ -520,7 +552,7 @@ export const ProfileView: React.FC = () => {
               className="w-full py-3 bg-white dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/15 text-[#063B2C] dark:text-[#4ECCA3] font-bold text-xs rounded-2xl flex items-center justify-center gap-2 hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] cursor-pointer shadow-2xs transition-colors"
             >
               <Edit3 className="w-4 h-4" />
-              <span>Edit My Profile Manually</span>
+              <span>{isBengali ? 'প্রোফাইল তথ্য ম্যানুয়ালি সম্পাদন করুন' : 'Edit My Profile Manually'}</span>
             </button>
 
             <button
@@ -528,14 +560,14 @@ export const ProfileView: React.FC = () => {
               className="w-full py-3 bg-white dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/15 text-[#063B2C] dark:text-[#4ECCA3] font-bold text-xs rounded-2xl flex items-center justify-center gap-2 hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] cursor-pointer transition-colors"
             >
               <UserPlus className="w-4 h-4" />
-              <span>Switch / Sign into Another Account</span>
+              <span>{isBengali ? 'অন্য অ্যাকাউন্টে প্রবেশ বা পরিবর্তন করুন' : 'Switch / Sign into Another Account'}</span>
             </button>
             <button
               onClick={handleLogout}
               className="w-full py-3 bg-white dark:bg-[#17231E] border border-[#D9383A]/30 text-[#D9383A] dark:text-red-400 font-bold text-xs rounded-2xl flex items-center justify-center gap-2 hover:bg-[#FFEBEA] dark:hover:bg-red-950/30 cursor-pointer transition-colors"
             >
               <LogOut className="w-4 h-4" />
-              <span>Log Out of Jalpaiguri Connect</span>
+              <span>{isBengali ? 'জলপাইগুড়ি কানেক্ট থেকে লগআউট' : 'Log Out of Jalpaiguri Connect'}</span>
             </button>
           </div>
         ) : (
@@ -544,7 +576,7 @@ export const ProfileView: React.FC = () => {
             className="w-full py-3.5 bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-md hover:bg-[#084D3A] active:scale-98 cursor-pointer"
           >
             <LogIn className="w-4 h-4" />
-            <span>Open Sign In / Sign Up Page</span>
+            <span>{isBengali ? 'লগইন / সাইন আপ পেজ খুলুন' : 'Open Sign In / Sign Up Page'}</span>
           </button>
         )}
       </div>
@@ -558,7 +590,9 @@ export const ProfileView: React.FC = () => {
             <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0] dark:border-white/10">
               <div className="flex items-center gap-2">
                 <Edit3 className="w-5 h-5 text-[#063B2C] dark:text-[#4ECCA3]" />
-                <h3 className="font-extrabold text-base text-[#11241C] dark:text-white">Edit Profile</h3>
+                <h3 className="font-extrabold text-base text-[#11241C] dark:text-white">
+                  {isBengali ? 'প্রোফাইল সম্পাদনা' : 'Edit Profile'}
+                </h3>
               </div>
               <button
                 onClick={() => setIsEditModalOpen(false)}
@@ -571,7 +605,7 @@ export const ProfileView: React.FC = () => {
             {saveSuccess && (
               <div className="p-3 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300 rounded-2xl text-xs font-bold flex items-center gap-2">
                 <Check className="w-4 h-4" />
-                <span>Profile updated successfully!</span>
+                <span>{isBengali ? 'প্রোফাইল সফলভাবে আপডেট করা হয়েছে!' : 'Profile updated successfully!'}</span>
               </div>
             )}
 
@@ -579,7 +613,7 @@ export const ProfileView: React.FC = () => {
               {/* Full Name */}
               <div>
                 <label className="block text-xs font-bold text-[#11241C] dark:text-[#E8ECE9] uppercase mb-1">
-                  Full Name *
+                  {isBengali ? 'পুরো নাম *' : 'Full Name *'}
                 </label>
                 <input
                   type="text"
@@ -594,7 +628,11 @@ export const ProfileView: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-xs font-bold text-[#11241C] dark:text-[#E8ECE9] uppercase">
-                    Age: <span className="text-[#063B2C] dark:text-[#4ECCA3]">{editAge} years</span>
+                    {isBengali ? (
+                      <>বয়স: <span className="text-[#063B2C] dark:text-[#4ECCA3]">{formatNumber(editAge)} বছর</span></>
+                    ) : (
+                      <>Age: <span className="text-[#063B2C] dark:text-[#4ECCA3]">{editAge} years</span></>
+                    )}
                   </label>
                 </div>
                 <input
@@ -610,7 +648,7 @@ export const ProfileView: React.FC = () => {
               {/* Gender with Icons */}
               <div>
                 <label className="block text-xs font-bold text-[#11241C] dark:text-[#E8ECE9] uppercase mb-1.5">
-                  Gender *
+                  {isBengali ? 'লিঙ্গ *' : 'Gender *'}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {genderOptions.map((opt) => (
@@ -639,7 +677,7 @@ export const ProfileView: React.FC = () => {
               {/* Blood Group */}
               <div>
                 <label className="block text-xs font-bold text-[#11241C] dark:text-[#E8ECE9] uppercase mb-1.5">
-                  Blood Group *
+                  {isBengali ? 'রক্তের গ্রুপ *' : 'Blood Group *'}
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {bloodGroups.map((bg) => (
@@ -653,7 +691,7 @@ export const ProfileView: React.FC = () => {
                           : 'bg-[#FAF8F5] dark:bg-[#131F1A] border-[#D2CEBE] dark:border-white/15 text-[#11241C] dark:text-white hover:bg-white dark:hover:bg-[#1F312A]'
                       }`}
                     >
-                      {bg}
+                      {bg === "I don't know" && isBengali ? 'জানা নেই' : bg}
                     </button>
                   ))}
                 </div>
@@ -662,7 +700,7 @@ export const ProfileView: React.FC = () => {
               {/* Location */}
               <div>
                 <label className="block text-xs font-bold text-[#11241C] dark:text-[#E8ECE9] uppercase mb-1">
-                  Location / Ward in Jalpaiguri
+                  {isBengali ? 'জলপাইগুড়ির এলাকা / ওয়ার্ড' : 'Location / Ward in Jalpaiguri'}
                 </label>
                 <input
                   type="text"
@@ -675,7 +713,7 @@ export const ProfileView: React.FC = () => {
               {/* Phone Number */}
               <div>
                 <label className="block text-xs font-bold text-[#11241C] dark:text-[#E8ECE9] uppercase mb-1">
-                  Contact Phone
+                  {isBengali ? 'যোগাযোগের ফোন নম্বর' : 'Contact Phone'}
                 </label>
                 <input
                   type="tel"
@@ -691,7 +729,7 @@ export const ProfileView: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Heart className="w-4 h-4 text-[#D9383A] fill-[#D9383A]" />
                   <span className="text-xs font-extrabold text-[#D9383A] dark:text-red-300">
-                    Register as Emergency Blood Donor
+                    {isBengali ? 'জরুরি রক্তদাতা হিসেবে যোগ দিন' : 'Register as Emergency Blood Donor'}
                   </span>
                 </div>
                 <input
@@ -709,13 +747,13 @@ export const ProfileView: React.FC = () => {
                   onClick={() => setIsEditModalOpen(false)}
                   className="flex-1 py-3 text-xs font-bold text-[#55685F] dark:text-[#A2B3AA] rounded-2xl bg-[#F1F5F9] dark:bg-white/10 hover:bg-[#E2E8F0] cursor-pointer"
                 >
-                  Cancel
+                  {isBengali ? 'বাতিল' : 'Cancel'}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 py-3 text-xs font-extrabold text-white rounded-2xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] shadow-md cursor-pointer active:scale-98 transition-all"
                 >
-                  Save Profile Changes
+                  {isBengali ? 'পরিবর্তন সংরক্ষণ করুন' : 'Save Profile Changes'}
                 </button>
               </div>
             </form>
