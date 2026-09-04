@@ -10,6 +10,7 @@ import {
   ServiceAreaValidationResult
 } from '../utils/serviceArea';
 import { JALPAIGURI_LOCALITIES, LocalityInfo } from '../data/jalpaiguriLocalities';
+import { apiClient } from '../services/apiClient';
 
 export interface ExtendedUserLocation extends UserLocation {
   city?: string;
@@ -80,39 +81,28 @@ const LocationContext = createContext<LocationContextType | undefined>(undefined
 // Real reverse geocoding via dedicated server-side proxy
 async function reverseGeocodeCoordinates(lat: number, lng: number): Promise<ReverseGeocodeResult> {
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 7000);
-
-    const res = await fetch(`/api/location/reverse-geocode?lat=${lat}&lng=${lng}`, {
-      signal: controller.signal,
-      headers: { 'Accept': 'application/json' }
-    });
-    clearTimeout(timeoutId);
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.success) {
-        return {
-          formattedName: data.name || `${data.locality || 'Detected Area'}, ${data.state || data.country || ''}`.trim(),
-          locality: data.locality || data.city || 'Detected Location',
-          city: data.city || '',
-          district: data.district || '',
-          state: data.state || '',
-          country: data.country || 'India',
-          pincode: data.pincode || '',
-          road: data.road || '',
-          source: data.source || 'server-api',
-          details: {
-            road: data.road,
-            suburb: data.locality,
-            city: data.city,
-            district: data.district,
-            state: data.state,
-            postcode: data.pincode,
-            country: data.country
-          }
-        };
-      }
+    const data = await apiClient.reverseGeocode(lat, lng);
+    if (data && data.success) {
+      return {
+        formattedName: data.name || `${data.locality || 'Detected Area'}, ${data.state || data.country || ''}`.trim(),
+        locality: data.locality || data.city || 'Detected Location',
+        city: data.city || '',
+        district: data.district || '',
+        state: data.state || '',
+        country: data.country || 'India',
+        pincode: data.pincode || '',
+        road: data.road || '',
+        source: data.source || 'server-api',
+        details: {
+          road: data.road,
+          suburb: data.locality,
+          city: data.city,
+          district: data.district,
+          state: data.state,
+          postcode: data.pincode,
+          country: data.country
+        }
+      };
     }
   } catch (serverErr) {
     console.warn('[REVERSE GEOCODE] Server proxy call failed or timed out:', serverErr);

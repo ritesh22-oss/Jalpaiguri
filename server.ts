@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
+import { apiKeyService } from './server/apiKeyService';
 
 dotenv.config();
 
@@ -12,13 +13,9 @@ const app = express();
 
 app.use(express.json({ limit: '10mb' }));
 
-// Lazy initialization for Gemini AI
-let geminiClient: GoogleGenAI | null = null;
+// Safe lazy initialization for Gemini AI via centralized apiKeyService
 function getGeminiClient(): GoogleGenAI | null {
-  if (!geminiClient && process.env.GEMINI_API_KEY) {
-    geminiClient = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-  }
-  return geminiClient;
+  return apiKeyService.getGeminiClient();
 }
 
 // In-Memory Database Store for real-time live sync across clients
@@ -305,9 +302,15 @@ app.get('/api/health', (req: Request, res: Response) => {
     status: 'ok',
     service: 'Jalpaiguri Connect Backend',
     firebaseAuthEnabled: true,
-    geminiEnabled: Boolean(process.env.GEMINI_API_KEY),
+    geminiEnabled: apiKeyService.hasGeminiKey(),
+    googleMapsEnabled: apiKeyService.hasGoogleMapsKey(),
     timestamp: new Date().toISOString()
   });
+});
+
+// Centralized API Keys status endpoint (sanitized - secrets never exposed)
+app.get('/api/keys/status', (req: Request, res: Response) => {
+  res.json(apiKeyService.getStatus());
 });
 
 // Dedicated Server-Side High-Accuracy Reverse Geocoding Route
@@ -827,7 +830,8 @@ const SERVER_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 // Google Maps API Key Config Endpoint (Safe for client-side maps loader)
 app.get('/api/config/maps-key', (req: Request, res: Response) => {
   res.json({
-    apiKey: process.env.GOOGLE_MAPS_API_KEY || process.env.VITE_GOOGLE_MAPS_API_KEY || ''
+    apiKey: apiKeyService.getPublicMapsKey(),
+    solution_channel: 'gmp_mcp_codeassist_v1_aistudio'
   });
 });
 
@@ -926,7 +930,7 @@ app.get('/api/places/photo', async (req: Request, res: Response) => {
     });
   }
 
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  const apiKey = apiKeyService.getGoogleMapsApiKey();
   if (!apiKey) {
     // If no Google Maps API key is configured yet, safely return authentic missing-photo state
     const entry: PlacePhotoCacheEntry = {
@@ -1013,7 +1017,7 @@ app.get('/api/places/details/:placeId', async (req: Request, res: Response) => {
     return res.json(cached.data);
   }
 
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  const apiKey = apiKeyService.getGoogleMapsApiKey();
   if (!apiKey) {
     return res.json({
       placeId,

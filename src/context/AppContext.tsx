@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   Worker,
   CivicReport,
@@ -111,14 +111,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [lostFound, setLostFound] = useState<LostFoundItem[]>(() => sanitizeCachedList<LostFoundItem>('jpg_lost_found'));
   const [notifications, setNotifications] = useState<AppNotification[]>(() => sanitizeCachedList<AppNotification>('jpg_notifications'));
 
-  const [language, setLanguageState] = useState<string>(() => {
-    return localStorage.getItem('jpg_language') || 'en';
-  });
-
-  const setLanguage = (lang: string) => {
-    setLanguageState(lang);
-    localStorage.setItem('jpg_language', lang);
-  };
+  const { language, setLanguage: setGlobalLanguage } = useLanguage();
+  const setLanguage = useCallback((lang: string) => {
+    setGlobalLanguage(lang as 'en' | 'bn');
+  }, [setGlobalLanguage]);
 
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>(() => sanitizeCachedList<ServiceRequest>('jpg_service_requests'));
   const [savedItemIds, setSavedItemIds] = useState<string[]>(() => {

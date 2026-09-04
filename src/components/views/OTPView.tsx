@@ -21,6 +21,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useNav } from '../../context/NavigationContext';
 import { useExpo } from '../../context/ExpoContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const OTPView: React.FC = () => {
   const { pendingPhone, verifyPhoneOtp, sendPhoneOtp, activeOtp } = useAuth();
@@ -32,6 +33,7 @@ export const OTPView: React.FC = () => {
     latestOtp,
     triggerPushNotification
   } = useExpo();
+  const { isBengali, language, setLanguage, formatNumber } = useLanguage();
 
   const [digits, setDigits] = useState<string[]>(['', '', '', '', '', '']);
   const [resendCountdown, setResendCountdown] = useState<number>(30);
@@ -58,12 +60,12 @@ export const OTPView: React.FC = () => {
     // If an OTP exists, trigger push notification for seamless testing
     if (availableOtp) {
       triggerPushNotification({
-        appTitle: 'Messages',
+        appTitle: isBengali ? 'বার্তা' : 'Messages',
         category: 'SMS',
-        title: 'Jalpaiguri Connect Verification',
-        body: `Your verification code is ${availableOtp}. Tap to auto-fill.`,
+        title: isBengali ? 'জলপাইগুড়ি কানেক্ট যাচাইকরণ' : 'Jalpaiguri Connect Verification',
+        body: isBengali ? `আপনার যাচাইকরণ কোড হলো ${availableOtp}। স্বয়ংক্রিয়ভাবে পূরণ করতে ট্যাপ করুন।` : `Your verification code is ${availableOtp}. Tap to auto-fill.`,
         code: availableOtp,
-        actionLabel: 'Auto-Fill'
+        actionLabel: isBengali ? 'স্বয়ংক্রিয় পূরণ' : 'Auto-Fill'
       });
     }
   }, []);
@@ -180,7 +182,7 @@ export const OTPView: React.FC = () => {
   const verifyCode = async (codeToVerify: string) => {
     if (codeToVerify.length < 6) {
       setErrorType('invalid');
-      setErrorMsg('Please enter all 6 digits to verify.');
+      setErrorMsg(isBengali ? 'যাচাই করতে অনুগ্রহ করে সবকটি ৬টি সংখ্যা লিখুন।' : 'Please enter all 6 digits to verify.');
       triggerHaptic('warning');
       return;
     }
@@ -207,7 +209,7 @@ export const OTPView: React.FC = () => {
         setShake(true);
         triggerHaptic('error');
         setErrorType('invalid');
-        setErrorMsg(res.message || 'Incorrect verification code. Please check and try again.');
+        setErrorMsg(res.message || (isBengali ? 'ভুল যাচাইকরণ কোড। যাচাই করে আবার চেষ্টা করুন।' : 'Incorrect verification code. Please check and try again.'));
         setTimeout(() => setShake(false), 500);
       }
     } catch (err: any) {
@@ -215,7 +217,7 @@ export const OTPView: React.FC = () => {
       setShake(true);
       triggerHaptic('error');
       setErrorType('network');
-      setErrorMsg('Network connectivity issue. Please check your connection or retry.');
+      setErrorMsg(isBengali ? 'নেটওয়ার্ক সংযোগে সমস্যা হয়েছে। অনুগ্রহ করে ইন্টারনেট সংযোগ পরীক্ষা করুন।' : 'Network connectivity issue. Please check your connection or retry.');
       setTimeout(() => setShake(false), 500);
     }
   };
@@ -239,22 +241,22 @@ export const OTPView: React.FC = () => {
         triggerHaptic('success');
         if (res.otp) {
           triggerPushNotification({
-            appTitle: 'Messages',
+            appTitle: isBengali ? 'বার্তা' : 'Messages',
             category: 'SMS',
-            title: 'Jalpaiguri Connect Verification',
-            body: `Your new verification code is ${res.otp}. Tap to auto-fill.`,
+            title: isBengali ? 'জলপাইগুড়ি কানেক্ট যাচাইকরণ' : 'Jalpaiguri Connect Verification',
+            body: isBengali ? `আপনার নতুন যাচাইকরণ কোড হলো ${res.otp}। স্বয়ংক্রিয়ভাবে পূরণ করতে ট্যাপ করুন।` : `Your new verification code is ${res.otp}. Tap to auto-fill.`,
             code: res.otp,
-            actionLabel: 'Auto-Fill'
+            actionLabel: isBengali ? 'স্বয়ংক্রিয় পূরণ' : 'Auto-Fill'
           });
         }
       } else {
         setErrorType('network');
-        setErrorMsg(res.message || 'Failed to dispatch new OTP. Please retry.');
+        setErrorMsg(res.message || (isBengali ? 'নতুন ওটিপি পাঠাতে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।' : 'Failed to dispatch new OTP. Please retry.'));
       }
     } catch (err: any) {
       setResending(false);
       setErrorType('network');
-      setErrorMsg('Failed to reach verification service. Tap retry to attempt again.');
+      setErrorMsg(isBengali ? 'যাচাইকরণ সার্ভিসে সংযোগ করা যাচ্ছে না। পুনরায় চেষ্টা করুন।' : 'Failed to reach verification service. Tap retry to attempt again.');
     }
   };
 
@@ -340,21 +342,21 @@ export const OTPView: React.FC = () => {
           aria-label="Go Back & Change Number"
         >
           <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
-          <span>Back</span>
+          <span>{isBengali ? 'পেছনে' : 'Back'}</span>
         </button>
 
         <h1 className="text-base font-bold text-gray-900 dark:text-white tracking-tight">
-          Verify Phone
+          {isBengali ? 'ফোন যাচাইকরণ' : 'Verify Phone'}
         </h1>
 
-        <button
-          onClick={handleRestartFlow}
-          className="text-xs font-semibold text-[#2F74E9] dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
-          title="Change Phone Number"
-        >
-          <Edit3 className="w-3.5 h-3.5" />
-          <span>Change</span>
-        </button>
+        <div className="flex items-center bg-[#E8E4DA] dark:bg-white/10 p-0.5 rounded-full">
+          <button
+            onClick={() => setLanguage(language === 'bn' ? 'en' : 'bn')}
+            className="text-[11px] font-bold px-2 py-0.5 rounded-full text-[#063B2C] dark:text-emerald-300 hover:bg-white/50 cursor-pointer"
+          >
+            {language === 'bn' ? 'EN' : 'বাংলা'}
+          </button>
+        </div>
       </div>
 
       {/* Main Verification Content Area */}
@@ -362,7 +364,7 @@ export const OTPView: React.FC = () => {
         {/* Instruction Subtitle */}
         <div className="space-y-1">
           <p className="text-xs font-medium text-gray-500 dark:text-[#A2B3AA]">
-            Enter the 6-digit verification code sent to
+            {isBengali ? 'এই নম্বরে পাঠানো ৬-সংখ্যার ওটিপি কোডটি লিখুন:' : 'Enter the 6-digit verification code sent to'}
           </p>
           <div className="inline-flex items-center gap-2 bg-gray-100/90 dark:bg-[#17231E] px-3 py-1 rounded-full border border-gray-200 dark:border-white/10 transition-colors">
             <span className="text-sm font-bold text-gray-900 dark:text-white font-mono tracking-wide">
@@ -372,7 +374,7 @@ export const OTPView: React.FC = () => {
               onClick={handleRestartFlow}
               className="text-[11px] font-semibold text-[#2F74E9] dark:text-blue-400 hover:text-blue-700 hover:underline cursor-pointer"
             >
-              Edit
+              {isBengali ? 'সম্পাদনা' : 'Edit'}
             </button>
           </div>
         </div>
@@ -381,11 +383,11 @@ export const OTPView: React.FC = () => {
         <div className="w-full max-w-xs flex items-center justify-between text-[11px] text-gray-500 dark:text-[#A2B3AA] bg-gray-50/80 dark:bg-[#121E19] px-2.5 py-1.5 rounded-xl border border-gray-100 dark:border-white/10 transition-colors">
           <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-medium">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>Anti-Hack 256-Bit OTP</span>
+            <span>{isBengali ? 'সুরক্ষিত ২৫৬-বিট ওটিপি' : 'Anti-Hack 256-Bit OTP'}</span>
           </div>
           <div className="flex items-center gap-1 text-gray-500 dark:text-[#A2B3AA] font-mono text-[10px]">
             <Lock className="w-3 h-3 text-gray-400 dark:text-gray-500" />
-            <span>Expires in 5m</span>
+            <span>{isBengali ? 'মেয়াদ ৫ মিনিট' : 'Expires in 5m'}</span>
           </div>
         </div>
 
@@ -398,7 +400,7 @@ export const OTPView: React.FC = () => {
               </div>
               <div className="text-left">
                 <p className="text-[10px] font-bold text-blue-900 dark:text-blue-200 uppercase tracking-wider">
-                  Instant SMS Code
+                  {isBengali ? 'তাত্ক্ষণিক এসএমএস কোড' : 'Instant SMS Code'}
                 </p>
                 <p className="text-sm font-black text-[#2F74E9] dark:text-blue-400 font-mono tracking-widest leading-none">
                   {availableOtp}
@@ -422,7 +424,7 @@ export const OTPView: React.FC = () => {
                 className="py-1 px-2.5 bg-[#2F74E9] hover:bg-[#2563EB] active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1"
               >
                 <Sparkles className="w-3 h-3 text-amber-200" />
-                <span>Auto-Fill</span>
+                <span>{isBengali ? 'স্বয়ংক্রিয় পূরণ' : 'Auto-Fill'}</span>
               </button>
             </div>
           </div>
@@ -452,7 +454,7 @@ export const OTPView: React.FC = () => {
                     className="text-[11px] font-bold text-rose-700 dark:text-rose-400 hover:text-rose-900 dark:hover:text-rose-300 hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <RotateCcw className="w-3 h-3" />
-                    <span>Clear Digits</span>
+                    <span>{isBengali ? 'মুছে ফেলুন' : 'Clear Digits'}</span>
                   </button>
                   <span className="text-rose-300 dark:text-rose-700">•</span>
                   <button
@@ -461,7 +463,7 @@ export const OTPView: React.FC = () => {
                     className="text-[11px] font-bold text-[#2F74E9] dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <RefreshCw className={`w-3 h-3 ${resending ? 'animate-spin' : ''}`} />
-                    <span>Resend Code</span>
+                    <span>{isBengali ? 'কোড পুনরায় পাঠান' : 'Resend Code'}</span>
                   </button>
                 </div>
               </div>
@@ -473,7 +475,9 @@ export const OTPView: React.FC = () => {
         {isSuccess && (
           <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 rounded-2xl p-3 text-xs text-emerald-800 dark:text-emerald-200 flex items-center justify-center gap-2 font-bold max-w-xs animate-in fade-in duration-200">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <p className="text-xs">Phone verified successfully! Redirecting...</p>
+            <p className="text-xs">
+              {isBengali ? 'ফোন নম্বর সফলভাবে যাচাই করা হয়েছে! এগিয়ে যাওয়া হচ্ছে...' : 'Phone verified successfully! Redirecting...'}
+            </p>
           </div>
         )}
 
@@ -525,7 +529,8 @@ export const OTPView: React.FC = () => {
         <div className="flex items-center justify-center gap-3 text-xs pt-1">
           {resendCountdown > 0 ? (
             <p className="text-gray-500 dark:text-[#A2B3AA] font-normal">
-              Resend code in <span className="font-semibold text-gray-700 dark:text-white font-mono">00:{formattedSeconds}</span>
+              {isBengali ? 'কোড পুনরায় পাঠান ' : 'Resend code in '}
+              <span className="font-semibold text-gray-700 dark:text-white font-mono">00:{formattedSeconds}</span>
             </p>
           ) : (
             <button
@@ -534,7 +539,7 @@ export const OTPView: React.FC = () => {
               className="font-semibold text-[#2F74E9] dark:text-blue-400 hover:underline cursor-pointer flex items-center gap-1.5"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${resending ? 'animate-spin' : ''}`} />
-              <span>{resending ? 'Sending Code...' : 'Resend Code'}</span>
+              <span>{resending ? (isBengali ? 'পাঠানো হচ্ছে...' : 'Sending Code...') : (isBengali ? 'কোড পুনরায় পাঠান' : 'Resend Code')}</span>
             </button>
           )}
 
@@ -545,7 +550,7 @@ export const OTPView: React.FC = () => {
             className="text-gray-600 dark:text-[#A2B3AA] hover:text-gray-900 dark:hover:text-white font-medium hover:underline cursor-pointer flex items-center gap-1"
           >
             <RotateCcw className="w-3 h-3" />
-            <span>Try Another Number</span>
+            <span>{isBengali ? 'অন্য নম্বর দিয়ে চেষ্টা' : 'Try Another Number'}</span>
           </button>
         </div>
 
@@ -560,15 +565,15 @@ export const OTPView: React.FC = () => {
             {loading ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin text-white" />
-                <span>Verifying...</span>
+                <span>{isBengali ? 'যাচাই করা হচ্ছে...' : 'Verifying...'}</span>
               </div>
             ) : isSuccess ? (
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-white" />
-                <span>Verified!</span>
+                <span>{isBengali ? 'যাচাইকৃত!' : 'Verified!'}</span>
               </div>
             ) : (
-              <span>Verify & Continue</span>
+              <span>{isBengali ? 'যাচাই করে এগিয়ে যান' : 'Verify & Continue'}</span>
             )}
           </button>
         </div>
@@ -625,4 +630,5 @@ export const OTPView: React.FC = () => {
     </div>
   );
 };
+
 

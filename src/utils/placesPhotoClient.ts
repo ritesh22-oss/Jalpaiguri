@@ -19,6 +19,7 @@
 
 import { ExplorePlaceItem } from '../types';
 import { getCategoryIllustrationUri } from './placeCategoryIllustrations';
+import { apiClient } from './apiClient';
 
 export type PlaceImageSourceType = 'google' | 'database' | 'gemini' | 'category_illustration';
 
@@ -86,34 +87,19 @@ export async function fetchPlacePhoto(
     return inStore;
   }
 
-  // 3. Dynamic fetch via backend proxy to prevent CORS and safeguard API credentials
+  // 3. Dynamic fetch via centralized apiClient to prevent CORS and safeguard API credentials
   try {
-    const params = new URLSearchParams({
+    const data = await apiClient.getPlacePhoto({
       placeId,
-      width: maxWidth.toString(),
-      height: maxHeight.toString()
+      name: photoResourceName,
+      width: maxWidth,
+      height: maxHeight
     });
-    if (photoResourceName) {
-      params.append('name', photoResourceName);
-    }
 
-    const response = await fetch(`/api/places/photo?${params.toString()}`);
-    if (!response.ok) {
-      const fallbackData: CachedPhotoData = {
-        photoUrl: null,
-        hasPhoto: false,
-        timestamp: Date.now()
-      };
-      MEMORY_CACHE.set(cacheKey, fallbackData);
-      setStorageCache(cacheKey, fallbackData);
-      return fallbackData;
-    }
-
-    const data = await response.json();
     const result: CachedPhotoData = {
       photoUrl: data.photoUrl || null,
       attribution: data.attribution,
-      hasPhoto: !!data.photoUrl,
+      hasPhoto: Boolean(data.photoUrl),
       timestamp: Date.now()
     };
 
@@ -185,34 +171,27 @@ export async function resolvePlaceImage(
       }
     }
 
-    const aiRes = await fetch('/api/places/generate-image', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        placeId: place.placeId,
-        name: place.name,
-        category: place.category,
-        subcategory: place.subcategory,
-        address: place.formattedAddress
-      })
+    const aiData = await apiClient.generatePlaceImage({
+      placeId: place.placeId,
+      name: place.name,
+      category: place.category,
+      subcategory: place.subcategory,
+      address: place.formattedAddress
     });
 
-    if (aiRes.ok) {
-      const aiData = await aiRes.json();
-      if (aiData.imageUrl) {
-        try {
-          localStorage.setItem(aiStorageKey, JSON.stringify({ imageUrl: aiData.imageUrl }));
-        } catch {
-          // Ignore quota
-        }
-        return {
-          imageUrl: aiData.imageUrl,
-          sourceType: 'gemini',
-          badgeLabel: 'AI Preview',
-          attribution: aiData.attribution || 'AI-generated Preview (Gemini)',
-          isAiGenerated: true
-        };
+    if (aiData?.imageUrl) {
+      try {
+        localStorage.setItem(aiStorageKey, JSON.stringify({ imageUrl: aiData.imageUrl }));
+      } catch {
+        // Ignore quota
       }
+      return {
+        imageUrl: aiData.imageUrl,
+        sourceType: 'gemini',
+        badgeLabel: 'AI Preview',
+        attribution: aiData.attribution || 'AI-generated Preview (Gemini)',
+        isAiGenerated: true
+      };
     }
   } catch {
     // Proceed to Tier 4

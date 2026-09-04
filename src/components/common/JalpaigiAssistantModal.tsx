@@ -24,7 +24,7 @@ import {
 import ReactMarkdown from 'react-markdown';
 import { useNav } from '../../context/NavigationContext';
 import { useLocation } from '../../context/LocationContext';
-import { apiFetch } from '../../lib/firebase';
+import { apiClient } from '../../services/apiClient';
 
 interface GroundingPlace {
   title: string;
@@ -121,23 +121,16 @@ export const JalpaigiAssistantModal: React.FC = () => {
         text: m.text
       }));
 
-      const res = await apiFetch<{
-        reply: string;
-        groundingPlaces?: GroundingPlace[];
-        modelUsed?: string;
-      }>('/api/gemini/chat', {
-        method: 'POST',
-        body: JSON.stringify({
-          message: query,
-          history: historyPayload,
-          role: selectedRole,
-          modelType: selectedTier,
-          useMaps: true,
-          userLocation: {
-            latitude: location.lat || 26.5414,
-            longitude: location.lng || 88.7196
-          }
-        })
+      const res = await apiClient.geminiChat({
+        message: query,
+        history: historyPayload,
+        role: selectedRole,
+        modelType: selectedTier,
+        useMaps: true,
+        userLocation: {
+          latitude: location.lat || 26.5414,
+          longitude: location.lng || 88.7196
+        }
       });
 
       setChatHistory((prev) => [

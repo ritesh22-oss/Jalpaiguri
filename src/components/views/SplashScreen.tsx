@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
 import { SplashLeafLogo } from '../common/SplashLeafLogo';
 import { useNav } from '../../context/NavigationContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const SplashScreen: React.FC = () => {
   const { replaceView } = useNav();
+  const { isBengali, t } = useLanguage();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -34,12 +36,12 @@ export const SplashScreen: React.FC = () => {
 
         {/* Brand Headline */}
         <h1 className="text-3xl font-extrabold tracking-tight text-white mb-2.5 font-sans drop-shadow-xs">
-          Jalpaiguri Connect
+          {isBengali ? 'জলপাইগুড়ি কানেক্ট' : 'Jalpaiguri Connect'}
         </h1>
 
         {/* Subtitle */}
         <p className="text-sm font-normal text-white/90 tracking-wide">
-          Your City. Your People. One Place.
+          {isBengali ? 'আপনার শহর। আপনার মানুষ। এক স্থানে।' : 'Your City. Your People. One Place.'}
         </p>
       </div>
 

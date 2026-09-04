@@ -234,8 +234,8 @@ const AppContent: React.FC = () => {
   return (
     <ExpoDeviceShell>
       <main
-        className={`flex-1 w-full ${isBengali && isPostLogin ? 'font-bengali' : ''}`}
-        data-lang={isBengali && isPostLogin ? 'bn' : 'en'}
+        className={`flex-1 w-full ${isBengali ? 'font-bengali' : ''}`}
+        data-lang={isBengali ? 'bn' : 'en'}
       >
         {renderView()}
       </main>

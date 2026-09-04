@@ -11,10 +11,12 @@ import {
   Lock,
   UserCheck,
   RotateCcw,
-  Info
+  Info,
+  Globe
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNav } from '../../context/NavigationContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { HandshakePinLogo } from '../common/HandshakePinLogo';
 import { FingerprintScannerModal } from '../common/FingerprintScannerModal';
 import { isAuthorizedAdminEmail } from '../../types';
@@ -30,6 +32,7 @@ export const AuthView: React.FC = () => {
     refreshEnrolledFingerprint
   } = useAuth();
   const { navigate, replaceView } = useNav();
+  const { isBengali, language, setLanguage, formatNumber, tLocality } = useLanguage();
 
   // Tab: 'citizen' | 'admin'
   const [authMode, setAuthMode] = useState<'citizen' | 'admin'>('citizen');
@@ -59,17 +62,19 @@ export const AuthView: React.FC = () => {
 
       if (res.success) {
         if (isAdminAttempt && res.isAdmin) {
-          setSuccessMsg('Welcome Administrator! Municipal authority credentials verified.');
+          setSuccessMsg(isBengali ? 'স্বাগতম প্রশাসক! পৌর কর্তৃপক্ষের প্রমাণপত্র যাচাই হয়েছে।' : 'Welcome Administrator! Municipal authority credentials verified.');
           setTimeout(() => {
             navigate('admin-dashboard');
           }, 600);
         } else if (isAdminAttempt && !res.isAdmin) {
           setErrorMsg(
             res.message ||
-              'Access Denied: Only verified municipal administrators can access the Admin portal. You have been connected with citizen privileges.'
+              (isBengali
+                ? 'অনুমতি অস্বীকৃত: শুধুমাত্র যাচাইকৃত পৌর প্রশাসকরা অ্যাডমিন পোর্টালে প্রবেশ করতে পারবেন। আপনি সাধারণ নাগরিক হিসেবে সংযুক্ত হয়েছেন।'
+                : 'Access Denied: Only verified municipal administrators can access the Admin portal. You have been connected with citizen privileges.')
           );
         } else {
-          setSuccessMsg(res.isNewUser ? 'Welcome to Jalpaiguri Connect!' : 'Welcome back!');
+          setSuccessMsg(res.isNewUser ? (isBengali ? 'জলপাইগুড়ি কানেক্টে স্বাগতম!' : 'Welcome to Jalpaiguri Connect!') : (isBengali ? 'আবার স্বাগতম!' : 'Welcome back!'));
           setTimeout(() => {
             if (res.isNewUser) {
               replaceView('profile-setup');
@@ -85,7 +90,7 @@ export const AuthView: React.FC = () => {
       }
     } catch (err: any) {
       setLoading(false);
-      setErrorMsg('Google sign-in could not be completed. Please try again.');
+      setErrorMsg(isBengali ? 'গুগল সাইন ইন সম্পন্ন করা যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।' : 'Google sign-in could not be completed. Please try again.');
     }
   };
 
@@ -93,7 +98,7 @@ export const AuthView: React.FC = () => {
   const handleStartFingerprintSignUp = (e: React.FormEvent) => {
     e.preventDefault();
     if (!citizenName.trim()) {
-      setErrorMsg('Please enter your full name to enroll your biometric fingerprint.');
+      setErrorMsg(isBengali ? 'বায়োমেট্রিক ফিঙ্গারপ্রিন্ট নথিভুক্ত করতে আপনার পুরো নাম লিখুন।' : 'Please enter your full name to enroll your biometric fingerprint.');
       return;
     }
     setErrorMsg('');
@@ -113,22 +118,22 @@ export const AuthView: React.FC = () => {
     if (scannerMode === 'enroll') {
       const res = await registerWithFingerprint(enrolled.userName, citizenLocation);
       if (res.success) {
-        setSuccessMsg(`Biometric Key Enrolled! Locked exclusively to ${enrolled.userName}.`);
+        setSuccessMsg(isBengali ? `বায়োমেট্রিক কি নথিভুক্ত হয়েছে! কেবল ${enrolled.userName}-এর সাথে সুরক্ষিত।` : `Biometric Key Enrolled! Locked exclusively to ${enrolled.userName}.`);
         setTimeout(() => {
           replaceView('home');
         }, 700);
       } else {
-        setErrorMsg(res.message || 'Enrollment registration failed.');
+        setErrorMsg(res.message || (isBengali ? 'নথিভুক্তি ব্যর্থ হয়েছে।' : 'Enrollment registration failed.'));
       }
     } else {
       const res = await loginWithFingerprint(enrolled.fingerprintSignature);
       if (res.success) {
-        setSuccessMsg(`Biometric Verified! Welcome back, ${enrolled.userName}.`);
+        setSuccessMsg(isBengali ? `বায়োমেট্রিক যাচাইকৃত! স্বাগতম, ${enrolled.userName}।` : `Biometric Verified! Welcome back, ${enrolled.userName}.`);
         setTimeout(() => {
           replaceView('home');
         }, 700);
       } else {
-        setErrorMsg(res.message || 'Fingerprint verification failed.');
+        setErrorMsg(res.message || (isBengali ? 'আঙুলের ছাপ যাচাই ব্যর্থ হয়েছে।' : 'Fingerprint verification failed.'));
       }
     }
   };
@@ -146,10 +151,19 @@ export const AuthView: React.FC = () => {
         </button>
 
         <h1 className="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">
-          Authentication & Access
+          {isBengali ? 'লগইন ও নাগরিক প্রবেশ' : 'Authentication & Access'}
         </h1>
 
-        <div className="w-8"></div>
+        {/* Top Quick Language Switcher */}
+        <div className="flex items-center bg-[#E8E4DA] dark:bg-white/10 p-0.5 rounded-full">
+          <button
+            onClick={() => setLanguage(language === 'bn' ? 'en' : 'bn')}
+            className="text-[11px] font-bold px-2 py-0.5 rounded-full text-[#063B2C] dark:text-emerald-300 hover:bg-white/50 cursor-pointer"
+            title="Toggle Language"
+          >
+            {language === 'bn' ? 'EN' : 'বাংলা'}
+          </button>
+        </div>
       </div>
 
       {/* Main Content Area */}
@@ -176,7 +190,7 @@ export const AuthView: React.FC = () => {
             }`}
           >
             <Fingerprint className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400" />
-            <span>Citizen Access</span>
+            <span>{isBengali ? 'নাগরিক প্রবেশ' : 'Citizen Access'}</span>
           </button>
 
           <button
@@ -194,7 +208,7 @@ export const AuthView: React.FC = () => {
             }`}
           >
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Login as Admin</span>
+            <span>{isBengali ? 'অ্যাডমিন লগইন' : 'Login as Admin'}</span>
           </button>
         </div>
 
@@ -222,11 +236,13 @@ export const AuthView: React.FC = () => {
             <div className="bg-white dark:bg-[#17231E] rounded-2xl p-4 border border-[#E8E4DA] dark:border-white/10 shadow-xs transition-colors">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xs font-bold text-gray-500 dark:text-[#A2B3AA] uppercase tracking-wider">
-                  Universal Google Sign-In
+                  {isBengali ? 'সর্বজনীন গুগল সাইন ইন' : 'Universal Google Sign-In'}
                 </span>
               </div>
               <p className="text-xs text-gray-600 dark:text-[#A2B3AA] mb-3">
-                Every citizen can sign in immediately using their personal Google account.
+                {isBengali
+                  ? 'প্রতিটি নাগরিক তাঁদের ব্যক্তিগত গুগল অ্যাকাউন্ট দিয়ে সাথে সাথে প্রবেশ করতে পারেন।'
+                  : 'Every citizen can sign in immediately using their personal Google account.'}
               </p>
 
               <button
@@ -238,7 +254,9 @@ export const AuthView: React.FC = () => {
                 {loading ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin text-white" />
-                    <span className="font-semibold text-white">Authenticating...</span>
+                    <span className="font-semibold text-white">
+                      {isBengali ? 'প্রমাণীকরণ হচ্ছে...' : 'Authenticating...'}
+                    </span>
                   </div>
                 ) : (
                   <>
@@ -263,7 +281,7 @@ export const AuthView: React.FC = () => {
                       </svg>
                     </div>
                     <span className="font-semibold text-white tracking-normal">
-                      Continue with Google
+                      {isBengali ? 'গুগল দিয়ে এগিয়ে যান' : 'Continue with Google'}
                     </span>
                   </>
                 )}
@@ -274,7 +292,7 @@ export const AuthView: React.FC = () => {
             <div className="relative flex py-1 items-center">
               <div className="grow border-t border-gray-300 dark:border-white/10"></div>
               <span className="shrink mx-3 text-xs font-semibold text-gray-500 dark:text-[#A2B3AA] uppercase tracking-wider">
-                or Biometric Privacy
+                {isBengali ? 'বা বায়োমেট্রিক গোপনীয়তা' : 'or Biometric Privacy'}
               </span>
               <div className="grow border-t border-gray-300 dark:border-white/10"></div>
             </div>
@@ -288,15 +306,15 @@ export const AuthView: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white">
-                      Fingerprint Biometrics
+                      {isBengali ? 'আঙুলের ছাপ বায়োমেট্রিক' : 'Fingerprint Biometrics'}
                     </h3>
                     <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold">
-                      Hardware Bound • Strict Privacy
+                      {isBengali ? 'ডিভাইসের সাথে সুরক্ষিত • সর্বোচ্চ গোপনীয়তা' : 'Hardware Bound • Strict Privacy'}
                     </p>
                   </div>
                 </div>
                 <span className="text-[10px] bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-extrabold px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700">
-                  {enrolledFingerprint ? 'Enrolled' : 'Ready'}
+                  {enrolledFingerprint ? (isBengali ? 'সংযুক্ত' : 'Enrolled') : (isBengali ? 'প্রস্তুত' : 'Ready')}
                 </span>
               </div>
 
@@ -304,8 +322,9 @@ export const AuthView: React.FC = () => {
               <div className="bg-[#FAF8F5] dark:bg-[#121E19] rounded-xl p-2.5 text-[11px] text-gray-600 dark:text-[#A2B3AA] border border-[#E8E4DA] dark:border-white/10 flex items-start gap-2 transition-colors">
                 <Lock className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400 shrink-0 mt-0.5" />
                 <p className="leading-relaxed">
-                  Once your fingerprint is scanned, it is cryptographically locked to this device. No
-                  one can log in with a different fingerprint.
+                  {isBengali
+                    ? 'একবার আপনার আঙুলের ছাপ স্ক্যান করা হলে, এটি সুরক্ষিতভাবে এই ডিভাইসে আবদ্ধ হয়ে যায়। অন্য কেউ লগইন করতে পারবে না।'
+                    : 'Once your fingerprint is scanned, it is cryptographically locked to this device. No one can log in with a different fingerprint.'}
                 </p>
               </div>
 
@@ -315,13 +334,13 @@ export const AuthView: React.FC = () => {
                   <div className="p-3 bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 rounded-xl flex items-center justify-between">
                     <div>
                       <span className="text-[10px] font-bold uppercase text-emerald-800 dark:text-emerald-300 tracking-wider block">
-                        Registered Citizen
+                        {isBengali ? 'নথিভুক্ত নাগরিক' : 'Registered Citizen'}
                       </span>
                       <p className="text-sm font-black text-gray-900 dark:text-white">
                         {enrolledFingerprint.userName}
                       </p>
                       <span className="text-[10px] text-gray-500 dark:text-[#A2B3AA]">
-                        Device Key: {enrolledFingerprint.credentialId.slice(0, 16)}...
+                        {isBengali ? 'ডিভাইস কি:' : 'Device Key:'} {enrolledFingerprint.credentialId.slice(0, 16)}...
                       </span>
                     </div>
                     <CheckCircle2 className="w-6 h-6 text-emerald-600 dark:text-emerald-400 shrink-0" />
@@ -334,22 +353,24 @@ export const AuthView: React.FC = () => {
                     className="w-full h-12 rounded-xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] active:scale-98 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
                   >
                     <Fingerprint className="w-5 h-5 text-emerald-300" />
-                    <span>Touch Sensor to Login</span>
+                    <span>{isBengali ? 'লগইন করতে সেন্সর স্পর্শ করুন' : 'Touch Sensor to Login'}</span>
                   </button>
 
                   <div className="flex items-center justify-between pt-1">
                     <button
                       onClick={() => {
                         removeFingerprint();
-                        setSuccessMsg('Enrolled fingerprint cleared from this device.');
+                        setSuccessMsg(isBengali ? 'এই ডিভাইস থেকে ফিঙ্গারপ্রিন্ট মুছে ফেলা হয়েছে।' : 'Enrolled fingerprint cleared from this device.');
                       }}
                       className="text-[11px] text-gray-500 dark:text-[#A2B3AA] hover:text-rose-600 dark:hover:text-rose-400 flex items-center gap-1 cursor-pointer transition-colors"
                     >
                       <RotateCcw className="w-3 h-3" />
-                      <span>Re-enroll New Fingerprint</span>
+                      <span>{isBengali ? 'নতুন আঙুলের ছাপ পুনরায় যুক্ত করুন' : 'Re-enroll New Fingerprint'}</span>
                     </button>
                     <span className="text-[10px] text-gray-400 dark:text-gray-500">
-                      Enrolled on {new Date(enrolledFingerprint.enrolledAt).toLocaleDateString()}
+                      {isBengali
+                        ? `যুক্ত করা হয়েছে: ${new Date(enrolledFingerprint.enrolledAt).toLocaleDateString()}`
+                        : `Enrolled on ${new Date(enrolledFingerprint.enrolledAt).toLocaleDateString()}`}
                     </span>
                   </div>
                 </div>
@@ -358,14 +379,14 @@ export const AuthView: React.FC = () => {
                 <form onSubmit={handleStartFingerprintSignUp} className="space-y-3 pt-1">
                   <div>
                     <label className="block text-[11px] font-bold text-gray-700 dark:text-[#A2B3AA] mb-1">
-                      Citizen Full Name
+                      {isBengali ? 'নাগরিকের পুরো নাম' : 'Citizen Full Name'}
                     </label>
                     <input
                       id="input-citizen-name"
                       type="text"
                       value={citizenName}
                       onChange={(e) => setCitizenName(e.target.value)}
-                      placeholder="e.g. Sourav Sengupta"
+                      placeholder={isBengali ? 'যেমন: সৌরভ সেনগুপ্ত' : 'e.g. Sourav Sengupta'}
                       className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-[#121E19] border border-gray-300 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[#063B2C] dark:focus:border-emerald-400 focus:bg-white dark:focus:bg-[#17231E] transition-all"
                     />
                   </div>
@@ -376,18 +397,21 @@ export const AuthView: React.FC = () => {
                     className="w-full h-12 rounded-xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] active:scale-98 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
                   >
                     <Fingerprint className="w-5 h-5 text-emerald-300" />
-                    <span>Sign Up with Fingerprint</span>
+                    <span>{isBengali ? 'আঙুলের ছাপ দিয়ে সাইন আপ করুন' : 'Sign Up with Fingerprint'}</span>
                   </button>
                 </form>
               )}
             </div>
 
-            {/* Retired Phone Auth Notice */}
+            {/* Direct Phone OTP entry option */}
             <div className="text-center pt-1">
-              <span className="text-[11px] text-gray-500 dark:text-[#A2B3AA] inline-flex items-center gap-1">
-                <Info className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
-                Phone OTP authentication has been replaced with biometric privacy.
-              </span>
+              <button
+                onClick={() => navigate('phone-auth')}
+                className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 font-semibold cursor-pointer"
+              >
+                <Info className="w-3.5 h-3.5" />
+                <span>{isBengali ? 'মোবাইল ফোন ওটিপি (OTP) দিয়ে প্রবেশ করতে চান?' : 'Sign in using Mobile Phone OTP'}</span>
+              </button>
             </div>
           </div>
         )}
@@ -401,16 +425,18 @@ export const AuthView: React.FC = () => {
                   <ShieldCheck className="w-7 h-7" />
                 </div>
                 <div className="px-3 py-1 rounded-full bg-[#114637] border border-[#1E5D4B] text-[10px] font-extrabold tracking-wide uppercase text-emerald-300">
-                  Municipal Portal
+                  {isBengali ? 'পৌর পোর্টাল' : 'Municipal Portal'}
                 </div>
               </div>
 
               <div>
                 <h2 className="text-lg font-black tracking-tight text-white">
-                  Jalpaiguri Municipal Administration
+                  {isBengali ? 'জলপাইগুড়ি পৌর প্রশাসন' : 'Jalpaiguri Municipal Administration'}
                 </h2>
                 <p className="text-xs text-emerald-200/80 mt-1 leading-relaxed">
-                  Administrative console for grievance dispatch, civic worker verification, and city alerts.
+                  {isBengali
+                    ? 'অভিযোগ প্রেরণ, কর্মী যাচাইকরণ ও পৌর জরুরি সতর্কতার প্রশাসনিক প্যানেল।'
+                    : 'Administrative console for grievance dispatch, civic worker verification, and city alerts.'}
                 </p>
               </div>
 
@@ -418,16 +444,24 @@ export const AuthView: React.FC = () => {
               <div className="bg-[#03231A] dark:bg-[#021811] rounded-2xl p-4 border border-[#114637] space-y-2.5">
                 <div className="flex items-center gap-2 text-emerald-300 text-xs font-bold">
                   <ShieldAlert className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>Municipal Officer Identity Gateway</span>
+                  <span>{isBengali ? 'পৌর আধিকারিক পরিচয় গেটওয়ে' : 'Municipal Officer Identity Gateway'}</span>
                 </div>
                 <div className="text-[11px] text-emerald-100/85 leading-relaxed space-y-1.5">
                   <p className="flex items-start gap-1.5">
                     <span className="text-emerald-400 font-bold">•</span>
-                    <span>Designated single sign-on for verified municipal authority personnel.</span>
+                    <span>
+                      {isBengali
+                        ? 'শুধুমাত্র অনুমোদিত পৌর আধিকারিকদের জন্য নির্ধারিত একক সাইন-অন।'
+                        : 'Designated single sign-on for verified municipal authority personnel.'}
+                    </span>
                   </p>
                   <p className="flex items-start gap-1.5 text-emerald-200/75 text-[10px]">
                     <span className="text-emerald-400 font-bold">•</span>
-                    <span>Administrative privileges are granted solely to verified municipality staff. Standard accounts receive citizen access.</span>
+                    <span>
+                      {isBengali
+                        ? 'প্রশাসনিক অধিকার শুধুমাত্র যাচাইকৃত পৌর কর্মীদের প্রদান করা হয়। অন্যান্য অ্যাকাউন্ট নাগরিক অধিকার পায়।'
+                        : 'Administrative privileges are granted solely to verified municipality staff. Standard accounts receive citizen access.'}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -442,7 +476,9 @@ export const AuthView: React.FC = () => {
                 {loading ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin text-[#063B2C]" />
-                    <span className="font-bold">Verifying Admin Credentials...</span>
+                    <span className="font-bold">
+                      {isBengali ? 'অ্যাডমিন প্রমাণপত্র যাচাই করা হচ্ছে...' : 'Verifying Admin Credentials...'}
+                    </span>
                   </div>
                 ) : (
                   <>
@@ -464,7 +500,7 @@ export const AuthView: React.FC = () => {
                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                       />
                     </svg>
-                    <span>Authenticate as Admin with Google</span>
+                    <span>{isBengali ? 'গুগল দিয়ে অ্যাডমিন হিসেবে প্রমাণীকরণ' : 'Authenticate as Admin with Google'}</span>
                   </>
                 )}
               </button>
@@ -475,7 +511,7 @@ export const AuthView: React.FC = () => {
                 onClick={() => setAuthMode('citizen')}
                 className="text-xs text-gray-500 dark:text-[#A2B3AA] hover:text-gray-900 dark:hover:text-white font-semibold cursor-pointer underline underline-offset-2"
               >
-                Not an admin? Return to Citizen Access
+                {isBengali ? 'প্রশাসক নন? নাগরিক প্রবেশে ফিরে যান' : 'Not an admin? Return to Citizen Access'}
               </button>
             </div>
           </div>
