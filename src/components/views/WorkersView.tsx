@@ -23,7 +23,19 @@ export const WorkersView: React.FC = () => {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<'find' | 'offer'>('find');
 
-  const categories = ['All', 'Electrician', 'Plumber', 'Carpenter', 'Painter', 'AC Repair', 'Cleaner'];
+  const categories = [
+    'All',
+    'Masi / Household Helper',
+    'Maid / Domestic Helper',
+    'Cook / Maharaj',
+    'Elderly Care / Patient Attendant',
+    'Electrician',
+    'Plumber',
+    'Carpenter',
+    'Painter',
+    'Cleaner',
+    'AC Repair'
+  ];
 
   // Apply filters
   const filteredWorkers = workers.filter((w) => {
@@ -233,13 +245,23 @@ export const WorkersView: React.FC = () => {
                           <CheckCircle2 className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400 fill-[#E6F4EA] dark:fill-emerald-950/60" />
                         )}
                       </p>
-                      <div className="flex items-center gap-2 text-[11px] font-semibold text-[#55685F] dark:text-[#A2B3AA] mt-1">
+                      <div className="flex items-center gap-2 text-[11px] font-semibold text-[#55685F] dark:text-[#A2B3AA] mt-1 flex-wrap">
                         <span className="flex items-center gap-0.5">
                           <MapPin className="w-3 h-3 text-[#063B2C] dark:text-emerald-400" />
                           <span>{worker.distance}</span>
                         </span>
-                        <span className="flex items-center gap-0.5 text-[#063B2C] dark:text-emerald-400">
-                          <CheckCircle2 className="w-3 h-3 text-[#063B2C] dark:text-emerald-400" />
+                        <span className={`flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          worker.availability === 'Available Now'
+                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300'
+                            : worker.availability === 'Available Morning'
+                            ? 'bg-amber-100 text-amber-900 dark:bg-amber-950/70 dark:text-amber-300'
+                            : worker.availability === 'Available Evening'
+                            ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-950/70 dark:text-indigo-300'
+                            : worker.availability === 'Full Day'
+                            ? 'bg-sky-100 text-sky-900 dark:bg-sky-950/70 dark:text-sky-300'
+                            : 'bg-teal-100 text-teal-900 dark:bg-teal-950/70 dark:text-teal-300'
+                        }`}>
+                          <Clock className="w-2.5 h-2.5" />
                           <span>{worker.availability}</span>
                         </span>
                       </div>
@@ -256,9 +278,21 @@ export const WorkersView: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Pricing row */}
-                <div className="text-xs font-bold text-[#11241C] dark:text-white px-0.5">
-                  {worker.startingPrice}
+                {/* Pricing row with startingPrice and monthlyRate */}
+                <div className="flex items-center justify-between text-xs font-bold text-[#11241C] dark:text-white px-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#063B2C] dark:text-emerald-400">{worker.startingPrice}</span>
+                    {worker.monthlyRate && (
+                      <span className="text-[11px] text-[#55685F] dark:text-[#A2B3AA] font-semibold bg-[#FAF8F5] dark:bg-white/5 px-2 py-0.5 rounded-md border border-[#E8E4DA] dark:border-white/10">
+                        {worker.monthlyRate}
+                      </span>
+                    )}
+                  </div>
+                  {worker.completedJobs > 0 && (
+                    <span className="text-[10px] text-[#73827B] dark:text-[#A2B3AA] font-normal">
+                      {worker.completedJobs}+ jobs completed
+                    </span>
+                  )}
                 </div>
 
                 {/* 3 Action Buttons matching Screenshot 4: Call, Message, Request */}

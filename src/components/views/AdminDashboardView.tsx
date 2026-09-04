@@ -20,7 +20,8 @@ import {
   Loader2,
   TrendingUp,
   Clock,
-  LogOut
+  LogOut,
+  Store
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useApp } from '../../context/AppContext';
@@ -44,11 +45,61 @@ export const AdminDashboardView: React.FC = () => {
     clearError
   } = useAdminGuard();
 
-  const [activeTab, setActiveTab] = useState<'Dashboard' | 'Users' | 'Workers' | 'Doctors' | 'Reports' | 'Alerts' | 'Analytics' | 'Settings'>('Dashboard');
+  const [activeTab, setActiveTab] = useState<'Dashboard' | 'Users' | 'Workers' | 'Shops' | 'Doctors' | 'Reports' | 'Alerts' | 'Analytics' | 'Settings'>('Dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [localError, setLocalError] = useState('');
   const [isProcessingAction, setIsProcessingAction] = useState(false);
   const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
+  const [adminShops, setAdminShops] = useState<any[]>([]);
+
+  // Load shops for moderation
+  const loadShops = async () => {
+    try {
+      const res = await fetch('/api/shops');
+      if (res.ok) {
+        const data = await res.json();
+        setAdminShops(data);
+      }
+    } catch (e) {
+      console.warn('Failed to load shops for admin', e);
+    }
+  };
+
+  React.useEffect(() => {
+    loadShops();
+  }, []);
+
+  const handleApproveShop = async (shopId: string) => {
+    try {
+      setIsProcessingAction(true);
+      await requireAdminAction(async () => {
+        const res = await fetch(`/api/admin/shops/${shopId}/verify`, { method: 'POST' });
+        if (res.ok) {
+          setAdminShops(prev => prev.map(s => s.id === shopId ? { ...s, isVerified: true, status: 'verified' } : s));
+        }
+      }, 'Access Denied: Only municipal administrator can verify shops.');
+    } catch (err: any) {
+      setLocalError(err.message || 'Verification failed.');
+    } finally {
+      setIsProcessingAction(false);
+    }
+  };
+
+  const handleRejectShop = async (shopId: string) => {
+    try {
+      setIsProcessingAction(true);
+      await requireAdminAction(async () => {
+        const res = await fetch(`/api/admin/shops/${shopId}/reject`, { method: 'POST' });
+        if (res.ok) {
+          setAdminShops(prev => prev.map(s => s.id === shopId ? { ...s, isVerified: false, status: 'rejected' } : s));
+        }
+      }, 'Access Denied: Only municipal administrator can reject shops.');
+    } catch (err: any) {
+      setLocalError(err.message || 'Rejection failed.');
+    } finally {
+      setIsProcessingAction(false);
+    }
+  };
 
   const handleAdminGoogleLogin = async () => {
     setLocalError('');
@@ -180,6 +231,7 @@ export const AdminDashboardView: React.FC = () => {
     { id: 'Dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
     { id: 'Users', label: 'Users', icon: <Users className="w-5 h-5" /> },
     { id: 'Workers', label: 'Workers', icon: <Wrench className="w-5 h-5" /> },
+    { id: 'Shops', label: 'Shops & Merchants', icon: <Store className="w-5 h-5" /> },
     { id: 'Doctors', label: 'Doctors', icon: <PlusSquare className="w-5 h-5" /> },
     { id: 'Reports', label: 'Reports', icon: <FileSpreadsheet className="w-5 h-5" /> },
     { id: 'Alerts', label: 'Alerts', icon: <AlertTriangle className="w-5 h-5" /> },
@@ -345,86 +397,182 @@ export const AdminDashboardView: React.FC = () => {
             </p>
           </div>
 
-          {/* Main Grid: Verification Queue (Left) & 3 Stats Cards (Right) */}
+          {/* Main Grid: Verification Queue (Left) & Metric Cards (Right) */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Verification Queue Table (2 Columns wide) */}
             <div className="lg:col-span-2 bg-white rounded-3xl border border-[#E8E4DA] shadow-xs overflow-hidden">
-              <div className="p-5 border-b border-[#F0ECE1] flex items-center justify-between">
-                <h2 className="text-sm font-extrabold text-[#11241C]">
-                  Verification Queue
-                </h2>
-                <button
-                  onClick={() => setActiveTab('Workers')}
-                  className="text-xs font-bold text-[#11241C] hover:text-[#063B2C] flex items-center gap-1 cursor-pointer"
-                >
-                  <span>View All</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+              <div className="p-5 border-b border-[#F0ECE1] flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setActiveTab('Dashboard')}
+                    className={`text-xs font-black px-3 py-1.5 rounded-xl cursor-pointer transition-colors ${
+                      activeTab !== 'Shops' ? 'bg-[#063B2C] text-white' : 'bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    Workers Queue ({adminVerificationQueue.length})
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('Shops')}
+                    className={`text-xs font-black px-3 py-1.5 rounded-xl cursor-pointer transition-colors ${
+                      activeTab === 'Shops' ? 'bg-[#063B2C] text-white' : 'bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    Shops Moderation ({adminShops.length})
+                  </button>
+                </div>
+
+                <span className="text-[11px] font-bold text-gray-400">
+                  Municipal Verification Console
+                </span>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#FAF8F5] border-b border-[#F0ECE1] text-[#55685F] font-bold">
-                    <tr>
-                      <th className="py-3 px-4">Provider Name</th>
-                      <th className="py-3 px-4">Profession</th>
-                      <th className="py-3 px-4">Submission Date</th>
-                      <th className="py-3 px-4">Status</th>
-                      <th className="py-3 px-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#F0ECE1]">
-                    {adminVerificationQueue.map((item) => {
-                      const initials = item.name.split(' ').map(n => n[0]).join('');
-                      return (
-                        <tr key={item.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
+              {activeTab === 'Shops' ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#FAF8F5] border-b border-[#F0ECE1] text-[#55685F] font-bold">
+                      <tr>
+                        <th className="py-3 px-4">Shop Name</th>
+                        <th className="py-3 px-4">Category & Locality</th>
+                        <th className="py-3 px-4">Contact</th>
+                        <th className="py-3 px-4">Status</th>
+                        <th className="py-3 px-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#F0ECE1]">
+                      {adminShops.map((shop) => (
+                        <tr key={shop.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
                           <td className="py-3.5 px-4">
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-7 h-7 rounded-full bg-[#E2E8F0] text-[#334155] font-extrabold text-[10px] flex items-center justify-center">
-                                {initials}
-                              </div>
-                              <span className="font-bold text-[#11241C]">{item.name}</span>
+                            <div>
+                              <span className="font-bold text-[#11241C] block">{shop.name}</span>
+                              <span className="text-[10px] text-gray-500">Owner: {shop.ownerName}</span>
                             </div>
                           </td>
-                          <td className="py-3.5 px-4 text-[#55685F] font-semibold">{item.profession}</td>
-                          <td className="py-3.5 px-4 text-[#55685F] font-medium">{item.date}</td>
+                          <td className="py-3.5 px-4">
+                            <span className="font-semibold text-gray-700 block">{shop.category}</span>
+                            <span className="text-[10px] text-[#55685F]">{shop.locality} (PIN: {shop.pincode})</span>
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-[11px] text-gray-600">
+                            {shop.phone || shop.ownerPhone}
+                          </td>
                           <td className="py-3.5 px-4">
                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                              item.status === 'Approved'
+                              shop.isVerified
                                 ? 'bg-[#E6F4EA] text-[#063B2C]'
-                                : 'bg-[#EFECE6] text-[#55685F]'
+                                : 'bg-amber-100 text-amber-800'
                             }`}>
-                              <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'Approved' ? 'bg-[#063B2C]' : 'bg-[#73827B]'}`}></span>
-                              <span>{item.status}</span>
+                              <span className={`w-1.5 h-1.5 rounded-full ${shop.isVerified ? 'bg-[#063B2C]' : 'bg-amber-600'}`}></span>
+                              <span>{shop.isVerified ? 'Verified' : 'Pending'}</span>
                             </span>
                           </td>
                           <td className="py-3.5 px-4 text-right">
                             <div className="inline-flex items-center gap-1.5">
-                              <button
-                                onClick={() => alert(`Reviewing documents for ${item.name}`)}
-                                className="px-2.5 py-1 rounded-lg bg-[#C8EADB] text-[#063B2C] font-bold text-[11px] hover:bg-[#B5E2CE] cursor-pointer"
-                              >
-                                Review
-                              </button>
-                              <button
-                                onClick={() => handleApproveWorker(item.id)}
-                                disabled={isProcessingAction}
-                                className="px-2.5 py-1 rounded-lg bg-[#063B2C] text-white font-bold text-[11px] hover:bg-[#084D3A] cursor-pointer transition-colors disabled:opacity-50"
-                              >
-                                Approve
-                              </button>
+                              {!shop.isVerified ? (
+                                <button
+                                  onClick={() => handleApproveShop(shop.id)}
+                                  disabled={isProcessingAction}
+                                  className="px-2.5 py-1 rounded-lg bg-[#063B2C] text-white font-bold text-[11px] hover:bg-[#084D3A] cursor-pointer transition-colors disabled:opacity-50"
+                                >
+                                  Verify
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleRejectShop(shop.id)}
+                                  disabled={isProcessingAction}
+                                  className="px-2.5 py-1 rounded-lg bg-rose-100 text-rose-800 font-bold text-[11px] hover:bg-rose-200 cursor-pointer transition-colors disabled:opacity-50"
+                                >
+                                  Revoke
+                                </button>
+                              )}
                             </div>
                           </td>
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#FAF8F5] border-b border-[#F0ECE1] text-[#55685F] font-bold">
+                      <tr>
+                        <th className="py-3 px-4">Provider Name</th>
+                        <th className="py-3 px-4">Profession</th>
+                        <th className="py-3 px-4">Submission Date</th>
+                        <th className="py-3 px-4">Status</th>
+                        <th className="py-3 px-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#F0ECE1]">
+                      {adminVerificationQueue.map((item) => {
+                        const initials = item.name.split(' ').map(n => n[0]).join('');
+                        return (
+                          <tr key={item.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
+                            <td className="py-3.5 px-4">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-7 h-7 rounded-full bg-[#E2E8F0] text-[#334155] font-extrabold text-[10px] flex items-center justify-center">
+                                  {initials}
+                                </div>
+                                <span className="font-bold text-[#11241C]">{item.name}</span>
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-4 text-[#55685F] font-semibold">{item.profession}</td>
+                            <td className="py-3.5 px-4 text-[#55685F] font-medium">{item.date}</td>
+                            <td className="py-3.5 px-4">
+                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                                item.status === 'Approved'
+                                  ? 'bg-[#E6F4EA] text-[#063B2C]'
+                                  : 'bg-[#EFECE6] text-[#55685F]'
+                              }`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'Approved' ? 'bg-[#063B2C]' : 'bg-[#73827B]'}`}></span>
+                                <span>{item.status}</span>
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-4 text-right">
+                              <div className="inline-flex items-center gap-1.5">
+                                <button
+                                  onClick={() => alert(`Reviewing documents for ${item.name}`)}
+                                  className="px-2.5 py-1 rounded-lg bg-[#C8EADB] text-[#063B2C] font-bold text-[11px] hover:bg-[#B5E2CE] cursor-pointer"
+                                >
+                                  Review
+                                </button>
+                                <button
+                                  onClick={() => handleApproveWorker(item.id)}
+                                  disabled={isProcessingAction}
+                                  className="px-2.5 py-1 rounded-lg bg-[#063B2C] text-white font-bold text-[11px] hover:bg-[#084D3A] cursor-pointer transition-colors disabled:opacity-50"
+                                >
+                                  Approve
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
 
-            {/* 3 Right Metric Cards matching Screenshot 5 */}
+            {/* Right Metric Cards */}
             <div className="space-y-4">
+              {/* Card 0: Local Shops Registered */}
+              <div className="bg-white rounded-3xl p-5 border border-[#E8E4DA] shadow-xs flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-[#E6F4EA] text-[#063B2C] flex items-center justify-center shadow-xs shrink-0">
+                  <Store className="w-6 h-6" />
+                </div>
+                <div>
+                  <span className="text-xs font-semibold text-[#55685F] block">
+                    Registered Shops
+                  </span>
+                  <h3 className="text-xl font-extrabold text-[#11241C] tracking-tight">
+                    {adminShops.length}
+                  </h3>
+                  <span className="text-[11px] font-bold text-[#063B2C] flex items-center gap-1 mt-0.5">
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    <span>{adminShops.filter(s => s.isVerified).length} verified merchants</span>
+                  </span>
+                </div>
+              </div>
               {/* Card 1: Total Active Users */}
               <div className="bg-white rounded-3xl p-5 border border-[#E8E4DA] shadow-xs flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-[#063B2C] text-white flex items-center justify-center shadow-xs shrink-0">

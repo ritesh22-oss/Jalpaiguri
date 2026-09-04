@@ -11,7 +11,7 @@
         "phone": { "type": "string" },
         "bloodGroup": { "type": "string" },
         "location": { "type": "string" },
-        "role": { "type": "string", "enum": ["citizen", "admin", "worker"] },
+        "role": { "type": "string", "enum": ["citizen", "admin", "worker", "shop_owner"] },
         "language": { "type": "string" },
         "isBloodDonor": { "type": "boolean" },
         "isVolunteer": { "type": "boolean" },
@@ -194,6 +194,87 @@
         "createdAt": { "type": "string" }
       },
       "required": ["id", "workerId", "serviceType", "address", "status"]
+    },
+    "Shop": {
+      "title": "Shop",
+      "description": "Registered local merchant shop in Jalpaiguri",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "ownerName": { "type": "string" },
+        "ownerPhone": { "type": "string" },
+        "ownerEmail": { "type": "string" },
+        "whatsappNumber": { "type": "string" },
+        "name": { "type": "string" },
+        "nameBn": { "type": "string" },
+        "category": { "type": "string" },
+        "categories": { "type": "array", "items": { "type": "string" } },
+        "description": { "type": "string" },
+        "locality": { "type": "string" },
+        "address": { "type": "string" },
+        "landmark": { "type": "string" },
+        "pincode": { "type": "string" },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "openingTime": { "type": "string" },
+        "closingTime": { "type": "string" },
+        "weeklyOff": { "type": "string" },
+        "homeDelivery": { "type": "boolean" },
+        "minOrderAmount": { "type": "number" },
+        "deliveryRadiusKm": { "type": "number" },
+        "paymentMethods": { "type": "array", "items": { "type": "string" } },
+        "photoUrl": { "type": "string" },
+        "insidePhotoUrl": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "isVerified": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["pending", "verified", "rejected", "suspended"] },
+        "featured": { "type": "boolean" },
+        "isOpen": { "type": "boolean" },
+        "rating": { "type": "number" },
+        "reviewCount": { "type": "number" },
+        "subscriptionPlan": { "type": "string", "enum": ["free", "monthly", "yearly"] },
+        "subscriptionExpiresAt": { "type": "string" },
+        "totalViews": { "type": "number" },
+        "inquiryClicks": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "ownerId", "ownerPhone", "name", "category", "locality", "address", "pincode", "status"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Product item listed by a Jalpaiguri shop owner",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "shopId": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "name": { "type": "string" },
+        "nameBn": { "type": "string" },
+        "category": { "type": "string" },
+        "price": { "type": "number" },
+        "discountPrice": { "type": "number" },
+        "unit": { "type": "string" },
+        "inStock": { "type": "boolean" },
+        "photoUrl": { "type": "string" },
+        "description": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "shopId", "ownerId", "name", "price", "inStock"]
+    },
+    "ShoppingList": {
+      "title": "ShoppingList",
+      "description": "Citizen personal shopping list for local Jalpaiguri matching",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "items": { "type": "array" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "items"]
     }
   },
   "firestore": {
@@ -236,6 +317,18 @@
     "/service_requests/{requestId}": {
       "schema": "ServiceRequest",
       "description": "Direct service bookings"
+    },
+    "/shops/{shopId}": {
+      "schema": "Shop",
+      "description": "Local marketplace shops in Jalpaiguri"
+    },
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Product catalog items for Jalpaiguri shops"
+    },
+    "/shopping_lists/{listId}": {
+      "schema": "ShoppingList",
+      "description": "Citizen shopping lists"
     }
   }
 }

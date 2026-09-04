@@ -17,6 +17,7 @@ import {
   isAuthorizedAdminEmail
 } from '../types';
 import { OFFICIAL_DOCTORS, OFFICIAL_HOSPITALS } from '../data/directoryData';
+import { INITIAL_WORKERS } from '../data/initialWorkers';
 import { db, isFirebaseConfigured, apiFetch } from '../lib/firebase';
 import {
   collection,
@@ -99,7 +100,10 @@ function sanitizeCachedList<T>(key: string): T[] {
 }
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [workers, setWorkers] = useState<Worker[]>(() => sanitizeCachedList<Worker>('jpg_workers'));
+  const [workers, setWorkers] = useState<Worker[]>(() => {
+    const cached = sanitizeCachedList<Worker>('jpg_workers');
+    return cached.length > 0 ? cached : INITIAL_WORKERS;
+  });
   const [civicReports, setCivicReports] = useState<CivicReport[]>(() => sanitizeCachedList<CivicReport>('jpg_civic_reports'));
   const [localAlerts, setLocalAlerts] = useState<LocalAlert[]>(() => sanitizeCachedList<LocalAlert>('jpg_local_alerts'));
   const [bloodDonors, setBloodDonors] = useState<BloodDonor[]>(() => sanitizeCachedList<BloodDonor>('jpg_blood_donors'));
