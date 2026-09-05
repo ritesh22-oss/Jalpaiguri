@@ -16,8 +16,79 @@ export interface EnrolledFingerprint {
 }
 
 const STORAGE_KEY = 'jpg_enrolled_fingerprint';
+const BIOMETRIC_ENABLED_KEY = 'jpg_biometric_login_enabled';
 export const PRIMARY_FINGERPRINT_SIG = 'BIO_SECURE_FP_PRIMARY_VERIFIED';
 export const UNAUTHORIZED_TEST_SIG = 'BIO_UNAUTHORIZED_DIFFERENT_FINGER_REJECT';
+
+/**
+ * Check if biometric login preference is enabled by user
+ */
+export function isBiometricLoginEnabled(): boolean {
+  try {
+    const val = localStorage.getItem(BIOMETRIC_ENABLED_KEY);
+    return val === 'true';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Update biometric login preference
+ */
+export function setBiometricLoginEnabled(enabled: boolean): void {
+  try {
+    localStorage.setItem(BIOMETRIC_ENABLED_KEY, enabled ? 'true' : 'false');
+  } catch (err) {
+    console.warn('[WEBAUTHN] Error updating biometric login preference:', err);
+  }
+}
+
+export interface BiometricDeviceCapability {
+  supported: boolean;
+  platformAvailable: boolean;
+  enrolled: boolean;
+  enabled: boolean;
+  status: 'supported' | 'not_supported' | 'not_enrolled' | 'locked_out';
+}
+
+/**
+ * Detect biometric capability before displaying UI
+ */
+export async function checkBiometricDeviceCapability(): Promise<BiometricDeviceCapability> {
+  const supported = isWebAuthnSupported();
+  if (!supported) {
+    return {
+      supported: false,
+      platformAvailable: false,
+      enrolled: false,
+      enabled: false,
+      status: 'not_supported'
+    };
+  }
+
+  const platformAvailable = await isPlatformAuthenticatorAvailable();
+  const enrolledRecord = getEnrolledFingerprint();
+  const enrolled = Boolean(enrolledRecord);
+  const enabled = isBiometricLoginEnabled();
+
+  if (!enrolled) {
+    return {
+      supported: true,
+      platformAvailable,
+      enrolled: false,
+      enabled,
+      status: 'not_enrolled'
+    };
+  }
+
+  return {
+    supported: true,
+    platformAvailable,
+    enrolled: true,
+    enabled,
+    status: 'supported'
+  };
+}
 
 /**
  * Base64URL helpers for WebAuthn ArrayBuffers

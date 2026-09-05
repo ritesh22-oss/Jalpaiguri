@@ -60,16 +60,28 @@ export const OnboardingView: React.FC = () => {
       </div>
 
       {/* Bottom Action Button & Login Link */}
-      <div className="space-y-3.5 pt-2 pb-1">
+      <div className="space-y-3 pt-2 pb-1">
         <button
           id="get-started-btn"
           onClick={handleGetStarted}
           className="w-full py-3.5 rounded-full bg-[#00A859] hover:bg-[#00924D] active:scale-98 text-white font-bold text-sm tracking-wide shadow-sm transition-all cursor-pointer"
         >
-          {isBengali ? 'শুরু করুন' : 'Get Started'}
+          {isBengali ? 'শুরু করুন (সাইন ইন)' : 'Get Started (Sign In)'}
         </button>
 
-        <div className="text-center">
+        <button
+          id="explore-guest-btn"
+          onClick={() => {
+            localStorage.setItem('jpg_has_onboarded', 'true');
+            replaceView('home');
+          }}
+          className="w-full py-2.5 rounded-full bg-[#FAF8F5] dark:bg-[#1A2822] hover:bg-[#F3F0E6] dark:hover:bg-[#22362E] text-[#063B2C] dark:text-[#4ECCA3] border border-[#D2CEBE] dark:border-white/10 font-bold text-xs tracking-wide transition-all cursor-pointer flex items-center justify-center gap-1.5"
+        >
+          <span>🏪</span>
+          <span>{isBengali ? 'লগইন ছাড়া অ্যাপ ও বাজার দেখুন (গেস্ট)' : 'Explore App & Local Shops as Guest'}</span>
+        </button>
+
+        <div className="text-center pt-0.5">
           <p className="text-xs text-[#6B7280] dark:text-[#A2B3AA] font-normal">
             {isBengali ? 'ইতিমধ্যে একটি অ্যাকাউন্ট আছে?' : 'Already have an account?'}{' '}
             <button

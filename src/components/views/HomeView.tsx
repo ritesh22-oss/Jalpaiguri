@@ -25,7 +25,10 @@ import {
   Radio,
   Navigation,
   Loader2,
-  Check
+  Check,
+  ShoppingBag,
+  PackageSearch,
+  PlusCircle
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
@@ -116,7 +119,7 @@ export const HomeView: React.FC = () => {
     { id: 'srv-animal', label: isBengali ? 'প্রাণী সেবা' : 'Animal Help', icon: <PawPrint className="w-5 h-5 text-[#15803D]" />, view: 'nearby' as const, cat: 'Animal' as NearbyCategoryType, bg: 'bg-[#DCFCE7]' },
     { id: 'srv-pharmacy', label: isBengali ? 'ফার্মেসি' : 'Pharmacies', icon: <Pill className="w-5 h-5 text-[#0891B2]" />, view: 'medical' as const, cat: 'Medical' as NearbyCategoryType, bg: 'bg-[#CFFAFE]' },
     { id: 'srv-rentals', label: isBengali ? 'ভাড়া' : 'Rentals', icon: <HomeIcon className="w-5 h-5 text-[#7C3AED]" />, view: 'nearby' as const, cat: 'Rentals' as NearbyCategoryType, bg: 'bg-[#F3E8FF]' },
-    { id: 'srv-businesses', label: isBengali ? 'দোকান' : 'Shops', icon: <Store className="w-5 h-5 text-[#BE123C]" />, view: 'nearby' as const, cat: 'Shops' as NearbyCategoryType, bg: 'bg-[#FFE4E6]' },
+    { id: 'srv-businesses', label: isBengali ? 'দোকান ও বাজার' : 'Shops & Mart', icon: <Store className="w-5 h-5 text-[#BE123C]" />, view: 'shop-marketplace' as const, cat: 'Shops' as NearbyCategoryType, bg: 'bg-[#FFE4E6]' },
     { id: 'srv-govt', label: isBengali ? 'সরকারি' : 'Government', icon: <Landmark className="w-5 h-5 text-[#334155]" />, view: 'government' as const, cat: 'Services' as NearbyCategoryType, bg: 'bg-[#F1F5F9]' },
     { id: 'srv-lostfound', label: isBengali ? 'হারানো ও প্রাপ্তি' : 'Lost & Found', icon: <HelpCircle className="w-5 h-5 text-[#D97706]" />, view: 'lost-found' as const, cat: 'Services' as NearbyCategoryType, bg: 'bg-[#FEF3C7]' },
     { id: 'srv-report', label: isBengali ? 'অভিযোগ' : 'Report Issue', icon: <AlertTriangle className="w-5 h-5 text-[#D9383A]" />, view: 'report-problem' as const, cat: 'Services' as NearbyCategoryType, bg: 'bg-[#FEE2E2]' }
@@ -306,6 +309,70 @@ export const HomeView: React.FC = () => {
               className="bg-white dark:bg-[#17231E] border border-[#FECDCA] dark:border-red-900/50 text-[#D9383A] dark:text-red-400 hover:bg-[#FFEBEA] dark:hover:bg-red-950/40 text-xs font-bold px-2.5 py-2 rounded-xl active:scale-95 transition-all cursor-pointer"
             >
               {isBengali ? 'সেবাসমূহ' : 'Services'}
+            </button>
+          </div>
+        </div>
+
+        {/* JALPAIGURI LOCAL MARKETPLACE & SHOPS PROMINENT SHOWCASE CARD */}
+        <div className="bg-gradient-to-br from-[#063B2C] via-[#084D3A] to-[#0B5C45] text-white rounded-3xl p-4 sm:p-5 shadow-md border border-[#0F6B51] dark:border-emerald-800/40 space-y-3.5 transition-all">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-2xl bg-white/15 flex items-center justify-center text-emerald-300 shadow-inner">
+                <Store className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-emerald-300 bg-white/10 px-2.5 py-0.5 rounded-full">
+                  {isBengali ? 'স্থানীয় বাজার ও দোকান' : 'Jalpaiguri Local Marketplace'}
+                </span>
+                <h3 className="text-base font-black text-white mt-1 leading-snug">
+                  {isBengali ? 'জলপাইগুড়ি দোকান ও পণ্যের ডিরেক্টরি' : 'Neighborhood Shops & Live Catalog'}
+                </h3>
+              </div>
+            </div>
+            <span className="text-xs font-black text-emerald-200 bg-emerald-950/70 px-2.5 py-1 rounded-xl border border-emerald-400/30">
+              {isBengali ? '৩৪+ দোকান' : '34+ Shops'}
+            </span>
+          </div>
+
+          <p className="text-xs text-emerald-100/90 leading-relaxed font-normal">
+            {isBengali
+              ? 'মুদিখানা, মিষ্টি, ওষুধ, ইলেকট্রনিক্স ও পোশাক—সরাসরি স্থানীয় দোকানদারের সাথে হোয়াটসঅ্যাপে যোগাযোগ ও পণ্যের দাম জানুন।'
+              : 'Discover grocery, sweets, pharmacy, electronics & apparel stores with verified inventory and direct WhatsApp order.'}
+          </p>
+
+          <div className="grid grid-cols-2 gap-2.5 pt-0.5">
+            <button
+              id="btn-home-browse-shops"
+              onClick={() => navigate('shop-marketplace')}
+              className="py-2.5 px-3 rounded-xl bg-white text-[#063B2C] font-black text-xs flex items-center justify-center gap-1.5 shadow-sm hover:bg-emerald-50 active:scale-98 transition-all cursor-pointer"
+            >
+              <Store className="w-4 h-4 text-[#063B2C]" />
+              <span>{isBengali ? 'দোকান ব্রাউজ করুন' : 'Browse All Shops'}</span>
+            </button>
+            <button
+              id="btn-home-smart-search"
+              onClick={() => navigate('smart-shopping-search')}
+              className="py-2.5 px-3 rounded-xl bg-white/15 hover:bg-white/20 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 border border-white/20 active:scale-98 transition-all cursor-pointer"
+            >
+              <PackageSearch className="w-4 h-4 text-emerald-300" />
+              <span>{isBengali ? 'পণ্য কোথায় পাবেন' : 'Find Any Item'}</span>
+            </button>
+          </div>
+
+          <div className="pt-2.5 border-t border-white/15 flex items-center justify-between text-xs text-emerald-200">
+            <button
+              onClick={() => navigate('add-shop')}
+              className="font-bold hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
+            >
+              <PlusCircle className="w-4 h-4 text-emerald-300" />
+              <span>{isBengali ? 'দোকানদার? দোকান যোগ করুন (+)' : 'Shop Owner? Register (+)'}</span>
+            </button>
+            <button
+              onClick={() => navigate('merchant-dashboard')}
+              className="font-bold text-white hover:underline cursor-pointer flex items-center gap-0.5"
+            >
+              <span>{isBengali ? 'মার্চেন্ট ড্যাশবোর্ড' : 'Merchant Portal'}</span>
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>

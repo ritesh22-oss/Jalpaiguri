@@ -789,6 +789,39 @@ class ShopStore {
   private products: ServerProduct[] = [...initialProducts];
   private inquiries: ServerShopInquiry[] = [];
 
+  public formatShop(shop: ServerShop): any {
+    const phone = shop.ownerPhone || (shop as any).phone || '+91 98320 11094';
+    const open = shop.openingTime || '08:00 AM';
+    const close = shop.closingTime || '09:00 PM';
+    const weeklyOff = shop.weeklyOff || 'None';
+    return {
+      ...shop,
+      phone,
+      ownerPhone: phone,
+      whatsappNumber: shop.whatsappNumber || phone,
+      openingTime: open,
+      closingTime: close,
+      weeklyOff,
+      openingHours: {
+        open,
+        close,
+        weeklyOff
+      },
+      homeDelivery: Boolean(shop.homeDelivery),
+      deliveryAvailable: Boolean(shop.homeDelivery),
+      nameBn: shop.nameBn || '',
+      nameBengali: shop.nameBn || '',
+      isFeatured: Boolean(shop.featured),
+      featured: Boolean(shop.featured),
+      isVerified: Boolean(shop.isVerified || shop.status === 'verified'),
+      rating: typeof shop.rating === 'number' ? shop.rating : 4.8,
+      reviewCount: typeof shop.reviewCount === 'number' ? shop.reviewCount : 25,
+      distance: (shop as any).distanceText || ((shop as any).distanceKm ? `${(shop as any).distanceKm} km` : '1.2 km'),
+      distanceText: (shop as any).distanceText || ((shop as any).distanceKm ? `${(shop as any).distanceKm} km` : '1.2 km'),
+      distanceKm: typeof (shop as any).distanceKm === 'number' ? (shop as any).distanceKm : 1.2
+    };
+  }
+
   public getAllShops(filters: {
     category?: string;
     openNow?: boolean;
@@ -798,7 +831,7 @@ class ShopStore {
     search?: string;
     userLat?: number;
     userLng?: number;
-  }): ServerShop[] {
+  }): any[] {
     let result = [...this.shops];
 
     if (filters.search && filters.search.trim()) {
@@ -861,14 +894,15 @@ class ShopStore {
       });
     }
 
-    return result;
+    return result.map((s) => this.formatShop(s));
   }
 
-  public getShopById(id: string): { shop: ServerShop; products: ServerProduct[] } | null {
+  public getShopById(id: string): { shop: any; products: ServerProduct[] } | null {
     const shop = this.shops.find((s) => s.id === id);
     if (!shop) return null;
+    const formatted = this.formatShop(shop);
     const shopProducts = this.products.filter((p) => p.shopId === id);
-    return { shop, products: shopProducts };
+    return { shop: formatted, products: shopProducts };
   }
 
   public getShopsByOwner(ownerId: string): ServerShop[] {

@@ -1785,7 +1785,70 @@ app.get('/api/shops/:id', (req: Request, res: Response) => {
     return res.status(404).json({ error: 'Shop not found in Jalpaiguri.' });
   }
   shopStore.incrementShopViews(req.params.id);
-  res.json(shopData);
+  res.json({
+    ...shopData.shop,
+    shop: shopData.shop,
+    products: shopData.products
+  });
+});
+
+// 2b. Get Shop Products by Shop ID
+app.get('/api/shops/:id/products', (req: Request, res: Response) => {
+  const shopData = shopStore.getShopById(req.params.id);
+  if (!shopData) {
+    return res.status(404).json({ error: 'Shop not found in Jalpaiguri.' });
+  }
+  res.json(shopData.products);
+});
+
+// 2c. Batch add products for merchant
+app.post('/api/shops/:id/products/batch', (req: Request, res: Response) => {
+  try {
+    const { products } = req.body;
+    const userId = (req.headers['x-user-id'] as string) || 'merchant-user';
+    if (!Array.isArray(products) || products.length === 0) {
+      return res.status(400).json({ error: 'Array of products required.' });
+    }
+    const created = products.map((p: any) =>
+      shopStore.addProduct(
+        {
+          ...p,
+          shopId: req.params.id
+        },
+        userId
+      )
+    );
+    res.json(created);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Failed to batch add products.' });
+  }
+});
+
+// 2d. Alias for single item search
+app.get('/api/shops/search-item', (req: Request, res: Response) => {
+  try {
+    const query = (req.query.q as string) || '';
+    const userLat = req.query.userLat ? parseFloat(req.query.userLat as string) : undefined;
+    const userLng = req.query.userLng ? parseFloat(req.query.userLng as string) : undefined;
+    const results = shopStore.searchProducts(query, userLat, userLng);
+    res.json({ results });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Item search failed.' });
+  }
+});
+
+// 2e. Alias for shopping list matcher
+app.post('/api/shops/match-list', (req: Request, res: Response) => {
+  try {
+    const { items, userLat, userLng } = req.body;
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'Items array is required.' });
+    }
+    const matches = shopStore.matchShoppingList(items, userLat, userLng);
+    res.json({ matches });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Matching failed.' });
+  }
 });
 
 // 3. Get Shops Owned by User

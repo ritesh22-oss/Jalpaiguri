@@ -172,6 +172,9 @@ export interface UserProfile {
   role?: 'citizen' | 'admin' | 'worker' | 'shop_owner';
   fingerprintEnrolled?: boolean;
   fingerprintCredentialId?: string;
+  emailVerified?: boolean;
+  biometricEnabled?: boolean;
+  authMethod?: 'google' | 'phone' | 'email' | 'biometric';
   createdAt: string;
 }
 
@@ -553,16 +556,40 @@ export interface ExplorePlaceItem {
 
 export type ShopCategory =
   | 'All'
+  | 'Grocery / Kirana'
   | 'Grocery'
+  | 'Grocery & Departmental'
   | 'Pharmacy'
-  | 'Electronics'
+  | 'Pharmacy & Medical'
+  | 'Clothing & Fashion'
   | 'Clothing'
-  | 'Bakery & Sweets'
+  | 'Clothing & Garments'
+  | 'Electronics'
+  | 'Electronics & Mobile'
+  | 'Mobile & Accessories'
+  | 'Computer & Accessories'
   | 'Hardware'
+  | 'Hardware & Electricals'
+  | 'Stationery & Books'
   | 'Books & Stationery'
-  | 'Personal Care'
-  | 'Dairy'
+  | 'Bakery'
+  | 'Sweets & Snacks'
+  | 'Bakery & Sweets'
+  | 'Restaurant / Food'
+  | 'Fruits & Vegetables'
+  | 'Meat / Fish'
   | 'Fresh Meat & Fish'
+  | 'Beauty & Cosmetics'
+  | 'Footwear'
+  | 'Jewellery & Accessories'
+  | 'Home & Kitchen'
+  | 'Furniture'
+  | 'Automobile / Spare Parts'
+  | 'Gifts & Toys'
+  | 'Dairy'
+  | 'Dairy & Milk'
+  | 'Personal Care'
+  | 'Personal Care & Salon'
   | 'Other';
 
 export interface Shop {

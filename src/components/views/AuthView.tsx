@@ -404,7 +404,7 @@ export const AuthView: React.FC = () => {
             </div>
 
             {/* Direct Phone OTP entry option */}
-            <div className="text-center pt-1">
+            <div className="text-center pt-1 space-y-2">
               <button
                 onClick={() => navigate('phone-auth')}
                 className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 font-semibold cursor-pointer"
@@ -412,6 +412,18 @@ export const AuthView: React.FC = () => {
                 <Info className="w-3.5 h-3.5" />
                 <span>{isBengali ? 'মোবাইল ফোন ওটিপি (OTP) দিয়ে প্রবেশ করতে চান?' : 'Sign in using Mobile Phone OTP'}</span>
               </button>
+
+              <div>
+                <button
+                  id="btn-guest-explore"
+                  type="button"
+                  onClick={() => replaceView('home')}
+                  className="w-full py-2.5 rounded-xl bg-white dark:bg-[#17231E] hover:bg-gray-50 dark:hover:bg-white/5 border border-[#D2CEBE] dark:border-white/10 text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                >
+                  <span>🏪</span>
+                  <span>{isBengali ? 'পরে লগইন করুন • অতিথি হিসেবে বাজার ও দোকান দেখুন' : 'Continue as Guest • Explore Shops & Services'}</span>
+                </button>
+              </div>
             </div>
           </div>
         )}

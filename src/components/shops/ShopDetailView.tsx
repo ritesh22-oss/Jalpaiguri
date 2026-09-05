@@ -23,15 +23,19 @@ import {
 import { useNav } from '../../context/NavigationContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { Shop, Product } from '../../types';
+import { FALLBACK_JALPAIGURI_SHOPS } from '../../data/jalpaiguriShopsFallback';
 
 export const ShopDetailView: React.FC = () => {
   const { navParams, goBack, navigate } = useNav();
   const { language } = useLanguage();
   const shopId = navParams.shopId as string;
 
-  const [shop, setShop] = useState<Shop | null>(null);
+  const [shop, setShop] = useState<Shop | null>(() => {
+    return FALLBACK_JALPAIGURI_SHOPS.find(s => s.id === shopId) || null;
+  });
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'catalog' | 'info' | 'reviews'>('catalog');
   const [productSearch, setProductSearch] = useState('');
   const [selectedProductCategory, setSelectedProductCategory] = useState<string>('All');
@@ -40,26 +44,42 @@ export const ShopDetailView: React.FC = () => {
   useEffect(() => {
     const fetchShopAndProducts = async () => {
       try {
-        setLoading(true);
         if (!shopId) return;
 
         const [shopRes, prodRes] = await Promise.all([
-          fetch(`/api/shops/${shopId}`),
-          fetch(`/api/shops/${shopId}/products`)
+          fetch(`/api/shops/${shopId}`).catch(() => null),
+          fetch(`/api/shops/${shopId}/products`).catch(() => null)
         ]);
 
-        if (shopRes.ok) {
+        let foundShop: any = null;
+        let foundProducts: any[] = [];
+
+        if (shopRes && shopRes.ok) {
           const shopData = await shopRes.json();
-          setShop(shopData);
+          foundShop = shopData.shop ? { ...shopData.shop, ...shopData } : shopData;
+          if (shopData.products && Array.isArray(shopData.products) && shopData.products.length > 0) {
+            foundProducts = shopData.products;
+          }
         }
-        if (prodRes.ok) {
+        if (prodRes && prodRes.ok) {
           const prodData = await prodRes.json();
-          setProducts(prodData);
+          if (Array.isArray(prodData) && prodData.length > 0) {
+            foundProducts = prodData;
+          }
+        }
+
+        if (foundShop) {
+          setShop(foundShop);
+        } else if (!shop) {
+          const fallback = FALLBACK_JALPAIGURI_SHOPS.find(s => s.id === shopId);
+          if (fallback) setShop(fallback);
+        }
+
+        if (foundProducts.length > 0) {
+          setProducts(foundProducts);
         }
       } catch (err) {
         console.error('Error fetching shop detail:', err);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -110,21 +130,25 @@ export const ShopDetailView: React.FC = () => {
   });
 
   const handleShare = () => {
+    if (!shop) return;
+    const phone = shop.phone || (shop as any).ownerPhone || '';
     if (navigator.share) {
       navigator.share({
         title: `${shop.name} - Jalpaiguri Connect`,
-        text: `Check out ${shop.name} in ${shop.locality}, Jalpaiguri!`,
+        text: `Check out ${shop.name} in ${shop.locality}, Jalpaiguri! Contact: ${phone}`,
         url: window.location.href
       }).catch(() => {});
-    } else {
+    } else if (navigator.clipboard) {
       navigator.clipboard.writeText(window.location.href);
-      alert(language === 'bn' ? 'লিঙ্ক কপি করা হয়েছে!' : 'Shop link copied!');
+      setToastMessage(language === 'bn' ? 'লিঙ্ক কপি করা হয়েছে!' : 'Shop link copied to clipboard!');
+      setTimeout(() => setToastMessage(null), 3000);
     }
   };
 
   const handleProductOrder = (product: Product) => {
+    if (!shop) return;
     const text = `Nomoshkar ${shop.name}! I want to order/inquire about "${product.name}" (Price: ₹${product.price}/${product.unit}) which I saw on Jalpaiguri Connect. Is this available right now?`;
-    const waPhone = (shop.whatsappNumber || shop.phone).replace(/\D/g, '');
+    const waPhone = (shop.whatsappNumber || shop.phone || (shop as any).ownerPhone || '9832011094').replace(/\D/g, '');
     window.open(`https://wa.me/91${waPhone.slice(-10)}?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -154,6 +178,13 @@ export const ShopDetailView: React.FC = () => {
         </div>
       </div>
 
+      {toastMessage && (
+        <div className="mx-4 mt-2 bg-emerald-700 text-white text-xs font-bold py-1.5 px-3 rounded-xl shadow-md text-center flex items-center justify-center gap-2 animate-fade-in">
+          <CheckCircle2 className="w-3.5 h-3.5" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* Hero Banner Image */}
       <div className="relative h-52 w-full bg-gray-200 dark:bg-gray-800">
         <img
@@ -165,13 +196,13 @@ export const ShopDetailView: React.FC = () => {
 
         <div className="absolute bottom-4 left-4 right-4 text-white">
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            {shop.isFeatured && (
+            {(shop.isFeatured || (shop as any).featured) && (
               <span className="bg-amber-400 text-amber-950 font-black text-[10px] px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1">
                 <Sparkles className="w-2.5 h-2.5 fill-amber-950" />
                 <span>Featured</span>
               </span>
             )}
-            {shop.isVerified && (
+            {(shop.isVerified || (shop as any).status === 'verified') && (
               <span className="bg-emerald-600 text-white font-bold text-[10px] px-2 py-0.5 rounded-md flex items-center gap-1">
                 <CheckCircle2 className="w-2.5 h-2.5 text-emerald-200" />
                 <span>Verified Merchant</span>
@@ -187,9 +218,9 @@ export const ShopDetailView: React.FC = () => {
           <h1 className="text-xl font-black text-white leading-tight">
             {shop.name}
           </h1>
-          {shop.nameBengali && (
+          {(shop.nameBengali || (shop as any).nameBn) && (
             <p className="text-xs font-bold text-emerald-300">
-              {shop.nameBengali}
+              {shop.nameBengali || (shop as any).nameBn}
             </p>
           )}
         </div>
@@ -206,8 +237,8 @@ export const ShopDetailView: React.FC = () => {
 
             <div className="flex items-center gap-1 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 px-2.5 py-1 rounded-xl">
               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-              <span className="text-xs font-black text-[#11241C] dark:text-white">{shop.rating}</span>
-              <span className="text-[10px] text-[#73827B] dark:text-[#A2B3AA]">({shop.reviewCount} reviews)</span>
+              <span className="text-xs font-black text-[#11241C] dark:text-white">{shop.rating || 4.8}</span>
+              <span className="text-[10px] text-[#73827B] dark:text-[#A2B3AA]">({shop.reviewCount || 20} reviews)</span>
             </div>
           </div>
 
@@ -227,10 +258,12 @@ export const ShopDetailView: React.FC = () => {
             {/* Operating Hours */}
             <div className="flex items-center gap-2 text-[11px] font-semibold text-[#55685F] dark:text-[#A2B3AA] pt-1">
               <Clock className="w-4 h-4 text-[#063B2C] dark:text-emerald-400 shrink-0" />
-              <span>{shop.openingHours.open} to {shop.openingHours.close}</span>
-              {shop.openingHours.weeklyOff && (
+              <span>
+                {shop.openingHours?.open || (shop as any).openingTime || '08:00 AM'} to {shop.openingHours?.close || (shop as any).closingTime || '09:00 PM'}
+              </span>
+              {(shop.openingHours?.weeklyOff || (shop as any).weeklyOff) && (shop.openingHours?.weeklyOff !== 'None' && (shop as any).weeklyOff !== 'None') && (
                 <span className="text-rose-600 dark:text-rose-400 font-bold">
-                  (Closed: {shop.openingHours.weeklyOff})
+                  (Closed: {shop.openingHours?.weeklyOff || (shop as any).weeklyOff})
                 </span>
               )}
             </div>
@@ -238,7 +271,7 @@ export const ShopDetailView: React.FC = () => {
 
           {/* Delivery & UPI Badges */}
           <div className="pt-2 border-t border-[#F0ECE1] dark:border-white/10 flex items-center justify-between text-xs flex-wrap gap-2">
-            {shop.deliveryAvailable ? (
+            {(shop.deliveryAvailable ?? (shop as any).homeDelivery ?? true) ? (
               <div className="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300 font-bold bg-[#E6F4EA] dark:bg-emerald-950/60 px-2.5 py-1 rounded-xl">
                 <Truck className="w-3.5 h-3.5 text-emerald-600" />
                 <span>{language === 'bn' ? 'হোম ডেলিভারি উপলব্ধ' : 'Home Delivery Available'}</span>
@@ -263,7 +296,10 @@ export const ShopDetailView: React.FC = () => {
         <div className="grid grid-cols-3 gap-2">
           {/* Call */}
           <button
-            onClick={() => window.location.href = `tel:${shop.phone.replace(/\s+/g, '')}`}
+            onClick={() => {
+              const ph = shop.phone || (shop as any).ownerPhone || '+919832011094';
+              window.location.href = `tel:${ph.replace(/\s+/g, '')}`;
+            }}
             className="py-3 px-3 rounded-2xl bg-[#D2EBE0] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-300 font-bold text-xs flex flex-col items-center justify-center gap-1 hover:bg-[#C2E4D5] active:scale-95 transition-all cursor-pointer border border-emerald-200/50 dark:border-emerald-800/40"
           >
             <Phone className="w-4 h-4" />
@@ -274,7 +310,7 @@ export const ShopDetailView: React.FC = () => {
           <button
             onClick={() => {
               const text = `Nomoshkar ${shop.name}! I am contacting you from Jalpaiguri Connect app regarding your products.`;
-              const waPhone = (shop.whatsappNumber || shop.phone).replace(/\D/g, '');
+              const waPhone = (shop.whatsappNumber || shop.phone || (shop as any).ownerPhone || '9832011094').replace(/\D/g, '');
               window.open(`https://wa.me/91${waPhone.slice(-10)}?text=${encodeURIComponent(text)}`, '_blank');
             }}
             className="py-3 px-3 rounded-2xl bg-emerald-600 text-white font-bold text-xs flex flex-col items-center justify-center gap-1 hover:bg-emerald-700 active:scale-95 transition-all cursor-pointer shadow-xs"
