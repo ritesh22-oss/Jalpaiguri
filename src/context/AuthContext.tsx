@@ -8,7 +8,15 @@ import {
   User as FirebaseUser,
   RecaptchaVerifier,
   signInWithPhoneNumber,
-  ConfirmationResult
+  ConfirmationResult,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  updateProfile as updateFirebaseProfile,
+  updatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import {
@@ -16,8 +24,49 @@ import {
   getEnrolledFingerprint,
   clearEnrolledFingerprint,
   registerFingerprint,
-  verifyFingerprint
+  verifyFingerprint,
+  isBiometricLoginEnabled,
+  setBiometricLoginEnabled,
+  checkBiometricDeviceCapability,
+  BiometricDeviceCapability,
+  PRIMARY_FINGERPRINT_SIG
 } from '../lib/biometrics';
+
+function formatFirebaseAuthError(err: any): string {
+  if (!err) return 'An error occurred. Please try again.';
+  const code = err.code || '';
+  if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+    return 'Incorrect email or password.';
+  }
+  if (code === 'auth/too-many-requests') {
+    return 'Too many login attempts. Please try again later.';
+  }
+  if (code === 'auth/network-request-failed') {
+    return 'Unable to connect. Please check your internet connection.';
+  }
+  if (code === 'auth/email-already-in-use') {
+    return 'This email is already registered. Try logging in instead.';
+  }
+  if (code === 'auth/user-not-found') {
+    return 'No account found with this email.';
+  }
+  if (code === 'auth/weak-password') {
+    return 'Password should be at least 8 characters with a mix of characters.';
+  }
+  if (code === 'auth/invalid-email') {
+    return 'Please enter a valid email address.';
+  }
+  if (code === 'auth/requires-recent-login') {
+    return 'Please re-authenticate to perform this action.';
+  }
+  if (code === 'auth/popup-closed-by-user') {
+    return 'Sign-in popup was closed.';
+  }
+  if (code === 'auth/popup-blocked') {
+    return 'Sign-in popup was blocked by your browser. Please allow popups.';
+  }
+  return err.message || 'Authentication error. Please try again.';
+}
 
 // Global singleton instance for RecaptchaVerifier to prevent multiple instances and UI duplicates
 let globalRecaptchaVerifier: RecaptchaVerifier | null = null;
@@ -72,9 +121,19 @@ interface AuthContextType {
   setConfirmationResult: (cr: ConfirmationResult | null) => void;
   // Auth actions
   loginWithGoogle: (options?: { asAdmin?: boolean }) => Promise<{ success: boolean; isNewUser?: boolean; isAdmin?: boolean; message?: string }>;
+  loginWithEmail: (email: string, password: string, options?: { asAdmin?: boolean }) => Promise<{ success: boolean; isNewUser?: boolean; isAdmin?: boolean; message?: string }>;
+  registerWithEmail: (fullName: string, email: string, password: string) => Promise<{ success: boolean; needsVerification?: boolean; message?: string }>;
+  sendVerificationEmail: () => Promise<{ success: boolean; message?: string }>;
+  checkEmailVerified: () => Promise<{ verified: boolean; message?: string }>;
+  resetPassword: (email: string) => Promise<{ success: boolean; message?: string }>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; message?: string }>;
   enrolledFingerprint: EnrolledFingerprint | null;
   refreshEnrolledFingerprint: () => void;
+  biometricEnabled: boolean;
+  setBiometricEnabled: (enabled: boolean) => void;
   loginWithFingerprint: (scannedSignature?: string) => Promise<{ success: boolean; message?: string; isNewUser?: boolean }>;
+  loginWithBiometrics: () => Promise<{ success: boolean; isAdmin?: boolean; isNewUser?: boolean; message?: string }>;
+  checkDeviceBiometrics: () => Promise<BiometricDeviceCapability>;
   registerWithFingerprint: (name: string, location?: string) => Promise<{ success: boolean; message?: string }>;
   removeFingerprint: () => void;
   sendPhoneOtp: (phoneNumber: string) => Promise<{ success: boolean; otp?: string; message?: string }>;
@@ -117,9 +176,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [enrolledFingerprint, setEnrolledFingerprint] = useState<EnrolledFingerprint | null>(() => {
     return getEnrolledFingerprint();
   });
+  const [biometricEnabled, setBiometricEnabledState] = useState<boolean>(() => {
+    return isBiometricLoginEnabled();
+  });
+
+  const setBiometricEnabled = (enabled: boolean) => {
+    setBiometricLoginEnabled(enabled);
+    setBiometricEnabledState(enabled);
+  };
 
   const refreshEnrolledFingerprint = () => {
     setEnrolledFingerprint(getEnrolledFingerprint());
+    setBiometricEnabledState(isBiometricLoginEnabled());
+  };
+
+  const checkDeviceBiometrics = async (): Promise<BiometricDeviceCapability> => {
+    return await checkBiometricDeviceCapability();
   };
 
   const removeFingerprint = () => {
@@ -305,6 +377,338 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         msg = err.message;
       }
       return { success: false, message: msg };
+    }
+  };
+
+  // 1b. Email & Password Sign In
+  const loginWithEmail = async (
+    email: string,
+    password: string,
+    options?: { asAdmin?: boolean }
+  ): Promise<{ success: boolean; isNewUser?: boolean; isAdmin?: boolean; message?: string }> => {
+    setIsLoading(true);
+    try {
+      if (!isFirebaseConfigured || !auth) {
+        throw new Error('Firebase Auth is not initialized');
+      }
+
+      const trimmedEmail = email.trim();
+      const result = await signInWithEmailAndPassword(auth, trimmedEmail, password);
+      const fbUser = result.user;
+
+      if (fbUser) {
+        const isOfficialAdmin = isAuthorizedAdminEmail(fbUser.email);
+
+        // Strict Admin Security Check: Only riteshganguly0911@gmail.com gets admin access!
+        if (options?.asAdmin && !isOfficialAdmin) {
+          setIsLoading(false);
+          return {
+            success: false,
+            isAdmin: false,
+            message: 'Access Denied: Only verified municipal administrators can access the Admin portal. Standard accounts receive citizen privileges.'
+          };
+        }
+
+        const userDocRef = doc(db, 'users', fbUser.uid);
+        const userSnap = await getDoc(userDocRef);
+        const assignedRole: 'admin' | 'citizen' = isOfficialAdmin ? 'admin' : 'citizen';
+
+        if (userSnap.exists()) {
+          const profileData = userSnap.data() as UserProfile;
+          const updatedProfile: UserProfile = {
+            ...profileData,
+            role: assignedRole,
+            email: fbUser.email || profileData.email || '',
+            emailVerified: fbUser.emailVerified,
+            authMethod: 'email'
+          };
+          setUser(updatedProfile);
+          localStorage.setItem('jpg_user_profile', JSON.stringify(updatedProfile));
+          localStorage.setItem('jpg_has_onboarded', 'true');
+          setIsProfileComplete(Boolean(updatedProfile.name && updatedProfile.location));
+          setIsLoading(false);
+          return {
+            success: true,
+            isAdmin: isOfficialAdmin,
+            isNewUser: !profileData.name || !profileData.location
+          };
+        } else {
+          const newProfile: UserProfile = {
+            id: fbUser.uid,
+            name: fbUser.displayName || '',
+            email: fbUser.email || '',
+            phone: fbUser.phoneNumber || '',
+            bloodGroup: 'O+',
+            location: '',
+            role: assignedRole,
+            language: 'English',
+            isBloodDonor: true,
+            isVolunteer: false,
+            emailVerified: fbUser.emailVerified,
+            authMethod: 'email',
+            createdAt: new Date().toISOString()
+          };
+
+          try {
+            await setDoc(userDocRef, newProfile);
+          } catch (e) {
+            console.warn('Initial profile doc write note:', e);
+          }
+
+          setUser(newProfile);
+          localStorage.setItem('jpg_user_profile', JSON.stringify(newProfile));
+          localStorage.setItem('jpg_has_onboarded', 'true');
+          setIsProfileComplete(false);
+          setIsLoading(false);
+          return {
+            success: true,
+            isAdmin: isOfficialAdmin,
+            isNewUser: true
+          };
+        }
+      }
+      setIsLoading(false);
+      return { success: false, message: 'Authentication was cancelled.' };
+    } catch (err: any) {
+      setIsLoading(false);
+      console.warn('Email login error:', err);
+      return { success: false, message: formatFirebaseAuthError(err) };
+    }
+  };
+
+  // 1c. Email & Password Sign Up
+  const registerWithEmail = async (
+    fullName: string,
+    email: string,
+    password: string
+  ): Promise<{ success: boolean; needsVerification?: boolean; message?: string }> => {
+    setIsLoading(true);
+    try {
+      if (!isFirebaseConfigured || !auth) {
+        throw new Error('Firebase Auth is not initialized');
+      }
+
+      const trimmedName = fullName.trim();
+      const trimmedEmail = email.trim();
+
+      const cred = await createUserWithEmailAndPassword(auth, trimmedEmail, password);
+      const fbUser = cred.user;
+
+      // Update Firebase Profile displayName
+      try {
+        await updateFirebaseProfile(fbUser, { displayName: trimmedName });
+      } catch (pErr) {
+        console.warn('Profile name update note:', pErr);
+      }
+
+      // Send Firebase Email Verification
+      try {
+        await sendEmailVerification(fbUser);
+      } catch (vErr) {
+        console.warn('Verification email dispatch note:', vErr);
+      }
+
+      const isOfficialAdmin = isAuthorizedAdminEmail(fbUser.email);
+      const assignedRole: 'admin' | 'citizen' = isOfficialAdmin ? 'admin' : 'citizen';
+
+      const newProfile: UserProfile = {
+        id: fbUser.uid,
+        name: trimmedName,
+        email: trimmedEmail,
+        phone: '',
+        bloodGroup: 'O+',
+        location: '',
+        role: assignedRole,
+        language: 'English',
+        isBloodDonor: true,
+        isVolunteer: false,
+        emailVerified: fbUser.emailVerified,
+        authMethod: 'email',
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        await setDoc(doc(db, 'users', fbUser.uid), newProfile);
+      } catch (e) {
+        console.warn('Initial firestore write note:', e);
+      }
+
+      setUser(newProfile);
+      localStorage.setItem('jpg_user_profile', JSON.stringify(newProfile));
+      localStorage.setItem('jpg_has_onboarded', 'true');
+      setIsProfileComplete(false);
+      setIsLoading(false);
+      return {
+        success: true,
+        needsVerification: !fbUser.emailVerified,
+        message: 'Account created! A verification link has been sent to your email.'
+      };
+    } catch (err: any) {
+      setIsLoading(false);
+      console.warn('Email registration error:', err);
+      return { success: false, message: formatFirebaseAuthError(err) };
+    }
+  };
+
+  // 1d. Resend Email Verification
+  const sendVerificationEmail = async (): Promise<{ success: boolean; message?: string }> => {
+    try {
+      if (!auth || !auth.currentUser) {
+        return { success: false, message: 'No active session found.' };
+      }
+      await sendEmailVerification(auth.currentUser);
+      return { success: true, message: 'Verification email sent! Please check your inbox.' };
+    } catch (err: any) {
+      return { success: false, message: formatFirebaseAuthError(err) };
+    }
+  };
+
+  // 1e. Check Email Verification Status
+  const checkEmailVerified = async (): Promise<{ verified: boolean; message?: string }> => {
+    try {
+      if (!auth || !auth.currentUser) {
+        return { verified: false, message: 'No active user found.' };
+      }
+      await auth.currentUser.reload();
+      const verified = Boolean(auth.currentUser.emailVerified);
+      if (verified && user) {
+        const updated = { ...user, emailVerified: true };
+        setUser(updated);
+        localStorage.setItem('jpg_user_profile', JSON.stringify(updated));
+        if (isFirebaseConfigured && db && user.id) {
+          try {
+            await updateDoc(doc(db, 'users', user.id), { emailVerified: true });
+          } catch (_) {}
+        }
+      }
+      return {
+        verified,
+        message: verified ? 'Email verified successfully!' : 'Email not verified yet. Please click the link in your email.'
+      };
+    } catch (err: any) {
+      return { verified: false, message: formatFirebaseAuthError(err) };
+    }
+  };
+
+  // 1f. Send Password Reset Email
+  const resetPassword = async (email: string): Promise<{ success: boolean; message?: string }> => {
+    try {
+      if (!isFirebaseConfigured || !auth) {
+        throw new Error('Firebase Auth is not initialized');
+      }
+      await sendPasswordResetEmail(auth, email.trim());
+      return {
+        success: true,
+        message: 'Password reset link sent to your email. Please check your inbox.'
+      };
+    } catch (err: any) {
+      return { success: false, message: formatFirebaseAuthError(err) };
+    }
+  };
+
+  // 1g. Change Password
+  const changePassword = async (currentPassword: string, newPassword: string): Promise<{ success: boolean; message?: string }> => {
+    try {
+      if (!auth || !auth.currentUser || !auth.currentUser.email) {
+        return { success: false, message: 'You must be logged in to change your password.' };
+      }
+      const credential = EmailAuthProvider.credential(auth.currentUser.email, currentPassword);
+      await reauthenticateWithCredential(auth.currentUser, credential);
+      await updatePassword(auth.currentUser, newPassword);
+      return { success: true, message: 'Password updated successfully!' };
+    } catch (err: any) {
+      return { success: false, message: formatFirebaseAuthError(err) };
+    }
+  };
+
+  // 1h. Biometric Login with WebAuthn & strict security verification
+  const loginWithBiometrics = async (): Promise<{ success: boolean; isAdmin?: boolean; isNewUser?: boolean; message?: string }> => {
+    setIsLoading(true);
+    try {
+      const capability = await checkBiometricDeviceCapability();
+      if (!capability.supported) {
+        setIsLoading(false);
+        return { success: false, message: 'Biometric authentication is not supported on this device.' };
+      }
+      if (!capability.enrolled) {
+        setIsLoading(false);
+        return { success: false, message: 'No biometric credentials enrolled on this device. Please log in with Email, Google, or Phone first.' };
+      }
+
+      const res = await verifyFingerprint(PRIMARY_FINGERPRINT_SIG);
+      if (!res.success || !res.enrolled) {
+        setIsLoading(false);
+        return { success: false, message: res.message || 'Biometric verification failed.' };
+      }
+
+      setEnrolledFingerprint(res.enrolled);
+
+      // Restore user profile
+      let existingProfile: UserProfile | null = null;
+      try {
+        const raw = localStorage.getItem('jpg_user_profile');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && (parsed.id === res.enrolled.userId || parsed.name === res.enrolled.userName)) {
+            existingProfile = parsed;
+          }
+        }
+      } catch (_) {}
+
+      if (!existingProfile && isFirebaseConfigured && db) {
+        try {
+          const snap = await getDoc(doc(db, 'users', res.enrolled.userId));
+          if (snap.exists()) {
+            existingProfile = snap.data() as UserProfile;
+          }
+        } catch (_) {}
+      }
+
+      // Security check: Only riteshganguly0911@gmail.com can be Admin! Biometrics never auto-grants admin.
+      const isOfficialAdmin = isAuthorizedAdminEmail(res.enrolled.userEmail || existingProfile?.email);
+      const assignedRole: 'admin' | 'citizen' = isOfficialAdmin ? 'admin' : 'citizen';
+
+      if (!existingProfile) {
+        existingProfile = {
+          id: res.enrolled.userId,
+          name: res.enrolled.userName,
+          phone: '',
+          email: res.enrolled.userEmail || '',
+          bloodGroup: 'O+',
+          location: 'Kadamtala, Jalpaiguri',
+          role: assignedRole,
+          language: 'English',
+          isBloodDonor: true,
+          isVolunteer: false,
+          fingerprintEnrolled: true,
+          fingerprintCredentialId: res.enrolled.credentialId,
+          biometricEnabled: true,
+          authMethod: 'biometric',
+          createdAt: new Date().toISOString()
+        };
+      } else {
+        existingProfile = {
+          ...existingProfile,
+          role: assignedRole,
+          biometricEnabled: true
+        };
+      }
+
+      setUser(existingProfile);
+      localStorage.setItem('jpg_user_profile', JSON.stringify(existingProfile));
+      localStorage.setItem('jpg_has_onboarded', 'true');
+      setIsProfileComplete(Boolean(existingProfile.name && existingProfile.location));
+
+      setIsLoading(false);
+      return {
+        success: true,
+        isAdmin: isOfficialAdmin,
+        isNewUser: !existingProfile.name || !existingProfile.location,
+        message: `Welcome back, ${res.enrolled.userName}!`
+      };
+    } catch (e: any) {
+      setIsLoading(false);
+      return { success: false, message: e.message || 'Biometric authentication failed.' };
     }
   };
 
@@ -742,9 +1146,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         confirmationResult,
         setConfirmationResult,
         loginWithGoogle,
+        loginWithEmail,
+        registerWithEmail,
+        sendVerificationEmail,
+        checkEmailVerified,
+        resetPassword,
+        changePassword,
         enrolledFingerprint,
         refreshEnrolledFingerprint,
+        biometricEnabled,
+        setBiometricEnabled,
         loginWithFingerprint,
+        loginWithBiometrics,
+        checkDeviceBiometrics,
         registerWithFingerprint,
         removeFingerprint,
         sendPhoneOtp,

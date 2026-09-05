@@ -22,7 +22,11 @@ import {
   Check,
   ChevronRight,
   BarChart3,
-  QrCode
+  QrCode,
+  Save,
+  Camera,
+  Truck,
+  ExternalLink
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
@@ -37,7 +41,25 @@ export const MerchantDashboardView: React.FC = () => {
   const [shop, setShop] = useState<Shop | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'products' | 'analytics' | 'subscription'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'profile' | 'subscription'>('products');
+
+  // Edit Shop Profile State (for Complete Later)
+  const [editPhotoUrl, setEditPhotoUrl] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editOpenTime, setEditOpenTime] = useState('08:00 AM');
+  const [editCloseTime, setEditCloseTime] = useState('09:30 PM');
+  const [editWeeklyOff, setEditWeeklyOff] = useState('None');
+  const [editDeliveryAvailable, setEditDeliveryAvailable] = useState(true);
+  const [editDeliveryRadius, setEditDeliveryRadius] = useState('3.5');
+  const [editMinOrder, setEditMinOrder] = useState('200');
+  const [editUpiId, setEditUpiId] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editWhatsapp, setEditWhatsapp] = useState('');
+  const [editAddress, setEditAddress] = useState('');
+  const [editLandmark, setEditLandmark] = useState('');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileSaveSuccess, setProfileSaveSuccess] = useState(false);
+  const [isGeneratingAiBio, setIsGeneratingAiBio] = useState(false);
 
   // New product form modal
   const [showAddProductModal, setShowAddProductModal] = useState(false);
@@ -90,6 +112,21 @@ export const MerchantDashboardView: React.FC = () => {
 
       if (targetShop) {
         setShop(targetShop);
+        // Initialize profile edit states
+        setEditPhotoUrl(targetShop.photoUrl || '');
+        setEditDescription(targetShop.description || '');
+        setEditOpenTime(targetShop.openingHours?.open || '08:00 AM');
+        setEditCloseTime(targetShop.openingHours?.close || '09:30 PM');
+        setEditWeeklyOff(targetShop.openingHours?.weeklyOff || 'None');
+        setEditDeliveryAvailable(Boolean(targetShop.deliveryAvailable));
+        setEditDeliveryRadius(String(targetShop.deliveryRadiusKm || '3.5'));
+        setEditMinOrder(String(targetShop.minOrderAmount || '200'));
+        setEditUpiId(targetShop.upiId || '');
+        setEditPhone(targetShop.phone || '');
+        setEditWhatsapp(targetShop.whatsappNumber || targetShop.phone || '');
+        setEditAddress(targetShop.address || '');
+        setEditLandmark(targetShop.landmark || '');
+
         // Fetch products
         const pRes = await fetch(`/api/shops/${targetShop.id}/products`);
         if (pRes.ok) {
@@ -270,6 +307,91 @@ export const MerchantDashboardView: React.FC = () => {
     }
   };
 
+  // Save Shop Profile Changes (Complete the rest later)
+  const handleSaveShopProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!shop) return;
+    setIsSavingProfile(true);
+    setProfileSaveSuccess(false);
+
+    try {
+      const updatePayload = {
+        photoUrl: editPhotoUrl.trim() || shop.photoUrl,
+        description: editDescription.trim(),
+        openingHours: {
+          open: editOpenTime || '08:00 AM',
+          close: editCloseTime || '09:30 PM',
+          weeklyOff: editWeeklyOff !== 'None' ? editWeeklyOff : undefined
+        },
+        deliveryAvailable: editDeliveryAvailable,
+        deliveryRadiusKm: editDeliveryAvailable ? parseFloat(editDeliveryRadius) || 3.5 : 0,
+        minOrderAmount: editDeliveryAvailable ? parseFloat(editMinOrder) || 0 : 0,
+        upiId: editUpiId.trim() || undefined,
+        phone: editPhone.trim() || shop.phone,
+        whatsappNumber: editWhatsapp.trim() || editPhone.trim() || shop.whatsappNumber,
+        address: editAddress.trim() || shop.address,
+        landmark: editLandmark.trim() || shop.landmark,
+        ownerId: shop.ownerId
+      };
+
+      const res = await fetch(`/api/shops/${shop.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': user?.id || firebaseUser?.uid || shop.ownerId
+        },
+        body: JSON.stringify(updatePayload)
+      });
+
+      if (res.ok) {
+        const updated = await res.json();
+        setShop(updated);
+        setProfileSaveSuccess(true);
+        setTimeout(() => setProfileSaveSuccess(false), 3500);
+      } else {
+        alert('Failed to update shop details. Please try again.');
+      }
+    } catch (err) {
+      console.error('Error saving shop profile:', err);
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  // AI Auto-generate Shop Bio
+  const handleGenerateAiBioInDashboard = async () => {
+    if (!shop) return;
+    setIsGeneratingAiBio(true);
+    try {
+      const res = await fetch('/api/ai/generate-shop-description', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          shopName: shop.name,
+          category: shop.category,
+          locality: shop.locality,
+          subcategories: shop.subcategories || []
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.description) {
+          setEditDescription(data.description);
+        }
+      } else {
+        setEditDescription(
+          `Welcome to ${shop.name}! Trusted ${shop.category.toLowerCase()} store in ${shop.locality}, Jalpaiguri. Offering authentic local goods, dedicated customer care, and quick service for all neighborhood families.`
+        );
+      }
+    } catch {
+      setEditDescription(
+        `Welcome to ${shop.name}! Trusted ${shop.category.toLowerCase()} store in ${shop.locality}, Jalpaiguri. Offering authentic local goods, dedicated customer care, and quick service for all neighborhood families.`
+      );
+    } finally {
+      setIsGeneratingAiBio(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] flex flex-col items-center justify-center p-6 space-y-3">
@@ -406,7 +528,19 @@ export const MerchantDashboardView: React.FC = () => {
             }`}
           >
             <Package className="w-4 h-4" />
-            <span>Product Catalog ({products.length})</span>
+            <span>Products ({products.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('profile')}
+            className={`flex-1 py-2.5 text-center transition-all cursor-pointer flex items-center justify-center gap-1.5 border-b-2 ${
+              activeTab === 'profile'
+                ? 'border-[#063B2C] text-[#063B2C] dark:border-emerald-400 dark:text-emerald-400 font-black'
+                : 'border-transparent text-[#55685F] dark:text-[#A2B3AA]'
+            }`}
+          >
+            <Store className="w-4 h-4" />
+            <span>Profile & Hours</span>
           </button>
 
           <button
@@ -418,7 +552,7 @@ export const MerchantDashboardView: React.FC = () => {
             }`}
           >
             <CreditCard className="w-4 h-4" />
-            <span>Pro Plan & Badge</span>
+            <span>Pro Plan</span>
           </button>
         </div>
 
@@ -578,6 +712,243 @@ export const MerchantDashboardView: React.FC = () => {
               </div>
             )}
           </div>
+        )}
+
+        {/* TAB 3: COMPLETE PROFILE & STORE SETTINGS */}
+        {activeTab === 'profile' && (
+          <form onSubmit={handleSaveShopProfile} className="space-y-4">
+            {/* Completion Status & View Live Store */}
+            <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold text-gray-500 block uppercase">Shop Status</span>
+                  <h3 className="text-sm font-black text-[#11241C] dark:text-white">
+                    {shop.name}
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('shop-detail', { shopId: shop.id })}
+                  className="px-3 py-1.5 rounded-xl bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#063B2C] dark:text-emerald-400 flex items-center gap-1 hover:bg-gray-100 cursor-pointer"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>View in App</span>
+                </button>
+              </div>
+
+              {/* Progress Bar */}
+              <div>
+                <div className="flex items-center justify-between text-[11px] font-bold text-gray-500 mb-1">
+                  <span>Profile Strength</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-black">
+                    {shop.photoUrl && shop.description ? '95%' : '65%'}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-100 dark:bg-white/10 h-2 rounded-full overflow-hidden">
+                  <div
+                    className="bg-[#063B2C] dark:bg-emerald-500 h-full rounded-full transition-all duration-500"
+                    style={{ width: shop.photoUrl && shop.description ? '95%' : '65%' }}
+                  />
+                </div>
+              </div>
+
+              {profileSaveSuccess && (
+                <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/40 rounded-xl text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>Shop profile updated successfully!</span>
+                </div>
+              )}
+            </div>
+
+            {/* Photos & Storefront Image */}
+            <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+              <div className="flex items-center gap-2">
+                <Camera className="w-4 h-4 text-[#063B2C] dark:text-emerald-400" />
+                <h4 className="text-xs font-black text-[#11241C] dark:text-white">
+                  Storefront Photo (দোকানের ছবি)
+                </h4>
+              </div>
+
+              {editPhotoUrl && (
+                <div className="relative rounded-2xl overflow-hidden h-32 border border-gray-200 dark:border-white/10">
+                  <img
+                    src={editPhotoUrl}
+                    alt={shop.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-300 mb-1">
+                  Photo URL
+                </label>
+                <input
+                  type="url"
+                  value={editPhotoUrl}
+                  onChange={(e) => setEditPhotoUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full px-3 py-2 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl text-xs font-semibold text-[#11241C] dark:text-white focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Description & AI Auto-Write */}
+            <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-black text-[#11241C] dark:text-white">
+                  Shop Bio / Description (পরিচিতি)
+                </h4>
+                <button
+                  type="button"
+                  onClick={handleGenerateAiBioInDashboard}
+                  disabled={isGeneratingAiBio}
+                  className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-[#E6F4EA] dark:bg-emerald-950/70 hover:bg-[#D5EADB] px-2.5 py-1 rounded-lg border border-emerald-300/50 flex items-center gap-1 cursor-pointer"
+                >
+                  {isGeneratingAiBio ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      <span>Writing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3 h-3" />
+                      <span>AI Rewrite</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <textarea
+                rows={3}
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Describe your specialties, freshness guarantee, or famous offerings in Jalpaiguri..."
+                className="w-full px-3 py-2 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl text-xs font-semibold text-[#11241C] dark:text-white focus:outline-none"
+              />
+            </div>
+
+            {/* Operating Hours & Days */}
+            <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-[#063B2C] dark:text-emerald-400" />
+                <h4 className="text-xs font-black text-[#11241C] dark:text-white">
+                  Operating Hours & Weekly Off
+                </h4>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-500 mb-0.5">Opens At</label>
+                  <input
+                    type="text"
+                    value={editOpenTime}
+                    onChange={(e) => setEditOpenTime(e.target.value)}
+                    className="w-full px-2.5 py-2 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-bold text-[#11241C] dark:text-white focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-500 mb-0.5">Closes At</label>
+                  <input
+                    type="text"
+                    value={editCloseTime}
+                    onChange={(e) => setEditCloseTime(e.target.value)}
+                    className="w-full px-2.5 py-2 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-bold text-[#11241C] dark:text-white focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-500 mb-0.5">Weekly Off Day</label>
+                <select
+                  value={editWeeklyOff}
+                  onChange={(e) => setEditWeeklyOff(e.target.value)}
+                  className="w-full px-2.5 py-2 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl text-xs font-bold text-[#11241C] dark:text-white focus:outline-none"
+                >
+                  <option value="None">None (Open 7 Days)</option>
+                  <option value="Sunday">Sunday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Delivery & UPI */}
+            <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+              <div className="flex items-center gap-2">
+                <Truck className="w-4 h-4 text-[#063B2C] dark:text-emerald-400" />
+                <h4 className="text-xs font-black text-[#11241C] dark:text-white">
+                  Delivery & Payments
+                </h4>
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 bg-[#FAF8F5] dark:bg-white/5 rounded-xl border border-gray-200/50 dark:border-white/10">
+                <span className="text-xs font-bold text-[#11241C] dark:text-white">Home Delivery Available</span>
+                <input
+                  type="checkbox"
+                  checked={editDeliveryAvailable}
+                  onChange={(e) => setEditDeliveryAvailable(e.target.checked)}
+                  className="w-4 h-4 accent-[#063B2C]"
+                />
+              </div>
+
+              {editDeliveryAvailable && (
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-500 mb-0.5">Max Radius (km)</label>
+                    <input
+                      type="text"
+                      value={editDeliveryRadius}
+                      onChange={(e) => setEditDeliveryRadius(e.target.value)}
+                      className="w-full px-2.5 py-2 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-bold text-[#11241C] dark:text-white focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-500 mb-0.5">Min Order (₹)</label>
+                    <input
+                      type="text"
+                      value={editMinOrder}
+                      onChange={(e) => setEditMinOrder(e.target.value)}
+                      className="w-full px-2.5 py-2 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-bold text-[#11241C] dark:text-white focus:outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-300 mb-0.5">
+                  Merchant UPI ID (for QR payment)
+                </label>
+                <input
+                  type="text"
+                  value={editUpiId}
+                  onChange={(e) => setEditUpiId(e.target.value)}
+                  placeholder="e.g. 9832012345@okaxis"
+                  className="w-full px-3 py-2 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl text-xs font-semibold text-[#11241C] dark:text-white focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <button
+              type="submit"
+              disabled={isSavingProfile}
+              className="w-full py-3 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] text-white text-xs font-black shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition-all"
+            >
+              {isSavingProfile ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Saving Profile...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  <span>Save Profile Updates</span>
+                </>
+              )}
+            </button>
+          </form>
         )}
       </div>
 

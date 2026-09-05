@@ -33,7 +33,9 @@ import {
   Navigation,
   Loader2,
   RefreshCw,
-  Database
+  Database,
+  Store,
+  ShoppingBag
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNav } from '../../context/NavigationContext';
@@ -447,6 +449,48 @@ export const ProfileView: React.FC = () => {
                 </h3>
                 <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">
                   {isBengali ? 'ইলেকট্রিশিয়ান, প্লাম্বার বা কারিগর হিসেবে নিবন্ধন' : 'Register as electrician, plumber, etc.'}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
+          </div>
+
+          {/* Shop Owner & Merchant Platform */}
+          <div
+            onClick={() => navigate('merchant-dashboard')}
+            className="p-4 flex items-center justify-between hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] cursor-pointer transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#FFE4E6] dark:bg-rose-950/40 text-[#BE123C] dark:text-rose-300 flex items-center justify-center">
+                <Store className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">
+                  {isBengali ? 'দোকানদার প্ল্যাটফর্ম ও মার্চেন্ট হাব' : 'Shop Owner Platform & Merchant Hub'}
+                </h3>
+                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">
+                  {isBengali ? 'দোকান পরিচালনা, পণ্য ক্যাটালগ বা নতুন দোকান যোগ করুন' : 'Manage your shop catalog or register new shop'}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
+          </div>
+
+          {/* Jalpaiguri Local Marketplace */}
+          <div
+            onClick={() => navigate('shop-marketplace')}
+            className="p-4 flex items-center justify-between hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] cursor-pointer transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#E6F4EA] dark:bg-[#1C4532] text-[#063B2C] dark:text-[#4ECCA3] flex items-center justify-center">
+                <ShoppingBag className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">
+                  {isBengali ? 'জলপাইগুড়ি স্থানীয় বাজার ও দোকান' : 'Jalpaiguri Local Marketplace'}
+                </h3>
+                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">
+                  {isBengali ? '৩৪+ স্থানীয় দোকান, পণ্য অনুসন্ধান ও সরাসরি হোয়াটসঅ্যাপ' : '34+ verified local shops, product search & WhatsApp'}
                 </p>
               </div>
             </div>

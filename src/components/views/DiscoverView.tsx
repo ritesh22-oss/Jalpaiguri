@@ -22,7 +22,9 @@ import {
   PhoneCall,
   Pill,
   ArrowRight,
-  Globe
+  Globe,
+  ShoppingBag,
+  PackageSearch
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useApp } from '../../context/AppContext';
@@ -128,6 +130,24 @@ export const DiscoverView: React.FC = () => {
       title: isBengali ? 'জীবিকা ও ব্যবসা-বাণিজ্য' : 'Livelihood & Commerce',
       items: [
         {
+          name: isBengali ? 'জলপাইগুড়ি স্থানীয় বাজার ও দোকান' : 'Local Marketplace & Shops',
+          count: isBengali ? '৩৪টি নিবন্ধিত দোকান ও পণ্য' : '34 verified shops & items',
+          view: 'shop-marketplace' as const,
+          icon: ShoppingBag
+        },
+        {
+          name: isBengali ? 'স্মার্ট পণ্য সন্ধান (কোথায় পাওয়া যাবে)' : 'Smart Product Finder',
+          count: isBengali ? 'পণ্যের দাম ও প্রাপ্যতা' : 'Live price & store locator',
+          view: 'smart-shopping-search' as const,
+          icon: PackageSearch
+        },
+        {
+          name: isBengali ? 'দোকানদার প্ল্যাটফর্ম ও মার্চেন্ট হাব' : 'Shop Owner & Merchant Hub',
+          count: isBengali ? 'দোকান পরিচালনা ও নতুন দোকান যোগ' : 'Manage catalog or add shop',
+          view: 'merchant-dashboard' as const,
+          icon: Store
+        },
+        {
           name: isBengali ? 'স্থানীয় চাকরি ও নিয়োগ' : 'Local Jobs & Vacancies',
           count: isBengali ? '১৫টি পদ খালি' : '15 open listings',
           view: 'jobs' as const,
@@ -138,12 +158,6 @@ export const DiscoverView: React.FC = () => {
           count: isBengali ? 'স্টেশন ও দিনবাজার রুট' : 'Station & Dinbazar routes',
           view: 'vehicle' as const,
           icon: Car
-        },
-        {
-          name: isBengali ? 'স্থানীয় ব্যবসায়ের তালিকা' : 'Local Business Directory',
-          count: isBengali ? '৩৪টি নিবন্ধিত দোকান' : '34 registered shops',
-          view: 'businesses' as const,
-          icon: Store
         },
         {
           name: isBengali ? 'বাড়ি ও রুম ভাড়া' : 'House Rentals & Stays',
