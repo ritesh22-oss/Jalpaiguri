@@ -55,7 +55,7 @@ export const WorkerRequestModalView: React.FC = () => {
     return (
       <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] p-6 flex flex-col justify-between max-w-md mx-auto select-none transition-colors">
         <div className="pt-16 text-center space-y-4">
-          <div className="w-20 h-20 bg-[#E6F4EA] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-400 border border-transparent dark:border-emerald-800/40 rounded-full flex items-center justify-center mx-auto shadow-sm">
+          <div className="w-20 h-20 bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-400 border border-transparent dark:border-blue-800/40 rounded-full flex items-center justify-center mx-auto shadow-sm">
             <CheckCircle2 className="w-10 h-10" />
           </div>
           <h2 className="text-2xl font-extrabold text-[#11241C] dark:text-white tracking-tight">
@@ -69,7 +69,7 @@ export const WorkerRequestModalView: React.FC = () => {
         <div className="space-y-3 pb-6">
           <button
             onClick={() => navigate('chat', { recipientId: worker.id, recipientName: worker.name, profession: worker.profession })}
-            className="w-full py-4 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-sm shadow-md hover:bg-[#084D3A] cursor-pointer"
+            className="w-full py-4 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-sm shadow-md hover:bg-[#084D3A] cursor-pointer"
           >
             Message {worker.name}
           </button>
@@ -108,7 +108,7 @@ export const WorkerRequestModalView: React.FC = () => {
           />
           <div>
             <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white">{worker.name}</h3>
-            <p className="text-xs font-semibold text-[#063B2C] dark:text-emerald-400">{worker.profession}</p>
+            <p className="text-xs font-semibold text-[#007AFF] dark:text-blue-400">{worker.profession}</p>
             <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA] mt-0.5">{worker.startingPrice}</p>
           </div>
         </div>
@@ -141,7 +141,7 @@ export const WorkerRequestModalView: React.FC = () => {
             value={problemDescription}
             onChange={(e) => setProblemDescription(e.target.value)}
             placeholder="e.g. Main switch tripping repeatedly, ceiling fan making noise in bedroom..."
-            className="w-full bg-white dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 rounded-2xl p-3.5 text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-[#8C9B93] dark:placeholder:text-[#A2B3AA] focus:outline-none focus:border-[#063B2C] dark:focus:border-emerald-500 resize-none"
+            className="w-full bg-white dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 rounded-2xl p-3.5 text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-[#8C9B93] dark:placeholder:text-[#A2B3AA] focus:outline-none focus:border-[#007AFF] dark:focus:border-blue-500 resize-none"
           ></textarea>
         </div>
 
@@ -151,7 +151,7 @@ export const WorkerRequestModalView: React.FC = () => {
             Your Service Address in Jalpaiguri
           </label>
           <div className="flex items-center gap-2 bg-white dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 rounded-2xl p-3">
-            <MapPin className="w-4 h-4 text-[#063B2C] dark:text-emerald-400 shrink-0" />
+            <MapPin className="w-4 h-4 text-[#007AFF] dark:text-blue-400 shrink-0" />
             <input
               type="text"
               value={address}
@@ -164,7 +164,7 @@ export const WorkerRequestModalView: React.FC = () => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-4 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-sm shadow-md hover:bg-[#084D3A] active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+          className="w-full py-4 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-sm shadow-md hover:bg-[#084D3A] active:scale-98 transition-all cursor-pointer disabled:opacity-50"
         >
           {isSubmitting ? 'Confirming with Provider…' : 'Submit Service Request'}
         </button>

@@ -79,10 +79,10 @@ const STATUS_CONFIG: Record<
   },
   'Resolved': {
     label: 'Resolved',
-    bg: 'bg-emerald-50 border-emerald-200',
-    text: 'text-emerald-700',
-    darkBg: 'dark:bg-emerald-950/60 dark:border-emerald-800/40',
-    darkText: 'dark:text-emerald-400',
+    bg: 'bg-blue-50 border-blue-200',
+    text: 'text-blue-700',
+    darkBg: 'dark:bg-blue-950/60 dark:border-blue-800/40',
+    darkText: 'dark:text-blue-400',
     icon: CheckCircle2
   },
   'Closed': {
@@ -149,7 +149,7 @@ export const ReportDetailsModal: React.FC<ReportDetailsModalProps> = ({
     if (navigator.share) {
       navigator.share({
         title: `Civic Report: ${report.category} (${report.id})`,
-        text: `Check civic report ${report.id} at ${report.location} on Jalpaiguri Connect`,
+        text: `Check civic report ${report.id} at ${report.location} on MYJPG`,
         url: window.location.href
       }).catch(() => {});
     } else {
@@ -160,7 +160,7 @@ export const ReportDetailsModal: React.FC<ReportDetailsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/65 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-[#16241F] w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-[#E4DFD3] dark:border-white/10 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+      <div className="bg-white dark:bg-[#0F172A] w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-[#E4DFD3] dark:border-white/10 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="p-4 border-b border-[#E4DFD3] dark:border-white/10 flex items-center justify-between">
           <div>
@@ -237,7 +237,7 @@ export const ReportDetailsModal: React.FC<ReportDetailsModalProps> = ({
               "{report.description}"
             </p>
             {report.aiAssisted && (
-              <span className="inline-block mt-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+              <span className="inline-block mt-1 text-[10px] font-semibold text-blue-700 dark:text-blue-400">
                 ✨ Enhanced with Jalpaigi AI
               </span>
             )}
@@ -246,7 +246,7 @@ export const ReportDetailsModal: React.FC<ReportDetailsModalProps> = ({
           {/* Location & Details Card */}
           <div className="p-3.5 bg-white dark:bg-[#14231D] rounded-2xl border border-[#E4DFD3] dark:border-white/10 space-y-2">
             <div className="flex items-start gap-2.5">
-              <MapPin className="w-4 h-4 text-[#063B2C] dark:text-emerald-400 shrink-0 mt-0.5" />
+              <MapPin className="w-4 h-4 text-[#007AFF] dark:text-blue-400 shrink-0 mt-0.5" />
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-bold text-[#11241C] dark:text-white">
                   {report.location}
@@ -279,7 +279,7 @@ export const ReportDetailsModal: React.FC<ReportDetailsModalProps> = ({
                     <div
                       className={`absolute -left-[23px] top-0.5 w-4 h-4 rounded-full border-2 border-white dark:border-[#14231D] flex items-center justify-center ${
                         step.done
-                          ? 'bg-[#063B2C] dark:bg-emerald-500 text-white'
+                          ? 'bg-[#007AFF] dark:bg-blue-500 text-white'
                           : 'bg-[#D2CEBE] dark:bg-gray-600 text-transparent'
                       }`}
                     >
@@ -305,11 +305,11 @@ export const ReportDetailsModal: React.FC<ReportDetailsModalProps> = ({
 
           {/* Official Municipality Response if present */}
           {report.officialResponse && (
-            <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 rounded-2xl space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 flex items-center gap-1">
+            <div className="p-3.5 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/40 rounded-2xl space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-800 dark:text-blue-300 flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5" /> Official Municipality Response
               </span>
-              <p className="text-xs text-emerald-900 dark:text-emerald-200 font-medium">
+              <p className="text-xs text-blue-900 dark:text-blue-200 font-medium">
                 {report.officialResponse}
               </p>
             </div>
@@ -327,16 +327,16 @@ export const ReportDetailsModal: React.FC<ReportDetailsModalProps> = ({
             type="button"
             id={`btn-upvote-report-${report.id}`}
             onClick={() => upvoteCivicReport(report.id)}
-            className="flex-1 py-3 rounded-xl bg-white dark:bg-[#16241F] border border-[#D2CEBE] dark:border-white/10 text-xs font-bold text-[#11241C] dark:text-white hover:bg-[#F2EFE8] dark:hover:bg-[#1C2C24] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+            className="flex-1 py-3 rounded-xl bg-white dark:bg-[#0F172A] border border-[#D2CEBE] dark:border-white/10 text-xs font-bold text-[#11241C] dark:text-white hover:bg-[#F2EFE8] dark:hover:bg-[#1C2C24] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
           >
-            <ThumbsUp className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400" />
+            <ThumbsUp className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400" />
             <span>Escalate Priority ({report.upvotes || 1})</span>
           </button>
 
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-3 rounded-xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] text-white text-xs font-bold transition-colors text-center cursor-pointer"
+            className="flex-1 py-3 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-bold transition-colors text-center cursor-pointer"
           >
             Close Details
           </button>

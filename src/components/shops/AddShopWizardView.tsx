@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 import {
   ArrowLeft,
   Store,
@@ -410,27 +412,30 @@ export const AddShopWizardView: React.FC = () => {
         photoUrl: safePhoto,
         rating: 5.0,
         reviewCount: 1,
-        isVerified: false
+        isVerified: false,
+        subscription: {
+          plan: 'free',
+          status: 'trial',
+          trialStartedAt: new Date().toISOString(),
+          trialEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          billingCycle: 'monthly',
+        }
       };
 
-      const res = await fetch('/api/shops', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (res.ok) {
-        const createdShop = await res.json();
+      try {
+        const shopsRef = collection(db, 'shops');
+        const docRef = await addDoc(shopsRef, payload);
+        const createdShop = { id: docRef.id, ...payload };
+        
         // Clear draft
         try {
           localStorage.removeItem(DRAFT_STORAGE_KEY);
-          localStorage.setItem('jpg_current_shop_id', createdShop.id);
+          localStorage.setItem('jpg_current_shop_id', docRef.id);
         } catch {}
 
         setCreatedShopResult(createdShop);
-      } else {
-        const errData = await res.json();
-        setErrorMessage(errData.error || 'Failed to register shop. Please check all fields.');
+      } catch (err: any) {
+        setErrorMessage(err.message || 'Failed to register shop. Please check all fields.');
       }
     } catch (err: any) {
       setErrorMessage(err.message || 'Network error while creating shop. Please verify connectivity.');
@@ -440,14 +445,14 @@ export const AddShopWizardView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 max-w-md mx-auto select-none transition-colors relative">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 max-w-md mx-auto select-none transition-colors relative">
       {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#0F1A15]/95 backdrop-blur-md px-4 py-3 border-b border-[#E8E4DA]/60 dark:border-white/10 transition-colors">
+      <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#0B132B]/95 backdrop-blur-md px-4 py-3 border-b border-[#E8E4DA]/60 dark:border-white/10 transition-colors">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <button
               onClick={goBack}
-              className="w-10 h-10 rounded-full bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
+              className="w-10 h-10 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
             >
               <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
             </button>
@@ -466,10 +471,10 @@ export const AddShopWizardView: React.FC = () => {
           <div className="flex items-center gap-1.5">
             <button
               onClick={handleSaveDraft}
-              className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 text-[11px] font-bold text-[#55685F] dark:text-[#A2B3AA] hover:text-[#11241C] dark:hover:text-white flex items-center gap-1 shadow-2xs active:scale-95 transition-all cursor-pointer"
+              className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 text-[11px] font-bold text-[#55685F] dark:text-[#A2B3AA] hover:text-[#11241C] dark:hover:text-white flex items-center gap-1 shadow-2xs active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
               title="Save draft to complete later"
             >
-              <Save className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <Save className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
               <span>{language === 'bn' ? 'ড্রাফট' : 'Save'}</span>
             </button>
           </div>
@@ -489,9 +494,9 @@ export const AddShopWizardView: React.FC = () => {
                 }}
                 className={`h-1.5 rounded-full transition-all cursor-pointer ${
                   i + 1 === step
-                    ? 'w-6 bg-[#063B2C] dark:bg-emerald-500'
+                    ? 'w-6 bg-[#007AFF] dark:bg-blue-500'
                     : i + 1 < step
-                    ? 'w-3 bg-emerald-700/60 dark:bg-emerald-600/60'
+                    ? 'w-3 bg-blue-700/60 dark:bg-blue-600/60'
                     : 'w-2 bg-gray-200 dark:bg-white/10'
                 }`}
                 title={`Step ${i + 1}`}
@@ -499,7 +504,7 @@ export const AddShopWizardView: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex items-center gap-1 text-[10px] font-black text-[#063B2C] dark:text-emerald-400 bg-[#E6F4EA] dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-800/40">
+          <div className="flex items-center gap-1 text-[10px] font-black text-[#007AFF] dark:text-blue-400 bg-[#E6F4EA] dark:bg-blue-950/60 px-2 py-0.5 rounded-full border border-blue-200/50 dark:border-blue-800/40">
             <span>{language === 'bn' ? 'প্রোফাইল' : 'Profile'}: {completeness}%</span>
           </div>
         </div>
@@ -508,7 +513,7 @@ export const AddShopWizardView: React.FC = () => {
       <div className="p-4 space-y-4">
         {/* Draft Notice Toast */}
         {draftSavedToast && (
-          <div className="p-2.5 bg-emerald-700 text-white rounded-2xl flex items-center justify-center gap-2 text-xs font-bold shadow-md animate-fade-in">
+          <div className="p-2.5 bg-blue-700 text-white rounded-2xl flex items-center justify-center gap-2 text-xs font-bold shadow-md animate-fade-in">
             <CheckCircle2 className="w-4 h-4" />
             <span>
               {language === 'bn'
@@ -559,9 +564,9 @@ export const AddShopWizardView: React.FC = () => {
 
         {/* QUICK REGISTRATION SHORTCUT: Shown if Step 1-3 essentials are already filled */}
         {areEssentialsFilled && step < 4 && (
-          <div className="p-3 bg-[#E6F4EA] dark:bg-emerald-950/40 border border-emerald-300/60 dark:border-emerald-800/40 rounded-2xl flex items-center justify-between gap-2 shadow-2xs">
+          <div className="p-3 bg-[#E6F4EA] dark:bg-blue-950/40 border border-blue-300/60 dark:border-blue-800/40 rounded-2xl flex items-center justify-between gap-2 shadow-2xs">
             <div>
-              <p className="text-xs font-black text-[#063B2C] dark:text-emerald-300">
+              <p className="text-xs font-black text-[#007AFF] dark:text-blue-300">
                 {language === 'bn' ? 'মূল তথ্য দেওয়া সম্পন্ন!' : 'Essential Info Completed!'}
               </p>
               <p className="text-[10px] font-semibold text-[#44554E] dark:text-[#A2B3AA]">
@@ -573,7 +578,7 @@ export const AddShopWizardView: React.FC = () => {
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="px-3.5 py-2 bg-[#063B2C] dark:bg-emerald-600 text-white rounded-xl text-xs font-black shrink-0 hover:bg-[#084D3A] active:scale-95 transition-all shadow-xs cursor-pointer flex items-center gap-1"
+              className="px-3.5 py-2 bg-[#007AFF] dark:bg-blue-600 text-white rounded-xl text-xs font-black shrink-0 hover:bg-[#084D3A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-xs cursor-pointer flex items-center gap-1"
             >
               {isSubmitting ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -589,10 +594,10 @@ export const AddShopWizardView: React.FC = () => {
         {/* STEP 1: OWNER INFORMATION (ESSENTIAL) */}
         {/* ========================================================== */}
         {step === 1 && (
-          <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[#E6F4EA] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-300 flex items-center justify-center font-black text-xs">
+                <div className="w-8 h-8 rounded-xl bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 flex items-center justify-center font-black text-xs">
                   1
                 </div>
                 <div>
@@ -616,7 +621,7 @@ export const AddShopWizardView: React.FC = () => {
                   value={ownerName}
                   onChange={(e) => setOwnerName(e.target.value)}
                   placeholder="e.g. Subrata Paul"
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#063B2C]"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
                 />
               </div>
 
@@ -629,7 +634,7 @@ export const AddShopWizardView: React.FC = () => {
                   value={ownerPhone}
                   onChange={(e) => setOwnerPhone(e.target.value)}
                   placeholder="+91 98320 12345"
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#063B2C]"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
                 />
                 <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
                   Used by Jalpaiguri citizens to place orders or verify stock via call.
@@ -650,7 +655,7 @@ export const AddShopWizardView: React.FC = () => {
                   value={ownerWhatsapp}
                   onChange={(e) => setOwnerWhatsapp(e.target.value)}
                   placeholder="Leave blank to use calling number"
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#063B2C]"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
                 />
               </div>
 
@@ -668,7 +673,7 @@ export const AddShopWizardView: React.FC = () => {
                   value={ownerEmail}
                   onChange={(e) => setOwnerEmail(e.target.value)}
                   placeholder="merchant@example.com"
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#063B2C]"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
                 />
               </div>
             </div>
@@ -679,10 +684,10 @@ export const AddShopWizardView: React.FC = () => {
         {/* STEP 2: SHOP IDENTITY & CATEGORY (ESSENTIAL) */}
         {/* ========================================================== */}
         {step === 2 && (
-          <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[#E6F4EA] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-300 flex items-center justify-center font-black text-xs">
+                <div className="w-8 h-8 rounded-xl bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 flex items-center justify-center font-black text-xs">
                   2
                 </div>
                 <div>
@@ -706,7 +711,7 @@ export const AddShopWizardView: React.FC = () => {
                   value={shopName}
                   onChange={(e) => setShopName(e.target.value)}
                   placeholder="e.g. Paul Grocery & Departmental"
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#063B2C]"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
                 />
               </div>
 
@@ -724,7 +729,7 @@ export const AddShopWizardView: React.FC = () => {
                   value={shopNameBengali}
                   onChange={(e) => setShopNameBengali(e.target.value)}
                   placeholder="যেমন: পাল গ্রোসারি অ্যান্ড ভাণ্ডার"
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#063B2C]"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
                 />
               </div>
 
@@ -735,7 +740,7 @@ export const AddShopWizardView: React.FC = () => {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value as ShopCategory)}
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#063B2C]"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c.key} value={c.key}>
@@ -759,7 +764,7 @@ export const AddShopWizardView: React.FC = () => {
                   value={subcategories}
                   onChange={(e) => setSubcategories(e.target.value)}
                   placeholder="e.g. Miniket Rice, Mustard Oil, Spices, Dairy"
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#063B2C]"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
                 />
               </div>
             </div>
@@ -770,10 +775,10 @@ export const AddShopWizardView: React.FC = () => {
         {/* STEP 3: LOCATION & ADDRESS (ESSENTIAL) */}
         {/* ========================================================== */}
         {step === 3 && (
-          <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[#E6F4EA] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-300 flex items-center justify-center font-black text-xs">
+                <div className="w-8 h-8 rounded-xl bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 flex items-center justify-center font-black text-xs">
                   3
                 </div>
                 <div>
@@ -795,7 +800,7 @@ export const AddShopWizardView: React.FC = () => {
                 <select
                   value={locality}
                   onChange={(e) => setLocality(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#063B2C]"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
                 >
                   {JALPAIGURI_LOCALITIES.map((loc) => (
                     <option key={loc} value={loc}>
@@ -814,7 +819,7 @@ export const AddShopWizardView: React.FC = () => {
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder="e.g. Holding No. 24, Kadamtala Main Road, Near Club"
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#063B2C]"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
                 />
               </div>
 
@@ -832,7 +837,7 @@ export const AddShopWizardView: React.FC = () => {
                   value={landmark}
                   onChange={(e) => setLandmark(e.target.value)}
                   placeholder="e.g. Opposite Dinbazar Post Office / Near Town Station"
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#063B2C]"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
                 />
               </div>
 
@@ -845,9 +850,9 @@ export const AddShopWizardView: React.FC = () => {
                   value={pincode}
                   onChange={(e) => setPincode(e.target.value)}
                   placeholder="735101"
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#063B2C]"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
                 />
-                <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold block mt-1">
+                <span className="text-[10px] text-blue-700 dark:text-blue-400 font-bold block mt-1">
                   ✓ Verified Jalpaiguri District Service Area (735101 - 735228)
                 </span>
               </div>
@@ -859,7 +864,7 @@ export const AddShopWizardView: React.FC = () => {
         {/* STEP 4: TIMINGS & DELIVERY (OPTIONAL - CAN COMPLETE LATER) */}
         {/* ========================================================== */}
         {step === 4 && (
-          <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center font-black text-xs">
@@ -878,7 +883,7 @@ export const AddShopWizardView: React.FC = () => {
               {/* Skip for now button */}
               <button
                 onClick={() => setStep(5)}
-                className="text-[11px] font-extrabold text-[#063B2C] dark:text-emerald-400 bg-[#E6F4EA] dark:bg-emerald-950/60 px-2.5 py-1 rounded-lg hover:underline cursor-pointer"
+                className="text-[11px] font-extrabold text-[#007AFF] dark:text-blue-400 bg-[#E6F4EA] dark:bg-blue-950/60 px-2.5 py-1 rounded-lg hover:underline cursor-pointer"
               >
                 {language === 'bn' ? 'পরে করব / Skip' : 'Skip for now'}
               </button>
@@ -927,14 +932,14 @@ export const AddShopWizardView: React.FC = () => {
               <div className="p-3 bg-[#FAF8F5] dark:bg-white/5 rounded-2xl border border-[#E8E4DA] dark:border-white/10 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Truck className="w-4 h-4 text-[#063B2C] dark:text-emerald-400" />
+                    <Truck className="w-4 h-4 text-[#007AFF] dark:text-blue-400" />
                     <span className="font-bold text-[#11241C] dark:text-white">Home Delivery in Jalpaiguri</span>
                   </div>
                   <input
                     type="checkbox"
                     checked={deliveryAvailable}
                     onChange={(e) => setDeliveryAvailable(e.target.checked)}
-                    className="w-4 h-4 accent-[#063B2C]"
+                    className="w-4 h-4 accent-[#007AFF]"
                   />
                 </div>
 
@@ -946,7 +951,7 @@ export const AddShopWizardView: React.FC = () => {
                         type="text"
                         value={deliveryRadiusKm}
                         onChange={(e) => setDeliveryRadiusKm(e.target.value)}
-                        className="w-full px-2.5 py-1.5 bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-lg font-bold"
+                        className="w-full px-2.5 py-1.5 bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-lg font-bold"
                       />
                     </div>
                     <div>
@@ -955,7 +960,7 @@ export const AddShopWizardView: React.FC = () => {
                         type="text"
                         value={minOrderAmount}
                         onChange={(e) => setMinOrderAmount(e.target.value)}
-                        className="w-full px-2.5 py-1.5 bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-lg font-bold"
+                        className="w-full px-2.5 py-1.5 bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-lg font-bold"
                       />
                     </div>
                   </div>
@@ -971,7 +976,7 @@ export const AddShopWizardView: React.FC = () => {
                   value={upiId}
                   onChange={(e) => setUpiId(e.target.value)}
                   placeholder="e.g. 9832011094@okaxis or shopname@paytm"
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#063B2C]"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
                 />
               </div>
             </div>
@@ -982,7 +987,7 @@ export const AddShopWizardView: React.FC = () => {
         {/* STEP 5: PHOTO & AI BIO (OPTIONAL - CAN COMPLETE LATER) */}
         {/* ========================================================== */}
         {step === 5 && (
-          <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 flex items-center justify-center font-black text-xs">
@@ -1002,7 +1007,7 @@ export const AddShopWizardView: React.FC = () => {
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="text-[11px] font-extrabold text-[#063B2C] dark:text-emerald-400 bg-[#E6F4EA] dark:bg-emerald-950/60 px-2.5 py-1 rounded-lg hover:underline cursor-pointer"
+                className="text-[11px] font-extrabold text-[#007AFF] dark:text-blue-400 bg-[#E6F4EA] dark:bg-blue-950/60 px-2.5 py-1 rounded-lg hover:underline cursor-pointer"
               >
                 {language === 'bn' ? 'পরে ছবি দেব / Skip' : 'Skip photo for now'}
               </button>
@@ -1019,11 +1024,11 @@ export const AddShopWizardView: React.FC = () => {
                   value={photoUrl}
                   onChange={(e) => setPhotoUrl(e.target.value)}
                   placeholder="https://images.unsplash.com/... or paste image URL"
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#063B2C]"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
                 />
 
                 <div className="mt-2 p-2.5 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-200/60 dark:border-white/10 flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400">
-                  <Camera className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <Camera className="w-4 h-4 text-blue-600 shrink-0" />
                   <span>
                     {language === 'bn'
                       ? 'দোকানের ছবি পরে আপনার মার্চেন্ট ড্যাশবোর্ড থেকেও যুক্ত করতে পারবেন।'
@@ -1042,7 +1047,7 @@ export const AddShopWizardView: React.FC = () => {
                     type="button"
                     onClick={handleGenerateAiDescription}
                     disabled={isGeneratingDescription}
-                    className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 bg-[#E6F4EA] dark:bg-emerald-950/70 hover:bg-[#D5EADB] px-2 py-0.5 rounded-lg border border-emerald-300/50 flex items-center gap-1 cursor-pointer transition-colors"
+                    className="text-[11px] font-bold text-blue-800 dark:text-blue-300 bg-[#E6F4EA] dark:bg-blue-950/70 hover:bg-[#D5EADB] px-2 py-0.5 rounded-lg border border-blue-300/50 flex items-center gap-1 cursor-pointer transition-colors"
                   >
                     {isGeneratingDescription ? (
                       <>
@@ -1062,11 +1067,11 @@ export const AddShopWizardView: React.FC = () => {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Tell Jalpaiguri citizens about your products, specials, and quality guarantee..."
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#063B2C]"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
                 />
               </div>
 
-              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 rounded-2xl text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
+              <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/40 rounded-2xl text-[11px] font-semibold text-blue-800 dark:text-blue-300">
                 ✓ By registering, you confirm that your shop operates in Jalpaiguri District and serves local customers.
               </div>
             </div>
@@ -1078,7 +1083,7 @@ export const AddShopWizardView: React.FC = () => {
           {step > 1 ? (
             <button
               onClick={() => setStep((prev) => prev - 1)}
-              className="py-3 px-4 rounded-2xl bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#11241C] dark:text-white flex items-center gap-1 hover:bg-gray-50 active:scale-95 transition-all cursor-pointer"
+              className="py-3 px-4 rounded-2xl bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#11241C] dark:text-white flex items-center gap-1 hover:bg-gray-50 active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>{language === 'bn' ? 'পূর্ববর্তী' : 'Back'}</span>
@@ -1100,7 +1105,7 @@ export const AddShopWizardView: React.FC = () => {
               )}
               <button
                 onClick={handleNext}
-                className="py-3 px-6 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 transition-all shadow-xs"
+                className="py-3 px-6 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-xs"
               >
                 <span>{language === 'bn' ? 'পরবর্তী ধাপ' : 'Continue'}</span>
                 <ChevronRight className="w-4 h-4" />
@@ -1110,7 +1115,7 @@ export const AddShopWizardView: React.FC = () => {
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="py-3 px-6 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 transition-all shadow-md ml-auto disabled:opacity-50"
+              className="py-3 px-6 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-md ml-auto disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
@@ -1131,58 +1136,47 @@ export const AddShopWizardView: React.FC = () => {
       {/* SUCCESS COMPLETION MODAL */}
       {createdShopResult && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 animate-scale-up text-center">
-            <div className="w-16 h-16 rounded-3xl bg-[#E6F4EA] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-300 flex items-center justify-center mx-auto shadow-sm">
-              <CheckCircle2 className="w-8 h-8" />
+          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 animate-scale-up text-center">
+            <div className="w-16 h-16 rounded-3xl bg-blue-50 text-[#007AFF] flex items-center justify-center mx-auto shadow-sm">
+              <Sparkles className="w-8 h-8" />
             </div>
 
             <div>
-              <h3 className="text-lg font-black text-[#11241C] dark:text-white">
-                {language === 'bn' ? 'অভিনন্দন! আপনার দোকান নিবন্ধিত' : 'Shop Registered Successfully!'}
+              <h3 className="text-xl font-black text-[#11241C] dark:text-white">
+                🎉 Your shop is now live!
               </h3>
-              <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 mt-0.5">
-                {createdShopResult.name} ({createdShopResult.locality})
+              <p className="text-sm font-bold text-blue-700 dark:text-blue-400 mt-0.5">
+                Welcome to MYJPG Merchant.
               </p>
-              <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] mt-1">
-                {language === 'bn'
-                  ? 'আপনার দোকান এখন জলপাইগুড়ি কানেক্টে দৃশ্যমান। বাকি বিবরণ আপনি যেকোনো সময় সম্পন্ন করতে পারবেন।'
-                  : 'Your shop is now live on Jalpaiguri Connect. You can complete products and photos anytime.'}
-              </p>
-            </div>
-
-            {/* Completeness Checklist */}
-            <div className="bg-[#FAF8F5] dark:bg-white/5 p-3 rounded-2xl border border-[#E8E4DA] dark:border-white/10 text-left text-xs space-y-1.5">
-              <div className="flex items-center justify-between font-black text-[11px] text-[#11241C] dark:text-white pb-1 border-b border-gray-200 dark:border-white/10">
-                <span>{language === 'bn' ? 'প্রোফাইল সমাপ্তি' : 'Profile Completion'}</span>
-                <span className="text-emerald-600">{completeness}%</span>
+              <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-xl mt-4 text-left">
+                <p className="text-sm font-bold text-blue-900 dark:text-blue-200">
+                  Your first 30 days are completely free.
+                </p>
+                <p className="text-xs text-blue-800 dark:text-blue-300 mt-1">
+                  Explore MYJPG's merchant tools and start connecting with customers across Jalpaiguri.
+                </p>
+                <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 mt-3 border-t border-blue-200 dark:border-blue-800/50 pt-2">
+                  Free access until: {new Date(createdShopResult.subscription?.trialEndsAt || Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </p>
               </div>
-              <p className="text-[10px] text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1">
-                ✓ {language === 'bn' ? 'মালিক ও দোকানের বিবরণ সম্পূর্ণ' : 'Owner & Location registered'}
-              </p>
-              <p className="text-[10px] text-[#55685F] dark:text-[#A2B3AA] font-semibold flex items-center gap-1">
-                {photoUrl ? '✓ Photo added' : '○ Add storefront photo (+10%)'}
-              </p>
-              <p className="text-[10px] text-[#55685F] dark:text-[#A2B3AA] font-semibold flex items-center gap-1">
-                ○ Add items & products to your catalogue (+15%)
-              </p>
             </div>
 
             {/* Action Buttons */}
             <div className="space-y-2 pt-2">
               <button
                 onClick={() => navigate('merchant-dashboard', { shopId: createdShopResult.id })}
-                className="w-full py-3 bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] text-white rounded-2xl text-xs font-black shadow-sm active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                className="w-full py-3 bg-[#007AFF] hover:bg-blue-700 text-white rounded-2xl text-xs font-black shadow-md active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer flex items-center justify-center gap-1.5"
               >
                 <Store className="w-4 h-4" />
-                <span>{language === 'bn' ? 'মার্চেন্ট ড্যাশবোর্ড খুলুন' : 'Open Merchant Dashboard'}</span>
+                <span>Explore Merchant Dashboard</span>
               </button>
 
               <button
-                onClick={() => navigate('shop-detail', { shopId: createdShopResult.id })}
-                className="w-full py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 text-[#11241C] dark:text-white rounded-2xl text-xs font-bold hover:bg-gray-100 cursor-pointer flex items-center justify-center gap-1.5"
+                onClick={() => navigate('merchant-dashboard', { shopId: createdShopResult.id, showUpgrade: true })}
+                className="w-full py-2.5 bg-transparent border border-blue-200 dark:border-white/10 text-blue-700 dark:text-blue-400 rounded-2xl text-xs font-bold hover:bg-blue-50 dark:hover:bg-white/5 cursor-pointer flex items-center justify-center gap-1.5"
               >
-                <ExternalLink className="w-3.5 h-3.5" />
-                <span>{language === 'bn' ? 'দোকানের পেজ দেখুন' : 'View Shop in Marketplace'}</span>
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>View Premium Plans</span>
               </button>
             </div>
           </div>

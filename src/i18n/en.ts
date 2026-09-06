@@ -69,7 +69,7 @@ export const en: Translations = {
     optional: 'Optional'
   },
   home: {
-    welcomeGreeting: 'Welcome to Jalpaiguri Connect',
+    welcomeGreeting: 'Welcome to MYJPG',
     jalpaiguriSub: 'Hyperlocal Civic Services & Community Hub',
     searchBarPlaceholder: 'Search workers, blood donors, emergencies...',
     quickServices: 'Civic & Community Services',
@@ -392,8 +392,6 @@ export const en: Translations = {
     languageDesc: 'Choose English or বাংলা interface',
     themeSetting: 'Appearance Theme',
     themeDesc: 'Light or Dark mode',
-    biometricLogin: 'Biometric Security',
-    biometricDesc: 'Fingerprint quick authentication',
     notificationsSetting: 'Push Notifications',
     offlineSync: 'Offline Storage Sync',
     myActivity: 'My Civic Activity',
@@ -404,9 +402,9 @@ export const en: Translations = {
     faqSection: 'Frequently Asked Questions',
     privacyPolicy: 'Privacy Policy',
     termsOfService: 'Terms of Service',
-    aboutApp: 'About Jalpaiguri Connect',
+    aboutApp: 'About MYJPG',
     appVersion: 'Version 2.4.0 (Jalpaiguri Municipal Edition)',
-    logoutBtn: 'Log Out of Jalpaiguri Connect',
+    logoutBtn: 'Log Out of MYJPG',
     logoutConfirmTitle: 'Confirm Logout',
     logoutConfirmDesc: 'Are you sure you want to log out from this device?',
     saveChanges: 'Save Changes',
@@ -439,7 +437,7 @@ export const en: Translations = {
   },
   faq: {
     title: 'Frequently Asked Questions',
-    subtitle: 'Quick answers about Jalpaiguri Connect civic services',
+    subtitle: 'Quick answers about MYJPG civic services',
     searchFaq: 'Search questions...',
     generalQuestions: 'General App Questions',
     workerQuestions: 'Workers & Service Booking',
@@ -458,7 +456,7 @@ export const en: Translations = {
     warningTitle: 'Important Warning',
     locationPermissionRequired: 'Location Permission Required',
     outsideRegionNotice: 'Outside Jalpaiguri Service Area',
-    returnToJalpaiguri: 'Jalpaiguri Connect services are restricted to Jalpaiguri district.'
+    returnToJalpaiguri: 'MYJPG services are restricted to Jalpaiguri district.'
   },
   splash: {
     tagline: 'Connecting Citizens, Empowering Jalpaiguri',
@@ -510,7 +508,7 @@ export const en: Translations = {
     setupProfileDesc: 'Help us customize local civic alerts, emergency services, and community requests for your area.',
     saveAndContinue: 'Save & Continue',
     skipForNow: 'Skip for Now',
-    termsNotice: 'By continuing, you agree to Jalpaiguri Connect Terms & Community Guidelines',
+    termsNotice: 'By continuing, you agree to MYJPG Terms & Community Guidelines',
     termsLink: 'Terms of Service',
     privacyLink: 'Privacy Policy',
     invalidPhone: 'Please enter a valid 10-digit mobile number',
@@ -522,7 +520,7 @@ export const en: Translations = {
     detectingLocation: 'Detecting your GPS location in Jalpaiguri...',
     detectGps: 'Detect Live GPS Location',
     permissionTitle: 'Enable Location Services',
-    permissionDesc: 'Jalpaiguri Connect uses your device location to connect you with nearby trade workers, doctors, emergency blood donors, and local ward notices.',
+    permissionDesc: 'MYJPG uses your device location to connect you with nearby trade workers, doctors, emergency blood donors, and local ward notices.',
     enableLocation: 'Allow Location Access',
     selectManually: 'Select Ward / Area Manually',
     outsideAreaTitle: 'Outside Jalpaiguri Service Area',

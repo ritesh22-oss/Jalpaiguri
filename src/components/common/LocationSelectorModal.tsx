@@ -80,7 +80,7 @@ export const LocationSelectorModal: React.FC = () => {
   const getLocalityIcon = (type: LocalityInfo['type']) => {
     switch (type) {
       case 'commercial':
-        return <Building2 className="w-4 h-4 text-emerald-700" />;
+        return <Building2 className="w-4 h-4 text-blue-700" />;
       case 'residential':
         return <Home className="w-4 h-4 text-amber-700" />;
       case 'healthcare':
@@ -90,7 +90,7 @@ export const LocationSelectorModal: React.FC = () => {
       case 'civic':
         return <Compass className="w-4 h-4 text-purple-600" />;
       default:
-        return <MapPin className="w-4 h-4 text-emerald-700" />;
+        return <MapPin className="w-4 h-4 text-blue-700" />;
     }
   };
 
@@ -103,7 +103,7 @@ export const LocationSelectorModal: React.FC = () => {
         {/* Modal Header */}
         <div className="p-5 pb-3 border-b border-[#E8E4DA] bg-white rounded-t-3xl flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#E6F4EA] text-[#063B2C] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-[#E6F4EA] text-[#007AFF] flex items-center justify-center">
               <MapPin className="w-5 h-5" />
             </div>
             <div>
@@ -134,8 +134,8 @@ export const LocationSelectorModal: React.FC = () => {
                 </span>
                 <div className="flex items-center gap-1.5">
                   <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-600"></span>
                   </span>
                   <p className="text-sm font-extrabold text-[#11241C] truncate max-w-[220px]">
                     {location.name}
@@ -149,7 +149,7 @@ export const LocationSelectorModal: React.FC = () => {
               </div>
 
               {location.locationSource === 'gps' ? (
-                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold flex items-center gap-1">
+                <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-extrabold flex items-center gap-1">
                   <ShieldCheck className="w-3 h-3" />
                   Real GPS
                 </span>
@@ -162,13 +162,13 @@ export const LocationSelectorModal: React.FC = () => {
 
             {/* GPS Accuracy Details if Available */}
             {location.accuracy && (
-              <div className="flex items-center justify-between text-[11px] text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+              <div className="flex items-center justify-between text-[11px] text-blue-800 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-200">
                 <div className="flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                  <Sparkles className="w-3.5 h-3.5 text-blue-600" />
                   <span>GPS Precision: ±{location.accuracy}m</span>
                 </div>
                 {location.city && (
-                  <span className="font-semibold text-emerald-900">{location.city}</span>
+                  <span className="font-semibold text-blue-900">{location.city}</span>
                 )}
               </div>
             )}
@@ -191,7 +191,7 @@ export const LocationSelectorModal: React.FC = () => {
               <button
                 onClick={handleUseCurrentLocation}
                 disabled={isDetecting}
-                className="w-full bg-[#063B2C] text-white hover:bg-[#084D3A] active:scale-[0.99] transition-all py-3 px-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-75"
+                className="w-full bg-[#007AFF] text-white hover:bg-[#084D3A] active:scale-[0.99] transition-all py-3 px-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-75"
               >
                 {isDetecting ? (
                   <>
@@ -200,7 +200,7 @@ export const LocationSelectorModal: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <Navigation className="w-4 h-4 text-emerald-300" />
+                    <Navigation className="w-4 h-4 text-blue-300" />
                     <span>📍 Use Current Location</span>
                   </>
                 )}
@@ -210,7 +210,7 @@ export const LocationSelectorModal: React.FC = () => {
                 onClick={toggleLiveTracking}
                 className={`w-full py-3 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 border transition-all cursor-pointer ${
                   isLiveTracking
-                    ? 'bg-emerald-700 text-white border-emerald-800 shadow-xs'
+                    ? 'bg-blue-700 text-white border-blue-800 shadow-xs'
                     : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'
                 }`}
               >
@@ -261,14 +261,14 @@ export const LocationSelectorModal: React.FC = () => {
 
             {/* Success Detected Feedback */}
             {status === 'found' && (
-              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 text-xs text-emerald-800 flex items-center justify-between">
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-2.5 text-xs text-blue-800 flex items-center justify-between">
                 <div className="flex items-center gap-1.5 font-bold">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <Check className="w-4 h-4 text-blue-600 shrink-0" />
                   <span>Location detected: {location.name}</span>
                 </div>
                 <button
                   onClick={() => setIsLocationSelectorOpen(false)}
-                  className="px-2.5 py-1 bg-[#063B2C] text-white font-extrabold text-[10px] rounded-lg cursor-pointer"
+                  className="px-2.5 py-1 bg-[#007AFF] text-white font-extrabold text-[10px] rounded-lg cursor-pointer"
                 >
                   Use This Location
                 </button>
@@ -286,7 +286,7 @@ export const LocationSelectorModal: React.FC = () => {
                 <button
                   onClick={() => setActiveTab('jalpaiguri')}
                   className={`px-2 py-0.5 text-[11px] font-extrabold rounded-lg transition-colors cursor-pointer ${
-                    activeTab === 'jalpaiguri' ? 'bg-[#063B2C] text-white' : 'text-[#55685F]'
+                    activeTab === 'jalpaiguri' ? 'bg-[#007AFF] text-white' : 'text-[#55685F]'
                   }`}
                 >
                   Jalpaiguri
@@ -294,7 +294,7 @@ export const LocationSelectorModal: React.FC = () => {
                 <button
                   onClick={() => setActiveTab('major-cities')}
                   className={`px-2 py-0.5 text-[11px] font-extrabold rounded-lg transition-colors cursor-pointer ${
-                    activeTab === 'major-cities' ? 'bg-[#063B2C] text-white' : 'text-[#55685F]'
+                    activeTab === 'major-cities' ? 'bg-[#007AFF] text-white' : 'text-[#55685F]'
                   }`}
                 >
                   Other Cities
@@ -310,7 +310,7 @@ export const LocationSelectorModal: React.FC = () => {
                 placeholder={activeTab === 'jalpaiguri' ? 'Search Kadamtala, Dinbazar, Hospital Road...' : 'Search Chennai, Bengaluru, Kolkata...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-[#D2CEBE] rounded-2xl pl-10 pr-4 py-3 text-xs font-semibold text-[#11241C] placeholder:text-[#8C9B93] focus:border-[#063B2C] focus:outline-none shadow-xs"
+                className="w-full bg-white border border-[#D2CEBE] rounded-2xl pl-10 pr-4 py-3 text-xs font-semibold text-[#11241C] placeholder:text-[#8C9B93] focus:border-[#007AFF] focus:outline-none shadow-xs"
               />
               {searchQuery && (
                 <button
@@ -346,7 +346,7 @@ export const LocationSelectorModal: React.FC = () => {
                               {loc.name}
                             </h4>
                             {isSelected && (
-                              <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-[#063B2C] text-white">
+                              <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-[#007AFF] text-white">
                                 Selected
                               </span>
                             )}
@@ -358,7 +358,7 @@ export const LocationSelectorModal: React.FC = () => {
                       </div>
 
                       <div className="flex items-center gap-1.5 text-xs text-[#55685F]">
-                        <span className="text-[11px] font-bold text-[#063B2C] bg-[#E6F4EA] px-2 py-0.5 rounded-full">
+                        <span className="text-[11px] font-bold text-[#007AFF] bg-[#E6F4EA] px-2 py-0.5 rounded-full">
                           {loc.pincode}
                         </span>
                         <ChevronRight className="w-4 h-4 text-[#8C9B93]" />

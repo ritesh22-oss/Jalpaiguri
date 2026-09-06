@@ -118,16 +118,44 @@ export const GovernmentServicesView: React.FC = () => {
   // Categories list
   const CATEGORIES: ('ALL' | GovtServiceCategory)[] = [
     'ALL',
-    'MUNICIPAL SERVICES',
+    'MAIN PORTALS',
     'CERTIFICATES',
     'LAND & PROPERTY',
+    'MUNICIPAL SERVICES',
+    'RATION & FOOD',
     'TRANSPORT',
     'UTILITY SERVICES',
     'EDUCATION & SCHOLARSHIPS',
-    'HEALTH & WELFARE',
     'EMPLOYMENT',
+    'BUSINESS & TRADE',
+    'HEALTH & WELFARE',
+    'AGRICULTURE',
+    'COMPLAINTS & GRIEVANCES',
+    'DEPARTMENT PORTALS',
     'GOVERNMENT SCHEMES'
   ];
+
+  const getCategoryLabel = (cat: 'ALL' | GovtServiceCategory) => {
+    switch (cat) {
+      case 'ALL': return '🔎 All Services';
+      case 'MAIN PORTALS': return '🏛️ Main Portals & BSK';
+      case 'CERTIFICATES': return '🪪 Certificates & Documents';
+      case 'LAND & PROPERTY': return '🏠 Land & Property';
+      case 'MUNICIPAL SERVICES': return '🏛️ Municipality Services';
+      case 'RATION & FOOD': return '🍚 Ration & Food';
+      case 'TRANSPORT': return '🚗 Transport';
+      case 'UTILITY SERVICES': return '⚡ Electricity & Utilities';
+      case 'EDUCATION & SCHOLARSHIPS': return '🎓 Education & Scholarships';
+      case 'EMPLOYMENT': return '💼 Jobs & Employment';
+      case 'BUSINESS & TRADE': return '🏪 Business & Trade';
+      case 'HEALTH & WELFARE': return '🏥 Health';
+      case 'AGRICULTURE': return '🌾 Agriculture';
+      case 'COMPLAINTS & GRIEVANCES': return '🧾 Complaints & Grievances';
+      case 'DEPARTMENT PORTALS': return '🌐 Department Portals';
+      case 'GOVERNMENT SCHEMES': return '🏛️ Government Schemes';
+      default: return cat;
+    }
+  };
 
   // Filtered Services
   const filteredServices = useMemo(() => {
@@ -245,8 +273,8 @@ export const GovernmentServicesView: React.FC = () => {
             onClick={goBack}
             className={`w-9 h-9 rounded-2xl flex items-center justify-center cursor-pointer transition-colors ${
               isDarkMode
-                ? 'bg-[#14231C] text-emerald-300 hover:bg-[#1E332A]'
-                : 'bg-white border border-[#E8E4DA] text-[#063B2C] hover:bg-[#F2EFE9]'
+                ? 'bg-[#14231C] text-blue-300 hover:bg-[#1E332A]'
+                : 'bg-white border border-[#E8E4DA] text-[#007AFF] hover:bg-[#F2EFE9]'
             }`}
             title="Back"
           >
@@ -255,7 +283,7 @@ export const GovernmentServicesView: React.FC = () => {
           <div>
             <h1 className="text-lg font-black tracking-tight flex items-center gap-1.5">
               <span>Government Hub</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-500 border border-blue-500/30">
                 Official
               </span>
             </h1>
@@ -267,8 +295,8 @@ export const GovernmentServicesView: React.FC = () => {
           onClick={() => navigate('faq')}
           className={`px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 border transition-colors cursor-pointer ${
             isDarkMode
-              ? 'bg-[#14231C] border-[#20362B] text-emerald-300'
-              : 'bg-white border-[#E8E4DA] text-[#063B2C]'
+              ? 'bg-[#14231C] border-[#20362B] text-blue-300'
+              : 'bg-white border-[#E8E4DA] text-[#007AFF]'
           }`}
           title="Govt Services FAQ"
         >
@@ -283,28 +311,28 @@ export const GovernmentServicesView: React.FC = () => {
           className={`rounded-3xl p-4 border transition-colors ${
             isDarkMode
               ? 'bg-[#101D17] border-[#1C3328]'
-              : 'bg-[#063B2C] text-white border-transparent shadow-sm'
+              : 'bg-[#007AFF] text-white border-transparent shadow-sm'
           }`}
         >
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 mt-0.5">
-              <Landmark className="w-5 h-5 text-emerald-300" />
+              <Landmark className="w-5 h-5 text-blue-300" />
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="font-extrabold text-xs tracking-wide">
                   Official Citizen Navigation Gateway
                 </span>
-                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-white/20 text-emerald-100">
+                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-white/20 text-blue-100">
                   WB & GoI
                 </span>
               </div>
               <p
                 className={`text-[11px] leading-relaxed ${
-                  isDarkMode ? 'text-gray-300' : 'text-emerald-100'
+                  isDarkMode ? 'text-gray-300' : 'text-blue-100'
                 }`}
               >
-                Jalpaiguri Connect is a citizen navigation platform. Applications and payments are
+                MYJPG is a citizen navigation platform. Applications and payments are
                 submitted securely on official state and central government portals.
               </p>
             </div>
@@ -322,8 +350,8 @@ export const GovernmentServicesView: React.FC = () => {
             className={`flex-1 py-2 px-1 rounded-xl text-center cursor-pointer transition-all ${
               activeTab === 'services'
                 ? isDarkMode
-                  ? 'bg-emerald-500 text-black shadow-xs font-black'
-                  : 'bg-[#063B2C] text-white shadow-xs font-black'
+                  ? 'bg-blue-500 text-black shadow-xs font-black'
+                  : 'bg-[#007AFF] text-white shadow-xs font-black'
                 : 'opacity-70 hover:opacity-100'
             }`}
           >
@@ -334,8 +362,8 @@ export const GovernmentServicesView: React.FC = () => {
             className={`flex-1 py-2 px-1 rounded-xl text-center cursor-pointer transition-all ${
               activeTab === 'schemes'
                 ? isDarkMode
-                  ? 'bg-emerald-500 text-black shadow-xs font-black'
-                  : 'bg-[#063B2C] text-white shadow-xs font-black'
+                  ? 'bg-blue-500 text-black shadow-xs font-black'
+                  : 'bg-[#007AFF] text-white shadow-xs font-black'
                 : 'opacity-70 hover:opacity-100'
             }`}
           >
@@ -346,8 +374,8 @@ export const GovernmentServicesView: React.FC = () => {
             className={`flex-1 py-2 px-1 rounded-xl text-center cursor-pointer transition-all ${
               activeTab === 'alerts'
                 ? isDarkMode
-                  ? 'bg-emerald-500 text-black shadow-xs font-black'
-                  : 'bg-[#063B2C] text-white shadow-xs font-black'
+                  ? 'bg-blue-500 text-black shadow-xs font-black'
+                  : 'bg-[#007AFF] text-white shadow-xs font-black'
                 : 'opacity-70 hover:opacity-100'
             }`}
           >
@@ -358,8 +386,8 @@ export const GovernmentServicesView: React.FC = () => {
             className={`flex-1 py-2 px-1 rounded-xl text-center cursor-pointer transition-all ${
               activeTab === 'tracking'
                 ? isDarkMode
-                  ? 'bg-emerald-500 text-black shadow-xs font-black'
-                  : 'bg-[#063B2C] text-white shadow-xs font-black'
+                  ? 'bg-blue-500 text-black shadow-xs font-black'
+                  : 'bg-[#007AFF] text-white shadow-xs font-black'
                 : 'opacity-70 hover:opacity-100'
             }`}
           >
@@ -382,8 +410,8 @@ export const GovernmentServicesView: React.FC = () => {
                 placeholder="Search caste, birth, property tax, land, driving..."
                 className={`w-full pl-10 pr-9 py-2.5 rounded-2xl text-xs font-medium border outline-hidden transition-all ${
                   isDarkMode
-                    ? 'bg-[#101B16] border-[#1E332B] focus:border-emerald-400 text-white placeholder:text-gray-500'
-                    : 'bg-white border-[#D2CEBE] focus:border-[#063B2C] text-[#11241C] placeholder:text-[#8C9B93]'
+                    ? 'bg-[#101B16] border-[#1E332B] focus:border-blue-400 text-white placeholder:text-gray-500'
+                    : 'bg-white border-[#D2CEBE] focus:border-[#007AFF] text-[#11241C] placeholder:text-[#8C9B93]'
                 }`}
               />
               {searchQuery && (
@@ -407,14 +435,14 @@ export const GovernmentServicesView: React.FC = () => {
                     className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap cursor-pointer transition-all ${
                       isSelected
                         ? isDarkMode
-                          ? 'bg-emerald-500 text-black shadow-xs'
-                          : 'bg-[#063B2C] text-white shadow-xs'
+                          ? 'bg-blue-500 text-black shadow-xs'
+                          : 'bg-[#007AFF] text-white shadow-xs'
                         : isDarkMode
                         ? 'bg-[#122019] text-gray-300 border border-[#1E352B] hover:bg-[#1A2E24]'
                         : 'bg-white text-[#55685F] border border-[#E8E4DA] hover:bg-[#FAF8F5]'
                     }`}
                   >
-                    {cat === 'ALL' ? 'All Services' : cat}
+                    {getCategoryLabel(cat)}
                   </button>
                 );
               })}
@@ -426,7 +454,7 @@ export const GovernmentServicesView: React.FC = () => {
                 Showing {filteredServices.length}{' '}
                 {filteredServices.length === 1 ? 'service' : 'services'}
               </span>
-              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+              <span className="text-[11px] text-blue-600 dark:text-blue-400 font-bold flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 All Links Official
               </span>
@@ -451,8 +479,8 @@ export const GovernmentServicesView: React.FC = () => {
                           <span
                             className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-md ${
                               isDarkMode
-                                ? 'bg-[#182C22] text-emerald-300'
-                                : 'bg-[#E6F4EA] text-[#063B2C]'
+                                ? 'bg-[#182C22] text-blue-300'
+                                : 'bg-[#E6F4EA] text-[#007AFF]'
                             }`}
                           >
                             {srv.category}
@@ -464,7 +492,7 @@ export const GovernmentServicesView: React.FC = () => {
                       </div>
 
                       <div
-                        className="w-8 h-8 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0"
+                        className="w-8 h-8 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0"
                         title="Verified Authority"
                       >
                         <ShieldCheck className="w-4 h-4" />
@@ -478,58 +506,56 @@ export const GovernmentServicesView: React.FC = () => {
                     <div
                       className={`p-2.5 rounded-2xl text-[11px] font-bold flex items-center justify-between border ${
                         isDarkMode
-                          ? 'bg-[#13231C] border-[#1D362B] text-emerald-300'
+                          ? 'bg-[#13231C] border-[#1D362B] text-blue-300'
                           : 'bg-[#F2FBF6] border-[#C3EAD4] text-[#085A43]'
                       }`}
                     >
                       <div className="flex items-center gap-1.5">
-                        <BadgeCheck className="w-4 h-4 shrink-0 text-emerald-500" />
-                        <span>Official Government Portal • {srv.authority}</span>
+                        <BadgeCheck className="w-4 h-4 shrink-0 text-blue-500" />
+                        <span>✓ Official Government Portal • {srv.authority}</span>
                       </div>
-                      <span className="text-[10px] opacity-70 font-mono">.gov.in / official</span>
+                      <span className="text-[10px] opacity-75 font-mono">Verified Portal</span>
                     </div>
 
                     {/* Action Buttons: Apply, Status, Requirements */}
                     <div className="pt-2 border-t border-dashed border-gray-200 dark:border-gray-800 flex items-center justify-between gap-2 flex-wrap">
-                      <div className="flex items-center gap-2">
-                        {srv.hasDirectApply && (
-                          <button
-                            onClick={() =>
-                              handleOpenExternal(srv.applyUrl || srv.officialUrl, srv.name)
-                            }
-                            className="px-3 py-1.5 rounded-xl bg-[#063B2C] hover:bg-[#084D3A] text-white font-bold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer"
-                          >
-                            <span>Apply Online</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </button>
-                        )}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <button
+                          onClick={() =>
+                            handleOpenExternal(srv.applyUrl || srv.officialUrl, srv.name)
+                          }
+                          className="px-3.5 py-2 rounded-xl bg-[#007AFF] hover:bg-[#0056B3] text-white font-bold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-98 transition-all"
+                        >
+                          <span>Apply / Open Official Portal</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </button>
 
                         {srv.hasStatusTrack && (
                           <button
                             onClick={() =>
                               handleOpenExternal(srv.statusUrl || srv.officialUrl, srv.name)
                             }
-                            className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 border transition-colors cursor-pointer ${
+                            className={`px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 border transition-colors cursor-pointer ${
                               isDarkMode
-                                ? 'bg-[#14231C] border-[#223B2F] text-emerald-300 hover:bg-[#1C3328]'
-                                : 'bg-[#FAF8F5] border-[#D2CEBE] text-[#063B2C] hover:bg-[#EAE5D8]'
+                                ? 'bg-[#14231C] border-[#223B2F] text-blue-300 hover:bg-[#1C3328]'
+                                : 'bg-[#FAF8F5] border-[#D2CEBE] text-[#007AFF] hover:bg-[#EAE5D8]'
                             }`}
                           >
                             <span>Check Status</span>
-                            <ChevronRight className="w-3 h-3" />
+                            <ChevronRight className="w-3.5 h-3.5" />
                           </button>
                         )}
 
                         <button
                           onClick={() => setChecklistModalData(srv)}
-                          className={`px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 border transition-colors cursor-pointer ${
+                          className={`px-2.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 border transition-colors cursor-pointer ${
                             isDarkMode
                               ? 'bg-transparent border-gray-700 text-gray-300 hover:bg-gray-800'
                               : 'bg-white border-[#E8E4DA] text-[#55685F] hover:bg-[#FAF8F5]'
                           }`}
                           title="View Required Documents"
                         >
-                          <FileText className="w-3 h-3" />
+                          <FileText className="w-3.5 h-3.5" />
                           <span>Documents</span>
                         </button>
                       </div>
@@ -563,7 +589,7 @@ export const GovernmentServicesView: React.FC = () => {
                     setSearchQuery('');
                     setSelectedCategory('ALL');
                   }}
-                  className="px-4 py-2 bg-[#063B2C] text-white font-bold text-xs rounded-xl"
+                  className="px-4 py-2 bg-[#007AFF] text-white font-bold text-xs rounded-xl"
                 >
                   View All Services
                 </button>
@@ -584,10 +610,10 @@ export const GovernmentServicesView: React.FC = () => {
             >
               <div className="flex items-center justify-between">
                 <h3 className="font-extrabold text-sm flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-emerald-500" />
+                  <Sparkles className="w-4 h-4 text-blue-500" />
                   <span>Find Government Schemes</span>
                 </h3>
-                <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400">
                   Interactive Filter
                 </span>
               </div>
@@ -615,8 +641,8 @@ export const GovernmentServicesView: React.FC = () => {
                       className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap cursor-pointer transition-all ${
                         isSel
                           ? isDarkMode
-                            ? 'bg-emerald-500 text-black'
-                            : 'bg-[#063B2C] text-white'
+                            ? 'bg-blue-500 text-black'
+                            : 'bg-[#007AFF] text-white'
                           : isDarkMode
                           ? 'bg-[#14231C] text-gray-300 border border-[#22392E]'
                           : 'bg-[#FAF8F5] text-[#55685F] border border-[#D2CEBE]'
@@ -645,7 +671,7 @@ export const GovernmentServicesView: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <h4 className="font-black text-sm">{sch.name}</h4>
                         {sch.bengaliName && (
-                          <span className="text-xs font-bold opacity-75 text-emerald-600 dark:text-emerald-400">
+                          <span className="text-xs font-bold opacity-75 text-blue-600 dark:text-blue-400">
                             ({sch.bengaliName})
                           </span>
                         )}
@@ -656,8 +682,8 @@ export const GovernmentServicesView: React.FC = () => {
                     <span
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
                         isDarkMode
-                          ? 'bg-[#182C22] text-emerald-300'
-                          : 'bg-[#E6F4EA] text-[#063B2C]'
+                          ? 'bg-[#182C22] text-blue-300'
+                          : 'bg-[#E6F4EA] text-[#007AFF]'
                       }`}
                     >
                       {sch.targetCategory}
@@ -668,11 +694,11 @@ export const GovernmentServicesView: React.FC = () => {
                   <div
                     className={`p-3 rounded-2xl text-xs space-y-1 border ${
                       isDarkMode
-                        ? 'bg-[#14231C] border-[#1F362B] text-emerald-300'
-                        : 'bg-[#F2FBF6] border-[#C3EAD4] text-[#063B2C]'
+                        ? 'bg-[#14231C] border-[#1F362B] text-blue-300'
+                        : 'bg-[#F2FBF6] border-[#C3EAD4] text-[#007AFF]'
                     }`}
                   >
-                    <span className="font-bold block text-[10px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                    <span className="font-bold block text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400">
                       Benefits / Entitlement:
                     </span>
                     <p className="font-semibold leading-relaxed">{sch.benefits}</p>
@@ -719,7 +745,7 @@ export const GovernmentServicesView: React.FC = () => {
                     <span className="text-[10px] opacity-60">Verified {sch.lastVerified}</span>
                     <button
                       onClick={() => handleOpenExternal(sch.officialUrl, sch.name)}
-                      className="px-3.5 py-1.5 bg-[#063B2C] hover:bg-[#084D3A] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer"
+                      className="px-3.5 py-1.5 bg-[#007AFF] hover:bg-[#084D3A] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer"
                     >
                       <span>Apply on Official Portal</span>
                       <ExternalLink className="w-3 h-3" />
@@ -739,11 +765,11 @@ export const GovernmentServicesView: React.FC = () => {
             <div
               className={`p-3.5 rounded-2xl text-xs flex items-start gap-2.5 border ${
                 isDarkMode
-                  ? 'bg-[#14231C] border-[#1F362B] text-emerald-300'
-                  : 'bg-[#F2FBF6] border-[#C3EAD4] text-[#063B2C]'
+                  ? 'bg-[#14231C] border-[#1F362B] text-blue-300'
+                  : 'bg-[#F2FBF6] border-[#C3EAD4] text-[#007AFF]'
               }`}
             >
-              <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-500 mt-0.5" />
+              <ShieldCheck className="w-4 h-4 shrink-0 text-blue-500 mt-0.5" />
               <p className="leading-relaxed">
                 These notices originate strictly from authorized departments of the Government of
                 West Bengal and Jalpaiguri Municipality. Community reports are kept separate in the
@@ -767,8 +793,8 @@ export const GovernmentServicesView: React.FC = () => {
                         <span
                           className={`text-[9px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider ${
                             isDarkMode
-                              ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                              : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              ? 'bg-blue-950 text-blue-300 border border-blue-800'
+                              : 'bg-blue-50 text-blue-700 border border-blue-200'
                           }`}
                         >
                           {alert.badge}
@@ -787,7 +813,7 @@ export const GovernmentServicesView: React.FC = () => {
                     {alert.officialNoticeUrl && (
                       <button
                         onClick={() => handleOpenExternal(alert.officialNoticeUrl!, alert.title)}
-                        className="px-3 py-1.5 bg-[#063B2C] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 hover:bg-[#084D3A] cursor-pointer shadow-xs"
+                        className="px-3 py-1.5 bg-[#007AFF] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 hover:bg-[#084D3A] cursor-pointer shadow-xs"
                       >
                         <span>Open Official Notice</span>
                         <ExternalLink className="w-3 h-3" />
@@ -818,7 +844,7 @@ export const GovernmentServicesView: React.FC = () => {
               </div>
               <button
                 onClick={() => setIsAddAppModalOpen(true)}
-                className="px-3 py-1.5 bg-[#063B2C] text-white font-bold text-xs rounded-xl flex items-center gap-1 shadow-xs cursor-pointer hover:bg-[#084D3A]"
+                className="px-3 py-1.5 bg-[#007AFF] text-white font-bold text-xs rounded-xl flex items-center gap-1 shadow-xs cursor-pointer hover:bg-[#084D3A]"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Save App</span>
@@ -842,7 +868,7 @@ export const GovernmentServicesView: React.FC = () => {
                           <span
                             className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                               app.status === 'Approved'
-                                ? 'bg-emerald-100 text-emerald-800'
+                                ? 'bg-blue-100 text-blue-800'
                                 : app.status === 'Action Required'
                                 ? 'bg-rose-100 text-rose-800'
                                 : 'bg-amber-100 text-amber-800'
@@ -887,7 +913,7 @@ export const GovernmentServicesView: React.FC = () => {
                             app.serviceName
                           )
                         }
-                        className="px-3 py-1.5 rounded-xl bg-[#063B2C] text-white font-bold text-xs flex items-center gap-1.5 shadow-xs hover:bg-[#084D3A] cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-[#007AFF] text-white font-bold text-xs flex items-center gap-1.5 shadow-xs hover:bg-[#084D3A] cursor-pointer"
                       >
                         <span>Track on Official Portal</span>
                         <ExternalLink className="w-3 h-3" />
@@ -910,7 +936,7 @@ export const GovernmentServicesView: React.FC = () => {
                 </p>
                 <button
                   onClick={() => setIsAddAppModalOpen(true)}
-                  className="px-4 py-2 bg-[#063B2C] text-white font-bold text-xs rounded-xl shadow-xs"
+                  className="px-4 py-2 bg-[#007AFF] text-white font-bold text-xs rounded-xl shadow-xs"
                 >
                   Add Your First Application
                 </button>
@@ -932,7 +958,7 @@ export const GovernmentServicesView: React.FC = () => {
           >
             <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-800">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-emerald-500" />
+                <ShieldCheck className="w-5 h-5 text-blue-500" />
                 <h3 className="font-extrabold text-sm">Official Portal Redirection</h3>
               </div>
               <button
@@ -944,20 +970,19 @@ export const GovernmentServicesView: React.FC = () => {
             </div>
 
             <div className="space-y-2.5 text-xs opacity-85 leading-relaxed">
-              <p>
-                You are leaving <strong>Jalpaiguri Connect</strong> and opening the verified
-                official government website:
+              <p className="font-medium">
+                You are leaving <strong>MYJPG</strong> and opening the official government portal.
               </p>
 
               <div
                 className={`p-3 rounded-2xl border font-mono text-xs space-y-1 ${
                   isDarkMode
-                    ? 'bg-[#14231C] border-emerald-500/30 text-emerald-300'
-                    : 'bg-[#F2FBF6] border-emerald-200 text-[#063B2C]'
+                    ? 'bg-[#14231C] border-blue-500/30 text-blue-300'
+                    : 'bg-[#F2FBF6] border-blue-200 text-[#007AFF]'
                 }`}
               >
                 <div className="flex items-center gap-1.5 font-bold text-[11px] uppercase tracking-wider">
-                  <BadgeCheck className="w-3.5 h-3.5 text-emerald-500" />
+                  <BadgeCheck className="w-3.5 h-3.5 text-blue-500" />
                   <span>Verified Government Server</span>
                 </div>
                 <div className="break-all font-semibold select-all text-xs">
@@ -987,7 +1012,7 @@ export const GovernmentServicesView: React.FC = () => {
               </button>
               <button
                 onClick={confirmRedirect}
-                className="flex-1 py-2.5 bg-[#063B2C] hover:bg-[#084D3A] text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                className="flex-1 py-2.5 bg-[#007AFF] hover:bg-[#084D3A] text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <span>Continue</span>
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -1009,7 +1034,7 @@ export const GovernmentServicesView: React.FC = () => {
           >
             <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-800">
               <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-emerald-500" />
+                <FileText className="w-5 h-5 text-blue-500" />
                 <h3 className="font-extrabold text-sm">Before You Apply</h3>
               </div>
               <button
@@ -1021,7 +1046,7 @@ export const GovernmentServicesView: React.FC = () => {
             </div>
 
             <div>
-              <h4 className="font-bold text-sm text-[#063B2C] dark:text-emerald-300">
+              <h4 className="font-bold text-sm text-[#007AFF] dark:text-blue-300">
                 {checklistModalData.name}
               </h4>
               <p className="text-[11px] opacity-70 mt-0.5">{checklistModalData.department}</p>
@@ -1037,7 +1062,7 @@ export const GovernmentServicesView: React.FC = () => {
                     key={i}
                     className="flex items-start gap-2 p-2 rounded-xl bg-gray-50 dark:bg-[#14231C] border border-gray-200 dark:border-gray-800"
                   >
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
                     <span>{req}</span>
                   </li>
                 ))}
@@ -1055,7 +1080,7 @@ export const GovernmentServicesView: React.FC = () => {
                 setChecklistModalData(null);
                 handleOpenExternal(srv.applyUrl || srv.officialUrl, srv.name);
               }}
-              className="w-full py-2.5 bg-[#063B2C] hover:bg-[#084D3A] text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full py-2.5 bg-[#007AFF] hover:bg-[#084D3A] text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span>Proceed to Official Portal</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -1088,9 +1113,9 @@ export const GovernmentServicesView: React.FC = () => {
             </div>
 
             {reportSubmitted ? (
-              <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-center space-y-2">
-                <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
-                <h4 className="font-bold text-xs text-emerald-800 dark:text-emerald-200">
+              <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-center space-y-2">
+                <CheckCircle2 className="w-8 h-8 text-blue-500 mx-auto" />
+                <h4 className="font-bold text-xs text-blue-800 dark:text-blue-200">
                   Thank you for reporting!
                 </h4>
                 <p className="text-[11px] opacity-75">
@@ -1129,7 +1154,7 @@ export const GovernmentServicesView: React.FC = () => {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 py-2 bg-[#063B2C] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1"
+                    className="flex-1 py-2 bg-[#007AFF] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1"
                   >
                     <Send className="w-3 h-3" />
                     <span>Submit Report</span>
@@ -1153,7 +1178,7 @@ export const GovernmentServicesView: React.FC = () => {
           >
             <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-800">
               <div className="flex items-center gap-2">
-                <FileCheck className="w-5 h-5 text-emerald-500" />
+                <FileCheck className="w-5 h-5 text-blue-500" />
                 <h3 className="font-extrabold text-sm">Save Application Record</h3>
               </div>
               <button
@@ -1275,7 +1300,7 @@ export const GovernmentServicesView: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 bg-[#063B2C] text-white font-bold text-xs rounded-xl shadow-xs hover:bg-[#084D3A] cursor-pointer"
+                  className="flex-1 py-2.5 bg-[#007AFF] text-white font-bold text-xs rounded-xl shadow-xs hover:bg-[#084D3A] cursor-pointer"
                 >
                   Save Record
                 </button>

@@ -87,12 +87,12 @@ export const ReportMediaUploader: React.FC<ReportMediaUploaderProps> = ({
     <div className="space-y-2.5">
       <div className="flex items-center justify-between">
         <label className="text-xs font-extrabold uppercase tracking-wider text-[#11241C] dark:text-white flex items-center gap-1.5">
-          <span className="w-5 h-5 rounded-full bg-[#063B2C] dark:bg-emerald-600 text-white flex items-center justify-center text-[11px] font-black">2</span>
+          <span className="w-5 h-5 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white flex items-center justify-center text-[11px] font-black">2</span>
           Photo or Video Evidence
           <span className="text-[11px] font-normal text-[#55685F] dark:text-[#A2B3AA] lowercase">(optional)</span>
         </label>
         {mediaUrl && (
-          <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
+          <span className="text-[11px] font-semibold text-blue-700 dark:text-blue-400 flex items-center gap-1">
             <FileCheck className="w-3.5 h-3.5" /> Media attached
           </span>
         )}
@@ -135,17 +135,17 @@ export const ReportMediaUploader: React.FC<ReportMediaUploaderProps> = ({
 
       {/* Uploading progress state */}
       {uploadProgress !== null && (
-        <div className="p-4 bg-white dark:bg-[#16241F] border border-[#E4DFD3] dark:border-white/10 rounded-2xl space-y-2">
+        <div className="p-4 bg-white dark:bg-[#0F172A] border border-[#E4DFD3] dark:border-white/10 rounded-2xl space-y-2">
           <div className="flex items-center justify-between text-xs font-bold text-[#11241C] dark:text-white">
             <span className="flex items-center gap-2">
-              <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#063B2C] dark:text-emerald-400" />
+              <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#007AFF] dark:text-blue-400" />
               Processing media...
             </span>
             <span>{uploadProgress}%</span>
           </div>
           <div className="w-full h-1.5 bg-[#E4DFD3] dark:bg-white/10 rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#063B2C] dark:bg-emerald-500 transition-all duration-200"
+              className="h-full bg-[#007AFF] dark:bg-blue-500 transition-all duration-200"
               style={{ width: `${uploadProgress}%` }}
             />
           </div>
@@ -154,7 +154,7 @@ export const ReportMediaUploader: React.FC<ReportMediaUploaderProps> = ({
 
       {/* Media preview state */}
       {mediaUrl && uploadProgress === null ? (
-        <div className="bg-white dark:bg-[#16241F] border border-[#E4DFD3] dark:border-white/10 rounded-2xl p-3 space-y-3">
+        <div className="bg-white dark:bg-[#0F172A] border border-[#E4DFD3] dark:border-white/10 rounded-2xl p-3 space-y-3">
           <div className="relative rounded-xl overflow-hidden bg-black/5 dark:bg-black/40 max-h-56 flex items-center justify-center border border-black/5 dark:border-white/5">
             {mediaType === 'video' ? (
               <video
@@ -188,7 +188,7 @@ export const ReportMediaUploader: React.FC<ReportMediaUploaderProps> = ({
                 onClick={() => fileInputRef.current?.click()}
                 className="px-3 py-1.5 rounded-xl border border-[#D2CEBE] dark:border-white/10 text-xs font-bold text-[#11241C] dark:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#1E3027] transition-colors flex items-center gap-1.5 cursor-pointer"
               >
-                <RefreshCw className="w-3 h-3 text-[#063B2C] dark:text-emerald-400" />
+                <RefreshCw className="w-3 h-3 text-[#007AFF] dark:text-blue-400" />
                 <span>Replace</span>
               </button>
               <button
@@ -205,16 +205,16 @@ export const ReportMediaUploader: React.FC<ReportMediaUploaderProps> = ({
         </div>
       ) : uploadProgress === null ? (
         /* Empty upload card */
-        <div className="bg-white dark:bg-[#16241F] border border-[#E4DFD3] dark:border-white/10 rounded-2xl p-4 transition-colors space-y-3">
+        <div className="bg-white dark:bg-[#0F172A] border border-[#E4DFD3] dark:border-white/10 rounded-2xl p-4 transition-colors space-y-3">
           <div className="grid grid-cols-2 gap-2.5">
             {/* Take photo with camera */}
             <button
               type="button"
               id="btn-open-camera"
               onClick={() => cameraInputRef.current?.click()}
-              className="py-3 px-3 rounded-xl border border-dashed border-[#B8B4A4] dark:border-white/20 bg-[#FAF8F5] dark:bg-[#121E19] hover:border-[#063B2C] dark:hover:border-emerald-500 hover:bg-white dark:hover:bg-[#1A2A22] transition-all flex flex-col items-center justify-center gap-1.5 text-center cursor-pointer group"
+              className="py-3 px-3 rounded-xl border border-dashed border-[#B8B4A4] dark:border-white/20 bg-[#FAF8F5] dark:bg-[#121E19] hover:border-[#007AFF] dark:hover:border-blue-500 hover:bg-white dark:hover:bg-[#1A2A22] transition-all flex flex-col items-center justify-center gap-1.5 text-center cursor-pointer group"
             >
-              <div className="w-9 h-9 rounded-full bg-white dark:bg-[#1A2A22] text-[#063B2C] dark:text-emerald-400 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+              <div className="w-9 h-9 rounded-full bg-white dark:bg-[#1A2A22] text-[#007AFF] dark:text-blue-400 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
                 <Camera className="w-4 h-4 stroke-[2]" />
               </div>
               <div>
@@ -228,9 +228,9 @@ export const ReportMediaUploader: React.FC<ReportMediaUploaderProps> = ({
               type="button"
               id="btn-open-gallery"
               onClick={() => fileInputRef.current?.click()}
-              className="py-3 px-3 rounded-xl border border-dashed border-[#B8B4A4] dark:border-white/20 bg-[#FAF8F5] dark:bg-[#121E19] hover:border-[#063B2C] dark:hover:border-emerald-500 hover:bg-white dark:hover:bg-[#1A2A22] transition-all flex flex-col items-center justify-center gap-1.5 text-center cursor-pointer group"
+              className="py-3 px-3 rounded-xl border border-dashed border-[#B8B4A4] dark:border-white/20 bg-[#FAF8F5] dark:bg-[#121E19] hover:border-[#007AFF] dark:hover:border-blue-500 hover:bg-white dark:hover:bg-[#1A2A22] transition-all flex flex-col items-center justify-center gap-1.5 text-center cursor-pointer group"
             >
-              <div className="w-9 h-9 rounded-full bg-white dark:bg-[#1A2A22] text-[#063B2C] dark:text-emerald-400 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+              <div className="w-9 h-9 rounded-full bg-white dark:bg-[#1A2A22] text-[#007AFF] dark:text-blue-400 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
                 <ImageIcon className="w-4 h-4 stroke-[2]" />
               </div>
               <div>

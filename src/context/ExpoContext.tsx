@@ -97,7 +97,7 @@ export const ExpoProvider: React.FC<{ children: React.ReactNode }> = ({ children
             triggerPushNotification({
               appTitle: 'Messages',
               category: 'SMS',
-              title: 'Jalpaiguri Connect Verification',
+              title: 'MYJPG Verification',
               body: `Your verification code is ${data.otp}. Do not share this code.`,
               code: data.otp,
               actionLabel: 'Auto-Fill OTP',
@@ -113,7 +113,7 @@ export const ExpoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           const alert = JSON.parse(e.data);
           triggerPushNotification({
-            appTitle: 'Jalpaiguri Connect',
+            appTitle: 'MYJPG',
             category: 'ALERT',
             title: alert.title || 'Local Alert',
             body: alert.description || 'New civic announcement for your area.',

@@ -16,6 +16,7 @@ import { useNav } from '../../context/NavigationContext';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { BloodGroup } from '../../types';
+import { EmptyState } from '../common/EmptyState';
 
 export const BloodView: React.FC = () => {
   const { navigate } = useNav();
@@ -76,18 +77,18 @@ export const BloodView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 max-w-md mx-auto select-none transition-colors">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 max-w-md mx-auto select-none transition-colors">
       {/* Exact Header matching Screenshot 8 */}
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0F1A15]/90 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-[#E8E4DA]/40 dark:border-white/10 transition-colors">
+      <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0B132B]/90 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-[#E8E4DA]/40 dark:border-white/10 transition-colors">
         <div
           onClick={() => navigate('profile')}
-          className="w-10 h-10 rounded-full bg-[#EFECE6] dark:bg-[#17231E] flex items-center justify-center text-[#11241C] dark:text-white cursor-pointer transition-colors"
+          className="w-10 h-10 rounded-full bg-[#EFECE6] dark:bg-[#0F172A] flex items-center justify-center text-[#11241C] dark:text-white cursor-pointer transition-colors"
         >
           <User className="w-5 h-5 stroke-[2]" />
         </div>
 
         <h1 className="text-lg font-extrabold text-[#11241C] dark:text-white tracking-tight">
-          Jalpaiguri Connect
+          MYJPG
         </h1>
 
         <div
@@ -104,7 +105,7 @@ export const BloodView: React.FC = () => {
           <div className="w-14 h-14 rounded-full bg-[#FFEBEA] dark:bg-red-950/50 text-[#D9383A] dark:text-red-400 flex items-center justify-center mx-auto shadow-xs border border-transparent dark:border-red-900/40">
             <Droplet className="w-7 h-7 fill-[#D9383A] dark:fill-red-400" />
           </div>
-          <h2 className="text-3xl font-extrabold text-[#063B2C] dark:text-[#4ECCA3] tracking-tight">
+          <h2 className="text-3xl font-extrabold text-[#007AFF] dark:text-[#38BDF8] tracking-tight">
             Blood Help
           </h2>
           <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] leading-relaxed max-w-[300px] mx-auto">
@@ -136,15 +137,15 @@ export const BloodView: React.FC = () => {
               const el = document.getElementById('register-donor-form');
               el?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="bg-[#DCEEE3] dark:bg-[#122A20] border border-[#C2E4D2] dark:border-emerald-900/40 rounded-3xl p-5 text-center shadow-xs hover:border-[#063B2C] active:scale-98 transition-all cursor-pointer space-y-1.5"
+            className="bg-[#DCEEE3] dark:bg-[#122A20] border border-[#C2E4D2] dark:border-blue-900/40 rounded-3xl p-5 text-center shadow-xs hover:border-[#007AFF] active:scale-98 transition-all cursor-pointer space-y-1.5"
           >
-            <div className="w-10 h-10 rounded-2xl bg-white/70 dark:bg-emerald-900/40 text-[#063B2C] dark:text-[#4ECCA3] flex items-center justify-center mx-auto">
-              <HeartHandshake className="w-6 h-6 text-[#063B2C] dark:text-[#4ECCA3]" />
+            <div className="w-10 h-10 rounded-2xl bg-white/70 dark:bg-blue-900/40 text-[#007AFF] dark:text-[#38BDF8] flex items-center justify-center mx-auto">
+              <HeartHandshake className="w-6 h-6 text-[#007AFF] dark:text-[#38BDF8]" />
             </div>
             <h3 className="font-extrabold text-base text-[#11241C] dark:text-white tracking-tight">
               I Want to Donate
             </h3>
-            <p className="text-xs font-semibold text-[#063B2C] dark:text-[#4ECCA3]">
+            <p className="text-xs font-semibold text-[#007AFF] dark:text-[#38BDF8]">
               Respond to active requests
             </p>
           </div>
@@ -168,7 +169,7 @@ export const BloodView: React.FC = () => {
 
         {/* Emergency Blood Request Sub-View */}
         {activeSection === 'request' && (
-          <div className="bg-white dark:bg-[#17231E] border-2 border-[#FFD2D0] dark:border-red-900/40 rounded-3xl p-5 shadow-sm space-y-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0F172A] border-2 border-[#FFD2D0] dark:border-red-900/40 rounded-3xl p-5 shadow-sm space-y-4 animate-in fade-in transition-colors">
             <div className="flex items-center gap-2 text-[#D9383A] dark:text-red-400">
               <AlertCircle className="w-5 h-5" />
               <h3 className="font-extrabold text-base text-[#11241C] dark:text-white">Post Urgent Blood Request</h3>
@@ -200,7 +201,7 @@ export const BloodView: React.FC = () => {
                     className="w-full bg-[#FAF8F5] dark:bg-[#121E19] border border-[#D2CEBE] dark:border-white/10 rounded-xl p-3 text-xs font-bold text-[#11241C] dark:text-white focus:outline-none"
                   >
                     {bloodGroups.map((bg) => (
-                      <option key={bg} value={bg} className="bg-white dark:bg-[#17231E] text-[#11241C] dark:text-white">{bg}</option>
+                      <option key={bg} value={bg} className="bg-white dark:bg-[#0F172A] text-[#11241C] dark:text-white">{bg}</option>
                     ))}
                   </select>
                 </div>
@@ -250,34 +251,44 @@ export const BloodView: React.FC = () => {
             </span>
           </div>
 
-          {bloodRequests.map((req) => (
-            <div
-              key={req.id}
-              className="bg-white dark:bg-[#17231E] border border-[#FFD2D0] dark:border-red-900/30 rounded-3xl p-4 shadow-xs space-y-2.5 transition-colors"
-            >
-              <div className="flex items-center justify-between">
-                <span className="px-2.5 py-1 rounded-xl bg-[#FFEBEA] dark:bg-red-950/50 text-[#D9383A] dark:text-red-400 text-xs font-extrabold border border-transparent dark:border-red-900/40">
-                  {req.bloodGroup} Needed ({req.units} Unit)
-                </span>
-                <span className="text-[11px] text-[#55685F] dark:text-[#A2B3AA] font-medium">{req.postedAt}</span>
+          {bloodRequests.length === 0 ? (
+            <EmptyState
+              icon={Droplet}
+              title="No Urgent Blood Needs"
+              description="There are currently no active emergency blood requests in Jalpaiguri. The community is safe."
+              actionLabel="Post a Request"
+              onAction={() => setActiveSection('request')}
+            />
+          ) : (
+            bloodRequests.map((req) => (
+              <div
+                key={req.id}
+                className="bg-white dark:bg-[#0F172A] border border-[#FFD2D0] dark:border-red-900/30 rounded-3xl p-4 shadow-xs space-y-2.5 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-1 rounded-xl bg-[#FFEBEA] dark:bg-red-950/50 text-[#D9383A] dark:text-red-400 text-xs font-extrabold border border-transparent dark:border-red-900/40">
+                    {req.bloodGroup} Needed ({req.units} Unit)
+                  </span>
+                  <span className="text-[11px] text-[#55685F] dark:text-[#A2B3AA] font-medium">{req.postedAt}</span>
+                </div>
+                <h4 className="font-bold text-sm text-[#11241C] dark:text-white">{req.hospital}</h4>
+                <p className="text-xs text-[#55685F] dark:text-[#A2B3AA]">Case: {req.patientName}</p>
+                <div className="pt-1 flex gap-2">
+                  <button
+                    onClick={() => alert(`Contacting coordinator: ${req.phone}`)}
+                    className="flex-1 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white text-xs font-bold shadow-xs cursor-pointer hover:bg-[#084D3A]"
+                  >
+                    I Can Donate
+                  </button>
+                </div>
               </div>
-              <h4 className="font-bold text-sm text-[#11241C] dark:text-white">{req.hospital}</h4>
-              <p className="text-xs text-[#55685F] dark:text-[#A2B3AA]">Case: {req.patientName}</p>
-              <div className="pt-1 flex gap-2">
-                <button
-                  onClick={() => alert(`Contacting coordinator: ${req.phone}`)}
-                  className="flex-1 py-2 rounded-xl bg-[#063B2C] dark:bg-emerald-600 text-white text-xs font-bold shadow-xs cursor-pointer hover:bg-[#084D3A]"
-                >
-                  I Can Donate
-                </button>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Find Donors Directory Section */}
         {activeSection === 'find-donors' && (
-          <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4 animate-in fade-in transition-colors">
+          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4 animate-in fade-in transition-colors">
             <div className="flex items-center justify-between">
               <h3 className="font-extrabold text-base text-[#11241C] dark:text-white">Nearby Donors</h3>
               <select
@@ -285,46 +296,65 @@ export const BloodView: React.FC = () => {
                 onChange={(e) => setSelectedSearchGroup(e.target.value)}
                 className="text-xs font-bold bg-[#FAF8F5] dark:bg-[#121E19] border border-[#D2CEBE] dark:border-white/10 rounded-lg px-2 py-1 text-[#11241C] dark:text-white"
               >
-                <option value="All" className="bg-white dark:bg-[#17231E] text-[#11241C] dark:text-white">All Groups</option>
+                <option value="All" className="bg-white dark:bg-[#0F172A] text-[#11241C] dark:text-white">All Groups</option>
                 {bloodGroups.map((bg) => (
-                  <option key={bg} value={bg} className="bg-white dark:bg-[#17231E] text-[#11241C] dark:text-white">{bg}</option>
+                  <option key={bg} value={bg} className="bg-white dark:bg-[#0F172A] text-[#11241C] dark:text-white">{bg}</option>
                 ))}
               </select>
             </div>
 
             <div className="space-y-3">
-              {bloodDonors
-                .filter((d) => selectedSearchGroup === 'All' || d.bloodGroup === selectedSearchGroup)
-                .map((donor) => (
-                  <div
-                    key={donor.id}
-                    className="bg-[#FAF8F5] dark:bg-[#121E19] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-3.5 flex items-center justify-between transition-colors"
-                  >
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-xs text-[#D9383A] dark:text-red-400 bg-[#FFEBEA] dark:bg-red-950/50 px-2 py-0.5 rounded-md border border-transparent dark:border-red-900/40">
-                          {donor.bloodGroup}
-                        </span>
-                        <span className="text-xs font-bold text-[#11241C] dark:text-white">{donor.name}</span>
-                      </div>
-                      <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">
-                        {donor.area} • {donor.distance}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => alert('Consent-based request sent to donor! They will be notified securely.')}
-                      className="text-xs font-bold px-3 py-1.5 rounded-xl bg-[#063B2C] dark:bg-emerald-600 text-white shadow-xs cursor-pointer"
+              {bloodDonors.filter((d) => selectedSearchGroup === 'All' || d.bloodGroup === selectedSearchGroup).length === 0 ? (
+                <EmptyState
+                  icon={Search}
+                  title="No Donors Found"
+                  description={bloodDonors.length === 0 
+                    ? "Be the first to register as a donor in Jalpaiguri and help those in need."
+                    : "No donors found for the selected blood group in your area."}
+                  actionLabel={bloodDonors.length === 0 ? "Register as Donor" : "Clear Filter"}
+                  onAction={() => {
+                    if (bloodDonors.length === 0) {
+                      const el = document.getElementById('register-donor-form');
+                      el?.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                      setSelectedSearchGroup('All');
+                    }
+                  }}
+                />
+              ) : (
+                bloodDonors
+                  .filter((d) => selectedSearchGroup === 'All' || d.bloodGroup === selectedSearchGroup)
+                  .map((donor) => (
+                    <div
+                      key={donor.id}
+                      className="bg-[#FAF8F5] dark:bg-[#121E19] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-3.5 flex items-center justify-between transition-colors"
                     >
-                      Request Contact
-                    </button>
-                  </div>
-                ))}
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-extrabold text-xs text-[#D9383A] dark:text-red-400 bg-[#FFEBEA] dark:bg-red-950/50 px-2 py-0.5 rounded-md border border-transparent dark:border-red-900/40">
+                            {donor.bloodGroup}
+                          </span>
+                          <span className="text-xs font-bold text-[#11241C] dark:text-white">{donor.name}</span>
+                        </div>
+                        <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">
+                          {donor.area} • {donor.distance}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => alert('Consent-based request sent to donor! They will be notified securely.')}
+                        className="text-xs font-bold px-3 py-1.5 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white shadow-xs cursor-pointer"
+                      >
+                        Request Contact
+                      </button>
+                    </div>
+                  ))
+              )}
             </div>
           </div>
         )}
 
         {/* Form: Register as Blood Donor matching Screenshot 8 */}
-        <div id="register-donor-form" className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4 transition-colors">
+        <div id="register-donor-form" className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4 transition-colors">
           <div className="space-y-1">
             <h3 className="text-lg font-extrabold text-[#11241C] dark:text-white tracking-tight">
               Register as Blood Donor
@@ -346,7 +376,7 @@ export const BloodView: React.FC = () => {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Enter your full name"
-                className="w-full bg-[#FAF5EE] dark:bg-[#121E19] border border-[#E5E0D5] dark:border-white/10 rounded-2xl p-3.5 text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-[#8C9B93] dark:placeholder:text-[#73857C] focus:outline-none focus:border-[#063B2C] dark:focus:border-emerald-500"
+                className="w-full bg-[#FAF5EE] dark:bg-[#121E19] border border-[#E5E0D5] dark:border-white/10 rounded-2xl p-3.5 text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-[#8C9B93] dark:placeholder:text-[#73857C] focus:outline-none focus:border-[#007AFF] dark:focus:border-blue-500"
               />
             </div>
 
@@ -362,7 +392,7 @@ export const BloodView: React.FC = () => {
                   className="w-full bg-[#FAF5EE] dark:bg-[#121E19] border border-[#E5E0D5] dark:border-white/10 rounded-2xl p-3.5 text-xs font-bold text-[#11241C] dark:text-white focus:outline-none appearance-none cursor-pointer"
                 >
                   {bloodGroups.map((bg) => (
-                    <option key={bg} value={bg} className="bg-white dark:bg-[#17231E] text-[#11241C] dark:text-white">{bg}</option>
+                    <option key={bg} value={bg} className="bg-white dark:bg-[#0F172A] text-[#11241C] dark:text-white">{bg}</option>
                   ))}
                 </select>
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#55685F] dark:text-[#A2B3AA]">
@@ -382,7 +412,7 @@ export const BloodView: React.FC = () => {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+91 98320 XXXXX"
-                className="w-full bg-[#FAF5EE] dark:bg-[#121E19] border border-[#E5E0D5] dark:border-white/10 rounded-2xl p-3.5 text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-[#8C9B93] dark:placeholder:text-[#73857C] focus:outline-none focus:border-[#063B2C] dark:focus:border-emerald-500"
+                className="w-full bg-[#FAF5EE] dark:bg-[#121E19] border border-[#E5E0D5] dark:border-white/10 rounded-2xl p-3.5 text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-[#8C9B93] dark:placeholder:text-[#73857C] focus:outline-none focus:border-[#007AFF] dark:focus:border-blue-500"
               />
             </div>
 
@@ -397,7 +427,7 @@ export const BloodView: React.FC = () => {
                 value={area}
                 onChange={(e) => setArea(e.target.value)}
                 placeholder="e.g. Kadamtala, Mohitnagar, Ward 8"
-                className="w-full bg-[#FAF5EE] dark:bg-[#121E19] border border-[#E5E0D5] dark:border-white/10 rounded-2xl p-3.5 text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-[#8C9B93] dark:placeholder:text-[#73857C] focus:outline-none focus:border-[#063B2C] dark:focus:border-emerald-500"
+                className="w-full bg-[#FAF5EE] dark:bg-[#121E19] border border-[#E5E0D5] dark:border-white/10 rounded-2xl p-3.5 text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-[#8C9B93] dark:placeholder:text-[#73857C] focus:outline-none focus:border-[#007AFF] dark:focus:border-blue-500"
               />
             </div>
 
@@ -405,7 +435,7 @@ export const BloodView: React.FC = () => {
             <div className="pt-2">
               <button
                 type="submit"
-                className="w-full bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-sm py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-md hover:bg-[#084D3A] active:scale-98 transition-all cursor-pointer"
+                className="w-full bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-sm py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-md hover:bg-[#084D3A] active:scale-98 transition-all cursor-pointer"
               >
                 <span>Register Now</span>
                 <ArrowRight className="w-4 h-4" />

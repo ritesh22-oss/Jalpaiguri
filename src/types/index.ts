@@ -33,7 +33,16 @@ export type ViewType =
   | 'rentals'
   | 'rental-detail'
   | 'list-property'
+  | 'transport'
+  | 'transport-detail'
+  | 'courier'
+  | 'courier-detail'
+  | 'add-courier'
+  | 'education'
+  | 'education-detail'
+  | 'add-education'
   | 'government'
+  | 'banks-atms'
   | 'businesses'
   | 'business-detail'
   | 'lost-found'
@@ -56,11 +65,20 @@ export type ViewType =
   | 'outside-area'
   | 'location-permission-required'
   | 'faq'
+
+  | 'dining'
+  | 'dining-marketplace'
+  | 'restaurant-detail'
+  | 'dining-detail'
+  | 'add-restaurant'
+  | 'restaurant-dashboard'
   | 'shop-marketplace'
   | 'add-shop'
   | 'merchant-dashboard'
   | 'shop-detail'
-  | 'smart-shopping-search';
+  | 'smart-shopping-search'
+  | 'puja-pandals'
+  | 'pandal-detail';
 
 export type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | "I don't know";
 
@@ -112,6 +130,7 @@ export type NearbyCategoryType =
   | 'Blood'
   | 'Jobs'
   | 'Shops'
+  | 'Dining'
   | 'Vehicle'
   | 'Animal'
   | 'Rentals'
@@ -170,11 +189,8 @@ export interface UserProfile {
   isBloodDonor?: boolean;
   language: 'English' | 'বাংলা' | 'हिन्दी';
   role?: 'citizen' | 'admin' | 'worker' | 'shop_owner';
-  fingerprintEnrolled?: boolean;
-  fingerprintCredentialId?: string;
   emailVerified?: boolean;
-  biometricEnabled?: boolean;
-  authMethod?: 'google' | 'phone' | 'email' | 'biometric';
+  authMethod?: 'google' | 'phone' | 'email';
   createdAt: string;
 }
 
@@ -248,7 +264,6 @@ export interface PrivateIncidentNote {
 export const PREDEFINED_ADMIN_EMAIL = 'riteshganguly0911@gmail.com';
 
 const AUTHORIZED_ADMIN_EMAILS: readonly string[] = [
-  'r36728659@gmail.com',
   PREDEFINED_ADMIN_EMAIL,
   'riteshganguly0911@gamil.com' // Handle common domain typo securely
 ];
@@ -646,6 +661,113 @@ export interface Shop {
   createdAt: string;
   updatedAt: string;
   productCount?: number;
+  subscription?: ShopSubscription;
+}
+
+export interface ShopSubscription {
+  plan: 'free' | 'monthly' | 'yearly';
+  status: 'trial' | 'active' | 'expired' | 'cancelled' | 'payment_failed';
+  trialStartedAt?: string;
+  trialEndsAt?: string;
+  subscriptionStartedAt?: string;
+  subscriptionEndsAt?: string;
+  billingCycle?: 'monthly' | 'yearly';
+  paymentStatus?: 'pending' | 'completed' | 'failed';
+  razorpayCustomerId?: string;
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  lastPaymentAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface SupportTicket {
+  id: string;
+  userId: string;
+  shopId?: string;
+  category: string;
+  subject: string;
+  description: string;
+  status: 'Open' | 'In Review' | 'Resolved' | 'Closed';
+  createdAt: string;
+  updatedAt: string;
+}
+
+
+export type RestaurantCategory = 
+  | 'Cafe'
+  | 'Restaurant'
+  | 'Fast Food'
+  | 'Street Food'
+  | 'Bakery & Sweets'
+  | 'Cloud Kitchen'
+  | 'Dhaba'
+  | 'Other';
+
+export interface Restaurant {
+  id: string;
+  ownerId: string;
+  ownerName: string;
+  ownerPhone: string;
+  phone?: string;
+  ownerEmail?: string;
+  whatsappNumber?: string;
+  name: string;
+  nameBn?: string;
+  category: RestaurantCategory | string;
+  cuisineTypes: string[];
+  description: string;
+  locality: string;
+  address: string;
+  landmark?: string;
+  pincode: string;
+  lat: number;
+  lng: number;
+  distanceKm?: number;
+  distanceText?: string;
+  openingTime?: string;
+  closingTime?: string;
+  openingHours?: { open: string; close: string; weeklyOff?: string };
+  weeklyOff?: string;
+  homeDelivery?: boolean;
+  minOrderAmount?: number;
+  paymentMethods: string[];
+  upiId?: string;
+  photoUrl?: string;
+  insidePhotoUrl?: string;
+  logoUrl?: string;
+  menuPhotoUrl?: string;
+  isVerified: boolean;
+  status: 'pending' | 'verified' | 'rejected' | 'suspended';
+  featured?: boolean;
+  isOpen: boolean;
+  rating: number;
+  reviewCount: number;
+  subscriptionPlan: 'free' | 'monthly' | 'yearly';
+  subscriptionExpiresAt?: string;
+  analytics?: { views?: number; callClicks?: number; whatsappClicks?: number; directionsClicks?: number };
+  createdAt: string;
+  updatedAt: string;
+  menuItemCount?: number;
+  subscription?: ShopSubscription;
+}
+
+export interface MenuItem {
+  id: string;
+  restaurantId: string;
+  ownerId: string;
+  name: string;
+  nameBn?: string;
+  category: string;
+  price: number;
+  discountPrice?: number;
+  isVeg: boolean;
+  isEgg: boolean;
+  inStock: boolean;
+  photoUrl?: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Product {
@@ -691,5 +813,173 @@ export interface MerchantSubscription {
   durationMonths: number;
   features: string[];
   isPopular?: boolean;
+}
+
+
+// --- CITY SERVICES: TRANSPORT, COURIER & EDUCATION ---
+
+export type TransportType = 'bus' | 'train' | 'local_auto' | 'toto' | 'toto_pool';
+
+export interface TransportStop {
+  id: string;
+  name: string;
+  nameBn?: string;
+  locality: string;
+  lat: number;
+  lng: number;
+}
+
+export interface TransportRoute {
+  id: string;
+  type: TransportType;
+  name: string;
+  nameBn?: string;
+  operator: string; // e.g., "NBSTC", "Indian Railways", "Local Auto Union"
+  origin: string;
+  destination: string;
+  departureTime: string;
+  arrivalTime: string;
+  duration: string;
+  fare?: number;
+  daysOfOperation: string[]; // ['Mon', 'Tue', ...]
+  intermediateStops: string[];
+  source: string; // e.g., "Official NBSTC Timetable 2026"
+  lastUpdated: string;
+  isDirect: boolean;
+}
+
+export interface CourierService {
+  id: string;
+  ownerId?: string;
+  name: string;
+  category: string; // 'Courier Office' | 'Parcel Service' | 'Logistics' | 'Express Delivery'
+  address: string;
+  locality: string;
+  pincode: string;
+  lat: number;
+  lng: number;
+  phone: string;
+  servicesOffered: string[]; // ['Home Pickup', 'Document Delivery', 'Express', 'Local', 'National']
+  openingHours: string;
+  isOpenNow?: boolean;
+  websiteUrl?: string;
+  trackingUrlTemplate?: string;
+  photoUrl?: string;
+  rating?: number;
+  reviewCount?: number;
+  isVerified: boolean;
+  createdAt: string;
+}
+
+export interface Course {
+  id: string;
+  institutionId: string;
+  name: string;
+  nameBn?: string;
+  category: string; // 'Science', 'Arts', 'Computer', 'Vocational', 'Language', 'Coaching'
+  duration: string;
+  fees?: string;
+  description?: string;
+}
+
+export interface AdmissionNotice {
+  id: string;
+  institutionId: string;
+  title: string;
+  titleBn?: string;
+  deadline?: string;
+  description: string;
+  officialUrl?: string;
+  publishedAt: string;
+}
+
+export interface EducationalInstitution {
+  id: string;
+  ownerId?: string;
+  name: string;
+  nameBn?: string;
+  category: 'School' | 'College' | 'University' | 'Coaching' | 'Tuition' | 'Computer Training' | 'Vocational' | 'Competitive Exams' | 'Library' | 'Language Learning' | 'Skill Development';
+  address: string;
+  locality: string;
+  pincode: string;
+  lat: number;
+  lng: number;
+  phone: string;
+  email?: string;
+  websiteUrl?: string;
+  openingHours: string;
+  overview: string;
+  facilities: string[];
+  photos: string[];
+  courses: Course[];
+  notices: AdmissionNotice[];
+  rating?: number;
+  reviewCount?: number;
+  isVerified: boolean;
+  createdAt: string;
+}
+
+export interface DurgaPandalItem {
+  id: string;
+  name: string;
+  nameBn?: string;
+  committee: string;
+  committeeBn?: string;
+  locality: string;
+  address: string;
+  lat: number;
+  lng: number;
+  season: string;
+  isCurrentSeason: boolean;
+  category: 'Theme Pandal' | 'Traditional Sabaki' | 'Eco-Friendly' | 'Lighting & Illumination' | 'Heritage';
+  themeName?: string;
+  description: string;
+  photos: string[];
+  photoAttributions?: string[];
+  primaryPhoto: string;
+  pujaDates?: string;
+  timings?: string;
+  specialAttractions?: string[];
+  badge?: 'Top Pick' | 'Popular' | 'Nearby' | 'Featured' | 'Traditional';
+  verificationStatus: 'verified' | 'pending' | 'rejected';
+  verifiedBy?: string;
+  organizerContact?: {
+    name?: string;
+    phone?: string;
+    email?: string;
+  };
+  submittedByUid?: string;
+  popularityScore?: number;
+  rating?: number;
+  ratingCount?: number;
+  createdAt: string;
+  updatedAt?: string;
+  distanceKm?: number;
+  distanceText?: string;
+}
+
+export interface PandalReport {
+  id: string;
+  pandalId: string;
+  pandalName: string;
+  reportedByUid?: string;
+  issueType: 'wrong_location' | 'outdated_info' | 'incorrect_photo' | 'duplicate' | 'other';
+  description: string;
+  createdAt: string;
+  status: 'pending' | 'resolved';
+}
+
+export interface PandalReview {
+  id: string;
+  pandalId: string;
+  userId: string;
+  userName: string;
+  userPhoto?: string;
+  rating: number; // 1 to 5
+  reviewText: string;
+  visitDate?: string;
+  createdAt: string;
+  updatedAt?: string;
+  isEdited?: boolean;
 }
 

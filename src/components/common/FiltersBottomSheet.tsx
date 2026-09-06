@@ -55,7 +55,7 @@ export const FiltersBottomSheet: React.FC = () => {
                     onClick={() => setWorkerFilters((f) => ({ ...f, distance: dist }))}
                     className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-[#063B2C] text-white border-[#063B2C]'
+                        ? 'bg-[#007AFF] text-white border-[#007AFF]'
                         : 'bg-white text-[#11241C] border-[#D2CEBE] hover:bg-[#FAF8F5]'
                     }`}
                   >
@@ -77,7 +77,7 @@ export const FiltersBottomSheet: React.FC = () => {
                   type="checkbox"
                   checked={workerFilters.availableNowOnly}
                   onChange={(e) => setWorkerFilters((f) => ({ ...f, availableNowOnly: e.target.checked }))}
-                  className="w-5 h-5 rounded border-[#D2CEBE] text-[#063B2C] focus:ring-[#063B2C]"
+                  className="w-5 h-5 rounded border-[#D2CEBE] text-[#007AFF] focus:ring-[#007AFF]"
                 />
                 <span className="text-sm font-medium text-[#11241C]">Available Now</span>
               </label>
@@ -87,7 +87,7 @@ export const FiltersBottomSheet: React.FC = () => {
                   type="checkbox"
                   checked={workerFilters.availableTodayOnly}
                   onChange={(e) => setWorkerFilters((f) => ({ ...f, availableTodayOnly: e.target.checked }))}
-                  className="w-5 h-5 rounded border-[#D2CEBE] text-[#063B2C] focus:ring-[#063B2C]"
+                  className="w-5 h-5 rounded border-[#D2CEBE] text-[#007AFF] focus:ring-[#007AFF]"
                 />
                 <span className="text-sm font-medium text-[#11241C]">Available Today</span>
               </label>
@@ -98,7 +98,7 @@ export const FiltersBottomSheet: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm font-bold text-[#11241C]">Minimum Rating</label>
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-[#D4E8DC] text-[#063B2C]">
+              <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-[#D4E8DC] text-[#007AFF]">
                 {workerFilters.minRating.toFixed(1)}+
               </span>
             </div>
@@ -109,7 +109,7 @@ export const FiltersBottomSheet: React.FC = () => {
               step="0.1"
               value={workerFilters.minRating}
               onChange={(e) => setWorkerFilters((f) => ({ ...f, minRating: parseFloat(e.target.value) }))}
-              className="w-full accent-[#063B2C] cursor-pointer"
+              className="w-full accent-[#007AFF] cursor-pointer"
             />
             <div className="flex justify-between text-[11px] text-[#6B7280] mt-1">
               <span>3.0 ★</span>
@@ -131,7 +131,7 @@ export const FiltersBottomSheet: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsFilterOpen(false)}
-            className="flex-1 py-3.5 px-4 rounded-xl bg-[#063B2C] font-bold text-sm text-white hover:bg-[#084D3A] active:scale-98 transition-all shadow-md cursor-pointer text-center"
+            className="flex-1 py-3.5 px-4 rounded-xl bg-[#007AFF] font-bold text-sm text-white hover:bg-[#084D3A] active:scale-98 transition-all shadow-md cursor-pointer text-center"
           >
             Apply Filters
           </button>

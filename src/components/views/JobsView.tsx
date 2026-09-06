@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useApp } from '../../context/AppContext';
+import { EmptyState } from '../common/EmptyState';
 
 export const JobsView: React.FC = () => {
   const { goBack, navigate } = useNav();
@@ -48,7 +49,7 @@ export const JobsView: React.FC = () => {
               onClick={() => setFilterType(t)}
               className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap cursor-pointer transition-all ${
                 filterType === t
-                  ? 'bg-[#063B2C] dark:bg-emerald-600 text-white shadow-xs'
+                  ? 'bg-[#007AFF] dark:bg-blue-600 text-white shadow-xs'
                   : 'bg-white dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 text-[#11241C] dark:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A]'
               }`}
             >
@@ -58,9 +59,20 @@ export const JobsView: React.FC = () => {
         </div>
 
         <div className="space-y-3">
-          {jobs
-            .filter((j) => filterType === 'All' || (j.jobType || j.type) === filterType)
-            .map((job) => {
+          {jobs.filter((j) => filterType === 'All' || (j.jobType || j.type) === filterType).length === 0 ? (
+            <EmptyState
+              icon={Briefcase}
+              title={jobs.length === 0 ? "No Jobs Posted Yet" : "No Match Found"}
+              description={jobs.length === 0 
+                ? "There are currently no active job openings listed in Jalpaiguri. Check back soon!"
+                : "Try changing your job type filter to see more opportunities."}
+              actionLabel={jobs.length === 0 ? undefined : "Clear Filters"}
+              onAction={() => setFilterType('All')}
+            />
+          ) : (
+            jobs
+              .filter((j) => filterType === 'All' || (j.jobType || j.type) === filterType)
+              .map((job) => {
               const isApplied = appliedJobIds.includes(job.id);
               const jobKind = job.jobType || job.type || 'Full-time';
               const companyName = job.employer || job.company || 'Local Employer';
@@ -73,7 +85,7 @@ export const JobsView: React.FC = () => {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white">{job.title}</h3>
-                      <p className="text-xs font-semibold text-[#063B2C] dark:text-emerald-400 mt-0.5">{companyName}</p>
+                      <p className="text-xs font-semibold text-[#007AFF] dark:text-blue-400 mt-0.5">{companyName}</p>
                     </div>
                     <span className="text-[11px] font-bold text-[#854D0E] dark:text-amber-300 bg-[#FEF9C3] dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-transparent dark:border-amber-800/40">
                       {jobKind}
@@ -82,7 +94,7 @@ export const JobsView: React.FC = () => {
 
                   <div className="flex items-center gap-3 text-xs text-[#55685F] dark:text-[#A2B3AA] font-semibold">
                     <span className="flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400" />
+                      <MapPin className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400" />
                       <span>{job.location}</span>
                     </span>
                     <span>•</span>
@@ -100,8 +112,8 @@ export const JobsView: React.FC = () => {
                       onClick={() => handleApply(job.id, job.title)}
                       className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         isApplied
-                          ? 'bg-[#E6F4EA] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-300 border border-transparent dark:border-emerald-800/40'
-                          : 'bg-[#063B2C] dark:bg-emerald-600 text-white hover:bg-[#084D3A] shadow-xs'
+                          ? 'bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 border border-transparent dark:border-blue-800/40'
+                          : 'bg-[#007AFF] dark:bg-blue-600 text-white hover:bg-[#084D3A] shadow-xs'
                       }`}
                     >
                       {isApplied ? 'Applied ✓' : 'Apply Now'}
@@ -109,7 +121,8 @@ export const JobsView: React.FC = () => {
                   </div>
                 </div>
               );
-            })}
+            })
+          )}
         </div>
       </div>
     </div>

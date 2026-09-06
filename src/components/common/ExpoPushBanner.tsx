@@ -91,8 +91,8 @@ export const ExpoPushBanner: React.FC = () => {
             >
               {copied ? (
                 <>
-                  <Check className="w-3 h-3 text-emerald-400" />
-                  <span className="text-emerald-300">Copied</span>
+                  <Check className="w-3 h-3 text-blue-400" />
+                  <span className="text-blue-300">Copied</span>
                 </>
               ) : (
                 <>

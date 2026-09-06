@@ -74,12 +74,12 @@ export const ReportDescriptionSection: React.FC<ReportDescriptionSectionProps> =
     <div className="space-y-2.5">
       <div className="flex items-center justify-between">
         <label className="text-xs font-extrabold uppercase tracking-wider text-[#11241C] dark:text-white flex items-center gap-1.5">
-          <span className="w-5 h-5 rounded-full bg-[#063B2C] dark:bg-emerald-600 text-white flex items-center justify-center text-[11px] font-black">4</span>
+          <span className="w-5 h-5 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white flex items-center justify-center text-[11px] font-black">4</span>
           Issue Description <span className="text-rose-500">*</span>
         </label>
         <div className="flex items-center gap-2">
           {isAiAssisted && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold border border-emerald-300 dark:border-emerald-800">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 text-[10px] font-bold border border-blue-300 dark:border-blue-800">
               <Sparkles className="w-3 h-3" /> AI-Assisted
             </span>
           )}
@@ -89,7 +89,7 @@ export const ReportDescriptionSection: React.FC<ReportDescriptionSectionProps> =
                 ? 'text-[#8C9B93] dark:text-[#A2B3AA]'
                 : charCount > maxChars
                 ? 'text-rose-600 dark:text-rose-400'
-                : 'text-[#063B2C] dark:text-emerald-400'
+                : 'text-[#007AFF] dark:text-blue-400'
             }`}
           >
             {charCount}/{maxChars}
@@ -97,7 +97,7 @@ export const ReportDescriptionSection: React.FC<ReportDescriptionSectionProps> =
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#16241F] border border-[#E4DFD3] dark:border-white/10 rounded-2xl p-3.5 transition-colors space-y-3 shadow-xs">
+      <div className="bg-white dark:bg-[#0F172A] border border-[#E4DFD3] dark:border-white/10 rounded-2xl p-3.5 transition-colors space-y-3 shadow-xs">
         <div className="relative">
           <textarea
             rows={4}
@@ -131,9 +131,9 @@ export const ReportDescriptionSection: React.FC<ReportDescriptionSectionProps> =
             id="btn-trigger-ai-assist"
             onClick={onOpenAiAssist}
             disabled={charCount < 5}
-            className="self-end sm:self-auto px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800/40 text-[#063B2C] dark:text-emerald-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40"
+            className="self-end sm:self-auto px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-800/40 text-[#007AFF] dark:text-blue-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40"
           >
-            <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
             <span>Enhance with Jalpaigi AI</span>
           </button>
         </div>

@@ -45,7 +45,7 @@ export const ExpoQrModal: React.FC = () => {
 
         <h3 className="text-lg font-bold text-gray-900">Scan to Open on Mobile</h3>
         <p className="text-xs text-gray-500 max-w-xs mt-1 leading-relaxed">
-          Open the Camera app on your iPhone or Android to test Jalpaiguri Connect live on your phone.
+          Open the Camera app on your iPhone or Android to test MYJPG live on your phone.
         </p>
 
         {/* QR Code Container */}
@@ -70,8 +70,8 @@ export const ExpoQrModal: React.FC = () => {
           >
             {copied ? (
               <>
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-emerald-300">Copied</span>
+                <Check className="w-3.5 h-3.5 text-blue-400" />
+                <span className="text-blue-300">Copied</span>
               </>
             ) : (
               <>

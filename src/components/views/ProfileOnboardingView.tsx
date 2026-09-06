@@ -86,7 +86,7 @@ export const ProfileOnboardingView: React.FC = () => {
       {/* Top Header */}
       <div className="pt-4">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-xs font-extrabold uppercase tracking-wider text-[#063B2C] dark:text-emerald-400">
+          <span className="text-xs font-extrabold uppercase tracking-wider text-[#007AFF] dark:text-blue-400">
             Step {step} of 5
           </span>
           <span className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA]">
@@ -97,7 +97,7 @@ export const ProfileOnboardingView: React.FC = () => {
         {/* Progress Bar */}
         <div className="w-full h-2 bg-[#E8E4DA] dark:bg-[#1A2E24] rounded-full overflow-hidden mb-6">
           <div
-            className="h-full bg-[#063B2C] dark:bg-emerald-500 transition-all duration-300 rounded-full"
+            className="h-full bg-[#007AFF] dark:bg-blue-500 transition-all duration-300 rounded-full"
             style={{ width: `${(step / 5) * 100}%` }}
           ></div>
         </div>
@@ -105,7 +105,7 @@ export const ProfileOnboardingView: React.FC = () => {
         {/* Step 1: Name */}
         {step === 1 && (
           <div className="space-y-4 animate-in fade-in duration-200">
-            <div className="w-12 h-12 rounded-2xl bg-[#E6F4EA] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-400 flex items-center justify-center font-bold text-xl shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-400 flex items-center justify-center font-bold text-xl shadow-xs">
               <User className="w-6 h-6" />
             </div>
             <h2 className="text-2xl font-extrabold text-[#11241C] dark:text-white tracking-tight">
@@ -124,7 +124,7 @@ export const ProfileOnboardingView: React.FC = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your full name"
-                  className="w-full bg-white dark:bg-[#17231E] border-2 border-[#D2CEBE] dark:border-white/10 rounded-2xl px-4 py-3.5 text-base font-bold text-[#11241C] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-[#063B2C] dark:focus:border-emerald-400 focus:outline-none shadow-xs transition-colors"
+                  className="w-full bg-white dark:bg-[#17231E] border-2 border-[#D2CEBE] dark:border-white/10 rounded-2xl px-4 py-3.5 text-base font-bold text-[#11241C] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-[#007AFF] dark:focus:border-blue-400 focus:outline-none shadow-xs transition-colors"
                   autoFocus
                 />
               </div>
@@ -138,7 +138,7 @@ export const ProfileOnboardingView: React.FC = () => {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+91 98320 XXXXX"
-                  className="w-full bg-white dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-[#063B2C] dark:focus:border-emerald-400 focus:outline-none shadow-xs transition-colors"
+                  className="w-full bg-white dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 rounded-2xl px-4 py-3 text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-[#007AFF] dark:focus:border-blue-400 focus:outline-none shadow-xs transition-colors"
                 />
               </div>
             </div>
@@ -162,7 +162,7 @@ export const ProfileOnboardingView: React.FC = () => {
                 <label className="text-xs font-bold text-[#11241C] dark:text-white uppercase">
                   Age in Years
                 </label>
-                <span className="text-xl font-extrabold text-[#063B2C] dark:text-emerald-400">
+                <span className="text-xl font-extrabold text-[#007AFF] dark:text-blue-400">
                   {age} yrs
                 </span>
               </div>
@@ -172,7 +172,7 @@ export const ProfileOnboardingView: React.FC = () => {
                 max="95"
                 value={age}
                 onChange={(e) => setAge(parseInt(e.target.value))}
-                className="w-full accent-[#063B2C] dark:accent-emerald-500 h-2 bg-[#E8E4DA] dark:bg-white/10 rounded-lg cursor-pointer"
+                className="w-full accent-[#007AFF] dark:accent-blue-500 h-2 bg-[#E8E4DA] dark:bg-white/10 rounded-lg cursor-pointer"
               />
               <div className="flex justify-between text-[10px] font-bold text-[#8C9B93] dark:text-[#A2B3AA]">
                 <span>14 yrs (Youth)</span>
@@ -201,7 +201,7 @@ export const ProfileOnboardingView: React.FC = () => {
                   onClick={() => setGender(opt.id)}
                   className={`p-4 rounded-3xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${
                     gender === opt.id
-                      ? 'bg-[#E6F4EA] dark:bg-emerald-950/60 border-[#063B2C] dark:border-emerald-400 text-[#063B2C] dark:text-emerald-300 shadow-sm ring-1 ring-[#063B2C] dark:ring-emerald-400'
+                      ? 'bg-[#E6F4EA] dark:bg-blue-950/60 border-[#007AFF] dark:border-blue-400 text-[#007AFF] dark:text-blue-300 shadow-sm ring-1 ring-[#007AFF] dark:ring-blue-400'
                       : 'bg-white dark:bg-[#17231E] border-[#D2CEBE] dark:border-white/10 text-[#11241C] dark:text-white hover:bg-[#FAF8F5] dark:hover:bg-white/5'
                   }`}
                 >
@@ -210,7 +210,7 @@ export const ProfileOnboardingView: React.FC = () => {
                       {opt.symbol}
                     </div>
                     {gender === opt.id && (
-                      <div className="w-5 h-5 rounded-full bg-[#063B2C] dark:bg-emerald-500 text-white flex items-center justify-center">
+                      <div className="w-5 h-5 rounded-full bg-[#007AFF] dark:bg-blue-500 text-white flex items-center justify-center">
                         <Check className="w-3 h-3 stroke-[3]" />
                       </div>
                     )}
@@ -270,7 +270,7 @@ export const ProfileOnboardingView: React.FC = () => {
 
             <div className="bg-white dark:bg-[#17231E] border-2 border-[#D2CEBE] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3 transition-colors">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#E6F4EA] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-full bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-400 flex items-center justify-center shrink-0">
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div className="flex-1">
@@ -279,7 +279,7 @@ export const ProfileOnboardingView: React.FC = () => {
                     type="text"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    className="w-full font-extrabold text-sm text-[#11241C] dark:text-white focus:outline-none border-b border-transparent focus:border-[#063B2C] dark:focus:border-emerald-400 bg-transparent"
+                    className="w-full font-extrabold text-sm text-[#11241C] dark:text-white focus:outline-none border-b border-transparent focus:border-[#007AFF] dark:focus:border-blue-400 bg-transparent"
                   />
                 </div>
               </div>
@@ -304,7 +304,7 @@ export const ProfileOnboardingView: React.FC = () => {
                     onClick={() => setLocation(`${loc}, Jalpaiguri`)}
                     className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-all cursor-pointer ${
                       location.includes(loc)
-                        ? 'bg-[#063B2C] dark:bg-emerald-600 text-white border-[#063B2C] dark:border-emerald-600'
+                        ? 'bg-[#007AFF] dark:bg-blue-600 text-white border-[#007AFF] dark:border-blue-600'
                         : 'bg-white dark:bg-[#17231E] text-[#11241C] dark:text-white border-[#D2CEBE] dark:border-white/10 hover:bg-[#FAF8F5] dark:hover:bg-white/5'
                     }`}
                   >
@@ -321,7 +321,7 @@ export const ProfileOnboardingView: React.FC = () => {
       <div className="pt-6">
         <button
           onClick={handleNext}
-          className="w-full bg-[#063B2C] dark:bg-emerald-600 text-white font-extrabold text-sm py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-md hover:bg-[#084D3A] dark:hover:bg-emerald-700 active:scale-98 transition-all cursor-pointer"
+          className="w-full bg-[#007AFF] dark:bg-blue-600 text-white font-extrabold text-sm py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-md hover:bg-[#084D3A] dark:hover:bg-blue-700 active:scale-98 transition-all cursor-pointer"
         >
           <span>{step === 5 ? 'Save & Start Exploring' : 'Continue'}</span>
           <ArrowRight className="w-4 h-4" />

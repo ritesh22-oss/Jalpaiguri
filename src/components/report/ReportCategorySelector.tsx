@@ -59,7 +59,7 @@ export const ReportCategorySelector: React.FC<ReportCategorySelectorProps> = ({
     <div className="space-y-2.5">
       <div className="flex items-center justify-between">
         <label className="text-xs font-extrabold uppercase tracking-wider text-[#11241C] dark:text-white flex items-center gap-1.5">
-          <span className="w-5 h-5 rounded-full bg-[#063B2C] dark:bg-emerald-600 text-white flex items-center justify-center text-[11px] font-black">1</span>
+          <span className="w-5 h-5 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white flex items-center justify-center text-[11px] font-black">1</span>
           Select Category <span className="text-rose-500">*</span>
         </label>
         <span className="text-[11px] font-semibold text-[#55685F] dark:text-[#A2B3AA]">
@@ -80,15 +80,15 @@ export const ReportCategorySelector: React.FC<ReportCategorySelectorProps> = ({
               onClick={() => onSelectCategory(cat.id)}
               className={`group text-left px-3 py-2.5 rounded-2xl border transition-all duration-150 cursor-pointer relative flex items-center gap-2.5 ${
                 isSelected
-                  ? 'bg-[#063B2C] dark:bg-emerald-600 text-white border-[#063B2C] dark:border-emerald-600 shadow-sm ring-2 ring-[#063B2C]/20 dark:ring-emerald-500/30'
-                  : 'bg-white dark:bg-[#16241F] text-[#11241C] dark:text-white border-[#E4DFD3] dark:border-white/10 hover:border-[#063B2C]/40 dark:hover:border-emerald-500/40 hover:bg-[#FAF8F5] dark:hover:bg-[#1B2C24]'
+                  ? 'bg-[#007AFF] dark:bg-blue-600 text-white border-[#007AFF] dark:border-blue-600 shadow-sm ring-2 ring-[#007AFF]/20 dark:ring-blue-500/30'
+                  : 'bg-white dark:bg-[#0F172A] text-[#11241C] dark:text-white border-[#E4DFD3] dark:border-white/10 hover:border-[#007AFF]/40 dark:hover:border-blue-500/40 hover:bg-[#FAF8F5] dark:hover:bg-[#1B2C24]'
               }`}
             >
               <div
                 className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center transition-colors ${
                   isSelected
                     ? 'bg-white/20 text-white'
-                    : 'bg-[#F2EFE8] dark:bg-[#121E19] text-[#063B2C] dark:text-emerald-400 group-hover:bg-[#E7E2D5] dark:group-hover:bg-[#172720]'
+                    : 'bg-[#F2EFE8] dark:bg-[#121E19] text-[#007AFF] dark:text-blue-400 group-hover:bg-[#E7E2D5] dark:group-hover:bg-[#172720]'
                 }`}
               >
                 <IconComp className="w-4 h-4 stroke-[2]" />
@@ -101,7 +101,7 @@ export const ReportCategorySelector: React.FC<ReportCategorySelectorProps> = ({
               </div>
 
               {isSelected && (
-                <div className="w-4 h-4 rounded-full bg-white text-[#063B2C] dark:text-emerald-600 flex items-center justify-center shrink-0">
+                <div className="w-4 h-4 rounded-full bg-white text-[#007AFF] dark:text-blue-600 flex items-center justify-center shrink-0">
                   <Check className="w-2.5 h-2.5 stroke-[3]" />
                 </div>
               )}

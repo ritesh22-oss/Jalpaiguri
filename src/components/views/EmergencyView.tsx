@@ -38,7 +38,7 @@ export const EmergencyView: React.FC = () => {
     {
       id: 'em-police',
       label: isBengali ? 'পুলিশ' : 'Police',
-      icon: <Shield className="w-7 h-7 text-[#0A58CA] dark:text-sky-400" />,
+      icon: <Shield className="w-7 h-7 text-[#0056b3] dark:text-sky-400" />,
       number: '112',
       bg: 'bg-white dark:bg-[#17231E] border-[#E8E4DA] dark:border-white/10',
       textColor: 'text-[#11241C] dark:text-white'
@@ -54,7 +54,7 @@ export const EmergencyView: React.FC = () => {
     {
       id: 'em-hospital',
       label: isBengali ? 'হাসপাতাল' : 'Hospital',
-      icon: <PlusSquare className="w-7 h-7 text-[#15803D] dark:text-emerald-400" />,
+      icon: <PlusSquare className="w-7 h-7 text-[#15803D] dark:text-blue-400" />,
       number: '03561-224001',
       bg: 'bg-white dark:bg-[#17231E] border-[#E8E4DA] dark:border-white/10',
       textColor: 'text-[#11241C] dark:text-white'
@@ -70,7 +70,7 @@ export const EmergencyView: React.FC = () => {
     {
       id: 'em-electricity',
       label: isBengali ? 'বিদ্যুৎ দপ্তর' : 'Electricity',
-      icon: <Zap className="w-7 h-7 text-[#0A58CA] dark:text-blue-400" />,
+      icon: <Zap className="w-7 h-7 text-[#0056b3] dark:text-blue-400" />,
       number: '19121',
       bg: 'bg-white dark:bg-[#17231E] border-[#E8E4DA] dark:border-white/10',
       textColor: 'text-[#11241C] dark:text-white'
@@ -122,7 +122,7 @@ export const EmergencyView: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={toggleLanguage}
-            className="h-8 px-2.5 rounded-full bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] flex items-center gap-1 shadow-xs cursor-pointer active:scale-95 transition-all"
+            className="h-8 px-2.5 rounded-full bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#007AFF] dark:text-[#38BDF8] flex items-center gap-1 shadow-xs cursor-pointer active:scale-95 transition-all"
             title={isBengali ? 'Switch to English' : 'বাংলায় দেখুন'}
           >
             <Globe className="w-3.5 h-3.5" />
@@ -131,7 +131,7 @@ export const EmergencyView: React.FC = () => {
 
           <div
             onClick={() => navigate('profile')}
-            className="w-9 h-9 rounded-full bg-[#063B2C] dark:bg-emerald-700 text-white flex items-center justify-center font-bold text-xs shadow-xs cursor-pointer"
+            className="w-9 h-9 rounded-full bg-[#007AFF] dark:bg-blue-700 text-white flex items-center justify-center font-bold text-xs shadow-xs cursor-pointer"
           >
             {user?.name ? user.name.charAt(0) : 'U'}
           </div>
@@ -174,7 +174,7 @@ export const EmergencyView: React.FC = () => {
                 {isBengali ? 'ব্যক্তিগত সুরক্ষা ব্যবস্থা' : 'Personal Safety System'}
               </span>
             </div>
-            <span className="text-xs font-bold text-[#063B2C] dark:text-emerald-400 bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 px-2.5 py-0.5 rounded-full">
+            <span className="text-xs font-bold text-[#007AFF] dark:text-blue-400 bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 px-2.5 py-0.5 rounded-full">
               {isBengali ? 'হাব খুলুন →' : 'Open Hub →'}
             </span>
           </div>
@@ -197,7 +197,7 @@ export const EmergencyView: React.FC = () => {
             <span className="bg-white/80 dark:bg-[#17231E]/80 px-2.5 py-1 rounded-xl text-[#11241C] dark:text-white border border-[#E8E4DA] dark:border-white/10">
               {isBengali ? '• ফোন ঝাঁকান' : '• Shake Phone'}
             </span>
-            <span className="bg-white/80 dark:bg-[#17231E]/80 px-2.5 py-1 rounded-xl text-[#063B2C] dark:text-emerald-400 border border-[#E8E4DA] dark:border-white/10">
+            <span className="bg-white/80 dark:bg-[#17231E]/80 px-2.5 py-1 rounded-xl text-[#007AFF] dark:text-blue-400 border border-[#E8E4DA] dark:border-white/10">
               {isBengali ? '• ১১২ কন্ট্রোল রুম' : '• 112 Dispatch'}
             </span>
           </div>
@@ -206,7 +206,7 @@ export const EmergencyView: React.FC = () => {
         {/* Dedicated Sexual Violence & Assault Support Link */}
         <div
           onClick={() => navigate('sexual-violence-support')}
-          className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 hover:border-[#063B2C] dark:hover:border-emerald-500 rounded-3xl p-4 shadow-xs flex items-center justify-between cursor-pointer transition-all active:scale-98"
+          className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 hover:border-[#007AFF] dark:hover:border-blue-500 rounded-3xl p-4 shadow-xs flex items-center justify-between cursor-pointer transition-all active:scale-98"
         >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-[#FFF0F0] dark:bg-red-950/50 text-[#D92D20] dark:text-red-400 flex items-center justify-center shrink-0 border border-transparent dark:border-red-900/40">
@@ -223,7 +223,7 @@ export const EmergencyView: React.FC = () => {
               </p>
             </div>
           </div>
-          <span className="text-xs font-bold text-[#063B2C] dark:text-emerald-400">{isBengali ? 'দেখুন →' : 'View →'}</span>
+          <span className="text-xs font-bold text-[#007AFF] dark:text-blue-400">{isBengali ? 'দেখুন →' : 'View →'}</span>
         </div>
 
         {/* 8 Grid Emergency Tiles */}
@@ -272,7 +272,7 @@ export const EmergencyView: React.FC = () => {
                     <span>{isBengali ? `${formatNumber('2.4')} কিমি দূরে` : '2.4 km away'}</span>
                   </span>
                   <span>•</span>
-                  <span className="text-[#063B2C] dark:text-emerald-400 font-bold">
+                  <span className="text-[#007AFF] dark:text-blue-400 font-bold">
                     {isBengali ? '২৪/৭ খোলা' : 'Open 24/7'}
                   </span>
                 </p>
@@ -301,7 +301,7 @@ export const EmergencyView: React.FC = () => {
           {/* Service Card 2: Kotwali Police Station */}
           <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3.5 transition-colors">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#EBF2FC] dark:bg-blue-950/50 text-[#0A58CA] dark:text-sky-400 flex items-center justify-center shrink-0 border border-transparent dark:border-blue-900/40">
+              <div className="w-10 h-10 rounded-2xl bg-[#EBF2FC] dark:bg-blue-950/50 text-[#0056b3] dark:text-sky-400 flex items-center justify-center shrink-0 border border-transparent dark:border-blue-900/40">
                 <Shield className="w-5 h-5" />
               </div>
               <div className="flex-1">
@@ -318,7 +318,7 @@ export const EmergencyView: React.FC = () => {
             <div className="grid grid-cols-2 gap-2.5">
               <button
                 onClick={() => handleTileClick('03561-224100', isBengali ? 'কোতোয়ালি থানা' : 'Kotwali Police Station')}
-                className="py-2.5 px-3 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs active:scale-95 transition-all cursor-pointer"
+                className="py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs active:scale-95 transition-all cursor-pointer"
               >
                 <Phone className="w-3.5 h-3.5" />
                 <span>{isBengali ? 'এখনই কল করুন' : 'Call Now'}</span>
@@ -354,7 +354,7 @@ export const EmergencyView: React.FC = () => {
             <div className="grid grid-cols-2 gap-2.5">
               <button
                 onClick={() => handleTileClick('03561-224101', isBengali ? 'দমকল জরুরি সেবা' : 'Fire Emergency')}
-                className="py-2.5 px-3 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs active:scale-95 transition-all cursor-pointer"
+                className="py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs active:scale-95 transition-all cursor-pointer"
               >
                 <Phone className="w-3.5 h-3.5" />
                 <span>{isBengali ? 'এখনই কল করুন' : 'Call Now'}</span>

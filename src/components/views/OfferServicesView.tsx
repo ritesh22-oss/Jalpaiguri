@@ -141,7 +141,7 @@ export const OfferServicesView: React.FC = () => {
       completedJobs: 1,
       reviews: [
         {
-          author: 'Jalpaiguri Connect Verified',
+          author: 'MYJPG Verified',
           rating: 5,
           date: 'Just now',
           comment: 'Verified professional registered on the municipal local trades directory.'
@@ -157,7 +157,7 @@ export const OfferServicesView: React.FC = () => {
     return (
       <div className="min-h-screen bg-[#FAF8F5] p-6 flex flex-col justify-between max-w-md mx-auto select-none">
         <div className="pt-16 text-center space-y-4 animate-in zoom-in-95 duration-300">
-          <div className="w-20 h-20 bg-[#E6F4EA] text-[#063B2C] rounded-full flex items-center justify-center mx-auto shadow-sm">
+          <div className="w-20 h-20 bg-[#E6F4EA] text-[#007AFF] rounded-full flex items-center justify-center mx-auto shadow-sm">
             <CheckCircle2 className="w-10 h-10" />
           </div>
           <h2 className="text-2xl font-extrabold text-[#11241C] tracking-tight">
@@ -171,7 +171,7 @@ export const OfferServicesView: React.FC = () => {
             />
             <div className="min-w-0">
               <h3 className="font-extrabold text-sm text-[#11241C] truncate">{name}</h3>
-              <p className="text-xs text-[#063B2C] font-bold truncate">{professionTitle}</p>
+              <p className="text-xs text-[#007AFF] font-bold truncate">{professionTitle}</p>
               <p className="text-[11px] text-[#55685F]">{startingPrice} • {availability}</p>
             </div>
           </div>
@@ -183,7 +183,7 @@ export const OfferServicesView: React.FC = () => {
         <div className="space-y-3 pt-6">
           <button
             onClick={() => navigate('workers')}
-            className="w-full py-4 rounded-2xl bg-[#063B2C] hover:bg-[#084D3A] text-white font-bold text-sm shadow-md cursor-pointer active:scale-98 transition-all"
+            className="w-full py-4 rounded-2xl bg-[#007AFF] hover:bg-[#084D3A] text-white font-bold text-sm shadow-md cursor-pointer active:scale-98 transition-all"
           >
             View My Profile in Workers List
           </button>
@@ -218,7 +218,7 @@ export const OfferServicesView: React.FC = () => {
       <form onSubmit={handleSubmit} className="p-4 space-y-4">
         {/* Banner */}
         <div className="bg-gradient-to-r from-[#E6F4EA] to-[#F1F9F4] p-4 rounded-3xl border border-[#A7D7B9] space-y-1">
-          <div className="flex items-center gap-1.5 text-[#063B2C] font-extrabold text-sm">
+          <div className="flex items-center gap-1.5 text-[#007AFF] font-extrabold text-sm">
             <Sparkles className="w-4 h-4" />
             <span>Join Jalpaiguri Local Workers Network</span>
           </div>
@@ -233,7 +233,7 @@ export const OfferServicesView: React.FC = () => {
             <label className="block text-xs font-bold text-[#11241C] uppercase">
               Worker Profile Picture *
             </label>
-            <span className="text-[11px] text-[#063B2C] font-bold">Add Your Photo</span>
+            <span className="text-[11px] text-[#007AFF] font-bold">Add Your Photo</span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -241,7 +241,7 @@ export const OfferServicesView: React.FC = () => {
               <img
                 src={uploadedImagePreview || avatarUrl}
                 alt="Profile Preview"
-                className="w-20 h-20 rounded-3xl object-cover border-2 border-[#063B2C] shadow-sm"
+                className="w-20 h-20 rounded-3xl object-cover border-2 border-[#007AFF] shadow-sm"
               />
               {uploadedImagePreview && (
                 <button
@@ -269,7 +269,7 @@ export const OfferServicesView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full py-2.5 px-3 rounded-2xl bg-[#E6F4EA] hover:bg-[#D2EBE0] text-[#063B2C] font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer border border-[#A7D7B9]"
+                className="w-full py-2.5 px-3 rounded-2xl bg-[#E6F4EA] hover:bg-[#D2EBE0] text-[#007AFF] font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer border border-[#A7D7B9]"
               >
                 <Camera className="w-4 h-4" />
                 <span>Upload From Device / Camera</span>
@@ -297,7 +297,7 @@ export const OfferServicesView: React.FC = () => {
                   }}
                   className={`w-11 h-11 rounded-2xl object-cover cursor-pointer border-2 transition-all shrink-0 ${
                     avatarUrl === url && !uploadedImagePreview
-                      ? 'border-[#063B2C] ring-2 ring-[#063B2C]/20 scale-105'
+                      ? 'border-[#007AFF] ring-2 ring-[#007AFF]/20 scale-105'
                       : 'border-[#D2CEBE] opacity-60 hover:opacity-100'
                   }`}
                 />
@@ -308,7 +308,7 @@ export const OfferServicesView: React.FC = () => {
 
         {/* 2. BASIC PROFESSIONAL INFO */}
         <div className="bg-white rounded-3xl p-4 border border-[#E8E4DA] shadow-xs space-y-3">
-          <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#063B2C]">
+          <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#007AFF]">
             Professional Details
           </h3>
 
@@ -322,7 +322,7 @@ export const OfferServicesView: React.FC = () => {
               placeholder="e.g. Subir Karmakar"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-bold text-[#11241C] focus:border-[#063B2C] focus:bg-white focus:outline-none"
+              className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-bold text-[#11241C] focus:border-[#007AFF] focus:bg-white focus:outline-none"
             />
           </div>
 
@@ -338,7 +338,7 @@ export const OfferServicesView: React.FC = () => {
                   setCategory(newCat);
                   setProfessionTitle(`Master ${newCat}`);
                 }}
-                className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-bold text-[#11241C] focus:border-[#063B2C] focus:bg-white focus:outline-none cursor-pointer"
+                className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-bold text-[#11241C] focus:border-[#007AFF] focus:bg-white focus:outline-none cursor-pointer"
               >
                 <option value="Electrician">Electrician</option>
                 <option value="Plumber">Plumber</option>
@@ -363,7 +363,7 @@ export const OfferServicesView: React.FC = () => {
                 max={45}
                 value={experienceYears}
                 onChange={(e) => setExperienceYears(parseInt(e.target.value) || 1)}
-                className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-bold text-[#11241C] focus:border-[#063B2C] focus:bg-white focus:outline-none"
+                className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-bold text-[#11241C] focus:border-[#007AFF] focus:bg-white focus:outline-none"
               />
             </div>
           </div>
@@ -377,14 +377,14 @@ export const OfferServicesView: React.FC = () => {
               placeholder="e.g. Certified Inverter Specialist & High-Voltage Electrician"
               value={professionTitle}
               onChange={(e) => setProfessionTitle(e.target.value)}
-              className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-bold text-[#11241C] focus:border-[#063B2C] focus:bg-white focus:outline-none"
+              className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-bold text-[#11241C] focus:border-[#007AFF] focus:bg-white focus:outline-none"
             />
           </div>
         </div>
 
         {/* 3. CONTACT & PRICING */}
         <div className="bg-white rounded-3xl p-4 border border-[#E8E4DA] shadow-xs space-y-3">
-          <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#063B2C]">
+          <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#007AFF]">
             Contact, Rates & Availability
           </h3>
 
@@ -399,7 +399,7 @@ export const OfferServicesView: React.FC = () => {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+91 98320 XXXXX"
-                className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-bold text-[#11241C] focus:border-[#063B2C] focus:bg-white focus:outline-none"
+                className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-bold text-[#11241C] focus:border-[#007AFF] focus:bg-white focus:outline-none"
               />
             </div>
 
@@ -412,7 +412,7 @@ export const OfferServicesView: React.FC = () => {
                 value={startingPrice}
                 onChange={(e) => setStartingPrice(e.target.value)}
                 placeholder="₹250/visit"
-                className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-bold text-[#11241C] focus:border-[#063B2C] focus:bg-white focus:outline-none"
+                className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-bold text-[#11241C] focus:border-[#007AFF] focus:bg-white focus:outline-none"
               />
             </div>
           </div>
@@ -429,7 +429,7 @@ export const OfferServicesView: React.FC = () => {
                   onClick={() => setAvailability(status)}
                   className={`py-2 px-2 rounded-2xl text-[11px] font-bold border transition-all cursor-pointer ${
                     availability === status
-                      ? 'bg-[#063B2C] text-white border-[#063B2C] shadow-xs'
+                      ? 'bg-[#007AFF] text-white border-[#007AFF] shadow-xs'
                       : 'bg-[#FAF8F5] text-[#55685F] border-[#D2CEBE] hover:bg-white'
                   }`}
                 >
@@ -448,7 +448,7 @@ export const OfferServicesView: React.FC = () => {
               value={serviceArea}
               onChange={(e) => setServiceArea(e.target.value)}
               placeholder="e.g. Kadamtala, Dinbazar, Pandapara, Silpasamiti Para"
-              className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-semibold text-[#11241C] focus:border-[#063B2C] focus:bg-white focus:outline-none"
+              className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-semibold text-[#11241C] focus:border-[#007AFF] focus:bg-white focus:outline-none"
             />
           </div>
 
@@ -465,7 +465,7 @@ export const OfferServicesView: React.FC = () => {
               type="checkbox"
               checked={isEmergencyAvailable}
               onChange={(e) => setIsEmergencyAvailable(e.target.checked)}
-              className="w-4 h-4 text-[#063B2C] rounded-md focus:ring-0 cursor-pointer"
+              className="w-4 h-4 text-[#007AFF] rounded-md focus:ring-0 cursor-pointer"
             />
           </div>
         </div>
@@ -473,7 +473,7 @@ export const OfferServicesView: React.FC = () => {
         {/* 4. SKILLS & SPECIALIZATIONS */}
         <div className="bg-white rounded-3xl p-4 border border-[#E8E4DA] shadow-xs space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#063B2C]">
+            <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#007AFF]">
               Skills & Services Offered
             </h3>
             <span className="text-[10px] text-[#55685F]">{skills.length} added</span>
@@ -484,7 +484,7 @@ export const OfferServicesView: React.FC = () => {
             {skills.map((skill) => (
               <span
                 key={skill}
-                className="bg-[#E6F4EA] text-[#063B2C] border border-[#A7D7B9] text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5"
+                className="bg-[#E6F4EA] text-[#007AFF] border border-[#A7D7B9] text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5"
               >
                 <span>{skill}</span>
                 <button
@@ -511,12 +511,12 @@ export const OfferServicesView: React.FC = () => {
                   handleAddSkill();
                 }
               }}
-              className="flex-1 bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl px-3 py-2 text-xs font-semibold text-[#11241C] focus:border-[#063B2C] focus:outline-none"
+              className="flex-1 bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl px-3 py-2 text-xs font-semibold text-[#11241C] focus:border-[#007AFF] focus:outline-none"
             />
             <button
               type="button"
               onClick={handleAddSkill}
-              className="px-4 py-2 bg-[#063B2C] text-white font-bold text-xs rounded-2xl hover:bg-[#084D3A] cursor-pointer"
+              className="px-4 py-2 bg-[#007AFF] text-white font-bold text-xs rounded-2xl hover:bg-[#084D3A] cursor-pointer"
             >
               Add
             </button>
@@ -538,8 +538,8 @@ export const OfferServicesView: React.FC = () => {
                       onClick={() => handleToggleSuggestedSkill(s)}
                       className={`text-[11px] font-bold px-2.5 py-1 rounded-xl transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-[#063B2C] text-white'
-                          : 'bg-[#FAF8F5] text-[#55685F] border border-[#E2DED4] hover:border-[#063B2C]'
+                          ? 'bg-[#007AFF] text-white'
+                          : 'bg-[#FAF8F5] text-[#55685F] border border-[#E2DED4] hover:border-[#007AFF]'
                       }`}
                     >
                       {isSelected ? `✓ ${s}` : `+ ${s}`}
@@ -561,14 +561,14 @@ export const OfferServicesView: React.FC = () => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Tell customers about your working experience, honesty, and guarantees..."
-            className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-semibold text-[#11241C] focus:border-[#063B2C] focus:bg-white focus:outline-none"
+            className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-2xl p-3 text-xs font-semibold text-[#11241C] focus:border-[#007AFF] focus:bg-white focus:outline-none"
           ></textarea>
         </div>
 
         {/* SUBMIT BUTTON */}
         <button
           type="submit"
-          className="w-full py-4 rounded-2xl bg-[#063B2C] text-white font-extrabold text-sm shadow-md hover:bg-[#084D3A] active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-2xl bg-[#007AFF] text-white font-extrabold text-sm shadow-md hover:bg-[#084D3A] active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-2"
         >
           <CheckCircle2 className="w-5 h-5" />
           <span>Publish My Worker Profile</span>

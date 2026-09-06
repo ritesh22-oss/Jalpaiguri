@@ -14,7 +14,8 @@ import {
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useApp } from '../../context/AppContext';
-import { Worker } from '../../types';
+import { EmptyState } from '../common/EmptyState';
+import { Worker as AppWorker } from '../../types';
 
 export const WorkersView: React.FC = () => {
   const { goBack, navigate, setIsFilterOpen } = useNav();
@@ -73,17 +74,17 @@ export const WorkersView: React.FC = () => {
     return true;
   });
 
-  const handleCall = (worker: Worker, e: React.MouseEvent) => {
+  const handleCall = (worker: AppWorker, e: React.MouseEvent) => {
     e.stopPropagation();
     window.location.href = `tel:${worker.phone.replace(/\s+/g, '')}`;
   };
 
-  const handleMessage = (worker: Worker, e: React.MouseEvent) => {
+  const handleMessage = (worker: AppWorker, e: React.MouseEvent) => {
     e.stopPropagation();
     navigate('chat', { recipientId: worker.id, recipientName: worker.name, profession: worker.profession });
   };
 
-  const handleRequest = (worker: Worker, e: React.MouseEvent) => {
+  const handleRequest = (worker: AppWorker, e: React.MouseEvent) => {
     e.stopPropagation();
     navigate('worker-request', { workerId: worker.id });
   };
@@ -108,7 +109,7 @@ export const WorkersView: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate('offer-services')}
-            className="px-3 py-2 rounded-full bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] text-white text-xs font-bold flex items-center gap-1 shadow-xs active:scale-95 transition-all cursor-pointer"
+            className="px-3 py-2 rounded-full bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-bold flex items-center gap-1 shadow-xs active:scale-95 transition-all cursor-pointer"
             title="Add your work & profile"
           >
             <Plus className="w-3.5 h-3.5" />
@@ -163,7 +164,7 @@ export const WorkersView: React.FC = () => {
                 onClick={() => setWorkerFilters((prev) => ({ ...prev, category: cat }))}
                 className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-[#063B2C] dark:bg-emerald-600 text-white shadow-xs'
+                    ? 'bg-[#007AFF] dark:bg-blue-600 text-white shadow-xs'
                     : 'bg-white dark:bg-[#17231E] text-[#11241C] dark:text-white border border-[#D2CEBE] dark:border-white/10 hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A]'
                 }`}
               >
@@ -176,56 +177,33 @@ export const WorkersView: React.FC = () => {
         {/* Worker Cards List */}
         <div className="space-y-4 pt-1">
           {filteredWorkers.length === 0 ? (
-            <div className="text-center py-10 bg-white dark:bg-[#17231E] rounded-3xl p-6 border border-[#E8E4DA] dark:border-white/10 shadow-xs space-y-4 transition-colors">
-              <div className="w-16 h-16 rounded-full bg-[#E6F4EA] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-400 flex items-center justify-center mx-auto shadow-xs">
-                <Wrench className="w-8 h-8" />
-              </div>
-              <div>
-                <h3 className="font-extrabold text-base text-[#11241C] dark:text-white">
-                  {workers.length === 0 ? 'No Workers Registered Yet' : 'No Workers Match Your Filter'}
-                </h3>
-                <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] mt-1 max-w-[280px] mx-auto leading-relaxed">
-                  {workers.length === 0
-                    ? 'Are you an electrician, plumber, carpenter, painter, or artisan in Jalpaiguri? Be the first to join the directory!'
-                    : 'Try changing your trade category or resetting search filters.'}
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-2 pt-2 max-w-xs mx-auto">
-                <button
-                  type="button"
-                  onClick={() => navigate('offer-services')}
-                  className="w-full py-3.5 px-4 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm cursor-pointer active:scale-98 transition-all"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Join as Worker / Add Trade</span>
-                </button>
-
-                {workers.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setWorkerFilters({
-                        category: 'All',
-                        distance: 'Any',
-                        availableNowOnly: false,
-                        availableTodayOnly: false,
-                        minRating: 3.0
-                      })
-                    }
-                    className="py-2.5 px-4 text-xs font-bold text-[#55685F] dark:text-[#A2B3AA] hover:text-[#11241C] dark:hover:text-white cursor-pointer"
-                  >
-                    Reset Active Filters
-                  </button>
-                )}
-              </div>
-            </div>
+            <EmptyState
+              icon={Wrench}
+              title={workers.length === 0 ? "No Workers Registered Yet" : "No Match Found"}
+              description={workers.length === 0 
+                ? "Be the first verified professional to join the Jalpaiguri directory and help your community."
+                : "Try adjusting your trade category or search filters to find what you're looking for."}
+              actionLabel={workers.length === 0 ? "Join as Worker" : "Reset Filters"}
+              onAction={() => {
+                if (workers.length === 0) {
+                  navigate('offer-services');
+                } else {
+                  setWorkerFilters({
+                    category: 'All',
+                    distance: 'Any',
+                    availableNowOnly: false,
+                    availableTodayOnly: false,
+                    minRating: 3.0
+                  });
+                }
+              }}
+            />
           ) : (
             filteredWorkers.map((worker) => (
               <div
                 key={worker.id}
                 onClick={() => navigate('worker-detail', { workerId: worker.id })}
-                className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs hover:border-[#063B2C] dark:hover:border-emerald-500 transition-all cursor-pointer space-y-3.5"
+                className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs hover:border-[#007AFF] dark:hover:border-blue-500 transition-all cursor-pointer space-y-3.5"
               >
                 {/* Top Worker Profile Info */}
                 <div className="flex items-start justify-between gap-3">
@@ -242,17 +220,17 @@ export const WorkersView: React.FC = () => {
                       <p className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA] flex items-center gap-1 mt-0.5">
                         <span>{worker.profession}</span>
                         {worker.verified && (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400 fill-[#E6F4EA] dark:fill-emerald-950/60" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400 fill-blue-50 dark:fill-blue-950/60" />
                         )}
                       </p>
                       <div className="flex items-center gap-2 text-[11px] font-semibold text-[#55685F] dark:text-[#A2B3AA] mt-1 flex-wrap">
                         <span className="flex items-center gap-0.5">
-                          <MapPin className="w-3 h-3 text-[#063B2C] dark:text-emerald-400" />
+                          <MapPin className="w-3 h-3 text-[#007AFF] dark:text-blue-400" />
                           <span>{worker.distance}</span>
                         </span>
                         <span className={`flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${
                           worker.availability === 'Available Now'
-                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300'
+                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-300'
                             : worker.availability === 'Available Morning'
                             ? 'bg-amber-100 text-amber-900 dark:bg-amber-950/70 dark:text-amber-300'
                             : worker.availability === 'Available Evening'
@@ -270,7 +248,7 @@ export const WorkersView: React.FC = () => {
 
                   {/* Rating pill */}
                   <div className="bg-[#FAF8F5] dark:bg-[#121E19] border border-[#E2DED4] dark:border-white/10 px-2 py-1 rounded-xl flex items-center gap-1 shrink-0">
-                    <Star className="w-3 h-3 fill-[#063B2C] dark:fill-emerald-400 text-[#063B2C] dark:text-emerald-400" />
+                    <Star className="w-3 h-3 fill-[#007AFF] dark:fill-blue-400 text-[#007AFF] dark:text-blue-400" />
                     <span className="text-xs font-extrabold text-[#11241C] dark:text-white">
                       {worker.rating}
                     </span>
@@ -281,7 +259,7 @@ export const WorkersView: React.FC = () => {
                 {/* Pricing row with startingPrice and monthlyRate */}
                 <div className="flex items-center justify-between text-xs font-bold text-[#11241C] dark:text-white px-0.5">
                   <div className="flex items-center gap-2">
-                    <span className="text-[#063B2C] dark:text-emerald-400">{worker.startingPrice}</span>
+                    <span className="text-[#007AFF] dark:text-blue-400">{worker.startingPrice}</span>
                     {worker.monthlyRate && (
                       <span className="text-[11px] text-[#55685F] dark:text-[#A2B3AA] font-semibold bg-[#FAF8F5] dark:bg-white/5 px-2 py-0.5 rounded-md border border-[#E8E4DA] dark:border-white/10">
                         {worker.monthlyRate}
@@ -297,31 +275,31 @@ export const WorkersView: React.FC = () => {
 
                 {/* 3 Action Buttons matching Screenshot 4: Call, Message, Request */}
                 <div className="grid grid-cols-3 gap-2 pt-1">
-                  {/* Call Button (light sage green) */}
+                  {/* Call Button (light blue) */}
                   <button
                     type="button"
                     onClick={(e) => handleCall(worker, e)}
-                    className="py-2.5 px-3 rounded-2xl bg-[#D2EBE0] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-[#C2E4D5] dark:hover:bg-emerald-900/60 active:scale-95 transition-all cursor-pointer border border-transparent dark:border-emerald-800/40"
+                    className="py-2.5 px-3 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-blue-100 dark:hover:bg-blue-900/60 active:scale-95 transition-all cursor-pointer border border-transparent dark:border-blue-800/40"
                   >
                     <Phone className="w-3.5 h-3.5" />
                     <span>Call</span>
                   </button>
 
-                  {/* Message Button (light sage green) */}
+                  {/* Message Button (light blue) */}
                   <button
                     type="button"
                     onClick={(e) => handleMessage(worker, e)}
-                    className="py-2.5 px-3 rounded-2xl bg-[#D2EBE0] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-[#C2E4D5] dark:hover:bg-emerald-900/60 active:scale-95 transition-all cursor-pointer border border-transparent dark:border-emerald-800/40"
+                    className="py-2.5 px-3 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-blue-100 dark:hover:bg-blue-900/60 active:scale-95 transition-all cursor-pointer border border-transparent dark:border-blue-800/40"
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
                     <span>Message</span>
                   </button>
 
-                  {/* Request Button (dark green #063B2C) */}
+                  {/* Request Button (dark green #007AFF) */}
                   <button
                     type="button"
                     onClick={(e) => handleRequest(worker, e)}
-                    className="py-2.5 px-3 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-[#084D3A] active:scale-95 transition-all shadow-xs cursor-pointer"
+                    className="py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-[#084D3A] active:scale-95 transition-all shadow-xs cursor-pointer"
                   >
                     <Wrench className="w-3.5 h-3.5" />
                     <span>Request</span>
@@ -335,17 +313,17 @@ export const WorkersView: React.FC = () => {
         {/* Offer Services promotion card */}
         <div
           onClick={() => navigate('offer-services')}
-          className="mt-6 bg-gradient-to-r from-[#E6F4EA] to-[#F1F9F4] dark:from-[#13281E] dark:to-[#182C22] border border-[#A7D7B9] dark:border-emerald-800/40 rounded-3xl p-4 shadow-xs flex items-center justify-between cursor-pointer transition-colors"
+          className="mt-6 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-[#13281E] dark:to-[#182C22] border border-blue-200 dark:border-blue-800/40 rounded-3xl p-4 shadow-xs flex items-center justify-between cursor-pointer transition-colors"
         >
           <div>
-            <h4 className="font-extrabold text-sm text-[#063B2C] dark:text-emerald-400">
+            <h4 className="font-extrabold text-sm text-[#007AFF] dark:text-blue-400">
               Are you a skilled professional?
             </h4>
             <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] mt-0.5">
               Register your trade & get direct customer requests in Jalpaiguri.
             </p>
           </div>
-          <button className="px-3.5 py-2 rounded-xl bg-[#063B2C] dark:bg-emerald-600 text-white text-xs font-bold shrink-0">
+          <button className="px-3.5 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white text-xs font-bold shrink-0">
             Join
           </button>
         </div>

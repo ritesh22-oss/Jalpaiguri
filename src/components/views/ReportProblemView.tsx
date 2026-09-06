@@ -197,7 +197,7 @@ export const ReportProblemView: React.FC = () => {
               onClick={() => setActiveTab('form')}
               className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'form'
-                  ? 'bg-white dark:bg-emerald-600 text-[#063B2C] dark:text-white shadow-xs'
+                  ? 'bg-white dark:bg-blue-600 text-[#007AFF] dark:text-white shadow-xs'
                   : 'text-[#55685F] dark:text-[#A2B3AA] hover:text-[#11241C] dark:hover:text-white'
               }`}
             >
@@ -209,12 +209,12 @@ export const ReportProblemView: React.FC = () => {
               onClick={() => setActiveTab('my-reports')}
               className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                 activeTab === 'my-reports'
-                  ? 'bg-white dark:bg-emerald-600 text-[#063B2C] dark:text-white shadow-xs'
+                  ? 'bg-white dark:bg-blue-600 text-[#007AFF] dark:text-white shadow-xs'
                   : 'text-[#55685F] dark:text-[#A2B3AA] hover:text-[#11241C] dark:hover:text-white'
               }`}
             >
               <span>Track</span>
-              <span className="w-4 h-4 rounded-full bg-[#063B2C]/10 dark:bg-white/20 text-[#063B2C] dark:text-white text-[10px] flex items-center justify-center font-bold">
+              <span className="w-4 h-4 rounded-full bg-[#007AFF]/10 dark:bg-white/20 text-[#007AFF] dark:text-white text-[10px] flex items-center justify-center font-bold">
                 {civicReports.length}
               </span>
             </button>
@@ -247,12 +247,12 @@ export const ReportProblemView: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Hero Section */}
             <div className="text-center pt-2 pb-1 space-y-2">
-              <div className="w-12 h-12 rounded-2xl bg-[#E6F4EA] dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/40 text-[#063B2C] dark:text-emerald-400 flex items-center justify-center mx-auto shadow-xs">
+              <div className="w-12 h-12 rounded-2xl bg-[#E6F4EA] dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/40 text-[#007AFF] dark:text-blue-400 flex items-center justify-center mx-auto shadow-xs">
                 <Building2 className="w-6 h-6 stroke-[1.8]" />
               </div>
 
               <div>
-                <h2 className="text-2xl sm:text-3xl font-black text-[#063B2C] dark:text-emerald-400 tracking-tight">
+                <h2 className="text-2xl sm:text-3xl font-black text-[#007AFF] dark:text-blue-400 tracking-tight">
                   What needs fixing?
                 </h2>
                 <p className="text-xs sm:text-sm text-[#55685F] dark:text-[#A2B3AA] mt-1 max-w-[320px] mx-auto leading-relaxed">
@@ -321,7 +321,7 @@ export const ReportProblemView: React.FC = () => {
 
             {/* Privacy Compliance Banner */}
             <div className="p-3 bg-white dark:bg-[#16241F] rounded-2xl border border-[#E4DFD3] dark:border-white/10 flex items-start gap-2.5 text-[11px] text-[#55685F] dark:text-[#A2B3AA] leading-relaxed shadow-xs">
-              <Lock className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400 shrink-0 mt-0.5" />
+              <Lock className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400 shrink-0 mt-0.5" />
               <div>
                 <span className="font-bold text-[#11241C] dark:text-white">Privacy Protected: </span>
                 Your report information is shared only with authorized municipal systems or personnel responsible for handling the reported civic issue.
@@ -337,7 +337,7 @@ export const ReportProblemView: React.FC = () => {
                   disabled={isSubmitting || !isFormValid}
                   className={`w-full py-4 px-6 rounded-2xl font-bold text-sm shadow-md flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
                     isFormValid && !isSubmitting
-                      ? 'bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] dark:hover:bg-emerald-700 text-white active:scale-98'
+                      ? 'bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] dark:hover:bg-blue-700 text-white active:scale-98'
                       : 'bg-[#D2CEBE] dark:bg-gray-700 text-white cursor-not-allowed opacity-75'
                   }`}
                 >

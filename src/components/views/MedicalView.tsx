@@ -16,6 +16,7 @@ import {
 import { useNav } from '../../context/NavigationContext';
 import { useApp } from '../../context/AppContext';
 import { Doctor } from '../../types';
+import { EmptyState } from '../common/EmptyState';
 
 export const MedicalView: React.FC = () => {
   const { goBack, navigate } = useNav();
@@ -79,7 +80,7 @@ export const MedicalView: React.FC = () => {
               onClick={() => setSelectedSpecialty(spec)}
               className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap cursor-pointer transition-all ${
                 selectedSpecialty === spec
-                  ? 'bg-[#063B2C] dark:bg-emerald-600 text-white shadow-xs'
+                  ? 'bg-[#007AFF] dark:bg-blue-600 text-white shadow-xs'
                   : 'bg-white dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 text-[#11241C] dark:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A]'
               }`}
             >
@@ -91,15 +92,15 @@ export const MedicalView: React.FC = () => {
         {/* 24x7 Emergency Notice */}
         <div className="bg-[#EBF2FC] dark:bg-[#0D2137] border border-[#C5DCFA] dark:border-blue-900/50 rounded-2xl p-3 flex items-center justify-between transition-colors">
           <div className="flex items-center gap-2.5">
-            <PlusSquare className="w-5 h-5 text-[#0A58CA] dark:text-sky-300" />
+            <PlusSquare className="w-5 h-5 text-[#0056b3] dark:text-sky-300" />
             <div>
-              <h4 className="text-xs font-bold text-[#0A58CA] dark:text-sky-300">Jalpaiguri District Hospital</h4>
+              <h4 className="text-xs font-bold text-[#0056b3] dark:text-sky-300">Jalpaiguri District Hospital</h4>
               <p className="text-[11px] text-[#42648B] dark:text-sky-200/80">24/7 Casualty & Blood Bank open</p>
             </div>
           </div>
           <button
             onClick={() => window.location.href = 'tel:03561224001'}
-            className="px-3 py-1.5 rounded-xl bg-[#0A58CA] dark:bg-sky-600 text-white font-bold text-xs cursor-pointer shadow-xs"
+            className="px-3 py-1.5 rounded-xl bg-[#0056b3] dark:bg-sky-600 text-white font-bold text-xs cursor-pointer shadow-xs"
           >
             Call
           </button>
@@ -107,48 +108,63 @@ export const MedicalView: React.FC = () => {
 
         {/* Doctor List */}
         <div className="space-y-3 pt-1">
-          {filteredDoctors.map((doc) => (
-            <div
-              key={doc.id}
-              className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3 transition-colors"
-            >
-              <div className="flex items-start gap-3">
-                <img
-                  src={doc.avatarUrl || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80'}
-                  alt={doc.name}
-                  className="w-14 h-14 rounded-2xl object-cover border border-[#E8E4DA] dark:border-white/10 shrink-0"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white truncate">{doc.name}</h3>
-                    <span className="text-[11px] font-bold text-[#063B2C] dark:text-[#4ECCA3] bg-[#E6F4EA] dark:bg-[#1C4532] px-2 py-0.5 rounded-full">
-                      ★ {doc.rating}
-                    </span>
+          {filteredDoctors.length === 0 ? (
+            <EmptyState
+              icon={Stethoscope}
+              title={doctors.length === 0 ? "No Doctors Listed Yet" : "No Match Found"}
+              description={doctors.length === 0 
+                ? "The medical directory is currently empty. Verified doctors in Jalpaiguri will be listed here soon."
+                : "No doctors found matching your search or specialty filter. Try adjusting your criteria."}
+              actionLabel={doctors.length === 0 ? undefined : "Clear Filters"}
+              onAction={() => {
+                setSelectedSpecialty('All');
+                setSearch('');
+              }}
+            />
+          ) : (
+            filteredDoctors.map((doc) => (
+              <div
+                key={doc.id}
+                className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3 transition-colors"
+              >
+                <div className="flex items-start gap-3">
+                  <img
+                    src={doc.avatarUrl || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80'}
+                    alt={doc.name}
+                    className="w-14 h-14 rounded-2xl object-cover border border-[#E8E4DA] dark:border-white/10 shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white truncate">{doc.name}</h3>
+                      <span className="text-[11px] font-bold text-[#007AFF] dark:text-[#38BDF8] bg-[#E6F4EA] dark:bg-[#1C4532] px-2 py-0.5 rounded-full">
+                        ★ {doc.rating}
+                      </span>
+                    </div>
+                    <p className="text-xs font-semibold text-[#007AFF] dark:text-[#38BDF8]">{doc.specialty} • {doc.experience || '10+ yrs exp'}</p>
+                    <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA] mt-0.5">{doc.clinic || doc.medicalCentre} ({doc.distance})</p>
+                    <p className="text-[11px] font-bold text-[#11241C] dark:text-white mt-1">{doc.fee || '₹400-₹600'} • Timing: {doc.timing || doc.visitingHours}</p>
                   </div>
-                  <p className="text-xs font-semibold text-[#063B2C] dark:text-[#4ECCA3]">{doc.specialty} • {doc.experience || '10+ yrs exp'}</p>
-                  <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA] mt-0.5">{doc.clinic || doc.medicalCentre} ({doc.distance})</p>
-                  <p className="text-[11px] font-bold text-[#11241C] dark:text-white mt-1">{doc.fee || '₹400-₹600'} • Timing: {doc.timing || doc.visitingHours}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 pt-1 border-t border-[#F0ECE1] dark:border-white/10">
+                  <button
+                    onClick={() => window.location.href = `tel:${doc.phone.replace(/\s+/g, '')}`}
+                    className="py-2.5 rounded-xl bg-[#D2EBE0] dark:bg-[#1C4532] text-[#007AFF] dark:text-[#38BDF8] font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>Call Clinic</span>
+                  </button>
+                  <button
+                    onClick={() => alert(`Appointment request submitted for ${doc.name}. Clinic coordinator will confirm via SMS.`)}
+                    className="py-2.5 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                  >
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>Book Slot</span>
+                  </button>
                 </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-2 pt-1 border-t border-[#F0ECE1] dark:border-white/10">
-                <button
-                  onClick={() => window.location.href = `tel:${doc.phone.replace(/\s+/g, '')}`}
-                  className="py-2.5 rounded-xl bg-[#D2EBE0] dark:bg-[#1C4532] text-[#063B2C] dark:text-[#4ECCA3] font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <Phone className="w-3.5 h-3.5" />
-                  <span>Call Clinic</span>
-                </button>
-                <button
-                  onClick={() => alert(`Appointment request submitted for ${doc.name}. Clinic coordinator will confirm via SMS.`)}
-                  className="py-2.5 rounded-xl bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
-                >
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span>Book Slot</span>
-                </button>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>

@@ -9,14 +9,10 @@ import {
   Copy,
   Check,
   RefreshCw,
-  PhoneCall,
-  WifiOff,
   RotateCcw,
-  Edit3,
   ShieldCheck,
-  Smartphone,
   Lock,
-  Info
+  ArrowRight
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNav } from '../../context/NavigationContext';
@@ -33,7 +29,7 @@ export const OTPView: React.FC = () => {
     latestOtp,
     triggerPushNotification
   } = useExpo();
-  const { isBengali, language, setLanguage, formatNumber } = useLanguage();
+  const { isBengali, language, setLanguage } = useLanguage();
 
   const [digits, setDigits] = useState<string[]>(['', '', '', '', '', '']);
   const [resendCountdown, setResendCountdown] = useState<number>(30);
@@ -62,7 +58,7 @@ export const OTPView: React.FC = () => {
       triggerPushNotification({
         appTitle: isBengali ? 'বার্তা' : 'Messages',
         category: 'SMS',
-        title: isBengali ? 'জলপাইগুড়ি কানেক্ট যাচাইকরণ' : 'Jalpaiguri Connect Verification',
+        title: isBengali ? 'জলপাইগুড়ি কানেক্ট যাচাইকরণ' : 'MYJPG Verification',
         body: isBengali ? `আপনার যাচাইকরণ কোড হলো ${availableOtp}। স্বয়ংক্রিয়ভাবে পূরণ করতে ট্যাপ করুন।` : `Your verification code is ${availableOtp}. Tap to auto-fill.`,
         code: availableOtp,
         actionLabel: isBengali ? 'স্বয়ংক্রিয় পূরণ' : 'Auto-Fill'
@@ -243,7 +239,7 @@ export const OTPView: React.FC = () => {
           triggerPushNotification({
             appTitle: isBengali ? 'বার্তা' : 'Messages',
             category: 'SMS',
-            title: isBengali ? 'জলপাইগুড়ি কানেক্ট যাচাইকরণ' : 'Jalpaiguri Connect Verification',
+            title: isBengali ? 'জলপাইগুড়ি কানেক্ট যাচাইকরণ' : 'MYJPG Verification',
             body: isBengali ? `আপনার নতুন যাচাইকরণ কোড হলো ${res.otp}। স্বয়ংক্রিয়ভাবে পূরণ করতে ট্যাপ করুন।` : `Your new verification code is ${res.otp}. Tap to auto-fill.`,
             code: res.otp,
             actionLabel: isBengali ? 'স্বয়ংক্রিয় পূরণ' : 'Auto-Fill'
@@ -311,10 +307,13 @@ export const OTPView: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen bg-white dark:bg-[#0F1A15] text-[#11241C] dark:text-white flex flex-col justify-between p-4 max-w-md mx-auto select-none relative shadow-2xl transition-colors"
+      className="min-h-screen bg-[#F8FBFF] dark:bg-[#020617] text-[#11241C] dark:text-white flex flex-col p-6 max-w-md mx-auto select-none relative transition-colors overflow-hidden"
       onPaste={handlePaste}
     >
-      {/* Hidden input for mobile keyboard and clipboard paste auto-detection */}
+      {/* Background Orbs */}
+      <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-blue-400/10 dark:bg-blue-600/5 rounded-full blur-3xl pointer-events-none"></div>
+
+      {/* Hidden input for mobile keyboard */}
       <input
         ref={hiddenInputRef}
         type="tel"
@@ -334,171 +333,123 @@ export const OTPView: React.FC = () => {
         }}
       />
 
-      {/* Top Navigation Header Bar */}
-      <div className="w-full flex items-center justify-between pt-1 pb-1">
+      {/* Top Header */}
+      <div className="w-full flex items-center justify-between mb-8 z-10">
         <button
           onClick={handleRestartFlow}
-          className="p-1.5 -ml-1.5 text-gray-700 dark:text-[#A2B3AA] hover:text-black dark:hover:text-white active:scale-95 transition-all cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-white/10 flex items-center gap-1 text-xs font-semibold"
-          aria-label="Go Back & Change Number"
+          className="p-2 -ml-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 active:scale-95 transition-all cursor-pointer rounded-full"
         >
           <ChevronLeft className="w-5 h-5 stroke-[2.2]" />
-          <span>{isBengali ? 'পেছনে' : 'Back'}</span>
         </button>
 
-        <h1 className="text-base font-bold text-gray-900 dark:text-white tracking-tight">
-          {isBengali ? 'ফোন যাচাইকরণ' : 'Verify Phone'}
+        <h1 className="text-base font-black text-gray-900 dark:text-white tracking-tight">
+          {isBengali ? 'কোড যাচাই করুন' : 'Verify Code'}
         </h1>
 
-        <div className="flex items-center bg-[#E8E4DA] dark:bg-white/10 p-0.5 rounded-full">
+        <div className="flex items-center bg-white/50 dark:bg-white/5 backdrop-blur-sm p-1 rounded-full border border-blue-100 dark:border-white/10 shadow-sm">
           <button
             onClick={() => setLanguage(language === 'bn' ? 'en' : 'bn')}
-            className="text-[11px] font-bold px-2 py-0.5 rounded-full text-[#063B2C] dark:text-emerald-300 hover:bg-white/50 cursor-pointer"
+            className="text-[10px] font-bold px-3 py-1 rounded-full text-[#2563EB] dark:text-[#3B82F6] hover:bg-white dark:hover:bg-white/10 transition-all cursor-pointer"
           >
             {language === 'bn' ? 'EN' : 'বাংলা'}
           </button>
         </div>
       </div>
 
-      {/* Main Verification Content Area */}
-      <div className="flex flex-col items-center text-center space-y-3 my-auto w-full px-2">
-        {/* Instruction Subtitle */}
-        <div className="space-y-1">
-          <p className="text-xs font-medium text-gray-500 dark:text-[#A2B3AA]">
-            {isBengali ? 'এই নম্বরে পাঠানো ৬-সংখ্যার ওটিপি কোডটি লিখুন:' : 'Enter the 6-digit verification code sent to'}
+      <div className="flex-1 flex flex-col justify-center space-y-6 z-10">
+        {/* Instruction Section */}
+        <div className="text-center space-y-1.5">
+          <p className="text-gray-500 dark:text-gray-400 text-[13px] font-medium">
+            {isBengali ? 'আমরা একটি ৬-সংখ্যার কোড পাঠিয়েছি:' : 'We sent a 6-digit verification code to:'}
           </p>
-          <div className="inline-flex items-center gap-2 bg-gray-100/90 dark:bg-[#17231E] px-3 py-1 rounded-full border border-gray-200 dark:border-white/10 transition-colors">
-            <span className="text-sm font-bold text-gray-900 dark:text-white font-mono tracking-wide">
+          <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/10 px-3 py-1.5 rounded-xl border border-blue-100 dark:border-blue-800/20">
+            <span className="text-sm font-black text-[#2563EB] dark:text-blue-400 font-mono tracking-wider">
               {pendingPhone || '+91 90915 63912'}
             </span>
             <button
               onClick={handleRestartFlow}
-              className="text-[11px] font-semibold text-[#2F74E9] dark:text-blue-400 hover:text-blue-700 hover:underline cursor-pointer"
+              className="text-[9px] font-black text-blue-400 dark:text-blue-500 hover:text-blue-600 uppercase tracking-tighter cursor-pointer"
             >
-              {isBengali ? 'সম্পাদনা' : 'Edit'}
+              {isBengali ? 'বদলান' : 'Change'}
             </button>
           </div>
         </div>
 
-        {/* Security Shield & Expiry Badge */}
-        <div className="w-full max-w-xs flex items-center justify-between text-[11px] text-gray-500 dark:text-[#A2B3AA] bg-gray-50/80 dark:bg-[#121E19] px-2.5 py-1.5 rounded-xl border border-gray-100 dark:border-white/10 transition-colors">
-          <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-medium">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>{isBengali ? 'সুরক্ষিত ২৫৬-বিট ওটিপি' : 'Anti-Hack 256-Bit OTP'}</span>
+        {/* Security Shield */}
+        <div className="w-full flex items-center justify-center gap-3 text-[9px] font-black text-blue-400/50 dark:text-blue-500/50 uppercase tracking-[0.15em]">
+          <div className="flex items-center gap-1">
+            <ShieldCheck className="w-3 h-3" />
+            <span>{isBengali ? 'সুরক্ষিত যাচাইকরণ' : 'Secure Verification'}</span>
           </div>
-          <div className="flex items-center gap-1 text-gray-500 dark:text-[#A2B3AA] font-mono text-[10px]">
-            <Lock className="w-3 h-3 text-gray-400 dark:text-gray-500" />
-            <span>{isBengali ? 'মেয়াদ ৫ মিনিট' : 'Expires in 5m'}</span>
+          <div className="w-0.5 h-0.5 bg-blue-100 dark:bg-blue-800 rounded-full"></div>
+          <div className="flex items-center gap-1">
+            <Lock className="w-3 h-3" />
+            <span>{isBengali ? 'এনক্রিপ্টেড' : 'Encrypted'}</span>
           </div>
         </div>
 
-        {/* Instant Auto-Fill Banner Pill */}
+        {/* Auto-Fill Prompt */}
         {availableOtp && (
-          <div className="w-full max-w-xs bg-blue-50/90 dark:bg-blue-950/40 border border-blue-200/90 dark:border-blue-800/40 rounded-2xl p-2.5 flex items-center justify-between shadow-xs animate-in zoom-in-95 duration-200 transition-colors">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-[#2F74E9] flex items-center justify-center text-white shrink-0 shadow-xs">
-                <Zap className="w-4 h-4 text-amber-300 fill-amber-300" />
+          <div className="w-full bg-white dark:bg-[#111C35] border border-blue-50 dark:border-white/10 rounded-2xl p-3 flex items-center justify-between shadow-sm animate-in zoom-in-95 duration-300">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#2563EB] dark:text-blue-400">
+                <Zap className="w-4 h-4 fill-current" />
               </div>
               <div className="text-left">
-                <p className="text-[10px] font-bold text-blue-900 dark:text-blue-200 uppercase tracking-wider">
-                  {isBengali ? 'তাত্ক্ষণিক এসএমএস কোড' : 'Instant SMS Code'}
+                <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest leading-none mb-1">
+                  {isBengali ? 'অটো-ফিল কোড' : 'Auto-fill'}
                 </p>
-                <p className="text-sm font-black text-[#2F74E9] dark:text-blue-400 font-mono tracking-widest leading-none">
+                <p className="text-base font-black text-[#2563EB] dark:text-white font-mono tracking-widest leading-tight">
                   {availableOtp}
                 </p>
               </div>
             </div>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => handleCopyOtp(availableOtp)}
-                className="p-1.5 rounded-lg text-gray-500 dark:text-[#A2B3AA] hover:text-gray-800 dark:hover:text-white hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors cursor-pointer"
-                title="Copy Code"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleAutoFillClick(availableOtp)}
-                className="py-1 px-2.5 bg-[#2F74E9] hover:bg-[#2563EB] active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1"
-              >
-                <Sparkles className="w-3 h-3 text-amber-200" />
-                <span>{isBengali ? 'স্বয়ংক্রিয় পূরণ' : 'Auto-Fill'}</span>
-              </button>
-            </div>
+            <button
+              onClick={() => handleAutoFillClick(availableOtp)}
+              className="px-3 py-1.5 bg-[#2563EB] dark:bg-[#3B82F6] text-white text-[10px] font-black rounded-lg active:scale-95 transition-all cursor-pointer flex items-center gap-1.5"
+            >
+              <Sparkles className="w-2.5 h-2.5" />
+              <span>{isBengali ? 'পূরণ' : 'Fill'}</span>
+            </button>
           </div>
         )}
 
-        {/* Dynamic Rich Error Alerts with Retry Actions */}
-        {errorMsg && (
-          <div
-            className={`w-full max-w-xs rounded-2xl p-3 text-xs border shadow-xs animate-in fade-in zoom-in-95 duration-200 ${
+        {/* Status Alerts */}
+        <div className="w-full space-y-2">
+          {errorMsg && (
+            <div className={`rounded-xl p-3 text-[11px] border animate-in fade-in slide-in-from-top-1 duration-300 ${
               errorType === 'network'
-                ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/40 text-amber-900 dark:text-amber-200'
-                : 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/40 text-rose-900 dark:text-rose-200'
-            }`}
-          >
-            <div className="flex items-start gap-2">
-              {errorType === 'network' ? (
-                <WifiOff className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-              ) : (
-                <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
-              )}
-              <div className="text-left flex-1">
-                <p className="text-[12px] font-semibold leading-snug">{errorMsg}</p>
-                <div className="flex items-center gap-2 mt-2 pt-1.5 border-t border-rose-200/60 dark:border-rose-800/40">
-                  <button
-                    type="button"
-                    onClick={handleClearDigits}
-                    className="text-[11px] font-bold text-rose-700 dark:text-rose-400 hover:text-rose-900 dark:hover:text-rose-300 hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    <RotateCcw className="w-3 h-3" />
-                    <span>{isBengali ? 'মুছে ফেলুন' : 'Clear Digits'}</span>
-                  </button>
-                  <span className="text-rose-300 dark:text-rose-700">•</span>
-                  <button
-                    type="button"
-                    onClick={handleResendOtp}
-                    className="text-[11px] font-bold text-[#2F74E9] dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    <RefreshCw className={`w-3 h-3 ${resending ? 'animate-spin' : ''}`} />
-                    <span>{isBengali ? 'কোড পুনরায় পাঠান' : 'Resend Code'}</span>
-                  </button>
-                </div>
+                ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-100 dark:border-amber-800/40 text-amber-900 dark:text-amber-200'
+                : 'bg-rose-50 dark:bg-rose-950/40 border-rose-100 dark:border-rose-800/40 text-rose-900 dark:text-rose-200'
+            }`}>
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <p className="font-semibold leading-relaxed flex-1">{errorMsg}</p>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Success Alert */}
-        {isSuccess && (
-          <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 rounded-2xl p-3 text-xs text-emerald-800 dark:text-emerald-200 flex items-center justify-center gap-2 font-bold max-w-xs animate-in fade-in duration-200">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <p className="text-xs">
-              {isBengali ? 'ফোন নম্বর সফলভাবে যাচাই করা হয়েছে! এগিয়ে যাওয়া হচ্ছে...' : 'Phone verified successfully! Redirecting...'}
-            </p>
-          </div>
-        )}
+          {isSuccess && (
+            <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-800/40 rounded-xl p-3 text-blue-800 dark:text-blue-200 flex items-center justify-center gap-2.5 font-bold animate-in fade-in duration-300">
+              <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+              <span className="text-xs">{isBengali ? 'সফলভাবে যাচাই করা হয়েছে!' : 'Verified Successfully!'}</span>
+            </div>
+          )}
+        </div>
 
-        {/* 6 OTP Input Boxes with Dynamic Error/Success States */}
-        <div className={`flex items-center justify-center gap-2 py-1 ${shake ? 'animate-shake' : ''}`}>
+        {/* 6 OTP Input Boxes */}
+        <div className={`flex items-center justify-center gap-2 ${shake ? 'animate-shake' : ''}`}>
           {digits.map((digit, idx) => {
             const isFilled = Boolean(digit);
             const isActive = idx === currentCursorIndex && !isFilled;
-            const hasError = Boolean(errorMsg);
-
-            let borderStyle = 'border-2 border-gray-200 dark:border-white/10 bg-gray-50/70 dark:bg-[#17231E] hover:border-gray-300 dark:hover:border-white/20';
+            
+            let borderStyle = 'border border-gray-200 dark:border-white/10 bg-white dark:bg-[#111C35]';
             if (isSuccess) {
-              borderStyle = 'border-2 border-emerald-500 dark:border-emerald-400 bg-emerald-50/70 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 shadow-sm';
-            } else if (hasError) {
-              borderStyle = isFilled
-                ? 'border-2 border-rose-500 dark:border-rose-400 bg-rose-50/50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-200 shadow-sm'
-                : 'border-2 border-rose-300 dark:border-rose-600 bg-rose-50/30 dark:bg-rose-950/20';
+              borderStyle = 'border-2 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300';
             } else if (isActive) {
-              borderStyle = 'border-2 border-[#2F74E9] dark:border-blue-400 bg-white dark:bg-[#17231E] ring-4 ring-blue-100/60 dark:ring-blue-900/40 shadow-sm';
+              borderStyle = 'border-2 border-[#2563EB] dark:border-blue-400 bg-white dark:bg-[#111C35] ring-2 ring-blue-50 dark:ring-blue-900/20';
             } else if (isFilled) {
-              borderStyle = 'border-2 border-[#2F74E9] dark:border-blue-400 bg-white dark:bg-[#17231E] shadow-sm';
+              borderStyle = 'border border-[#2563EB] dark:border-blue-400 bg-white dark:bg-[#111C35] shadow-xs';
             }
 
             return (
@@ -507,102 +458,70 @@ export const OTPView: React.FC = () => {
                 onClick={() => {
                   triggerHaptic('light');
                   hiddenInputRef.current?.focus();
-                  const newDigits = [...digits];
-                  for (let i = idx; i < 6; i++) newDigits[i] = '';
-                  setDigits(newDigits);
                 }}
-                className={`w-[44px] h-[44px] sm:w-[48px] sm:h-[48px] rounded-2xl flex items-center justify-center transition-all duration-150 relative cursor-pointer ${borderStyle}`}
+                className={`w-10 h-12 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer ${borderStyle}`}
               >
                 {isFilled ? (
-                  <span className={`text-lg font-bold font-mono ${hasError ? 'text-rose-800 dark:text-rose-300' : isSuccess ? 'text-emerald-700 dark:text-emerald-300' : 'text-gray-900 dark:text-white'}`}>
+                  <span className="text-lg font-black text-gray-900 dark:text-white font-mono">
                     {digit}
                   </span>
                 ) : isActive ? (
-                  <div className="w-[2px] h-5 bg-[#2F74E9] dark:bg-blue-400 rounded-full animate-pulse"></div>
+                  <div className="w-0.5 h-5 bg-[#2563EB] dark:bg-blue-400 rounded-full animate-pulse"></div>
                 ) : null}
               </div>
             );
           })}
         </div>
 
-        {/* Resend & Retry Actions Panel */}
-        <div className="flex items-center justify-center gap-3 text-xs pt-1">
-          {resendCountdown > 0 ? (
-            <p className="text-gray-500 dark:text-[#A2B3AA] font-normal">
-              {isBengali ? 'কোড পুনরায় পাঠান ' : 'Resend code in '}
-              <span className="font-semibold text-gray-700 dark:text-white font-mono">00:{formattedSeconds}</span>
-            </p>
-          ) : (
-            <button
-              onClick={handleResendOtp}
-              disabled={loading || resending}
-              className="font-semibold text-[#2F74E9] dark:text-blue-400 hover:underline cursor-pointer flex items-center gap-1.5"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${resending ? 'animate-spin' : ''}`} />
-              <span>{resending ? (isBengali ? 'পাঠানো হচ্ছে...' : 'Sending Code...') : (isBengali ? 'কোড পুনরায় পাঠান' : 'Resend Code')}</span>
-            </button>
-          )}
-
-          <span className="text-gray-300 dark:text-white/20">•</span>
+        {/* Resend Logic */}
+        <div className="flex flex-col items-center space-y-4">
+          <div className="flex items-center gap-3 text-[12px] font-bold">
+            {resendCountdown > 0 ? (
+              <p className="text-gray-400 dark:text-gray-500">
+                {isBengali ? 'কোড পুনরায় পাঠান ' : 'Resend in '}
+                <span className="text-[#2563EB] dark:text-blue-400 font-mono">00:{formattedSeconds}</span>
+              </p>
+            ) : (
+              <button
+                onClick={handleResendOtp}
+                disabled={loading || resending}
+                className="text-[#2563EB] dark:text-blue-400 hover:text-[#1D4ED8] flex items-center gap-1.5 cursor-pointer group"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${resending ? 'animate-spin' : ''}`} />
+                <span>{isBengali ? 'আবার কোড পাঠান' : 'Resend Code'}</span>
+              </button>
+            )}
+          </div>
 
           <button
-            onClick={handleRestartFlow}
-            className="text-gray-600 dark:text-[#A2B3AA] hover:text-gray-900 dark:hover:text-white font-medium hover:underline cursor-pointer flex items-center gap-1"
-          >
-            <RotateCcw className="w-3 h-3" />
-            <span>{isBengali ? 'অন্য নম্বর দিয়ে চেষ্টা' : 'Try Another Number'}</span>
-          </button>
-        </div>
-
-        {/* Verify Action Button */}
-        <div className="w-full px-1 pt-1">
-          <button
-            id="btn-verify-otp"
             onClick={() => verifyCode(digits.join(''))}
-            disabled={loading || digits.some((d) => !d) || isSuccess}
-            className="w-full h-[48px] rounded-xl bg-[#2F74E9] hover:bg-[#2563EB] active:scale-[0.99] text-white font-semibold text-[14px] flex items-center justify-center shadow-sm transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            disabled={loading || digits.some(d => !d) || isSuccess}
+            className="w-full h-12 rounded-xl bg-[#2563EB] dark:bg-[#3B82F6] hover:bg-[#1D4ED8] dark:hover:bg-[#2563EB] active:scale-[0.98] text-white font-bold text-sm flex items-center justify-center gap-3 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed group"
           >
             {loading ? (
-              <div className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-white" />
-                <span>{isBengali ? 'যাচাই করা হচ্ছে...' : 'Verifying...'}</span>
-              </div>
-            ) : isSuccess ? (
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-white" />
-                <span>{isBengali ? 'যাচাইকৃত!' : 'Verified!'}</span>
-              </div>
+              <Loader2 className="w-4 h-4 animate-spin text-white" />
             ) : (
-              <span>{isBengali ? 'যাচাই করে এগিয়ে যান' : 'Verify & Continue'}</span>
+              <span>{isBengali ? 'যাচাই করুন' : 'Verify & Proceed'}</span>
             )}
           </button>
         </div>
       </div>
 
-      {/* iOS-Style Custom On-Screen Numeric Keypad */}
-      <div className="w-full max-w-[340px] mx-auto bg-[#E5E9F0]/80 dark:bg-[#121E19] p-2 rounded-2xl shadow-inner mt-2 mb-1 transition-colors">
+      {/* Numerical Keypad */}
+      <div className="w-full max-w-[320px] mx-auto bg-white/50 dark:bg-[#111C35]/50 backdrop-blur-md p-2.5 rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm z-10">
         <div className="grid grid-cols-3 gap-1.5">
           {keypadRows.flat().map((key, i) => {
-            if (key.isBlank) {
-              return <div key={i} className="h-10"></div>;
-            }
-
+            if (key.isBlank) return <div key={i} className="h-11"></div>;
+            
             if (key.isBackspace) {
               return (
                 <button
                   key={i}
                   type="button"
                   onClick={() => handleKeypadPress('backspace')}
-                  className="h-10 rounded-lg flex items-center justify-center text-gray-800 dark:text-white hover:bg-white/60 dark:hover:bg-white/10 active:bg-white/90 active:scale-95 transition-all cursor-pointer"
-                  aria-label="Backspace"
+                  className="h-11 rounded-xl flex items-center justify-center text-gray-400 hover:text-rose-500 active:scale-90 transition-all cursor-pointer"
                 >
-                  <div className="w-7 h-5 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-gray-800 dark:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path>
-                      <line x1="18" y1="9" x2="12" y2="15"></line>
-                      <line x1="12" y1="9" x2="18" y2="15"></line>
-                    </svg>
-                  </div>
+                  <RotateCcw className="w-5 h-5" />
                 </button>
               );
             }
@@ -612,13 +531,13 @@ export const OTPView: React.FC = () => {
                 key={i}
                 type="button"
                 onClick={() => handleKeypadPress(key.num)}
-                className="h-10 bg-white dark:bg-[#17231E] rounded-lg flex flex-col items-center justify-center shadow-xs border border-white/80 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-[#1E2E27] active:bg-gray-200/80 active:scale-95 transition-all cursor-pointer select-none"
+                className="h-11 bg-white dark:bg-[#1E293B] rounded-xl flex flex-col items-center justify-center border border-gray-50 dark:border-white/5 active:scale-95 transition-all cursor-pointer group"
               >
-                <span className="text-lg font-bold text-gray-900 dark:text-white leading-none">
+                <span className="text-lg font-black text-gray-900 dark:text-white group-active:text-[#2563EB]">
                   {key.num}
                 </span>
                 {key.letters && (
-                  <span className="text-[7px] font-bold text-gray-500 dark:text-[#A2B3AA] tracking-widest uppercase mt-0.5 leading-none">
+                  <span className="text-[6px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">
                     {key.letters}
                   </span>
                 )}

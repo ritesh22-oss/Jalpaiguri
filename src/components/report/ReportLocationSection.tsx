@@ -106,18 +106,18 @@ export const ReportLocationSection: React.FC<ReportLocationSectionProps> = ({
     <div className="space-y-2.5">
       <div className="flex items-center justify-between">
         <label className="text-xs font-extrabold uppercase tracking-wider text-[#11241C] dark:text-white flex items-center gap-1.5">
-          <span className="w-5 h-5 rounded-full bg-[#063B2C] dark:bg-emerald-600 text-white flex items-center justify-center text-[11px] font-black">3</span>
+          <span className="w-5 h-5 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white flex items-center justify-center text-[11px] font-black">3</span>
           Problem Location <span className="text-rose-500">*</span>
         </label>
-        <span className="text-[10px] font-bold text-[#063B2C] dark:text-emerald-400 bg-[#E6F4EA] dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">
+        <span className="text-[10px] font-bold text-[#007AFF] dark:text-blue-400 bg-[#E6F4EA] dark:bg-blue-950/60 px-2 py-0.5 rounded-md">
           Jalpaiguri Wards 1-25
         </span>
       </div>
 
       {/* Main Location Card */}
-      <div className="bg-white dark:bg-[#16241F] border border-[#E4DFD3] dark:border-white/10 rounded-2xl p-4 transition-colors space-y-3 shadow-xs">
+      <div className="bg-white dark:bg-[#0F172A] border border-[#E4DFD3] dark:border-white/10 rounded-2xl p-4 transition-colors space-y-3 shadow-xs">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-[#E6F4EA] dark:bg-emerald-950/70 border border-emerald-100 dark:border-emerald-800/30 text-[#063B2C] dark:text-emerald-400 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-2xl bg-[#E6F4EA] dark:bg-blue-950/70 border border-blue-100 dark:border-blue-800/30 text-[#007AFF] dark:text-blue-400 flex items-center justify-center shrink-0">
             <MapPin className="w-5 h-5 stroke-[2]" />
           </div>
 
@@ -127,7 +127,7 @@ export const ReportLocationSection: React.FC<ReportLocationSectionProps> = ({
                 {locationData.locality || 'Select Location'}
               </h4>
               {locationData.isInsideJalpaiguri ? (
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-full">
                   <CheckCircle2 className="w-3 h-3" /> In Service Area
                 </span>
               ) : (
@@ -150,8 +150,19 @@ export const ReportLocationSection: React.FC<ReportLocationSectionProps> = ({
           </div>
         </div>
 
-        {/* Interactive Mini-Map for Pinpointing Exact Issue Location */}
-        <div className="pt-2 border-t border-[#F2EFE8] dark:border-white/5">
+        {/* Search & Mini-Map */}
+        <div className="pt-2 border-t border-[#F2EFE8] dark:border-white/5 space-y-3">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search a place, area or landmark..."
+              className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-[#E4DFD3] dark:border-white/10 bg-[#FAF8F5] dark:bg-[#121E19] text-[#11241C] dark:text-white placeholder:text-[#8C9B93] focus:ring-2 focus:ring-[#007AFF] outline-none"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-[#8C9B93]" />
+          </div>
+
           <ReportMiniMap
             currentLat={locationData.lat}
             currentLng={locationData.lng}
@@ -185,9 +196,9 @@ export const ReportLocationSection: React.FC<ReportLocationSectionProps> = ({
             className="py-2.5 px-3 rounded-xl bg-[#FAF8F5] dark:bg-[#121E19] hover:bg-[#F2EFE8] dark:hover:bg-[#1B2C24] border border-[#E4DFD3] dark:border-white/10 text-[#11241C] dark:text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
           >
             {isLocating ? (
-              <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#063B2C] dark:text-emerald-400" />
+              <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#007AFF] dark:text-blue-400" />
             ) : (
-              <Crosshair className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400" />
+              <Crosshair className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400" />
             )}
             <span>{isLocating ? 'Detecting...' : 'Use Current GPS'}</span>
           </button>
@@ -196,7 +207,7 @@ export const ReportLocationSection: React.FC<ReportLocationSectionProps> = ({
             type="button"
             id="btn-change-location"
             onClick={() => setIsPickerOpen(true)}
-            className="py-2.5 px-3 rounded-xl bg-[#063B2C]/5 dark:bg-emerald-950/40 hover:bg-[#063B2C]/10 dark:hover:bg-emerald-900/40 border border-[#063B2C]/20 dark:border-emerald-700/40 text-[#063B2C] dark:text-emerald-400 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+            className="py-2.5 px-3 rounded-xl bg-[#007AFF]/5 dark:bg-blue-950/40 hover:bg-[#007AFF]/10 dark:hover:bg-blue-900/40 border border-[#007AFF]/20 dark:border-blue-700/40 text-[#007AFF] dark:text-blue-400 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
           >
             <Building className="w-3.5 h-3.5" />
             <span>Select Locality</span>
@@ -231,7 +242,7 @@ export const ReportLocationSection: React.FC<ReportLocationSectionProps> = ({
       {/* Locality Selector Modal */}
       {isPickerOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#16241F] w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-[#E4DFD3] dark:border-white/10 shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
+          <div className="bg-white dark:bg-[#0F172A] w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-[#E4DFD3] dark:border-white/10 shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
             {/* Modal Header */}
             <div className="p-4 border-b border-[#E4DFD3] dark:border-white/10 flex items-center justify-between">
               <div>
@@ -262,7 +273,7 @@ export const ReportLocationSection: React.FC<ReportLocationSectionProps> = ({
                   value={customStreet}
                   onChange={(e) => setCustomStreet(e.target.value)}
                   placeholder="e.g. Near Girls High School, Ward 12, Club Road"
-                  className="w-full px-3 py-2 bg-white dark:bg-[#16241F] border border-[#D2CEBE] dark:border-white/10 rounded-xl text-xs font-medium text-[#11241C] dark:text-white placeholder:text-[#8C9B93] focus:outline-none focus:border-[#063B2C] dark:focus:border-emerald-500"
+                  className="w-full px-3 py-2 bg-white dark:bg-[#0F172A] border border-[#D2CEBE] dark:border-white/10 rounded-xl text-xs font-medium text-[#11241C] dark:text-white placeholder:text-[#8C9B93] focus:outline-none focus:border-[#007AFF] dark:focus:border-blue-500"
                 />
               </div>
 
@@ -274,7 +285,7 @@ export const ReportLocationSection: React.FC<ReportLocationSectionProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search locality (Kadamtala, Dinbazar, Pandapara...)"
-                  className="w-full pl-9 pr-3 py-2 bg-white dark:bg-[#16241F] border border-[#D2CEBE] dark:border-white/10 rounded-xl text-xs font-medium text-[#11241C] dark:text-white placeholder:text-[#8C9B93] focus:outline-none focus:border-[#063B2C] dark:focus:border-emerald-500"
+                  className="w-full pl-9 pr-3 py-2 bg-white dark:bg-[#0F172A] border border-[#D2CEBE] dark:border-white/10 rounded-xl text-xs font-medium text-[#11241C] dark:text-white placeholder:text-[#8C9B93] focus:outline-none focus:border-[#007AFF] dark:focus:border-blue-500"
                 />
               </div>
             </div>
@@ -290,12 +301,12 @@ export const ReportLocationSection: React.FC<ReportLocationSectionProps> = ({
                     onClick={() => handleSelectLocality(item)}
                     className={`w-full text-left py-3 px-3 rounded-xl flex items-start gap-3 transition-colors cursor-pointer ${
                       isCurrent
-                        ? 'bg-[#E6F4EA] dark:bg-emerald-950/50 text-[#063B2C] dark:text-emerald-400'
+                        ? 'bg-[#E6F4EA] dark:bg-blue-950/50 text-[#007AFF] dark:text-blue-400'
                         : 'hover:bg-[#FAF8F5] dark:hover:bg-[#1A2A22] text-[#11241C] dark:text-white'
                     }`}
                   >
                     <div className="w-8 h-8 rounded-xl bg-white dark:bg-[#121E19] border border-[#E4DFD3] dark:border-white/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <MapPin className="w-4 h-4 text-[#063B2C] dark:text-emerald-400" />
+                      <MapPin className="w-4 h-4 text-[#007AFF] dark:text-blue-400" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between">

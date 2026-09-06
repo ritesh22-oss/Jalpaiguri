@@ -1,5 +1,5 @@
 /**
- * Jalpaiguri Connect - Google Places Photo Client & Multi-Tier Fallback Engine
+ * MYJPG - Google Places Photo Client & Multi-Tier Fallback Engine
  * 
  * Strict Requirement:
  * EVERY place card ALWAYS has a visible image. NO place card should ever appear without an image.

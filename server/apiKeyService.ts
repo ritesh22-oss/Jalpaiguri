@@ -59,15 +59,10 @@ class ApiKeyService {
     if (!this.geminiClient) {
       try {
         this.geminiClient = new GoogleGenAI({
-          apiKey: key,
-          httpOptions: {
-            headers: {
-              'User-Agent': 'aistudio-build'
-            }
-          }
+          apiKey: key
         });
         this.isGeminiInitialized = true;
-        console.log('[ApiKeyService] GoogleGenAI client initialized successfully with User-Agent telemetry.');
+        console.log('[ApiKeyService] GoogleGenAI client initialized successfully.');
       } catch (err: any) {
         console.error('[ApiKeyService] Failed to initialize GoogleGenAI client:', err?.message || err);
         return null;
@@ -112,7 +107,7 @@ class ApiKeyService {
     return {
       gemini: {
         configured: hasGemini,
-        model: 'gemini-3.8-flash / gemini-3.1-pro-preview',
+        model: 'gemini-3.5-flash / gemini-3.1-pro-preview / gemini-3.1-flash-lite',
         initialized: this.isGeminiInitialized
       },
       googleMaps: {
