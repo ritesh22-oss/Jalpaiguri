@@ -42,7 +42,7 @@ export const ExpoDevMenuModal: React.FC = () => {
     triggerPushNotification({
       appTitle: 'Messages',
       category: 'SMS',
-      title: 'Jalpaiguri Connect Verification',
+      title: 'MYJPG Verification',
       body: `Your verification code is ${randomOtp}. Do not share this code.`,
       code: randomOtp,
       actionLabel: 'Auto-Fill OTP',
@@ -55,7 +55,7 @@ export const ExpoDevMenuModal: React.FC = () => {
 
   const handleSimulateAlertNotification = () => {
     triggerPushNotification({
-      appTitle: 'Jalpaiguri Connect',
+      appTitle: 'MYJPG',
       category: 'ALERT',
       title: 'Waterlogging Alert • Kadamtala',
       body: 'Heavy monsoon rainfall near railway crossing. Traffic diverted via Club Road.',
@@ -209,40 +209,40 @@ export const ExpoDevMenuModal: React.FC = () => {
                   }`}
                 >
                   <span>{frame.label}</span>
-                  {deviceType === frame.id && <CheckCircle2 className="w-3 h-3 text-emerald-400" />}
+                  {deviceType === frame.id && <CheckCircle2 className="w-3 h-3 text-blue-400" />}
                 </button>
               ))}
             </div>
           </div>
 
           {/* Fast Test Profiles Switcher */}
-          <div className="p-3 bg-emerald-50/60 rounded-2xl border border-emerald-100 space-y-2">
-            <p className="text-[11px] font-bold text-emerald-900 flex items-center gap-1.5">
-              <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
+          <div className="p-3 bg-blue-50/60 rounded-2xl border border-blue-100 space-y-2">
+            <p className="text-[11px] font-bold text-blue-900 flex items-center gap-1.5">
+              <UserCheck className="w-3.5 h-3.5 text-blue-600" />
               <span>Instant Test Profile Switcher</span>
             </p>
             <div className="grid grid-cols-2 gap-1.5">
               <button
                 onClick={() => handleFastLoginAs('citizen')}
-                className="py-1.5 px-2 bg-white rounded-xl border border-emerald-200 text-gray-800 text-[11px] font-medium hover:bg-emerald-50 cursor-pointer text-left"
+                className="py-1.5 px-2 bg-white rounded-xl border border-blue-200 text-gray-800 text-[11px] font-medium hover:bg-blue-50 cursor-pointer text-left"
               >
                 👤 Citizen User
               </button>
               <button
                 onClick={() => handleFastLoginAs('donor')}
-                className="py-1.5 px-2 bg-white rounded-xl border border-emerald-200 text-gray-800 text-[11px] font-medium hover:bg-emerald-50 cursor-pointer text-left"
+                className="py-1.5 px-2 bg-white rounded-xl border border-blue-200 text-gray-800 text-[11px] font-medium hover:bg-blue-50 cursor-pointer text-left"
               >
                 🩸 Blood Donor
               </button>
               <button
                 onClick={() => handleFastLoginAs('worker')}
-                className="py-1.5 px-2 bg-white rounded-xl border border-emerald-200 text-gray-800 text-[11px] font-medium hover:bg-emerald-50 cursor-pointer text-left"
+                className="py-1.5 px-2 bg-white rounded-xl border border-blue-200 text-gray-800 text-[11px] font-medium hover:bg-blue-50 cursor-pointer text-left"
               >
                 ⚡ Electrician
               </button>
               <button
                 onClick={() => handleFastLoginAs('admin')}
-                className="py-1.5 px-2 bg-white rounded-xl border border-emerald-200 text-emerald-900 text-[11px] font-bold hover:bg-emerald-50 cursor-pointer text-left"
+                className="py-1.5 px-2 bg-white rounded-xl border border-blue-200 text-blue-900 text-[11px] font-bold hover:bg-blue-50 cursor-pointer text-left"
               >
                 🏛️ Municipal Admin
               </button>
@@ -256,7 +256,7 @@ export const ExpoDevMenuModal: React.FC = () => {
           >
             <div className="flex items-center gap-2.5">
               {isSoundEnabled ? (
-                <Volume2 className="w-4 h-4 text-emerald-600" />
+                <Volume2 className="w-4 h-4 text-blue-600" />
               ) : (
                 <VolumeX className="w-4 h-4 text-gray-400" />
               )}
@@ -264,7 +264,7 @@ export const ExpoDevMenuModal: React.FC = () => {
             </div>
             <span
               className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                isSoundEnabled ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-600'
+                isSoundEnabled ? 'bg-blue-100 text-blue-800' : 'bg-gray-200 text-gray-600'
               }`}
             >
               {isSoundEnabled ? 'ON' : 'OFF'}

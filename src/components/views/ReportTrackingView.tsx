@@ -35,7 +35,7 @@ export const ReportTrackingView: React.FC = () => {
         <p className="text-sm font-bold text-[#11241C] dark:text-white">No reports found.</p>
         <button
           onClick={() => navigate('report-problem')}
-          className="px-4 py-2.5 rounded-xl bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-xs cursor-pointer"
+          className="px-4 py-2.5 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs cursor-pointer"
         >
           Submit a Report
         </button>
@@ -123,7 +123,7 @@ export const ReportTrackingView: React.FC = () => {
         {/* Status Card */}
         <div className="bg-white dark:bg-[#16241F] rounded-3xl p-5 border border-[#E8E4DA] dark:border-white/10 shadow-xs space-y-3.5 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold text-[#063B2C] dark:text-emerald-400 bg-[#E6F4EA] dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/40 px-3 py-1 rounded-full">
+            <span className="text-xs font-extrabold text-[#007AFF] dark:text-blue-400 bg-[#E6F4EA] dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/40 px-3 py-1 rounded-full">
               {report.status}
             </span>
             <span className="text-xs font-mono font-black text-[#55685F] dark:text-[#A2B3AA]">
@@ -144,7 +144,7 @@ export const ReportTrackingView: React.FC = () => {
             </div>
 
             <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] mt-1 flex items-center gap-1.5 font-medium">
-              <MapPin className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400 shrink-0" />
+              <MapPin className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400 shrink-0" />
               <span>{report.location}</span>
             </p>
           </div>
@@ -168,7 +168,7 @@ export const ReportTrackingView: React.FC = () => {
             <button
               type="button"
               onClick={handleUpvote}
-              className="flex items-center gap-1.5 font-bold text-[#063B2C] dark:text-emerald-400 hover:underline cursor-pointer"
+              className="flex items-center gap-1.5 font-bold text-[#007AFF] dark:text-blue-400 hover:underline cursor-pointer"
             >
               <ThumbsUp className="w-3.5 h-3.5" />
               <span>Escalate ({report.upvotes || 1})</span>
@@ -187,7 +187,7 @@ export const ReportTrackingView: React.FC = () => {
               <div key={idx} className="relative space-y-1">
                 <div
                   className={`absolute -left-[23px] top-0.5 w-4 h-4 rounded-full border-2 border-white dark:border-[#16241F] shadow-xs flex items-center justify-center ${
-                    step.done ? 'bg-[#063B2C] dark:bg-emerald-500' : 'bg-[#D2CEBE] dark:bg-gray-600'
+                    step.done ? 'bg-[#007AFF] dark:bg-blue-500' : 'bg-[#D2CEBE] dark:bg-gray-600'
                   }`}
                 >
                   {step.done && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
@@ -210,13 +210,13 @@ export const ReportTrackingView: React.FC = () => {
             onClick={() => navigate('report-problem')}
             className="w-full py-3.5 rounded-2xl bg-white dark:bg-[#16241F] border border-[#D2CEBE] dark:border-white/10 text-[#11241C] dark:text-white font-bold text-xs hover:bg-[#FAF8F5] dark:hover:bg-[#1C2C24] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
           >
-            <PlusCircle className="w-4 h-4 text-[#063B2C] dark:text-emerald-400" />
+            <PlusCircle className="w-4 h-4 text-[#007AFF] dark:text-blue-400" />
             <span>Report Another Problem</span>
           </button>
 
           <button
             onClick={() => navigate('home')}
-            className="w-full py-3.5 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-xs shadow-xs hover:bg-[#084D3A] cursor-pointer"
+            className="w-full py-3.5 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs shadow-xs hover:bg-[#084D3A] cursor-pointer"
           >
             Return to Dashboard
           </button>

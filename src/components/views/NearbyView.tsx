@@ -114,25 +114,25 @@ export const NearbyView: React.FC = () => {
   const getCategoryColor = (cat: NearbyCategoryType) => {
     switch (cat) {
       case 'Workers':
-        return 'bg-emerald-100 text-emerald-800 border-emerald-300';
+        return 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800/50';
       case 'Medical':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
+        return 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800/50';
       case 'Blood':
-        return 'bg-rose-100 text-rose-800 border-rose-300';
+        return 'bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-900/50';
       case 'Jobs':
-        return 'bg-amber-100 text-amber-800 border-amber-300';
+        return 'bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-900/50';
       case 'Shops':
-        return 'bg-purple-100 text-purple-800 border-purple-300';
+        return 'bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-800/50';
       case 'Vehicle':
-        return 'bg-slate-100 text-slate-800 border-slate-300';
+        return 'bg-slate-100 dark:bg-slate-800/40 text-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700/50';
       case 'Animal':
-        return 'bg-green-100 text-green-800 border-green-300';
+        return 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800/50';
       case 'Rentals':
-        return 'bg-indigo-100 text-indigo-800 border-indigo-300';
+        return 'bg-indigo-100 dark:bg-indigo-950/40 text-indigo-800 dark:text-indigo-300 border-indigo-300 dark:border-indigo-900/50';
       case 'Services':
-        return 'bg-teal-100 text-teal-800 border-teal-300';
+        return 'bg-teal-100 dark:bg-teal-950/40 text-teal-800 dark:text-teal-300 border-teal-300 dark:border-teal-900/50';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
+        return 'bg-gray-100 dark:bg-gray-800/40 text-gray-800 dark:text-gray-300 border-gray-300 dark:border-gray-700/50';
     }
   };
 
@@ -141,9 +141,9 @@ export const NearbyView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 max-w-md mx-auto select-none transition-colors">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 max-w-md mx-auto select-none transition-colors">
       {/* Top Location & Search Header */}
-      <header className="sticky top-0 z-30 bg-white/95 dark:bg-[#0F1A15]/95 backdrop-blur-md px-5 pt-6 pb-3 border-b border-[#E8E4DA] dark:border-white/10 space-y-3 shadow-xs transition-colors">
+      <header className="sticky top-0 z-30 bg-white/95 dark:bg-[#0B132B]/95 backdrop-blur-md px-5 pt-6 pb-3 border-b border-[#E8E4DA] dark:border-white/10 space-y-3 shadow-xs transition-colors">
         <div className="flex items-center justify-between">
           <div>
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#55685F] dark:text-[#A2B3AA] block">
@@ -153,22 +153,22 @@ export const NearbyView: React.FC = () => {
               onClick={() => setIsLocationSelectorOpen(true)}
               className="flex items-center gap-1.5 cursor-pointer group"
             >
-              <h1 className="text-base font-extrabold text-[#11241C] dark:text-white tracking-tight group-hover:text-[#063B2C] dark:group-hover:text-[#4ECCA3] truncate max-w-[200px]">
+              <h1 className="text-base font-extrabold text-[#11241C] dark:text-white tracking-tight group-hover:text-[#007AFF] dark:group-hover:text-[#38BDF8] truncate max-w-[200px]">
                 {location.locality}, Jalpaiguri
               </h1>
-              <span className="text-xs text-[#063B2C] dark:text-[#4ECCA3] font-bold underline decoration-dotted">
+              <span className="text-xs text-[#007AFF] dark:text-[#38BDF8] font-bold underline decoration-dotted">
                 Change
               </span>
             </div>
           </div>
 
           {/* List vs Map Toggle */}
-          <div className="flex items-center bg-[#FAF8F5] dark:bg-[#17231E] p-1 rounded-xl border border-[#D2CEBE] dark:border-white/10">
+          <div className="flex items-center bg-[#FAF8F5] dark:bg-[#0F172A] p-1 rounded-xl border border-[#D2CEBE] dark:border-white/10">
             <button
               onClick={() => setActiveTab('list')}
               className={`flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'list'
-                  ? 'bg-[#063B2C] dark:bg-emerald-600 text-white shadow-xs'
+                  ? 'bg-[#007AFF] dark:bg-blue-600 text-white shadow-xs'
                   : 'text-[#55685F] dark:text-[#A2B3AA] hover:text-[#11241C] dark:hover:text-white'
               }`}
             >
@@ -179,7 +179,7 @@ export const NearbyView: React.FC = () => {
               onClick={() => setActiveTab('map')}
               className={`flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'map'
-                  ? 'bg-[#063B2C] dark:bg-emerald-600 text-white shadow-xs'
+                  ? 'bg-[#007AFF] dark:bg-blue-600 text-white shadow-xs'
                   : 'text-[#55685F] dark:text-[#A2B3AA] hover:text-[#11241C] dark:hover:text-white'
               }`}
             >
@@ -190,7 +190,7 @@ export const NearbyView: React.FC = () => {
         </div>
 
         {/* Search Bar */}
-        <div className="w-full bg-[#FAF8F5] dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 rounded-2xl px-3.5 py-2.5 flex items-center gap-2.5 shadow-xs">
+        <div className="w-full bg-[#FAF8F5] dark:bg-[#0F172A] border border-[#D2CEBE] dark:border-white/10 rounded-2xl px-3.5 py-2.5 flex items-center gap-2.5 shadow-xs">
           <Search className="w-4 h-4 text-[#55685F] dark:text-[#A2B3AA]" />
           <input
             type="text"
@@ -216,8 +216,8 @@ export const NearbyView: React.FC = () => {
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap transition-all cursor-pointer border ${
                   isSelected
-                    ? 'bg-[#063B2C] dark:bg-emerald-600 text-white border-[#063B2C] dark:border-emerald-600 shadow-xs'
-                    : 'bg-white dark:bg-[#17231E] text-[#55685F] dark:text-[#A2B3AA] border-[#E8E4DA] dark:border-white/10 hover:border-[#063B2C] dark:hover:border-emerald-500'
+                    ? 'bg-[#007AFF] dark:bg-blue-600 text-white border-[#007AFF] dark:border-blue-600 shadow-xs'
+                    : 'bg-white dark:bg-[#0F172A] text-[#55685F] dark:text-[#A2B3AA] border-[#E8E4DA] dark:border-white/10 hover:border-[#007AFF] dark:hover:border-blue-500'
                 }`}
               >
                 {cat.icon}
@@ -240,8 +240,8 @@ export const NearbyView: React.FC = () => {
                 onClick={() => setDistanceFilter(dist)}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-[#E6F4EA] dark:bg-[#1C4532] text-[#063B2C] dark:text-[#4ECCA3] font-extrabold ring-1 ring-[#063B2C] dark:ring-emerald-500'
-                    : 'bg-[#FAF8F5] dark:bg-[#17231E] text-[#55685F] dark:text-[#A2B3AA] border border-[#E8E4DA] dark:border-white/10 hover:bg-white dark:hover:bg-[#1F312A]'
+                    ? 'bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-[#38BDF8] font-extrabold ring-1 ring-[#007AFF] dark:ring-blue-500'
+                    : 'bg-[#FAF8F5] dark:bg-[#0F172A] text-[#55685F] dark:text-[#A2B3AA] border border-[#E8E4DA] dark:border-white/10 hover:bg-white dark:hover:bg-[#1F312A]'
                 }`}
               >
                 {dist}
@@ -269,7 +269,7 @@ export const NearbyView: React.FC = () => {
             {filteredItems.map((item) => (
               <div
                 key={item.id}
-                className="bg-white dark:bg-[#17231E] rounded-2xl p-4 border border-[#E8E4DA] dark:border-white/10 shadow-xs hover:shadow-md transition-all space-y-3"
+                className="bg-white dark:bg-[#0F172A] rounded-2xl p-4 border border-[#E8E4DA] dark:border-white/10 shadow-xs hover:shadow-md transition-all space-y-3"
               >
                 {/* Card Top: Category & Distance */}
                 <div className="flex items-start justify-between gap-2">
@@ -284,14 +284,14 @@ export const NearbyView: React.FC = () => {
                       </span>
 
                       {item.verified && (
-                        <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md">
+                        <span className="flex items-center gap-1 text-[11px] font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-md">
                           <ShieldCheck className="w-3 h-3" />
                           <span>Verified</span>
                         </span>
                       )}
 
                       {item.availability && (
-                        <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50/70 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
+                        <span className="text-[10px] font-bold text-blue-700 dark:text-blue-300 bg-blue-50/70 dark:bg-blue-950/40 px-2 py-0.5 rounded-md">
                           {item.availability}
                         </span>
                       )}
@@ -309,8 +309,8 @@ export const NearbyView: React.FC = () => {
                   </div>
 
                   {/* Distance Pill */}
-                  <div className="bg-[#E6F4EA] dark:bg-[#1C4532] text-[#063B2C] dark:text-[#4ECCA3] px-2.5 py-1 rounded-xl text-xs font-black shrink-0 flex items-center gap-1 shadow-xs">
-                    <MapPin className="w-3 h-3 text-[#063B2C] dark:text-[#4ECCA3]" />
+                  <div className="bg-blue-50 dark:bg-blue-950/60 text-[#007AFF] dark:text-[#38BDF8] px-2.5 py-1 rounded-xl text-xs font-black shrink-0 flex items-center gap-1 shadow-xs">
+                    <MapPin className="w-3 h-3 text-[#007AFF] dark:text-[#38BDF8]" />
                     <span>{item.distanceText}</span>
                   </div>
                 </div>
@@ -318,7 +318,7 @@ export const NearbyView: React.FC = () => {
                 {/* Locality and Description */}
                 <div className="space-y-1 text-xs">
                   <p className="text-[#55685F] dark:text-[#A2B3AA] font-semibold flex items-center gap-1">
-                    <span className="text-[#11241C] dark:text-[#E8ECE9] font-bold">📍 {item.area}</span>
+                    <span className="text-[#11241C] dark:text-[#F8FAFC] font-bold">📍 {item.area}</span>
                   </p>
                   {item.description && (
                     <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] leading-relaxed line-clamp-2">
@@ -343,7 +343,7 @@ export const NearbyView: React.FC = () => {
                     )}
 
                     {item.startingPrice && (
-                      <span className="text-xs font-black text-[#063B2C] dark:text-[#4ECCA3]">
+                      <span className="text-xs font-black text-[#007AFF] dark:text-[#38BDF8]">
                         {item.startingPrice}
                       </span>
                     )}
@@ -363,7 +363,7 @@ export const NearbyView: React.FC = () => {
 
                   <button
                     onClick={() => handleAction(item)}
-                    className="bg-[#063B2C] dark:bg-emerald-600 text-white hover:bg-[#084D3A] active:scale-95 transition-all px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1 shadow-xs cursor-pointer"
+                    className="bg-[#007AFF] dark:bg-blue-600 text-white hover:bg-[#084D3A] active:scale-95 transition-all px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1 shadow-xs cursor-pointer"
                   >
                     <span>{item.primaryActionLabel}</span>
                     <ChevronRight className="w-3.5 h-3.5" />
@@ -378,7 +378,7 @@ export const NearbyView: React.FC = () => {
         {activeTab === 'map' && (
           <div className="relative w-full h-[520px] bg-[#E8E4DA] dark:bg-[#131F1A] rounded-3xl overflow-hidden border border-[#D2CEBE] dark:border-white/10 shadow-md flex flex-col justify-between">
             {/* Interactive Vector Map Canvas Mockup with real GPS markers */}
-            <div className="absolute inset-0 bg-[#E5E9E2] dark:bg-[#17231E] overflow-hidden">
+            <div className="absolute inset-0 bg-[#E5E9E2] dark:bg-[#0F172A] overflow-hidden">
               {/* Stylized road grid lines */}
               <svg className="w-full h-full opacity-40 dark:opacity-20" xmlns="http://www.w3.org/2000/svg">
                 <defs>
@@ -410,10 +410,10 @@ export const NearbyView: React.FC = () => {
                 title="Your approximate location"
               >
                 <span className="relative flex h-8 w-8 items-center justify-center">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-60"></span>
-                  <span className="relative inline-flex rounded-full h-5 w-5 bg-[#063B2C] dark:bg-emerald-600 border-3 border-white dark:border-[#17231E] shadow-md"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-60"></span>
+                  <span className="relative inline-flex rounded-full h-5 w-5 bg-[#007AFF] dark:bg-blue-600 border-3 border-white dark:border-[#17231E] shadow-md"></span>
                 </span>
-                <span className="mt-1 px-2 py-0.5 rounded-full bg-[#063B2C] dark:bg-emerald-600 text-white text-[9px] font-extrabold shadow-sm">
+                <span className="mt-1 px-2 py-0.5 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white text-[9px] font-extrabold shadow-sm">
                   You are here ({location.locality})
                 </span>
               </div>
@@ -441,17 +441,17 @@ export const NearbyView: React.FC = () => {
                     <div
                       className={`p-2 rounded-2xl shadow-lg border-2 flex items-center justify-center ${
                         isSelected
-                          ? 'bg-[#063B2C] text-white border-white ring-4 ring-[#E6F4EA] dark:ring-emerald-800'
-                          : 'bg-white dark:bg-[#17231E] text-[#11241C] dark:text-white border-[#063B2C] dark:border-emerald-500'
+                          ? 'bg-[#007AFF] text-white border-white ring-4 ring-[#E6F4EA] dark:ring-blue-800'
+                          : 'bg-white dark:bg-[#0F172A] text-[#11241C] dark:text-white border-[#007AFF] dark:border-blue-500'
                       }`}
                     >
-                      {item.category === 'Workers' && <Wrench className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />}
+                      {item.category === 'Workers' && <Wrench className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />}
                       {item.category === 'Medical' && <Stethoscope className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />}
                       {item.category === 'Blood' && <Droplet className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />}
                       {item.category === 'Jobs' && <Briefcase className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />}
                       {item.category === 'Shops' && <Store className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />}
                       {item.category === 'Vehicle' && <Car className="w-3.5 h-3.5 text-slate-700 dark:text-slate-300" />}
-                      {item.category === 'Animal' && <PawPrint className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />}
+                      {item.category === 'Animal' && <PawPrint className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />}
                       {item.category === 'Rentals' && <HomeIcon className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />}
                       {item.category === 'Services' && <Landmark className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />}
                     </div>
@@ -462,23 +462,23 @@ export const NearbyView: React.FC = () => {
 
             {/* Map Top Badge */}
             <div className="relative z-20 p-3 flex items-center justify-between">
-              <div className="bg-white/90 dark:bg-[#17231E]/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#E8E4DA] dark:border-white/10 text-[11px] font-bold text-[#11241C] dark:text-white shadow-xs flex items-center gap-1.5">
-                <Navigation className="w-3.5 h-3.5 text-[#063B2C] dark:text-[#4ECCA3]" />
+              <div className="bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#E8E4DA] dark:border-white/10 text-[11px] font-bold text-[#11241C] dark:text-white shadow-xs flex items-center gap-1.5">
+                <Navigation className="w-3.5 h-3.5 text-[#007AFF] dark:text-[#38BDF8]" />
                 <span>Tap any pin to inspect nearby service</span>
               </div>
             </div>
 
             {/* Map Selected Result Bottom Sheet */}
             {selectedMarkerItem && (
-              <div className="relative z-30 m-3 bg-white dark:bg-[#17231E] rounded-2xl p-4 border border-[#E8E4DA] dark:border-white/10 shadow-xl animate-in slide-in-from-bottom-4 duration-200">
+              <div className="relative z-30 m-3 bg-white dark:bg-[#0F172A] rounded-2xl p-4 border border-[#E8E4DA] dark:border-white/10 shadow-xl animate-in slide-in-from-bottom-4 duration-200">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div>
                     <div className="flex items-center gap-1.5 mb-1">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-[#E6F4EA] dark:bg-[#1C4532] text-[#063B2C] dark:text-[#4ECCA3] uppercase">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-[#38BDF8] uppercase">
                         {selectedMarkerItem.subcategory}
                       </span>
                       {selectedMarkerItem.verified && (
-                        <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-0.5">
+                        <span className="text-[10px] font-bold text-blue-700 dark:text-blue-300 flex items-center gap-0.5">
                           <ShieldCheck className="w-3 h-3" />
                           Verified
                         </span>
@@ -500,7 +500,7 @@ export const NearbyView: React.FC = () => {
                 </div>
 
                 <div className="pt-2 border-t border-[#F0ECE1] dark:border-white/10 flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3]">
+                  <span className="text-xs font-bold text-[#007AFF] dark:text-[#38BDF8]">
                     {selectedMarkerItem.startingPrice ||
                       selectedMarkerItem.salary ||
                       selectedMarkerItem.openStatus ||
@@ -508,7 +508,7 @@ export const NearbyView: React.FC = () => {
                   </span>
                   <button
                     onClick={() => handleAction(selectedMarkerItem)}
-                    className="bg-[#063B2C] dark:bg-emerald-600 text-white hover:bg-[#084D3A] px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1 shadow-xs cursor-pointer"
+                    className="bg-[#007AFF] dark:bg-blue-600 text-white hover:bg-[#084D3A] px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1 shadow-xs cursor-pointer"
                   >
                     <span>{selectedMarkerItem.primaryActionLabel}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -521,7 +521,7 @@ export const NearbyView: React.FC = () => {
 
         {/* Empty State when no nearby services found */}
         {filteredItems.length === 0 && (
-          <div className="bg-white dark:bg-[#17231E] rounded-3xl p-6 text-center border border-[#E8E4DA] dark:border-white/10 shadow-xs space-y-4 my-4 transition-colors">
+          <div className="bg-white dark:bg-[#0F172A] rounded-3xl p-6 text-center border border-[#E8E4DA] dark:border-white/10 shadow-xs space-y-4 my-4 transition-colors">
             <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 flex items-center justify-center mx-auto">
               <MapPin className="w-6 h-6" />
             </div>
@@ -537,7 +537,7 @@ export const NearbyView: React.FC = () => {
             <div className="flex flex-col gap-2 pt-2 max-w-xs mx-auto">
               <button
                 onClick={() => setDistanceFilter('Any distance')}
-                className="w-full bg-[#063B2C] dark:bg-emerald-600 text-white py-2.5 rounded-xl text-xs font-extrabold shadow-xs hover:bg-[#084D3A] cursor-pointer"
+                className="w-full bg-[#007AFF] dark:bg-blue-600 text-white py-2.5 rounded-xl text-xs font-extrabold shadow-xs hover:bg-[#084D3A] cursor-pointer"
               >
                 Expand Search to Any Distance
               </button>
@@ -553,7 +553,7 @@ export const NearbyView: React.FC = () => {
                   setDistanceFilter('Any distance');
                   setSearchQuery('');
                 }}
-                className="w-full text-xs font-bold text-[#55685F] dark:text-[#A2B3AA] py-1 hover:text-[#063B2C] dark:hover:text-[#4ECCA3] cursor-pointer"
+                className="w-full text-xs font-bold text-[#55685F] dark:text-[#A2B3AA] py-1 hover:text-[#007AFF] dark:hover:text-[#38BDF8] cursor-pointer"
               >
                 Browse All Services
               </button>

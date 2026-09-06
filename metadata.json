@@ -1,6 +1,6 @@
 {
-  "name": "Jalpaiguri Connect",
-  "description": "Hyperlocal community platform for Jalpaiguri with multi-turn Gemini civic AI chatbot, Google Maps Grounding for local places, verified trade workers, emergency blood donors, and municipal reporting.",
+  "name": "MYJPG",
+  "description": "Your Jalpaiguri, Connected. Everything local. One place.",
   "requestFramePermissions": [
     "geolocation",
     "camera",

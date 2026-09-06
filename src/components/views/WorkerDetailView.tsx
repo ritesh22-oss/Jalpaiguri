@@ -66,10 +66,10 @@ export const WorkerDetailView: React.FC = () => {
             <img
               src={worker.avatarUrl}
               alt={worker.name}
-              className="w-24 h-24 rounded-3xl object-cover border-2 border-[#063B2C] dark:border-emerald-500 shadow-sm"
+              className="w-24 h-24 rounded-3xl object-cover border-2 border-[#007AFF] dark:border-blue-500 shadow-sm"
             />
             {worker.verified && (
-              <span className="absolute -bottom-1.5 -right-1.5 bg-[#063B2C] dark:bg-emerald-600 text-white p-1 rounded-full shadow-xs">
+              <span className="absolute -bottom-1.5 -right-1.5 bg-[#007AFF] dark:bg-blue-600 text-white p-1 rounded-full shadow-xs">
                 <ShieldCheck className="w-4 h-4" />
               </span>
             )}
@@ -79,16 +79,16 @@ export const WorkerDetailView: React.FC = () => {
             <h2 className="text-xl font-extrabold text-[#11241C] dark:text-white tracking-tight">
               {worker.name}
             </h2>
-            <p className="text-xs font-bold text-[#063B2C] dark:text-emerald-400 mt-0.5">
+            <p className="text-xs font-bold text-[#007AFF] dark:text-blue-400 mt-0.5">
               {worker.profession} • {worker.experience || (worker.experienceYears ? `${worker.experienceYears} yrs exp` : 'Verified Professional')}
             </p>
             <div className="flex items-center justify-center gap-3 text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA] mt-2">
               <span className="flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400" />
+                <MapPin className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400" />
                 <span>{worker.location || worker.serviceArea} ({worker.distance})</span>
               </span>
               <span>•</span>
-              <span className="flex items-center gap-1 text-[#063B2C] dark:text-emerald-400 font-bold">
+              <span className="flex items-center gap-1 text-[#007AFF] dark:text-blue-400 font-bold">
                 <Clock className="w-3.5 h-3.5" />
                 <span>{worker.availability}</span>
               </span>
@@ -98,14 +98,14 @@ export const WorkerDetailView: React.FC = () => {
           <div className="flex items-center justify-center gap-4 pt-2 border-t border-[#F0ECE1] dark:border-white/10">
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 font-extrabold text-sm text-[#11241C] dark:text-white">
-                <Star className="w-4 h-4 fill-[#063B2C] dark:fill-emerald-400 text-[#063B2C] dark:text-emerald-400" />
+                <Star className="w-4 h-4 fill-[#007AFF] dark:fill-blue-400 text-[#007AFF] dark:text-blue-400" />
                 <span>{worker.rating}</span>
               </div>
               <span className="text-[10px] text-[#55685F] dark:text-[#A2B3AA]">{worker.reviewCount} reviews</span>
             </div>
             <div className="w-px h-8 bg-[#E8E4DA] dark:bg-white/10"></div>
             <div className="text-center">
-              <span className="font-extrabold text-sm text-[#063B2C] dark:text-emerald-400">{worker.startingPrice}</span>
+              <span className="font-extrabold text-sm text-[#007AFF] dark:text-blue-400">{worker.startingPrice}</span>
               <span className="text-[10px] text-[#55685F] dark:text-[#A2B3AA] block">Standard rate</span>
             </div>
           </div>
@@ -144,21 +144,21 @@ export const WorkerDetailView: React.FC = () => {
         <div className="grid grid-cols-3 gap-2">
           <button
             onClick={handleCall}
-            className="py-3.5 px-3 rounded-2xl bg-[#D2EBE0] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-[#C2E4D5] dark:hover:bg-emerald-900/60 border border-transparent dark:border-emerald-800/40 cursor-pointer"
+            className="py-3.5 px-3 rounded-2xl bg-[#D2EBE0] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-[#C2E4D5] dark:hover:bg-blue-900/60 border border-transparent dark:border-blue-800/40 cursor-pointer"
           >
             <Phone className="w-4 h-4" />
             <span>Call</span>
           </button>
           <button
             onClick={handleChat}
-            className="py-3.5 px-3 rounded-2xl bg-[#D2EBE0] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-[#C2E4D5] dark:hover:bg-emerald-900/60 border border-transparent dark:border-emerald-800/40 cursor-pointer"
+            className="py-3.5 px-3 rounded-2xl bg-[#D2EBE0] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-[#C2E4D5] dark:hover:bg-blue-900/60 border border-transparent dark:border-blue-800/40 cursor-pointer"
           >
             <MessageSquare className="w-4 h-4" />
             <span>Chat</span>
           </button>
           <button
             onClick={handleRequest}
-            className="py-3.5 px-3 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-[#084D3A] shadow-md cursor-pointer"
+            className="py-3.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-[#084D3A] shadow-md cursor-pointer"
           >
             <Wrench className="w-4 h-4" />
             <span>Book Now</span>

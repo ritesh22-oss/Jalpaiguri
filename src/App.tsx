@@ -1,4 +1,43 @@
-import React from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+
+interface Props {
+  children?: ReactNode;
+}
+
+interface State {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ErrorBoundary extends Component<Props, State> {
+  public state: State = {
+    hasError: false,
+    error: null
+  };
+
+  public static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
+  }
+
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Uncaught error:', error, errorInfo);
+  }
+
+  public render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '20px', color: 'red', backgroundColor: 'white', zIndex: 9999, position: 'absolute', inset: 0 }}>
+          <h1>Something went wrong.</h1>
+          <pre>{this.state.error?.message}</pre>
+          <pre>{this.state.error?.stack}</pre>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NavigationProvider, useNav } from './context/NavigationContext';
 import { AppProvider, useApp } from './context/AppContext';
@@ -33,6 +72,10 @@ import { VehicleView } from './components/views/VehicleView';
 import { RentalsView } from './components/views/RentalsView';
 import { BusinessesView } from './components/views/BusinessesView';
 import { GovernmentServicesView } from './components/views/GovernmentServicesView';
+import { BanksAtmsView } from './components/views/BanksAtmsView';
+import { TransportView } from './components/transport/TransportView';
+import { CourierSectionView } from './components/courier/CourierView';
+import { EducationView } from './components/education/EducationView';
 import { LostFoundView } from './components/views/LostFoundView';
 import { ChatView } from './components/views/ChatView';
 import { GeminiChatView } from './components/views/GeminiChatView';
@@ -48,11 +91,19 @@ import { SexualViolenceSupportView } from './components/views/SexualViolenceSupp
 import { ThemeProvider } from './context/ThemeContext';
 
 // Shop Marketplace & Merchant Platform
+
+// Dining Marketplace & Restaurant Owner Platform
+import { DiningMarketplaceView } from './components/dining/DiningMarketplaceView';
+import { RestaurantDetailView } from './components/dining/RestaurantDetailView';
+import { AddRestaurantWizardView } from './components/dining/AddRestaurantWizardView';
+import { RestaurantDashboardView } from './components/dining/RestaurantDashboardView';
+
 import { ShopMarketplaceView } from './components/shops/ShopMarketplaceView';
 import { ShopDetailView } from './components/shops/ShopDetailView';
 import { AddShopWizardView } from './components/shops/AddShopWizardView';
 import { MerchantDashboardView } from './components/shops/MerchantDashboardView';
 import { SmartShoppingSearchView } from './components/shops/SmartShoppingSearchView';
+import { PujaPandalsView } from './components/views/PujaPandalsView';
 
 // Common Components & Modals
 import { BottomNav } from './components/common/BottomNav';
@@ -64,7 +115,8 @@ import { Toast } from './components/common/Toast';
 const AppContent: React.FC = () => {
   const { currentView, replaceView, navigate, goBack } = useNav();
   const { user, isAuthenticated, isProfileComplete, isLoading } = useAuth();
-  const { isWithinServiceRegion, serviceAreaStatus, status: locationStatus } = useLocation();
+  const { isWithinServiceRegion, serviceAreaStatus, status: locationStatus, location } = useLocation();
+  const { pujaPandals, addPujaPandal, reportPandalInfo } = useApp();
 
   // Automatic auth state transition: if user is authenticated but has not completed profile setup
   // and is currently on auth/onboarding views, smoothly navigate them to profile-setup immediately
@@ -72,6 +124,23 @@ const AppContent: React.FC = () => {
     if (!isLoading && isAuthenticated && !isProfileComplete) {
       if (currentView === 'auth' || currentView === 'phone-auth' || currentView === 'onboarding') {
         replaceView('profile-setup');
+      }
+    }
+  }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView]);
+
+  // Persistent Authentication Session Restoration:
+  // If the session is still valid (authenticated + profile complete), automatically open the user
+  // directly to the Home screen without showing login, signup, splash, or onboarding again.
+  React.useEffect(() => {
+    if (!isLoading && isAuthenticated && isProfileComplete) {
+      if (
+        currentView === 'splash' ||
+        currentView === 'auth' ||
+        currentView === 'phone-auth' ||
+        currentView === 'otp' ||
+        currentView === 'onboarding'
+      ) {
+        replaceView('home');
       }
     }
   }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView]);
@@ -186,6 +255,18 @@ const AppContent: React.FC = () => {
       case 'rental-detail':
       case 'list-property':
         return <RentalsView />;
+
+      case 'dining':
+      case 'dining-marketplace':
+        return <DiningMarketplaceView />;
+      case 'restaurant-detail':
+      case 'dining-detail':
+        return <RestaurantDetailView />;
+      case 'add-restaurant':
+        return <AddRestaurantWizardView />;
+      case 'restaurant-dashboard':
+        return <RestaurantDashboardView />;
+
       case 'businesses':
       case 'shop-marketplace':
         return <ShopMarketplaceView />;
@@ -198,8 +279,27 @@ const AppContent: React.FC = () => {
         return <MerchantDashboardView />;
       case 'smart-shopping-search':
         return <SmartShoppingSearchView />;
+      case 'puja-pandals':
+      case 'pandal-detail':
+        return (
+          <PujaPandalsView
+            pandals={pujaPandals}
+            userLocation={location}
+            onBack={() => goBack()}
+            onAddPandal={addPujaPandal}
+            onReportPandal={reportPandalInfo}
+          />
+        );
+      case 'transport':
+        return <TransportView />;
+      case 'courier':
+        return <CourierSectionView />;
+      case 'education':
+        return <EducationView />;
       case 'government':
         return <GovernmentServicesView />;
+      case 'banks-atms':
+        return <BanksAtmsView />;
       case 'lost-found':
         return <LostFoundView />;
       case 'ai-chat':
@@ -278,7 +378,7 @@ export default function App() {
               <SafetyProvider>
                 <NavigationProvider>
                   <AppProvider>
-                    <AppContent />
+                    <ErrorBoundary><AppContent /></ErrorBoundary>
                   </AppProvider>
                 </NavigationProvider>
               </SafetyProvider>

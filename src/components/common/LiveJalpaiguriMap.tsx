@@ -65,8 +65,13 @@ export const LiveJalpaiguriMap: React.FC<LiveJalpaiguriMapProps> = ({
     }
 
     return () => {
+      userMarkerRef.current = null;
+      jalpaiguriMarkerRef.current = null;
+      connectingLineRef.current = null;
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
+        try {
+          mapInstanceRef.current.remove();
+        } catch {}
         mapInstanceRef.current = null;
       }
     };
@@ -84,7 +89,7 @@ export const LiveJalpaiguriMap: React.FC<LiveJalpaiguriMapProps> = ({
         <div style="position: relative; display: flex; align-items: center; justify-content: center;">
           <div style="position: absolute; width: 34px; height: 34px; border-radius: 9999px; background: rgba(16, 185, 129, 0.35); animation: ping-slow 2s infinite;"></div>
           <div style="position: relative; width: 22px; height: 22px; border-radius: 9999px; background: #064E3B; border: 3px solid #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2); display: flex; align-items: center; justify-content: center;">
-            <div style="width: 6px; height: 6px; border-radius: 9999px; background: #34D399;"></div>
+            <div style="width: 6px; height: 6px; border-radius: 9999px; background: #60A5FA;"></div>
           </div>
         </div>
       `,
@@ -205,8 +210,8 @@ export const LiveJalpaiguriMap: React.FC<LiveJalpaiguriMapProps> = ({
       {/* Header Bar */}
       <div className="px-4 py-3 border-b border-[#F0ECE1] flex items-center justify-between bg-white">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-[#E6F4EA] text-[#063B2C] flex items-center justify-center">
-            <Compass className="w-4 h-4 text-[#063B2C]" />
+          <div className="w-8 h-8 rounded-xl bg-[#E6F4EA] text-[#007AFF] flex items-center justify-center">
+            <Compass className="w-4 h-4 text-[#007AFF]" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
@@ -214,8 +219,8 @@ export const LiveJalpaiguriMap: React.FC<LiveJalpaiguriMapProps> = ({
                 Live Jalpaiguri Civic Map
               </h3>
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
               </span>
             </div>
             <p className="text-[10px] text-[#55685F] font-semibold">
@@ -229,7 +234,7 @@ export const LiveJalpaiguriMap: React.FC<LiveJalpaiguriMapProps> = ({
           <button
             onClick={handleCenterOnMe}
             className={`px-2 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer ${
-              activeView === 'user' ? 'bg-[#063B2C] text-white shadow-2xs' : 'text-[#55685F] hover:text-[#11241C]'
+              activeView === 'user' ? 'bg-[#007AFF] text-white shadow-2xs' : 'text-[#55685F] hover:text-[#11241C]'
             }`}
             title="Focus on your real coordinates"
           >
@@ -238,7 +243,7 @@ export const LiveJalpaiguriMap: React.FC<LiveJalpaiguriMapProps> = ({
           <button
             onClick={handleCenterOnJalpaiguri}
             className={`px-2 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer ${
-              activeView === 'jalpaiguri' ? 'bg-[#063B2C] text-white shadow-2xs' : 'text-[#55685F] hover:text-[#11241C]'
+              activeView === 'jalpaiguri' ? 'bg-[#007AFF] text-white shadow-2xs' : 'text-[#55685F] hover:text-[#11241C]'
             }`}
             title="Focus on Jalpaiguri civic hub"
           >
@@ -248,7 +253,7 @@ export const LiveJalpaiguriMap: React.FC<LiveJalpaiguriMapProps> = ({
             <button
               onClick={() => setActiveView('both')}
               className={`px-2 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer ${
-                activeView === 'both' ? 'bg-[#063B2C] text-white shadow-2xs' : 'text-[#55685F] hover:text-[#11241C]'
+                activeView === 'both' ? 'bg-[#007AFF] text-white shadow-2xs' : 'text-[#55685F] hover:text-[#11241C]'
               }`}
               title="View your distance to Jalpaiguri"
             >
@@ -283,11 +288,11 @@ export const LiveJalpaiguriMap: React.FC<LiveJalpaiguriMapProps> = ({
           <button
             onClick={handleCenterOnMe}
             disabled={isLocating}
-            className="w-7 h-7 rounded-lg bg-white/95 backdrop-blur-xs border border-gray-200 text-[#063B2C] flex items-center justify-center hover:bg-white active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+            className="w-7 h-7 rounded-lg bg-white/95 backdrop-blur-xs border border-gray-200 text-[#007AFF] flex items-center justify-center hover:bg-white active:scale-95 transition-all cursor-pointer disabled:opacity-50"
             title="Recenter on My Location"
             aria-label="Recenter on My Location"
           >
-            <Crosshair className={`w-3.5 h-3.5 ${isLocating ? 'animate-spin text-emerald-600' : ''}`} />
+            <Crosshair className={`w-3.5 h-3.5 ${isLocating ? 'animate-spin text-blue-600' : ''}`} />
           </button>
           <button
             onClick={() => navigate('maps-explorer')}
@@ -302,7 +307,7 @@ export const LiveJalpaiguriMap: React.FC<LiveJalpaiguriMapProps> = ({
         {/* Floating "You Are Here" Badge on Map */}
         <div className="absolute left-3 bottom-3 z-10 max-w-[78%] pointer-events-none">
           <div className="bg-white/90 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+            <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
             <span className="text-[11px] font-extrabold text-[#11241C] truncate">
               📍 You: {location.locality || location.city || 'Current GPS'}
             </span>
@@ -315,14 +320,14 @@ export const LiveJalpaiguriMap: React.FC<LiveJalpaiguriMapProps> = ({
         <div className="p-3 bg-[#FAF8F5] border-t border-[#E8E4DA] space-y-2">
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-1.5 truncate">
-              <MapPin className="w-3.5 h-3.5 text-[#063B2C] shrink-0" />
+              <MapPin className="w-3.5 h-3.5 text-[#007AFF] shrink-0" />
               <span className="font-bold text-[#11241C] truncate">
                 {location.name}
               </span>
             </div>
 
             {location.locationSource === 'gps' ? (
-              <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
+              <span className="text-[10px] font-extrabold text-blue-800 bg-blue-100 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3" />
                 <span>GPS {location.accuracy ? `±${location.accuracy}m` : 'Active'}</span>
               </span>
@@ -335,9 +340,9 @@ export const LiveJalpaiguriMap: React.FC<LiveJalpaiguriMapProps> = ({
 
           {/* Regional Context Banner */}
           {isWithinServiceRegion ? (
-            <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-[11px] text-emerald-900 font-semibold">
+            <div className="p-2 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-between text-[11px] text-blue-900 font-semibold">
               <span>Within Jalpaiguri municipal service area</span>
-              <span className="text-[10px] font-bold bg-emerald-200/70 text-emerald-900 px-2 py-0.5 rounded-md">
+              <span className="text-[10px] font-bold bg-blue-200/70 text-blue-900 px-2 py-0.5 rounded-md">
                 Local Resident
               </span>
             </div>
@@ -349,7 +354,7 @@ export const LiveJalpaiguriMap: React.FC<LiveJalpaiguriMapProps> = ({
                   <span>Outside Jalpaiguri Region ({Math.round(distanceToServiceRegionKm).toLocaleString()} km away)</span>
                 </p>
                 <p className="text-[10px] text-amber-800">
-                  You are viewing Jalpaiguri Connect in remote citizen mode.
+                  You are viewing MYJPG in remote citizen mode.
                 </p>
               </div>
               <button

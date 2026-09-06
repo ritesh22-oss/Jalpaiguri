@@ -303,7 +303,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           resolve({ success: true, locality: geoResult.locality, location: newLoc });
         },
         (error) => {
-          let userFriendlyError = 'Location permission is required to verify whether Jalpaiguri Connect is available in your area.';
+          let userFriendlyError = 'Location permission is required to verify whether MYJPG is available in your area.';
           let newStatus: LocationStatus = 'error';
 
           switch (error.code) {

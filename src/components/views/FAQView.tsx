@@ -69,8 +69,8 @@ export const FAQView: React.FC = () => {
             onClick={() => goBack()}
             className={`w-9 h-9 rounded-2xl flex items-center justify-center cursor-pointer transition-colors ${
               isDarkMode
-                ? 'bg-[#182620] text-emerald-300 hover:bg-[#20332B]'
-                : 'bg-white border border-[#E8E4DA] text-[#063B2C] hover:bg-[#F2EFE9]'
+                ? 'bg-[#182620] text-blue-300 hover:bg-[#20332B]'
+                : 'bg-white border border-[#E8E4DA] text-[#007AFF] hover:bg-[#F2EFE9]'
             }`}
             title="Back to Profile"
             aria-label="Back to Profile"
@@ -86,8 +86,8 @@ export const FAQView: React.FC = () => {
         <div
           className={`px-3 py-1 rounded-full text-[11px] font-bold border flex items-center gap-1.5 ${
             isDarkMode
-              ? 'bg-[#182620] border-[#254236] text-emerald-300'
-              : 'bg-[#E6F4EA] border-[#C3E6D0] text-[#063B2C]'
+              ? 'bg-[#182620] border-[#254236] text-blue-300'
+              : 'bg-[#E6F4EA] border-[#C3E6D0] text-[#007AFF]'
           }`}
         >
           <HelpCircle className="w-3.5 h-3.5" />
@@ -108,7 +108,7 @@ export const FAQView: React.FC = () => {
             <span>Frequently Asked Questions</span>
           </h2>
           <p className="text-xs opacity-75 mt-1 leading-relaxed">
-            Everything you need to know about using Jalpaiguri Connect, finding local services,
+            Everything you need to know about using MYJPG, finding local services,
             emergency help, and navigating official government portals safely.
           </p>
 
@@ -122,8 +122,8 @@ export const FAQView: React.FC = () => {
               placeholder="Search your question (e.g. birth certificate, electrician, blood)..."
               className={`w-full pl-10 pr-9 py-2.5 rounded-2xl text-xs font-medium border outline-hidden transition-all ${
                 isDarkMode
-                  ? 'bg-[#0E1714] border-[#254236] focus:border-emerald-400 text-white placeholder:text-gray-500'
-                  : 'bg-[#FAF8F5] border-[#D2CEBE] focus:border-[#063B2C] text-[#11241C] placeholder:text-[#8C9B93]'
+                  ? 'bg-[#0E1714] border-[#254236] focus:border-blue-400 text-white placeholder:text-gray-500'
+                  : 'bg-[#FAF8F5] border-[#D2CEBE] focus:border-[#007AFF] text-[#11241C] placeholder:text-[#8C9B93]'
               }`}
             />
             {searchQuery && (
@@ -149,8 +149,8 @@ export const FAQView: React.FC = () => {
                 className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap cursor-pointer transition-all ${
                   isSelected
                     ? isDarkMode
-                      ? 'bg-emerald-500 text-black shadow-xs'
-                      : 'bg-[#063B2C] text-white shadow-xs'
+                      ? 'bg-blue-500 text-black shadow-xs'
+                      : 'bg-[#007AFF] text-white shadow-xs'
                     : isDarkMode
                     ? 'bg-[#182620] text-gray-300 border border-[#254236] hover:bg-[#20332B]'
                     : 'bg-white text-[#55685F] border border-[#E8E4DA] hover:bg-[#FAF8F5]'
@@ -170,7 +170,7 @@ export const FAQView: React.FC = () => {
           {selectedCategory !== 'All' && (
             <button
               onClick={() => setSelectedCategory('All')}
-              className="text-emerald-500 hover:underline flex items-center gap-1 text-[11px]"
+              className="text-blue-500 hover:underline flex items-center gap-1 text-[11px]"
             >
               <span>Reset filter</span>
             </button>
@@ -188,10 +188,10 @@ export const FAQView: React.FC = () => {
                   className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
                     isDarkMode
                       ? isOpen
-                        ? 'bg-[#13201B] border-emerald-500/40 shadow-xs'
+                        ? 'bg-[#13201B] border-blue-500/40 shadow-xs'
                         : 'bg-[#101B16] border-[#1F332B] hover:border-[#2F4F42]'
                       : isOpen
-                      ? 'bg-white border-[#063B2C]/40 shadow-xs'
+                      ? 'bg-white border-[#007AFF]/40 shadow-xs'
                       : 'bg-white border-[#E8E4DA] hover:border-[#D2CEBE]'
                   }`}
                 >
@@ -204,8 +204,8 @@ export const FAQView: React.FC = () => {
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${
                             isDarkMode
-                              ? 'bg-[#1F332B] text-emerald-300'
-                              : 'bg-[#F0ECE1] text-[#063B2C]'
+                              ? 'bg-[#1F332B] text-blue-300'
+                              : 'bg-[#F0ECE1] text-[#007AFF]'
                           }`}
                         >
                           {item.category}
@@ -216,7 +216,7 @@ export const FAQView: React.FC = () => {
                     </div>
                     <div
                       className={`p-1 rounded-full shrink-0 transition-transform duration-200 ${
-                        isOpen ? 'rotate-180 text-emerald-500' : 'opacity-60'
+                        isOpen ? 'rotate-180 text-blue-500' : 'opacity-60'
                       }`}
                     >
                       <ChevronDown className="w-4 h-4" />
@@ -256,7 +256,7 @@ export const FAQView: React.FC = () => {
                 setSearchQuery('');
                 setSelectedCategory('All');
               }}
-              className="px-4 py-2 bg-[#063B2C] text-white font-bold text-xs rounded-xl shadow-xs hover:bg-[#084D3A] cursor-pointer"
+              className="px-4 py-2 bg-[#007AFF] text-white font-bold text-xs rounded-xl shadow-xs hover:bg-[#084D3A] cursor-pointer"
             >
               Clear Search & Show All
             </button>
@@ -272,7 +272,7 @@ export const FAQView: React.FC = () => {
           }`}
         >
           <div className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-emerald-500" />
+            <MessageSquare className="w-4 h-4 text-blue-500" />
             <h3 className="text-xs font-extrabold uppercase tracking-wider">
               Didn't find your answer?
             </h3>
@@ -288,7 +288,7 @@ export const FAQView: React.FC = () => {
               className={`py-2.5 px-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 border transition-colors cursor-pointer ${
                 isDarkMode
                   ? 'bg-[#182620] border-[#254236] text-white hover:bg-[#20332B]'
-                  : 'bg-[#FAF8F5] border-[#D2CEBE] text-[#063B2C] hover:bg-[#F2EFE9]'
+                  : 'bg-[#FAF8F5] border-[#D2CEBE] text-[#007AFF] hover:bg-[#F2EFE9]'
               }`}
             >
               <Mail className="w-3.5 h-3.5" />
@@ -299,8 +299,8 @@ export const FAQView: React.FC = () => {
               onClick={() => navigate('report-problem')}
               className={`py-2.5 px-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 text-white transition-colors cursor-pointer shadow-xs ${
                 isDarkMode
-                  ? 'bg-emerald-600 hover:bg-emerald-500'
-                  : 'bg-[#063B2C] hover:bg-[#084D3A]'
+                  ? 'bg-blue-600 hover:bg-blue-500'
+                  : 'bg-[#007AFF] hover:bg-[#084D3A]'
               }`}
             >
               <AlertCircle className="w-3.5 h-3.5" />
@@ -310,7 +310,7 @@ export const FAQView: React.FC = () => {
 
           <div className="pt-3 border-t border-dashed border-gray-300 dark:border-gray-800 text-center space-y-1">
             <p className="text-[11px] font-bold text-gray-500">
-              Jalpaiguri Connect Version 1.0.0 (Build 2024.09)
+              MYJPG Version 1.0.0 (Build 2024.09)
             </p>
             <p className="text-[10px] opacity-60 max-w-xs mx-auto">
               Information may change as government guidelines and official departments update their
@@ -330,7 +330,7 @@ export const FAQView: React.FC = () => {
           >
             <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-800">
               <div className="flex items-center gap-2">
-                <Mail className="w-5 h-5 text-emerald-500" />
+                <Mail className="w-5 h-5 text-blue-500" />
                 <h3 className="font-extrabold text-sm">Citizen Support Desk</h3>
               </div>
               <button
@@ -343,7 +343,7 @@ export const FAQView: React.FC = () => {
 
             <div className="space-y-3 text-xs opacity-85 leading-relaxed">
               <div className="p-3 rounded-2xl bg-gray-50 dark:bg-[#182620] border border-gray-200 dark:border-gray-800 space-y-1">
-                <span className="font-bold block text-[11px] text-emerald-600 dark:text-emerald-400 uppercase">
+                <span className="font-bold block text-[11px] text-blue-600 dark:text-blue-400 uppercase">
                   Email Inquiries
                 </span>
                 <p className="font-mono text-xs">support@jalpaiguriconnect.org</p>
@@ -351,7 +351,7 @@ export const FAQView: React.FC = () => {
               </div>
 
               <div className="p-3 rounded-2xl bg-gray-50 dark:bg-[#182620] border border-gray-200 dark:border-gray-800 space-y-1">
-                <span className="font-bold block text-[11px] text-emerald-600 dark:text-emerald-400 uppercase">
+                <span className="font-bold block text-[11px] text-blue-600 dark:text-blue-400 uppercase">
                   Jalpaiguri Municipal Helpdesk
                 </span>
                 <p className="font-mono text-xs">03561-230045 / 222111</p>
@@ -371,7 +371,7 @@ export const FAQView: React.FC = () => {
 
             <button
               onClick={() => setContactModalOpen(false)}
-              className="w-full py-2.5 bg-[#063B2C] text-white font-bold text-xs rounded-xl hover:bg-[#084D3A] cursor-pointer"
+              className="w-full py-2.5 bg-[#007AFF] text-white font-bold text-xs rounded-xl hover:bg-[#084D3A] cursor-pointer"
             >
               Close
             </button>

@@ -27,13 +27,13 @@ export const Header: React.FC<HeaderProps> = ({
   const { language, toggleLanguage, isBengali } = useLanguage();
 
   return (
-    <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0F1713]/90 backdrop-blur-md border-b border-[#E8E4DA]/60 dark:border-white/10 px-4 py-3 flex items-center justify-between transition-colors">
+    <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#020617]/90 backdrop-blur-md border-b border-[#E8E4DA]/60 dark:border-white/10 px-4 py-3 flex items-center justify-between transition-colors">
       <div className="flex items-center gap-3">
         {showBack ? (
           <button
             id="header-back-btn"
             onClick={goBack}
-            className="w-10 h-10 rounded-full bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-[#E8ECE9] shadow-sm hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
+            className="w-10 h-10 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-[#F8FAFC] shadow-sm hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
             aria-label="Go back"
           >
             <ArrowLeft className="w-5 h-5 stroke-[2]" />
@@ -45,7 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
         ) : null}
 
         {title && (
-          <h1 className="text-lg font-bold text-[#11241C] dark:text-[#E8ECE9] tracking-tight">
+          <h1 className="text-lg font-bold text-[#11241C] dark:text-[#F8FAFC] tracking-tight">
             {title}
           </h1>
         )}
@@ -56,7 +56,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           id="header-lang-btn"
           onClick={toggleLanguage}
-          className="h-9 px-2.5 rounded-full bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] flex items-center gap-1.5 shadow-sm hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
+          className="h-9 px-2.5 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#007AFF] dark:text-[#38BDF8] flex items-center gap-1.5 shadow-sm hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
           title={isBengali ? 'Switch to English' : 'বাংলায় দেখুন'}
           aria-label="Toggle language"
         >
@@ -67,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Quick Theme Toggle Icon */}
         <button
           onClick={toggleTheme}
-          className="w-9 h-9 rounded-full bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-amber-400 flex items-center justify-center shadow-sm hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
+          className="w-9 h-9 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-amber-400 flex items-center justify-center shadow-sm hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
           title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           aria-label="Toggle theme"
         >
@@ -77,7 +77,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* AI Assistant Quick Trigger */}
         <button
           onClick={() => setIsAssistantOpen(true)}
-          className="w-9 h-9 rounded-full bg-[#E6F4EA] dark:bg-[#153426] text-[#063B2C] dark:text-[#4ECCA3] flex items-center justify-center hover:bg-[#C8E6C9] dark:hover:bg-[#1C4532] active:scale-95 transition-all cursor-pointer"
+          className="w-9 h-9 rounded-full bg-[#E6F4EA] dark:bg-[#153426] text-[#007AFF] dark:text-[#38BDF8] flex items-center justify-center hover:bg-[#C8E6C9] dark:hover:bg-[#1C4532] active:scale-95 transition-all cursor-pointer"
           title="Ask Jalpaigi AI Assistant"
         >
           <Sparkles className="w-4 h-4" />
@@ -86,7 +86,7 @@ export const Header: React.FC<HeaderProps> = ({
         {showSearch && (
           <button
             onClick={onSearchClick}
-            className="w-9 h-9 rounded-full bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 text-[#11241C] dark:text-[#E8ECE9] flex items-center justify-center shadow-sm hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
+            className="w-9 h-9 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 text-[#11241C] dark:text-[#F8FAFC] flex items-center justify-center shadow-sm hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
             aria-label="Search"
           >
             <Search className="w-4 h-4 stroke-[2]" />
@@ -96,7 +96,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Switch to Admin Dashboard view toggle */}
         <button
           onClick={() => navigate('admin-dashboard')}
-          className="w-9 h-9 rounded-full bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 text-[#063B2C] dark:text-[#4ECCA3] flex items-center justify-center shadow-sm hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
+          className="w-9 h-9 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 text-[#007AFF] dark:text-[#38BDF8] flex items-center justify-center shadow-sm hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
           title="Admin Verification Portal"
         >
           <Shield className="w-4 h-4 stroke-[2]" />

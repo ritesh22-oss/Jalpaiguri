@@ -381,7 +381,7 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const mapUrl = location ? `https://maps.google.com/?q=${location.lat},${location.lng}` : '';
     const eventId = activeEvent?.id || 'SOS-ACTIVE';
 
-    return `EMERGENCY ALERT: ${userName} has activated Safety SOS on Jalpaiguri Connect (Ref: ${eventId}). They may need immediate assistance.\nApproximate Location: ${area}\nMap link: ${mapUrl}\nTime: ${new Date().toLocaleTimeString()}`;
+    return `EMERGENCY ALERT: ${userName} has activated Safety SOS on MYJPG (Ref: ${eventId}). They may need immediate assistance.\nApproximate Location: ${area}\nMap link: ${mapUrl}\nTime: ${new Date().toLocaleTimeString()}`;
   }, [user, location, activeEvent]);
 
   // Share Emergency Location via Web Share API or Clipboard
@@ -390,7 +390,7 @@ export const SafetyProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({
-          title: '🚨 Emergency SOS - Jalpaiguri Connect',
+          title: '🚨 Emergency SOS - MYJPG',
           text,
           url: location ? `https://maps.google.com/?q=${location.lat},${location.lng}` : undefined
         });

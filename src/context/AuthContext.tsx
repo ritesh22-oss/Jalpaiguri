@@ -19,18 +19,6 @@ import {
   reauthenticateWithCredential
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import {
-  EnrolledFingerprint,
-  getEnrolledFingerprint,
-  clearEnrolledFingerprint,
-  registerFingerprint,
-  verifyFingerprint,
-  isBiometricLoginEnabled,
-  setBiometricLoginEnabled,
-  checkBiometricDeviceCapability,
-  BiometricDeviceCapability,
-  PRIMARY_FINGERPRINT_SIG
-} from '../lib/biometrics';
 
 function formatFirebaseAuthError(err: any): string {
   if (!err) return 'An error occurred. Please try again.';
@@ -127,15 +115,6 @@ interface AuthContextType {
   checkEmailVerified: () => Promise<{ verified: boolean; message?: string }>;
   resetPassword: (email: string) => Promise<{ success: boolean; message?: string }>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; message?: string }>;
-  enrolledFingerprint: EnrolledFingerprint | null;
-  refreshEnrolledFingerprint: () => void;
-  biometricEnabled: boolean;
-  setBiometricEnabled: (enabled: boolean) => void;
-  loginWithFingerprint: (scannedSignature?: string) => Promise<{ success: boolean; message?: string; isNewUser?: boolean }>;
-  loginWithBiometrics: () => Promise<{ success: boolean; isAdmin?: boolean; isNewUser?: boolean; message?: string }>;
-  checkDeviceBiometrics: () => Promise<BiometricDeviceCapability>;
-  registerWithFingerprint: (name: string, location?: string) => Promise<{ success: boolean; message?: string }>;
-  removeFingerprint: () => void;
   sendPhoneOtp: (phoneNumber: string) => Promise<{ success: boolean; otp?: string; message?: string }>;
   verifyPhoneOtp: (otpCode: string) => Promise<{ success: boolean; isNewUser?: boolean; message?: string }>;
   pendingPhone: string;
@@ -171,33 +150,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isProfileComplete, setIsProfileComplete] = useState<boolean>(() => {
     return Boolean(user?.name && user?.location);
   });
-
-  // Biometric Fingerprint State
-  const [enrolledFingerprint, setEnrolledFingerprint] = useState<EnrolledFingerprint | null>(() => {
-    return getEnrolledFingerprint();
-  });
-  const [biometricEnabled, setBiometricEnabledState] = useState<boolean>(() => {
-    return isBiometricLoginEnabled();
-  });
-
-  const setBiometricEnabled = (enabled: boolean) => {
-    setBiometricLoginEnabled(enabled);
-    setBiometricEnabledState(enabled);
-  };
-
-  const refreshEnrolledFingerprint = () => {
-    setEnrolledFingerprint(getEnrolledFingerprint());
-    setBiometricEnabledState(isBiometricLoginEnabled());
-  };
-
-  const checkDeviceBiometrics = async (): Promise<BiometricDeviceCapability> => {
-    return await checkBiometricDeviceCapability();
-  };
-
-  const removeFingerprint = () => {
-    clearEnrolledFingerprint();
-    setEnrolledFingerprint(null);
-  };
 
   const [pendingPhone, setPendingPhone] = useState<string>('');
   const [activeOtp, setActiveOtp] = useState<string | null>(null);
@@ -262,7 +214,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 language: 'English',
                 isBloodDonor: true,
                 isVolunteer: false,
-                createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString()
               };
               setUser(partialProfile);
             }
@@ -270,11 +222,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.warn('Firestore profile fetch warning:', err);
           }
         } else {
-          // If no Firebase user, check if we have a valid biometric local user
-          const enrolled = getEnrolledFingerprint();
-          if (!enrolled) {
-            setUser(null);
-          }
+          setUser(null);
         }
 
         setIsLoading(false);
@@ -621,218 +569,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // 1h. Biometric Login with WebAuthn & strict security verification
-  const loginWithBiometrics = async (): Promise<{ success: boolean; isAdmin?: boolean; isNewUser?: boolean; message?: string }> => {
-    setIsLoading(true);
-    try {
-      const capability = await checkBiometricDeviceCapability();
-      if (!capability.supported) {
-        setIsLoading(false);
-        return { success: false, message: 'Biometric authentication is not supported on this device.' };
-      }
-      if (!capability.enrolled) {
-        setIsLoading(false);
-        return { success: false, message: 'No biometric credentials enrolled on this device. Please log in with Email, Google, or Phone first.' };
-      }
-
-      const res = await verifyFingerprint(PRIMARY_FINGERPRINT_SIG);
-      if (!res.success || !res.enrolled) {
-        setIsLoading(false);
-        return { success: false, message: res.message || 'Biometric verification failed.' };
-      }
-
-      setEnrolledFingerprint(res.enrolled);
-
-      // Restore user profile
-      let existingProfile: UserProfile | null = null;
-      try {
-        const raw = localStorage.getItem('jpg_user_profile');
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && (parsed.id === res.enrolled.userId || parsed.name === res.enrolled.userName)) {
-            existingProfile = parsed;
-          }
-        }
-      } catch (_) {}
-
-      if (!existingProfile && isFirebaseConfigured && db) {
-        try {
-          const snap = await getDoc(doc(db, 'users', res.enrolled.userId));
-          if (snap.exists()) {
-            existingProfile = snap.data() as UserProfile;
-          }
-        } catch (_) {}
-      }
-
-      // Security check: Only riteshganguly0911@gmail.com can be Admin! Biometrics never auto-grants admin.
-      const isOfficialAdmin = isAuthorizedAdminEmail(res.enrolled.userEmail || existingProfile?.email);
-      const assignedRole: 'admin' | 'citizen' = isOfficialAdmin ? 'admin' : 'citizen';
-
-      if (!existingProfile) {
-        existingProfile = {
-          id: res.enrolled.userId,
-          name: res.enrolled.userName,
-          phone: '',
-          email: res.enrolled.userEmail || '',
-          bloodGroup: 'O+',
-          location: 'Kadamtala, Jalpaiguri',
-          role: assignedRole,
-          language: 'English',
-          isBloodDonor: true,
-          isVolunteer: false,
-          fingerprintEnrolled: true,
-          fingerprintCredentialId: res.enrolled.credentialId,
-          biometricEnabled: true,
-          authMethod: 'biometric',
-          createdAt: new Date().toISOString()
-        };
-      } else {
-        existingProfile = {
-          ...existingProfile,
-          role: assignedRole,
-          biometricEnabled: true
-        };
-      }
-
-      setUser(existingProfile);
-      localStorage.setItem('jpg_user_profile', JSON.stringify(existingProfile));
-      localStorage.setItem('jpg_has_onboarded', 'true');
-      setIsProfileComplete(Boolean(existingProfile.name && existingProfile.location));
-
-      setIsLoading(false);
-      return {
-        success: true,
-        isAdmin: isOfficialAdmin,
-        isNewUser: !existingProfile.name || !existingProfile.location,
-        message: `Welcome back, ${res.enrolled.userName}!`
-      };
-    } catch (e: any) {
-      setIsLoading(false);
-      return { success: false, message: e.message || 'Biometric authentication failed.' };
-    }
-  };
-
-  // 2. Biometric Fingerprint Sign Up
-  // Enrolls user's fingerprint cryptographic key. Once enrolled, no other fingerprint can access!
-  const registerWithFingerprint = async (
-    name: string,
-    location: string = 'Kadamtala, Jalpaiguri'
-  ): Promise<{ success: boolean; message?: string }> => {
-    setIsLoading(true);
-    try {
-      const res = await registerFingerprint(name);
-      if (!res.success || !res.enrolled) {
-        setIsLoading(false);
-        return { success: false, message: res.message || 'Fingerprint registration failed.' };
-      }
-
-      setEnrolledFingerprint(res.enrolled);
-
-      const citizenProfile: UserProfile = {
-        id: res.enrolled.userId,
-        name: res.enrolled.userName,
-        phone: '',
-        email: res.enrolled.userEmail || `${name.toLowerCase().replace(/\s+/g, '')}@citizen.jalpaiguri.wb`,
-        bloodGroup: 'O+',
-        location: location || 'Kadamtala, Jalpaiguri',
-        role: 'citizen',
-        language: 'English',
-        isBloodDonor: true,
-        isVolunteer: false,
-        fingerprintEnrolled: true,
-        fingerprintCredentialId: res.enrolled.credentialId,
-        createdAt: new Date().toISOString()
-      };
-
-      setUser(citizenProfile);
-      localStorage.setItem('jpg_user_profile', JSON.stringify(citizenProfile));
-      localStorage.setItem('jpg_has_onboarded', 'true');
-      setIsProfileComplete(Boolean(citizenProfile.name && citizenProfile.location));
-
-      if (isFirebaseConfigured && db) {
-        try {
-          await setDoc(doc(db, 'users', citizenProfile.id), citizenProfile, { merge: true });
-        } catch (_) {}
-      }
-
-      setIsLoading(false);
-      return { success: true, message: `Fingerprint registered and bound exclusively to ${name}.` };
-    } catch (e: any) {
-      setIsLoading(false);
-      return { success: false, message: e.message || 'Fingerprint registration failed.' };
-    }
-  };
-
-  // 3. Biometric Fingerprint Login
-  // Enforces privacy: Verifies that ONLY the exact enrolled fingerprint unlocks the account!
-  const loginWithFingerprint = async (
-    scannedSignature?: string
-  ): Promise<{ success: boolean; message?: string; isNewUser?: boolean }> => {
-    setIsLoading(true);
-    try {
-      const res = await verifyFingerprint(scannedSignature);
-      if (!res.success || !res.enrolled) {
-        setIsLoading(false);
-        return {
-          success: false,
-          message: res.message || 'Fingerprint verification failed.'
-        };
-      }
-
-      setEnrolledFingerprint(res.enrolled);
-
-      // Restore user profile
-      let existingProfile: UserProfile | null = null;
-      try {
-        const raw = localStorage.getItem('jpg_user_profile');
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && (parsed.id === res.enrolled.userId || parsed.name === res.enrolled.userName)) {
-            existingProfile = parsed;
-          }
-        }
-      } catch (_) {}
-
-      if (!existingProfile && isFirebaseConfigured && db) {
-        try {
-          const snap = await getDoc(doc(db, 'users', res.enrolled.userId));
-          if (snap.exists()) {
-            existingProfile = snap.data() as UserProfile;
-          }
-        } catch (_) {}
-      }
-
-      if (!existingProfile) {
-        existingProfile = {
-          id: res.enrolled.userId,
-          name: res.enrolled.userName,
-          phone: '',
-          email: res.enrolled.userEmail || `${res.enrolled.userName.toLowerCase().replace(/\s+/g, '')}@citizen.jalpaiguri.wb`,
-          bloodGroup: 'O+',
-          location: 'Kadamtala, Jalpaiguri',
-          role: 'citizen',
-          language: 'English',
-          isBloodDonor: true,
-          isVolunteer: false,
-          fingerprintEnrolled: true,
-          fingerprintCredentialId: res.enrolled.credentialId,
-          createdAt: new Date().toISOString()
-        };
-      }
-
-      setUser(existingProfile);
-      localStorage.setItem('jpg_user_profile', JSON.stringify(existingProfile));
-      localStorage.setItem('jpg_has_onboarded', 'true');
-      setIsProfileComplete(Boolean(existingProfile.name && existingProfile.location));
-
-      setIsLoading(false);
-      return { success: true, message: `Welcome back, ${res.enrolled.userName}!` };
-    } catch (e: any) {
-      setIsLoading(false);
-      return { success: false, message: e.message || 'Fingerprint login failed.' };
-    }
-  };
-
   // 2. Send Phone OTP via Real Firebase Phone Authentication with Single RecaptchaVerifier
   const sendPhoneOtp = async (
     phoneNumber: string
@@ -986,7 +722,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           language: 'English',
           isBloodDonor: true,
           isVolunteer: false,
-          createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString()
         };
 
         if (isFirebaseConfigured && db) {
@@ -1121,6 +857,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // 7. Logout
+
+
+
   const logout = async () => {
     try {
       if (isFirebaseConfigured && auth) {
@@ -1152,15 +891,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         checkEmailVerified,
         resetPassword,
         changePassword,
-        enrolledFingerprint,
-        refreshEnrolledFingerprint,
-        biometricEnabled,
-        setBiometricEnabled,
-        loginWithFingerprint,
-        loginWithBiometrics,
-        checkDeviceBiometrics,
-        registerWithFingerprint,
-        removeFingerprint,
         sendPhoneOtp,
         verifyPhoneOtp,
         pendingPhone,

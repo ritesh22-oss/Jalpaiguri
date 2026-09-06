@@ -169,7 +169,7 @@ export const WritingCaptcha: React.FC<WritingCaptchaProps> = ({
     <div className="w-full bg-[#F8FAFC] dark:bg-[#121E19] border border-gray-200 dark:border-white/10 rounded-2xl p-3 space-y-2.5 transition-colors">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-800 dark:text-white">
-          <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+          <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
           <span>Security Code (Type the characters)</span>
         </div>
 
@@ -219,9 +219,9 @@ export const WritingCaptcha: React.FC<WritingCaptchaProps> = ({
             maxLength={5}
             autoComplete="off"
             spellCheck={false}
-            className={`w-full h-[44px] px-3 font-mono font-bold text-sm tracking-widest uppercase bg-white dark:bg-[#17231E] border rounded-xl focus:outline-none transition-all ${
+            className={`w-full h-[44px] px-3 font-mono font-bold text-sm tracking-widest uppercase bg-white dark:bg-[#0F172A] border rounded-xl focus:outline-none transition-all ${
               isMatched
-                ? 'border-emerald-500 dark:border-emerald-400 ring-2 ring-emerald-100 dark:ring-emerald-950 text-emerald-800 dark:text-emerald-300'
+                ? 'border-blue-500 dark:border-blue-400 ring-2 ring-blue-100 dark:ring-blue-950 text-blue-800 dark:text-blue-300'
                 : userInput.length === 5
                 ? 'border-rose-400 dark:border-rose-500 ring-2 ring-rose-100 dark:ring-rose-950 text-rose-800 dark:text-rose-300'
                 : 'border-gray-300 dark:border-white/10 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500'
@@ -229,7 +229,7 @@ export const WritingCaptcha: React.FC<WritingCaptchaProps> = ({
           />
 
           {isMatched && (
-            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-emerald-600 dark:text-emerald-400 pointer-events-none">
+            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-blue-600 dark:text-blue-400 pointer-events-none">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           )}

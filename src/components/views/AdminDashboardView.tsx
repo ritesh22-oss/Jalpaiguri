@@ -128,7 +128,7 @@ export const AdminDashboardView: React.FC = () => {
   // STRICT ACCESS BARRIER: Only authorized municipal administrators authenticated via Google can view Admin Dashboard
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-[#063B2C] text-white flex flex-col items-center justify-center p-6 select-none">
+      <div className="min-h-screen bg-[#007AFF] text-white flex flex-col items-center justify-center p-6 select-none">
         <div className="max-w-md w-full bg-[#042A1F] border border-[#0F5A43] rounded-3xl p-6 md:p-8 shadow-2xl flex flex-col items-center text-center">
           <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4 shadow-inner">
             <ShieldAlert className="w-8 h-8" />
@@ -143,7 +143,7 @@ export const AdminDashboardView: React.FC = () => {
             Municipal Admin Access
           </h1>
 
-          <p className="text-xs text-emerald-200/80 leading-relaxed mb-6">
+          <p className="text-xs text-blue-200/80 leading-relaxed mb-6">
             Access to the Jalpaiguri Municipal Administration Console is restricted exclusively to authorized city administration personnel authenticated via Google SSO.
           </p>
 
@@ -162,10 +162,10 @@ export const AdminDashboardView: React.FC = () => {
             </div>
           ) : (
             <div className="w-full bg-[#06382A] border border-[#0F5A43] rounded-2xl p-3.5 mb-6 text-left">
-              <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider block">
+              <span className="text-[10px] uppercase font-bold text-blue-400 tracking-wider block">
                 Official Sign-In Required
               </span>
-              <p className="text-xs text-emerald-200/90 mt-0.5 leading-relaxed">
+              <p className="text-xs text-blue-200/90 mt-0.5 leading-relaxed">
                 Please authenticate using your municipal administration Google account to proceed.
               </p>
             </div>
@@ -182,11 +182,11 @@ export const AdminDashboardView: React.FC = () => {
               id="btn-admin-barrier-google-login"
               onClick={handleAdminGoogleLogin}
               disabled={authLoading}
-              className="w-full py-3.5 px-4 rounded-xl bg-white hover:bg-emerald-50 active:scale-98 text-[#063B2C] font-black text-sm shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-70"
+              className="w-full py-3.5 px-4 rounded-xl bg-white hover:bg-blue-50 active:scale-98 text-[#007AFF] font-black text-sm shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-70"
             >
               {authLoading ? (
                 <div className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin text-[#063B2C]" />
+                  <Loader2 className="w-4 h-4 animate-spin text-[#007AFF]" />
                   <span>Verifying Google Auth...</span>
                 </div>
               ) : (
@@ -216,7 +216,7 @@ export const AdminDashboardView: React.FC = () => {
 
             <button
               onClick={() => navigate('home')}
-              className="w-full py-2.5 px-4 rounded-xl bg-transparent hover:bg-white/10 active:scale-98 text-emerald-200 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              className="w-full py-2.5 px-4 rounded-xl bg-transparent hover:bg-white/10 active:scale-98 text-blue-200 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Return to Citizen Portal</span>
@@ -248,12 +248,12 @@ export const AdminDashboardView: React.FC = () => {
             <div className="flex items-center gap-2.5">
               <JalpaiguriLogo size="sm" showText={false} />
               <span className="font-extrabold text-base text-[#11241C] tracking-tight">
-                Jalpaiguri Connect
+                MYJPG
               </span>
             </div>
             <button
               onClick={() => navigate('home')}
-              className="md:hidden text-xs font-bold text-[#063B2C] bg-[#E6F4EA] px-2 py-1 rounded-lg"
+              className="md:hidden text-xs font-bold text-[#007AFF] bg-[#E6F4EA] px-2 py-1 rounded-lg"
             >
               App View
             </button>
@@ -269,7 +269,7 @@ export const AdminDashboardView: React.FC = () => {
                   onClick={() => setActiveTab(link.id as any)}
                   className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-[#063B2C] text-white shadow-xs'
+                      ? 'bg-[#007AFF] text-white shadow-xs'
                       : 'text-[#55685F] hover:bg-[#FAF8F5] hover:text-[#11241C]'
                   }`}
                 >
@@ -289,7 +289,7 @@ export const AdminDashboardView: React.FC = () => {
             onClick={() => setActiveTab('Settings')}
             className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-colors cursor-pointer ${
               activeTab === 'Settings'
-                ? 'bg-[#063B2C] text-white'
+                ? 'bg-[#007AFF] text-white'
                 : 'text-[#55685F] hover:bg-[#FAF8F5]'
             }`}
           >
@@ -299,7 +299,7 @@ export const AdminDashboardView: React.FC = () => {
 
           <button
             onClick={() => navigate('home')}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-[#E6F4EA] text-[#063B2C] text-xs font-bold hover:bg-[#D5EADB] transition-colors cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-[#E6F4EA] text-[#007AFF] text-xs font-bold hover:bg-[#D5EADB] transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Return to Mobile App</span>
@@ -352,7 +352,7 @@ export const AdminDashboardView: React.FC = () => {
                     <p className="text-xs font-black text-[#11241C] truncate">
                       {user?.name || 'Administrator'}
                     </p>
-                    <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full inline-block mt-1">
+                    <span className="text-[10px] font-bold text-blue-800 bg-blue-100 px-2 py-0.5 rounded-full inline-block mt-1">
                       Municipal Authority
                     </span>
                   </div>
@@ -406,7 +406,7 @@ export const AdminDashboardView: React.FC = () => {
                   <button
                     onClick={() => setActiveTab('Dashboard')}
                     className={`text-xs font-black px-3 py-1.5 rounded-xl cursor-pointer transition-colors ${
-                      activeTab !== 'Shops' ? 'bg-[#063B2C] text-white' : 'bg-gray-100 text-gray-700'
+                      activeTab !== 'Shops' ? 'bg-[#007AFF] text-white' : 'bg-gray-100 text-gray-700'
                     }`}
                   >
                     Workers Queue ({adminVerificationQueue.length})
@@ -414,7 +414,7 @@ export const AdminDashboardView: React.FC = () => {
                   <button
                     onClick={() => setActiveTab('Shops')}
                     className={`text-xs font-black px-3 py-1.5 rounded-xl cursor-pointer transition-colors ${
-                      activeTab === 'Shops' ? 'bg-[#063B2C] text-white' : 'bg-gray-100 text-gray-700'
+                      activeTab === 'Shops' ? 'bg-[#007AFF] text-white' : 'bg-gray-100 text-gray-700'
                     }`}
                   >
                     Shops Moderation ({adminShops.length})
@@ -457,10 +457,10 @@ export const AdminDashboardView: React.FC = () => {
                           <td className="py-3.5 px-4">
                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${
                               shop.isVerified
-                                ? 'bg-[#E6F4EA] text-[#063B2C]'
+                                ? 'bg-[#E6F4EA] text-[#007AFF]'
                                 : 'bg-amber-100 text-amber-800'
                             }`}>
-                              <span className={`w-1.5 h-1.5 rounded-full ${shop.isVerified ? 'bg-[#063B2C]' : 'bg-amber-600'}`}></span>
+                              <span className={`w-1.5 h-1.5 rounded-full ${shop.isVerified ? 'bg-[#007AFF]' : 'bg-amber-600'}`}></span>
                               <span>{shop.isVerified ? 'Verified' : 'Pending'}</span>
                             </span>
                           </td>
@@ -470,7 +470,7 @@ export const AdminDashboardView: React.FC = () => {
                                 <button
                                   onClick={() => handleApproveShop(shop.id)}
                                   disabled={isProcessingAction}
-                                  className="px-2.5 py-1 rounded-lg bg-[#063B2C] text-white font-bold text-[11px] hover:bg-[#084D3A] cursor-pointer transition-colors disabled:opacity-50"
+                                  className="px-2.5 py-1 rounded-lg bg-[#007AFF] text-white font-bold text-[11px] hover:bg-[#084D3A] cursor-pointer transition-colors disabled:opacity-50"
                                 >
                                   Verify
                                 </button>
@@ -520,10 +520,10 @@ export const AdminDashboardView: React.FC = () => {
                             <td className="py-3.5 px-4">
                               <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${
                                 item.status === 'Approved'
-                                  ? 'bg-[#E6F4EA] text-[#063B2C]'
+                                  ? 'bg-[#E6F4EA] text-[#007AFF]'
                                   : 'bg-[#EFECE6] text-[#55685F]'
                               }`}>
-                                <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'Approved' ? 'bg-[#063B2C]' : 'bg-[#73827B]'}`}></span>
+                                <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'Approved' ? 'bg-[#007AFF]' : 'bg-[#73827B]'}`}></span>
                                 <span>{item.status}</span>
                               </span>
                             </td>
@@ -531,14 +531,14 @@ export const AdminDashboardView: React.FC = () => {
                               <div className="inline-flex items-center gap-1.5">
                                 <button
                                   onClick={() => alert(`Reviewing documents for ${item.name}`)}
-                                  className="px-2.5 py-1 rounded-lg bg-[#C8EADB] text-[#063B2C] font-bold text-[11px] hover:bg-[#B5E2CE] cursor-pointer"
+                                  className="px-2.5 py-1 rounded-lg bg-[#C8EADB] text-[#007AFF] font-bold text-[11px] hover:bg-[#B5E2CE] cursor-pointer"
                                 >
                                   Review
                                 </button>
                                 <button
                                   onClick={() => handleApproveWorker(item.id)}
                                   disabled={isProcessingAction}
-                                  className="px-2.5 py-1 rounded-lg bg-[#063B2C] text-white font-bold text-[11px] hover:bg-[#084D3A] cursor-pointer transition-colors disabled:opacity-50"
+                                  className="px-2.5 py-1 rounded-lg bg-[#007AFF] text-white font-bold text-[11px] hover:bg-[#084D3A] cursor-pointer transition-colors disabled:opacity-50"
                                 >
                                   Approve
                                 </button>
@@ -557,7 +557,7 @@ export const AdminDashboardView: React.FC = () => {
             <div className="space-y-4">
               {/* Card 0: Local Shops Registered */}
               <div className="bg-white rounded-3xl p-5 border border-[#E8E4DA] shadow-xs flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#E6F4EA] text-[#063B2C] flex items-center justify-center shadow-xs shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-[#E6F4EA] text-[#007AFF] flex items-center justify-center shadow-xs shrink-0">
                   <Store className="w-6 h-6" />
                 </div>
                 <div>
@@ -567,7 +567,7 @@ export const AdminDashboardView: React.FC = () => {
                   <h3 className="text-xl font-extrabold text-[#11241C] tracking-tight">
                     {adminShops.length}
                   </h3>
-                  <span className="text-[11px] font-bold text-[#063B2C] flex items-center gap-1 mt-0.5">
+                  <span className="text-[11px] font-bold text-[#007AFF] flex items-center gap-1 mt-0.5">
                     <TrendingUp className="w-3.5 h-3.5" />
                     <span>{adminShops.filter(s => s.isVerified).length} verified merchants</span>
                   </span>
@@ -575,7 +575,7 @@ export const AdminDashboardView: React.FC = () => {
               </div>
               {/* Card 1: Total Active Users */}
               <div className="bg-white rounded-3xl p-5 border border-[#E8E4DA] shadow-xs flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#063B2C] text-white flex items-center justify-center shadow-xs shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-[#007AFF] text-white flex items-center justify-center shadow-xs shrink-0">
                   <Users className="w-6 h-6" />
                 </div>
                 <div>
@@ -585,7 +585,7 @@ export const AdminDashboardView: React.FC = () => {
                   <h3 className="text-xl font-extrabold text-[#11241C] tracking-tight">
                     12,450
                   </h3>
-                  <span className="text-[11px] font-bold text-[#063B2C] flex items-center gap-1 mt-0.5">
+                  <span className="text-[11px] font-bold text-[#007AFF] flex items-center gap-1 mt-0.5">
                     <TrendingUp className="w-3.5 h-3.5" />
                     <span>+5.2% this week</span>
                   </span>
@@ -594,8 +594,8 @@ export const AdminDashboardView: React.FC = () => {
 
               {/* Card 2: Pending Civic Reports */}
               <div className="bg-white rounded-3xl p-5 border border-[#E8E4DA] shadow-xs flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#E2EAE6] text-[#063B2C] flex items-center justify-center shrink-0">
-                  <AlertTriangle className="w-6 h-6 text-[#063B2C]" />
+                <div className="w-12 h-12 rounded-2xl bg-[#E2EAE6] text-[#007AFF] flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-6 h-6 text-[#007AFF]" />
                 </div>
                 <div>
                   <span className="text-xs font-semibold text-[#55685F] block">

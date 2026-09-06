@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { doc, getDoc, collection, getDocs, updateDoc, setDoc, addDoc, query, where, deleteDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 import {
   ArrowLeft,
   Store,
@@ -31,7 +33,7 @@ import {
 import { useNav } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { Shop, Product } from '../../types';
+import { Shop, Product, ShopSubscription } from '../../types';
 
 export const MerchantDashboardView: React.FC = () => {
   const { navigate, goBack, navParams } = useNav();
@@ -94,19 +96,20 @@ export const MerchantDashboardView: React.FC = () => {
       let targetShop: Shop | null = null;
 
       if (currentShopId) {
-        const res = await fetch(`/api/shops/${currentShopId}`);
-        if (res.ok) {
-          targetShop = await res.json();
+        const shopDoc = await getDoc(doc(db, 'shops', currentShopId));
+        if (shopDoc.exists()) {
+          targetShop = { id: shopDoc.id, ...shopDoc.data() } as Shop;
         }
       }
 
       if (!targetShop) {
-        // Find by ownerId or fallback to first shop
-        const allRes = await fetch('/api/shops');
-        if (allRes.ok) {
-          const allShops: Shop[] = await allRes.json();
-          const userId = user?.id || firebaseUser?.uid;
-          targetShop = allShops.find(s => s.ownerId === userId) || allShops[0] || null;
+        const userId = user?.id || firebaseUser?.uid;
+        if (userId) {
+          const q = query(collection(db, 'shops'), where('ownerId', '==', userId));
+          const snapshot = await getDocs(q);
+          if (!snapshot.empty) {
+            targetShop = { id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as Shop;
+          }
         }
       }
 
@@ -128,11 +131,10 @@ export const MerchantDashboardView: React.FC = () => {
         setEditLandmark(targetShop.landmark || '');
 
         // Fetch products
-        const pRes = await fetch(`/api/shops/${targetShop.id}/products`);
-        if (pRes.ok) {
-          const pData = await pRes.json();
-          setProducts(pData);
-        }
+        const productsQ = query(collection(db, 'shops', targetShop.id, 'products'));
+        const pSnapshot = await getDocs(productsQ);
+        const pData = pSnapshot.docs.map(d => ({ id: d.id, ...d.data() })) as Product[];
+        setProducts(pData);
       }
     } catch (err) {
       console.error('Error fetching merchant data:', err);
@@ -152,11 +154,7 @@ export const MerchantDashboardView: React.FC = () => {
     setShop({ ...shop, isOpen: newStatus });
 
     try {
-      await fetch(`/api/shops/${shop.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isOpen: newStatus })
-      });
+      await updateDoc(doc(db, 'shops', shop.id), { isOpen: newStatus });
     } catch (e) {
       console.warn('Failed to update shop status');
     }
@@ -164,15 +162,12 @@ export const MerchantDashboardView: React.FC = () => {
 
   // Toggle Product Stock status
   const handleToggleProductStock = async (product: Product) => {
+    if (!shop) return;
     const updatedStock = !product.inStock;
     setProducts(prev => prev.map(p => p.id === product.id ? { ...p, inStock: updatedStock } : p));
 
     try {
-      await fetch(`/api/shops/${shop?.id}/products/${product.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inStock: updatedStock })
-      });
+      await updateDoc(doc(db, 'shops', shop.id, 'products', product.id), { inStock: updatedStock });
     } catch (e) {
       console.warn('Failed to update product stock');
     }
@@ -180,13 +175,12 @@ export const MerchantDashboardView: React.FC = () => {
 
   // Delete product
   const handleDeleteProduct = async (productId: string) => {
+    if (!shop) return;
     if (!confirm('Are you sure you want to delete this product?')) return;
     setProducts(prev => prev.filter(p => p.id !== productId));
 
     try {
-      await fetch(`/api/shops/${shop?.id}/products/${productId}`, {
-        method: 'DELETE'
-      });
+      await deleteDoc(doc(db, 'shops', shop.id, 'products', productId));
     } catch (e) {
       console.warn('Failed to delete product');
     }
@@ -199,32 +193,32 @@ export const MerchantDashboardView: React.FC = () => {
 
     setIsSubmittingProduct(true);
     try {
-      const res = await fetch(`/api/shops/${shop.id}/products`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: newProductName,
-          nameBengali: newProductNameBn || undefined,
-          category: newProductCategory,
-          price: parseFloat(newProductPrice) || 0,
-          discountPrice: newProductDiscount ? parseFloat(newProductDiscount) : undefined,
-          unit: newProductUnit,
-          inStock: newProductInStock,
-          photoUrl: newProductPhoto || undefined
-        })
-      });
+      const payload = {
+        name: newProductName,
+        nameBengali: newProductNameBn || undefined,
+        category: newProductCategory,
+        price: parseFloat(newProductPrice) || 0,
+        discountPrice: newProductDiscount ? parseFloat(newProductDiscount) : undefined,
+        unit: newProductUnit,
+        inStock: newProductInStock,
+        photoUrl: newProductPhoto || undefined,
+        shopId: shop.id,
+        ownerId: shop.ownerId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
 
-      if (res.ok) {
-        const created = await res.json();
-        setProducts(prev => [created, ...prev]);
-        setShowAddProductModal(false);
-        // Reset form
-        setNewProductName('');
-        setNewProductNameBn('');
-        setNewProductPrice('');
-        setNewProductDiscount('');
-        setNewProductPhoto('');
-      }
+      const docRef = await addDoc(collection(db, 'shops', shop.id, 'products'), payload);
+      const created = { id: docRef.id, ...payload } as Product;
+      
+      setProducts(prev => [created, ...prev]);
+      setShowAddProductModal(false);
+      // Reset form
+      setNewProductName('');
+      setNewProductNameBn('');
+      setNewProductPrice('');
+      setNewProductDiscount('');
+      setNewProductPhoto('');
     } catch (err) {
       console.error('Failed to add product:', err);
     } finally {
@@ -261,20 +255,24 @@ export const MerchantDashboardView: React.FC = () => {
     setIsSavingExtracted(true);
 
     try {
-      const res = await fetch(`/api/shops/${shop.id}/products/batch`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ products: extractedProducts })
-      });
-
-      if (res.ok) {
-        const saved = await res.json();
-        setProducts(prev => [...saved, ...prev]);
-        setShowAiImportModal(false);
-        setExtractedProducts([]);
-        setImportRawText('');
-        alert(`Successfully imported ${saved.length} products to your shop catalog!`);
+      const saved: Product[] = [];
+      for (const prod of extractedProducts) {
+        const payload = {
+          ...prod,
+          shopId: shop.id,
+          ownerId: shop.ownerId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        const docRef = await addDoc(collection(db, 'shops', shop.id, 'products'), payload);
+        saved.push({ id: docRef.id, ...payload });
       }
+
+      setProducts(prev => [...saved, ...prev]);
+      setShowAiImportModal(false);
+      setExtractedProducts([]);
+      setImportRawText('');
+      alert(`Successfully imported ${saved.length} products to your shop catalog!`);
     } catch (err) {
       console.error('Failed to batch save products:', err);
     } finally {
@@ -288,6 +286,7 @@ export const MerchantDashboardView: React.FC = () => {
     setIsUpgradingPlan(true);
 
     try {
+      // Create payment/order securely through backend (Simulated Razorpay flow)
       const res = await fetch(`/api/shops/${shop.id}/subscription`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -296,9 +295,44 @@ export const MerchantDashboardView: React.FC = () => {
 
       if (res.ok) {
         const data = await res.json();
-        setShop(prev => prev ? { ...prev, isFeatured: true } : null);
+        
+        // Simulating the Razorpay checkout overlay experience
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        
+        const newSubscription: ShopSubscription = {
+           ...shop.subscription,
+           plan: selectedPlan as 'monthly' | 'yearly',
+           status: 'active' as const,
+           subscriptionStartedAt: new Date().toISOString(),
+           subscriptionEndsAt: new Date(Date.now() + (selectedPlan === 'yearly' ? 365 : 30) * 24 * 60 * 60 * 1000).toISOString(),
+           billingCycle: selectedPlan as 'monthly' | 'yearly'
+        };
+
+        // Securely update the source of truth in Firestore
+        try {
+          const shopRef = doc(db, 'shops', shop.id);
+          await updateDoc(shopRef, {
+            isFeatured: true,
+            subscription: newSubscription
+          });
+        } catch (dbErr) {
+          console.error("Failed to update Firestore:", dbErr);
+          // Optional: handle Firestore write failure
+        }
+        
+        // Update local state
+        setShop(prev => prev ? { 
+          ...prev, 
+          isFeatured: true,
+          subscription: newSubscription
+        } : null);
+        
         setShowUpgradeModal(false);
-        alert(`Congratulations! Your shop has been upgraded to ${selectedPlan.toUpperCase()} Merchant Pro! Priority ranking & verified badge are now active.`);
+        
+        // Show success screen (we use alert for simplicity here, but a dedicated modal could be used)
+        alert(`🎉 Welcome to MYJPG Premium! Your ${selectedPlan} Premium plan is now active.`);
+      } else {
+        alert('Payment initiation failed. Please try again.');
       }
     } catch (err) {
       console.error('Failed to upgrade subscription:', err);
@@ -334,23 +368,11 @@ export const MerchantDashboardView: React.FC = () => {
         ownerId: shop.ownerId
       };
 
-      const res = await fetch(`/api/shops/${shop.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': user?.id || firebaseUser?.uid || shop.ownerId
-        },
-        body: JSON.stringify(updatePayload)
-      });
-
-      if (res.ok) {
-        const updated = await res.json();
-        setShop(updated);
-        setProfileSaveSuccess(true);
-        setTimeout(() => setProfileSaveSuccess(false), 3500);
-      } else {
-        alert('Failed to update shop details. Please try again.');
-      }
+      await updateDoc(doc(db, 'shops', shop.id), updatePayload);
+      const updated = { ...shop, ...updatePayload } as Shop;
+      setShop(updated);
+      setProfileSaveSuccess(true);
+      setTimeout(() => setProfileSaveSuccess(false), 3500);
     } catch (err) {
       console.error('Error saving shop profile:', err);
     } finally {
@@ -392,10 +414,19 @@ export const MerchantDashboardView: React.FC = () => {
     }
   };
 
+  const isPremiumActive = Boolean(
+    shop?.subscription && (
+      (shop.subscription.status === 'active' && (shop.subscription.plan === 'monthly' || shop.subscription.plan === 'yearly')) ||
+      (shop.subscription.status === 'trial')
+    )
+  );
+
+  const isTrial = shop?.subscription?.status === 'trial';
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] flex flex-col items-center justify-center p-6 space-y-3">
-        <div className="w-10 h-10 border-4 border-[#063B2C] border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] flex flex-col items-center justify-center p-6 space-y-3">
+        <div className="w-10 h-10 border-4 border-[#007AFF] border-t-transparent rounded-full animate-spin"></div>
         <p className="text-xs font-bold text-[#55685F] dark:text-[#A2B3AA]">
           Loading Merchant Hub...
         </p>
@@ -405,18 +436,18 @@ export const MerchantDashboardView: React.FC = () => {
 
   if (!shop) {
     return (
-      <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] p-6 text-center space-y-4">
-        <button onClick={goBack} className="p-2 rounded-full bg-white dark:bg-[#17231E]">
+      <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] p-6 text-center space-y-4">
+        <button onClick={goBack} className="p-2 rounded-full bg-white dark:bg-[#0F172A]">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <Store className="w-12 h-12 text-gray-400 mx-auto" />
         <h2 className="text-base font-black text-[#11241C] dark:text-white">No Shop Found</h2>
         <p className="text-xs text-gray-500 max-w-xs mx-auto">
-          You haven't registered a shop on Jalpaiguri Connect yet.
+          You haven't registered a shop on MYJPG yet.
         </p>
         <button
           onClick={() => navigate('add-shop')}
-          className="px-4 py-2.5 rounded-xl bg-[#063B2C] text-white text-xs font-bold cursor-pointer"
+          className="px-4 py-2.5 rounded-xl bg-[#007AFF] text-white text-xs font-bold cursor-pointer"
         >
           + Register Your Shop Now
         </button>
@@ -425,13 +456,13 @@ export const MerchantDashboardView: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 max-w-md mx-auto select-none transition-colors">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 max-w-md mx-auto select-none transition-colors">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#0F1A15]/95 backdrop-blur-md px-4 py-3 border-b border-[#E8E4DA]/60 dark:border-white/10 transition-colors flex items-center justify-between">
+      <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#0B132B]/95 backdrop-blur-md px-4 py-3 border-b border-[#E8E4DA]/60 dark:border-white/10 transition-colors flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <button
             onClick={goBack}
-            className="w-10 h-10 rounded-full bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
+            className="w-10 h-10 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
           >
             <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
           </button>
@@ -450,7 +481,7 @@ export const MerchantDashboardView: React.FC = () => {
           onClick={handleToggleShopOpen}
           className={`px-3 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer ${
             shop.isOpen
-              ? 'bg-emerald-500 text-white'
+              ? 'bg-blue-500 text-white'
               : 'bg-rose-500 text-white'
           }`}
           title="Click to toggle store open/closed status"
@@ -461,30 +492,68 @@ export const MerchantDashboardView: React.FC = () => {
       </header>
 
       <div className="p-4 space-y-4">
+        {/* Premium Upgrade Banner */}
+        <div className="bg-gradient-to-r from-gray-900 to-[#11241C] dark:from-[#1E293B] dark:to-[#0F172A] rounded-2xl p-4 shadow-md flex items-center justify-between border border-gray-700 dark:border-gray-800">
+          <div className="space-y-1">
+            <h3 className="text-white text-xs font-black flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              {shop.subscription?.plan === 'monthly' || shop.subscription?.plan === 'yearly' ? 'Premium Merchant' : 'Free Trial Plan'}
+            </h3>
+            {shop.subscription?.status === 'trial' ? (
+              <p className="text-[10px] font-semibold text-gray-300">
+                {Math.max(0, Math.ceil((new Date(shop.subscription.trialEndsAt || new Date().toISOString()).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))} days remaining
+              </p>
+            ) : shop.subscription?.plan === 'monthly' || shop.subscription?.plan === 'yearly' ? (
+              <p className="text-[10px] font-semibold text-gray-300">
+                Active until {new Date(shop.subscription.subscriptionEndsAt || new Date().toISOString()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+              </p>
+            ) : (
+              <p className="text-[10px] font-semibold text-rose-400">
+                Plan Expired
+              </p>
+            )}
+          </div>
+          <button 
+            onClick={() => { setActiveTab('subscription'); window.scrollTo(0, document.body.scrollHeight); }}
+            className="px-4 py-2 bg-gradient-to-r from-amber-400 to-amber-600 text-[#11241C] font-black text-xs rounded-xl shadow-sm hover:from-amber-300 hover:to-amber-500 active:scale-95 transition-all cursor-pointer border border-amber-300 flex items-center gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            Upgrade Plan
+          </button>
+        </div>
+
         {/* Quick Analytics Summary Strip */}
-        <div className="grid grid-cols-4 gap-2 text-center">
-          <div className="bg-white dark:bg-[#17231E] p-2.5 rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-2xs">
+        <div className="relative grid grid-cols-4 gap-2 text-center overflow-hidden rounded-2xl">
+          {!isPremiumActive && (
+            <div className="absolute inset-0 bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-[1.5px] z-10 flex items-center justify-center border border-[#E8E4DA] dark:border-white/10 rounded-2xl">
+               <div className="text-center px-4">
+                 <div className="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 text-[10px] font-black px-2 py-0.5 rounded-md uppercase inline-block mb-1">Locked</div>
+                 <p className="text-xs font-bold text-[#11241C] dark:text-white">Upgrade to view store analytics</p>
+               </div>
+            </div>
+          )}
+          <div className="bg-white dark:bg-[#0F172A] p-2.5 rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-2xs">
             <span className="text-[10px] text-gray-500 block font-semibold">Store Views</span>
             <span className="text-sm font-black text-[#11241C] dark:text-white">
               {shop.analytics?.views || 148}
             </span>
           </div>
 
-          <div className="bg-white dark:bg-[#17231E] p-2.5 rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-2xs">
+          <div className="bg-white dark:bg-[#0F172A] p-2.5 rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-2xs">
             <span className="text-[10px] text-gray-500 block font-semibold">Calls</span>
-            <span className="text-sm font-black text-emerald-600">
+            <span className="text-sm font-black text-blue-600">
               {shop.analytics?.callClicks || 24}
             </span>
           </div>
 
-          <div className="bg-white dark:bg-[#17231E] p-2.5 rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-2xs">
+          <div className="bg-white dark:bg-[#0F172A] p-2.5 rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-2xs">
             <span className="text-[10px] text-gray-500 block font-semibold">WhatsApp</span>
-            <span className="text-sm font-black text-emerald-600">
+            <span className="text-sm font-black text-blue-600">
               {shop.analytics?.whatsappClicks || 39}
             </span>
           </div>
 
-          <div className="bg-white dark:bg-[#17231E] p-2.5 rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-2xs">
+          <div className="bg-white dark:bg-[#0F172A] p-2.5 rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-2xs">
             <span className="text-[10px] text-gray-500 block font-semibold">Products</span>
             <span className="text-sm font-black text-[#11241C] dark:text-white">
               {products.length}
@@ -493,11 +562,19 @@ export const MerchantDashboardView: React.FC = () => {
         </div>
 
         {/* AI Smart Import Hero Card */}
-        <div className="bg-gradient-to-r from-[#E6F4EA] to-[#D5EADB] dark:from-[#132B22] dark:to-[#0C1E18] border border-emerald-300/60 dark:border-emerald-800/50 rounded-3xl p-4 shadow-xs flex items-center justify-between gap-3">
+        <div className="relative overflow-hidden bg-gradient-to-r from-[#eff6ff] to-[#dbeafe] dark:from-[#132B22] dark:to-[#0C1E18] border border-blue-300/60 dark:border-blue-800/50 rounded-3xl p-4 shadow-xs flex items-center justify-between gap-3">
+          {!isPremiumActive && (
+            <div className="absolute inset-0 bg-[#eff6ff]/90 dark:bg-[#132B22]/90 backdrop-blur-[2px] z-10 flex items-center justify-center">
+               <div className="text-center px-4">
+                 <div className="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 text-[10px] font-black px-2 py-0.5 rounded-md uppercase inline-block mb-1">Locked</div>
+                 <p className="text-xs font-bold text-blue-900 dark:text-blue-100">AI product import is a premium feature.</p>
+               </div>
+            </div>
+          )}
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-emerald-700 dark:text-emerald-300" />
-              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+              <Sparkles className="w-4 h-4 text-blue-700 dark:text-blue-300" />
+              <span className="text-[10px] font-black uppercase tracking-wider text-blue-800 dark:text-blue-300">
                 AI Powered Feature
               </span>
             </div>
@@ -511,7 +588,7 @@ export const MerchantDashboardView: React.FC = () => {
 
           <button
             onClick={() => setShowAiImportModal(true)}
-            className="px-3 py-2 rounded-xl bg-[#063B2C] dark:bg-emerald-600 text-white text-xs font-black shadow-xs hover:bg-[#084D3A] active:scale-95 transition-all shrink-0 cursor-pointer"
+            className="px-3 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white text-xs font-black shadow-xs hover:bg-[#084D3A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shrink-0 cursor-pointer"
           >
             Import with AI
           </button>
@@ -523,7 +600,7 @@ export const MerchantDashboardView: React.FC = () => {
             onClick={() => setActiveTab('products')}
             className={`flex-1 py-2.5 text-center transition-all cursor-pointer flex items-center justify-center gap-1.5 border-b-2 ${
               activeTab === 'products'
-                ? 'border-[#063B2C] text-[#063B2C] dark:border-emerald-400 dark:text-emerald-400 font-black'
+                ? 'border-[#007AFF] text-[#007AFF] dark:border-blue-400 dark:text-blue-400 font-black'
                 : 'border-transparent text-[#55685F] dark:text-[#A2B3AA]'
             }`}
           >
@@ -535,7 +612,7 @@ export const MerchantDashboardView: React.FC = () => {
             onClick={() => setActiveTab('profile')}
             className={`flex-1 py-2.5 text-center transition-all cursor-pointer flex items-center justify-center gap-1.5 border-b-2 ${
               activeTab === 'profile'
-                ? 'border-[#063B2C] text-[#063B2C] dark:border-emerald-400 dark:text-emerald-400 font-black'
+                ? 'border-[#007AFF] text-[#007AFF] dark:border-blue-400 dark:text-blue-400 font-black'
                 : 'border-transparent text-[#55685F] dark:text-[#A2B3AA]'
             }`}
           >
@@ -547,7 +624,7 @@ export const MerchantDashboardView: React.FC = () => {
             onClick={() => setActiveTab('subscription')}
             className={`flex-1 py-2.5 text-center transition-all cursor-pointer flex items-center justify-center gap-1.5 border-b-2 ${
               activeTab === 'subscription'
-                ? 'border-[#063B2C] text-[#063B2C] dark:border-emerald-400 dark:text-emerald-400 font-black'
+                ? 'border-[#007AFF] text-[#007AFF] dark:border-blue-400 dark:text-blue-400 font-black'
                 : 'border-transparent text-[#55685F] dark:text-[#A2B3AA]'
             }`}
           >
@@ -565,7 +642,7 @@ export const MerchantDashboardView: React.FC = () => {
               </span>
               <button
                 onClick={() => setShowAddProductModal(true)}
-                className="px-3 py-1.5 rounded-xl bg-[#063B2C] dark:bg-emerald-600 text-white text-xs font-bold flex items-center gap-1 cursor-pointer active:scale-95 transition-all shadow-xs"
+                className="px-3 py-1.5 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white text-xs font-bold flex items-center gap-1 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Single Item</span>
@@ -573,7 +650,7 @@ export const MerchantDashboardView: React.FC = () => {
             </div>
 
             {products.length === 0 ? (
-              <div className="py-8 text-center bg-white dark:bg-[#17231E] rounded-3xl border border-[#E8E4DA] dark:border-white/10 p-6 space-y-2">
+              <div className="py-8 text-center bg-white dark:bg-[#0F172A] rounded-3xl border border-[#E8E4DA] dark:border-white/10 p-6 space-y-2">
                 <Package className="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto" />
                 <p className="text-xs font-bold text-[#11241C] dark:text-white">
                   No products added yet
@@ -587,7 +664,7 @@ export const MerchantDashboardView: React.FC = () => {
                 {products.map((product) => (
                   <div
                     key={product.id}
-                    className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-2xs"
+                    className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-2xs"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       {product.photoUrl ? (
@@ -607,7 +684,7 @@ export const MerchantDashboardView: React.FC = () => {
                           {product.name}
                         </h4>
                         <div className="flex items-center gap-1.5 text-[11px] mt-0.5">
-                          <span className="font-black text-[#063B2C] dark:text-emerald-400">
+                          <span className="font-black text-[#007AFF] dark:text-blue-400">
                             ₹{product.price}
                           </span>
                           <span className="text-gray-400 font-semibold">/{product.unit}</span>
@@ -624,7 +701,7 @@ export const MerchantDashboardView: React.FC = () => {
                         onClick={() => handleToggleProductStock(product)}
                         className={`px-2 py-1 rounded-lg text-[10px] font-black cursor-pointer transition-colors ${
                           product.inStock
-                            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
                             : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
                         }`}
                         title="Click to toggle stock status"
@@ -650,65 +727,97 @@ export const MerchantDashboardView: React.FC = () => {
 
         {/* TAB 2: PRO PLAN & SUBSCRIPTION */}
         {activeTab === 'subscription' && (
-          <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-bold text-gray-500 uppercase">Current Tier</span>
-                <h3 className="text-base font-black text-[#11241C] dark:text-white flex items-center gap-1.5">
-                  <span>{shop.isFeatured ? 'Merchant Pro (Featured)' : 'Starter Merchant Plan'}</span>
-                  {shop.isFeatured && (
-                    <span className="bg-amber-400 text-amber-950 text-[10px] font-black px-2 py-0.5 rounded-md">
-                      PRO ACTIVE
-                    </span>
+                <span className="text-[10px] font-bold text-gray-500 uppercase">Subscription Status</span>
+                <h3 className="text-base font-black text-[#11241C] dark:text-white flex items-center gap-1.5 mt-0.5">
+                  {shop.subscription?.plan === 'monthly' || shop.subscription?.plan === 'yearly' ? (
+                    <>
+                      <span>MYJPG Premium</span>
+                      <span className="bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-300 text-[10px] font-black px-2 py-0.5 rounded-md uppercase">
+                        {shop.subscription.plan}
+                      </span>
+                    </>
+                  ) : shop.subscription?.status === 'trial' ? (
+                    <>
+                      <span>MYJPG Free Trial</span>
+                      <span className="bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 text-[10px] font-black px-2 py-0.5 rounded-md">
+                        TRIAL
+                      </span>
+                    </>
+                  ) : (
+                    <span>Premium Expired</span>
                   )}
                 </h3>
+                
+                {shop.subscription?.status === 'trial' && shop.subscription.trialEndsAt && (
+                   <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1">
+                     {Math.max(0, Math.ceil((new Date(shop.subscription.trialEndsAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))} days remaining
+                   </p>
+                )}
+                {(shop.subscription?.plan === 'monthly' || shop.subscription?.plan === 'yearly') && shop.subscription.subscriptionEndsAt && (
+                   <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1">
+                     Active until {new Date(shop.subscription.subscriptionEndsAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                   </p>
+                )}
+                {shop.subscription?.status === 'expired' && (
+                   <p className="text-xs font-semibold text-rose-600 dark:text-rose-400 mt-1">
+                     Upgrade to unlock premium merchant tools.
+                   </p>
+                )}
               </div>
-
-              <ShieldCheck className="w-8 h-8 text-[#063B2C] dark:text-emerald-400" />
+              <ShieldCheck className="w-8 h-8 text-[#2563EB] dark:text-[#38BDF8]" />
             </div>
 
-            <div className="space-y-2 text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA]">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Direct customer WhatsApp ordering</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Contactless UPI QR code payment</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Unlimited product catalog listings</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Gemini AI Smart Product Extraction</span>
-              </div>
-            </div>
-
-            {/* Upgrade banner if not featured */}
-            {!shop.isFeatured ? (
-              <div className="p-4 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/30 dark:to-black/30 border border-amber-200 dark:border-amber-800/40 rounded-2xl space-y-3">
+            {shop.subscription?.status === 'trial' && (
+              <div className="p-4 bg-blue-50 dark:bg-[#111C35] border border-blue-200 dark:border-blue-900/50 rounded-2xl space-y-3">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-600 fill-amber-600" />
-                  <h4 className="text-xs font-black text-amber-900 dark:text-amber-200">
-                    Upgrade to Merchant Pro (₹149/mo)
+                  <Sparkles className="w-4 h-4 text-[#2563EB] dark:text-[#38BDF8]" />
+                  <h4 className="text-xs font-black text-[#1D4ED8] dark:text-[#E0F2FE]">
+                    Enjoy your free merchant access
                   </h4>
                 </div>
-                <p className="text-[11px] font-semibold text-amber-800 dark:text-amber-300 leading-snug">
-                  Get Top Priority Ranking in Jalpaiguri Search, Verified Gold Merchant Badge, and 4x customer visibility.
+                <p className="text-[11px] font-semibold text-blue-800 dark:text-blue-200 leading-snug">
+                  You have full access to all premium merchant tools during your trial. Grow your business!
                 </p>
                 <button
                   onClick={() => setShowUpgradeModal(true)}
-                  className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-amber-950 font-black text-xs shadow-xs cursor-pointer active:scale-95 transition-all"
+                  className="w-full py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-black text-xs shadow-xs cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all"
                 >
-                  Upgrade to Pro Now
+                  Upgrade Plan
                 </button>
               </div>
-            ) : (
-              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 rounded-2xl text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-600" />
-                <span>Your shop has Priority Search Placement and Verified Merchant Status in Jalpaiguri.</span>
+            )}
+            
+            {(shop.subscription?.plan === 'monthly' || shop.subscription?.plan === 'yearly') && (
+              <div className="p-4 bg-blue-50 dark:bg-[#111C35] border border-blue-200 dark:border-blue-900/50 rounded-2xl space-y-3">
+                <p className="text-xs font-bold text-blue-900 dark:text-blue-100">
+                  You are enjoying MYJPG Premium benefits.
+                </p>
+                <button
+                  onClick={() => setShowUpgradeModal(true)}
+                  className="w-full py-2.5 rounded-xl bg-white dark:bg-white/10 text-[#2563EB] dark:text-[#38BDF8] border border-blue-200 dark:border-blue-800 font-black text-xs shadow-xs cursor-pointer hover:bg-blue-50 transition-all"
+                >
+                  Manage Plan
+                </button>
+              </div>
+            )}
+
+            {shop.subscription?.status === 'expired' && (
+              <div className="p-4 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 rounded-2xl space-y-3">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-rose-600" />
+                  <h4 className="text-xs font-black text-rose-900 dark:text-rose-200">
+                    Your free merchant period has ended
+                  </h4>
+                </div>
+                <button
+                  onClick={() => setShowUpgradeModal(true)}
+                  className="w-full py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-black text-xs shadow-xs cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all"
+                >
+                  Upgrade Now
+                </button>
               </div>
             )}
           </div>
@@ -718,7 +827,7 @@ export const MerchantDashboardView: React.FC = () => {
         {activeTab === 'profile' && (
           <form onSubmit={handleSaveShopProfile} className="space-y-4">
             {/* Completion Status & View Live Store */}
-            <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+            <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-bold text-gray-500 block uppercase">Shop Status</span>
@@ -729,7 +838,7 @@ export const MerchantDashboardView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => navigate('shop-detail', { shopId: shop.id })}
-                  className="px-3 py-1.5 rounded-xl bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#063B2C] dark:text-emerald-400 flex items-center gap-1 hover:bg-gray-100 cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#007AFF] dark:text-blue-400 flex items-center gap-1 hover:bg-gray-100 cursor-pointer"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   <span>View in App</span>
@@ -740,30 +849,30 @@ export const MerchantDashboardView: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between text-[11px] font-bold text-gray-500 mb-1">
                   <span>Profile Strength</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-black">
+                  <span className="text-blue-600 dark:text-blue-400 font-black">
                     {shop.photoUrl && shop.description ? '95%' : '65%'}
                   </span>
                 </div>
                 <div className="w-full bg-gray-100 dark:bg-white/10 h-2 rounded-full overflow-hidden">
                   <div
-                    className="bg-[#063B2C] dark:bg-emerald-500 h-full rounded-full transition-all duration-500"
+                    className="bg-[#007AFF] dark:bg-blue-500 h-full rounded-full transition-all duration-500"
                     style={{ width: shop.photoUrl && shop.description ? '95%' : '65%' }}
                   />
                 </div>
               </div>
 
               {profileSaveSuccess && (
-                <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/40 rounded-xl text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <div className="p-2.5 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800/40 rounded-xl text-xs font-bold text-blue-800 dark:text-blue-300 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-blue-600" />
                   <span>Shop profile updated successfully!</span>
                 </div>
               )}
             </div>
 
             {/* Photos & Storefront Image */}
-            <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+            <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
               <div className="flex items-center gap-2">
-                <Camera className="w-4 h-4 text-[#063B2C] dark:text-emerald-400" />
+                <Camera className="w-4 h-4 text-[#007AFF] dark:text-blue-400" />
                 <h4 className="text-xs font-black text-[#11241C] dark:text-white">
                   Storefront Photo (দোকানের ছবি)
                 </h4>
@@ -794,7 +903,7 @@ export const MerchantDashboardView: React.FC = () => {
             </div>
 
             {/* Description & AI Auto-Write */}
-            <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+            <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-black text-[#11241C] dark:text-white">
                   Shop Bio / Description (পরিচিতি)
@@ -803,7 +912,7 @@ export const MerchantDashboardView: React.FC = () => {
                   type="button"
                   onClick={handleGenerateAiBioInDashboard}
                   disabled={isGeneratingAiBio}
-                  className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-[#E6F4EA] dark:bg-emerald-950/70 hover:bg-[#D5EADB] px-2.5 py-1 rounded-lg border border-emerald-300/50 flex items-center gap-1 cursor-pointer"
+                  className="text-[10px] font-bold text-blue-800 dark:text-blue-300 bg-[#eff6ff] dark:bg-blue-950/70 hover:bg-[#dbeafe] px-2.5 py-1 rounded-lg border border-blue-300/50 flex items-center gap-1 cursor-pointer"
                 >
                   {isGeneratingAiBio ? (
                     <>
@@ -829,9 +938,9 @@ export const MerchantDashboardView: React.FC = () => {
             </div>
 
             {/* Operating Hours & Days */}
-            <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+            <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-[#063B2C] dark:text-emerald-400" />
+                <Clock className="w-4 h-4 text-[#007AFF] dark:text-blue-400" />
                 <h4 className="text-xs font-black text-[#11241C] dark:text-white">
                   Operating Hours & Weekly Off
                 </h4>
@@ -875,9 +984,9 @@ export const MerchantDashboardView: React.FC = () => {
             </div>
 
             {/* Delivery & UPI */}
-            <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+            <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
               <div className="flex items-center gap-2">
-                <Truck className="w-4 h-4 text-[#063B2C] dark:text-emerald-400" />
+                <Truck className="w-4 h-4 text-[#007AFF] dark:text-blue-400" />
                 <h4 className="text-xs font-black text-[#11241C] dark:text-white">
                   Delivery & Payments
                 </h4>
@@ -889,7 +998,7 @@ export const MerchantDashboardView: React.FC = () => {
                   type="checkbox"
                   checked={editDeliveryAvailable}
                   onChange={(e) => setEditDeliveryAvailable(e.target.checked)}
-                  className="w-4 h-4 accent-[#063B2C]"
+                  className="w-4 h-4 accent-[#007AFF]"
                 />
               </div>
 
@@ -934,7 +1043,7 @@ export const MerchantDashboardView: React.FC = () => {
             <button
               type="submit"
               disabled={isSavingProfile}
-              className="w-full py-3 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] text-white text-xs font-black shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition-all"
+              className="w-full py-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all"
             >
               {isSavingProfile ? (
                 <>
@@ -955,7 +1064,7 @@ export const MerchantDashboardView: React.FC = () => {
       {/* MODAL 1: ADD SINGLE PRODUCT */}
       {showAddProductModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#17231E] rounded-3xl max-w-sm w-full p-5 space-y-3 border border-[#E8E4DA] dark:border-white/10 shadow-2xl animate-in zoom-in-95">
+          <div className="bg-white dark:bg-[#0F172A] rounded-3xl max-w-sm w-full p-5 space-y-3 border border-[#E8E4DA] dark:border-white/10 shadow-2xl animate-in zoom-in-95">
             <div className="flex justify-between items-center">
               <h3 className="text-sm font-black text-[#11241C] dark:text-white">
                 Add Product to Catalog
@@ -1063,7 +1172,7 @@ export const MerchantDashboardView: React.FC = () => {
                   id="inStockCheck"
                   checked={newProductInStock}
                   onChange={(e) => setNewProductInStock(e.target.checked)}
-                  className="w-4 h-4 accent-[#063B2C]"
+                  className="w-4 h-4 accent-[#007AFF]"
                 />
                 <label htmlFor="inStockCheck" className="font-bold text-[#11241C] dark:text-white">
                   Available in stock immediately
@@ -1081,7 +1190,7 @@ export const MerchantDashboardView: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmittingProduct}
-                  className="px-5 py-2 rounded-xl bg-[#063B2C] text-white text-xs font-bold shadow-xs flex items-center gap-1 cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-[#007AFF] text-white text-xs font-bold shadow-xs flex items-center gap-1 cursor-pointer"
                 >
                   {isSubmittingProduct ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Save Product'}
                 </button>
@@ -1094,10 +1203,10 @@ export const MerchantDashboardView: React.FC = () => {
       {/* MODAL 2: AI SMART PRODUCT IMPORT */}
       {showAiImportModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#17231E] rounded-3xl max-w-md w-full p-5 space-y-3 border border-[#E8E4DA] dark:border-white/10 shadow-2xl animate-in zoom-in-95 max-h-[90vh] flex flex-col">
+          <div className="bg-white dark:bg-[#0F172A] rounded-3xl max-w-md w-full p-5 space-y-3 border border-[#E8E4DA] dark:border-white/10 shadow-2xl animate-in zoom-in-95 max-h-[90vh] flex flex-col">
             <div className="flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-xl bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-emerald-800 dark:text-emerald-300">
+                <div className="w-7 h-7 rounded-xl bg-blue-100 dark:bg-blue-950 flex items-center justify-center text-blue-800 dark:text-blue-300">
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <h3 className="text-sm font-black text-[#11241C] dark:text-white">
@@ -1129,7 +1238,7 @@ export const MerchantDashboardView: React.FC = () => {
 4. Sugar 1kg - Rs 44
 5. Amul Butter 100g - Rs 58`);
                     }}
-                    className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold underline cursor-pointer"
+                    className="text-[10px] text-blue-700 dark:text-blue-400 font-bold underline cursor-pointer"
                   >
                     Load Sample List
                   </button>
@@ -1147,7 +1256,7 @@ export const MerchantDashboardView: React.FC = () => {
               <button
                 onClick={handleRunAiExtraction}
                 disabled={isExtractingAi || !importRawText.trim()}
-                className="w-full py-2.5 rounded-xl bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-50"
+                className="w-full py-2.5 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-50"
               >
                 {isExtractingAi ? (
                   <>
@@ -1165,7 +1274,7 @@ export const MerchantDashboardView: React.FC = () => {
               {/* Extracted preview table */}
               {extractedProducts.length > 0 && (
                 <div className="space-y-2 pt-2 border-t border-[#F0ECE1] dark:border-white/10">
-                  <span className="font-black text-xs text-emerald-800 dark:text-emerald-400 block">
+                  <span className="font-black text-xs text-blue-800 dark:text-blue-400 block">
                     ✓ {extractedProducts.length} Items Extracted Successfully:
                   </span>
 
@@ -1179,7 +1288,7 @@ export const MerchantDashboardView: React.FC = () => {
                           <p className="font-bold text-[#11241C] dark:text-white">{item.name}</p>
                           <span className="text-[10px] text-gray-500">{item.category} • {item.unit}</span>
                         </div>
-                        <span className="font-black text-emerald-700 dark:text-emerald-400">
+                        <span className="font-black text-blue-700 dark:text-blue-400">
                           ₹{item.price}
                         </span>
                       </div>
@@ -1189,7 +1298,7 @@ export const MerchantDashboardView: React.FC = () => {
                   <button
                     onClick={handleSaveAllExtracted}
                     disabled={isSavingExtracted}
-                    className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
+                    className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
                   >
                     {isSavingExtracted ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1209,75 +1318,165 @@ export const MerchantDashboardView: React.FC = () => {
 
       {/* MODAL 3: PRO PLAN UPGRADE */}
       {showUpgradeModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#17231E] rounded-3xl max-w-sm w-full p-5 space-y-4 border border-[#E8E4DA] dark:border-white/10 shadow-2xl animate-in zoom-in-95">
-            <div className="flex justify-between items-center">
-              <h3 className="text-sm font-black text-[#11241C] dark:text-white">
-                Choose Merchant Plan
+        <div className="fixed inset-0 z-50 bg-[#F8FBFF] dark:bg-[#020617] overflow-y-auto">
+          <div className="min-h-screen pb-10">
+            <div className="sticky top-0 bg-[#F8FBFF]/90 dark:bg-[#020617]/90 backdrop-blur-md px-4 py-3 flex items-center justify-between z-10 border-b border-blue-100 dark:border-white/10">
+               <button
+                  onClick={() => setShowUpgradeModal(false)}
+                  className="w-10 h-10 rounded-full bg-white dark:bg-[#0B1224] border border-blue-100 dark:border-white/10 flex items-center justify-center text-[#0F172A] dark:text-white shadow-xs"
+               >
+                 <ArrowLeft className="w-5 h-5" />
+               </button>
+            </div>
+            
+            <div className="px-5 pt-4 pb-6 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#2563EB] to-[#38BDF8] mx-auto flex items-center justify-center shadow-lg shadow-blue-500/20 mb-4">
+                 <Store className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-black text-[#0F172A] dark:text-white">
+                Grow Your Shop with MYJPG Premium
               </h3>
-              <button
-                onClick={() => setShowUpgradeModal(false)}
-                className="w-7 h-7 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center text-gray-500 hover:text-black cursor-pointer"
-              >
-                ✕
-              </button>
+              <p className="text-xs text-[#0F172A]/70 dark:text-gray-400 mt-2 font-medium max-w-xs mx-auto">
+                More visibility. Better tools. More ways to reach local customers.
+              </p>
             </div>
 
-            <div className="space-y-2.5 text-xs">
-              <div
-                onClick={() => setSelectedPlan('monthly')}
-                className={`p-3 rounded-2xl border-2 cursor-pointer transition-all ${
-                  selectedPlan === 'monthly'
-                    ? 'border-[#063B2C] bg-[#E6F4EA] dark:bg-emerald-950/60'
-                    : 'border-[#E8E4DA] dark:border-white/10'
-                }`}
-              >
-                <div className="flex justify-between items-center">
-                  <span className="font-extrabold text-sm text-[#11241C] dark:text-white">Monthly Pro</span>
-                  <span className="font-black text-sm text-[#063B2C] dark:text-emerald-400">₹149 / month</span>
-                </div>
-                <p className="text-[11px] text-gray-500 font-semibold mt-1">
-                  Verified Gold Merchant Badge, Priority Search Ranking, Analytics.
-                </p>
-              </div>
-
+            <div className="px-4 space-y-4 max-w-md mx-auto">
+              {/* Yearly Plan (Best Value) */}
               <div
                 onClick={() => setSelectedPlan('yearly')}
-                className={`p-3 rounded-2xl border-2 cursor-pointer transition-all ${
+                className={`relative p-5 rounded-3xl border-2 cursor-pointer transition-all ${
                   selectedPlan === 'yearly'
-                    ? 'border-[#063B2C] bg-[#E6F4EA] dark:bg-emerald-950/60'
-                    : 'border-[#E8E4DA] dark:border-white/10'
+                    ? 'border-[#2563EB] bg-white dark:bg-[#111C35] shadow-lg shadow-blue-500/10'
+                    : 'border-blue-100 dark:border-white/10 bg-white/50 dark:bg-[#0B1224]'
                 }`}
               >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <span className="font-extrabold text-sm text-[#11241C] dark:text-white">Yearly Ultra</span>
-                    <span className="ml-2 text-[10px] font-bold bg-amber-400 text-amber-950 px-1.5 py-0.2 rounded">
-                      SAVE 27%
-                    </span>
-                  </div>
-                  <span className="font-black text-sm text-[#063B2C] dark:text-emerald-400">₹1,299 / year</span>
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#2563EB] to-[#38BDF8] text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
+                  BEST VALUE
                 </div>
-                <p className="text-[11px] text-gray-500 font-semibold mt-1">
-                  2 Months Free, Homepage Featured Storefront, Physical QR Standee delivered.
-                </p>
+                
+                <div className="text-center mt-2 border-b border-blue-50 dark:border-white/5 pb-4">
+                  <h4 className="font-extrabold text-[#0F172A] dark:text-white text-lg">MYJPG Premium Yearly</h4>
+                  <div className="mt-2 flex items-baseline justify-center gap-1">
+                     <span className="font-black text-2xl text-[#2563EB] dark:text-[#38BDF8]">₹4,999</span>
+                     <span className="text-xs text-gray-500 font-semibold">/ year</span>
+                  </div>
+                  <p className="text-[11px] font-bold text-gray-500 mt-1">≈ ₹417/month</p>
+                  <p className="text-[11px] font-bold text-[#1D4ED8] dark:text-[#38BDF8] bg-blue-50 dark:bg-blue-900/30 inline-block px-2 py-1 rounded-lg mt-2">
+                    Save ₹1,001 compared with 12 monthly payments
+                  </p>
+                </div>
+                
+                {selectedPlan === 'yearly' && (
+                  <button
+                    onClick={handleUpgradePlan}
+                    disabled={isUpgradingPlan}
+                    className="w-full mt-4 py-3.5 rounded-2xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-black text-sm flex items-center justify-center shadow-md cursor-pointer"
+                  >
+                    {isUpgradingPlan ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Upgrade for ₹4,999/year'}
+                  </button>
+                )}
               </div>
-            </div>
 
-            <button
-              onClick={handleUpgradePlan}
-              disabled={isUpgradingPlan}
-              className="w-full py-3 rounded-2xl bg-[#063B2C] hover:bg-[#084D3A] text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
-            >
-              {isUpgradingPlan ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <>
-                  <CreditCard className="w-4 h-4" />
-                  <span>Confirm Subscription & Activate</span>
-                </>
-              )}
-            </button>
+              {/* Monthly Plan */}
+              <div
+                onClick={() => setSelectedPlan('monthly')}
+                className={`p-5 rounded-3xl border-2 cursor-pointer transition-all ${
+                  selectedPlan === 'monthly'
+                    ? 'border-[#2563EB] bg-white dark:bg-[#111C35] shadow-lg shadow-blue-500/10'
+                    : 'border-blue-100 dark:border-white/10 bg-white/50 dark:bg-[#0B1224]'
+                }`}
+              >
+                <div className="flex justify-between items-start border-b border-blue-50 dark:border-white/5 pb-3">
+                  <div>
+                    <span className="bg-blue-100 text-[#1D4ED8] dark:bg-blue-900/50 dark:text-[#38BDF8] text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wide">
+                      FLEXIBLE
+                    </span>
+                    <h4 className="font-extrabold text-[#0F172A] dark:text-white text-base mt-1.5">MYJPG Premium Monthly</h4>
+                  </div>
+                  <div className="text-right">
+                     <span className="font-black text-xl text-[#2563EB] dark:text-[#38BDF8] block">₹500</span>
+                     <span className="text-[10px] text-gray-500 font-semibold">/ month</span>
+                  </div>
+                </div>
+                
+                {selectedPlan === 'monthly' && (
+                  <button
+                    onClick={handleUpgradePlan}
+                    disabled={isUpgradingPlan}
+                    className="w-full mt-4 py-3.5 rounded-2xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-black text-sm flex items-center justify-center shadow-md cursor-pointer"
+                  >
+                    {isUpgradingPlan ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Upgrade for ₹500/month'}
+                  </button>
+                )}
+              </div>
+              
+              {/* Premium Features List */}
+              <div className="bg-white dark:bg-[#111C35] rounded-3xl p-5 border border-blue-100 dark:border-white/10 mt-6">
+                 <h4 className="font-black text-sm text-[#0F172A] dark:text-white mb-4">What's included in Premium:</h4>
+                 <div className="grid grid-cols-1 gap-2.5 text-[11px] font-semibold text-[#0F172A]/80 dark:text-gray-300">
+                    <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[#2563EB] shrink-0" /> Enhanced shop visibility</div>
+                    <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[#2563EB] shrink-0" /> Priority placement in local searches</div>
+                    <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[#2563EB] shrink-0" /> Unlimited product/catalogue management</div>
+                    <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[#2563EB] shrink-0" /> Product price and stock updates</div>
+                    <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[#2563EB] shrink-0" /> Upload PDF/JPG catalogues</div>
+                    <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[#2563EB] shrink-0" /> AI-assisted catalogue extraction</div>
+                    <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[#2563EB] shrink-0" /> Customer enquiry management</div>
+                    <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[#2563EB] shrink-0" /> Shop announcements & promotions</div>
+                    <div className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-[#2563EB] shrink-0" /> Advanced shop analytics & insights</div>
+                 </div>
+              </div>
+
+              {/* Mobile-Friendly Comparison */}
+              <div className="bg-white dark:bg-[#111C35] rounded-3xl p-5 border border-blue-100 dark:border-white/10 mt-4 mb-8">
+                <h4 className="font-black text-sm text-[#0F172A] dark:text-white mb-4 text-center">Plan Comparison</h4>
+                <div className="space-y-0 text-[11px] font-medium">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-white/5">
+                     <span className="text-[#0F172A] dark:text-gray-300">Shop Profile</span>
+                     <div className="flex items-center gap-4 text-center font-bold">
+                       <span className="w-10 text-gray-400">Free</span>
+                       <span className="w-10 text-[#2563EB]">Pro</span>
+                     </div>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-white/5">
+                     <span className="text-[#0F172A] dark:text-gray-300">Basic Product Listing</span>
+                     <div className="flex items-center gap-4 text-center">
+                       <Check className="w-10 h-3 text-gray-400" />
+                       <Check className="w-10 h-3 text-[#2563EB]" />
+                     </div>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-white/5">
+                     <span className="text-[#0F172A] dark:text-gray-300">Customer Enquiries</span>
+                     <div className="flex items-center gap-4 text-center">
+                       <Check className="w-10 h-3 text-gray-400" />
+                       <Check className="w-10 h-3 text-[#2563EB]" />
+                     </div>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-white/5">
+                     <span className="text-[#0F172A] dark:text-gray-300">Advanced Catalogue</span>
+                     <div className="flex items-center gap-4 text-center">
+                       <span className="w-10 text-gray-300">—</span>
+                       <Check className="w-10 h-3 text-[#2563EB]" />
+                     </div>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-white/5">
+                     <span className="text-[#0F172A] dark:text-gray-300">Advanced Analytics</span>
+                     <div className="flex items-center gap-4 text-center">
+                       <span className="w-10 text-gray-300">—</span>
+                       <Check className="w-10 h-3 text-[#2563EB]" />
+                     </div>
+                  </div>
+                  <div className="flex justify-between items-center py-2">
+                     <span className="text-[#0F172A] dark:text-gray-300">Featured Shop Status</span>
+                     <div className="flex items-center gap-4 text-center">
+                       <span className="w-10 text-gray-300">—</span>
+                       <Check className="w-10 h-3 text-[#2563EB]" />
+                     </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
       )}

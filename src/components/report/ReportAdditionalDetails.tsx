@@ -92,7 +92,7 @@ export const ReportAdditionalDetails: React.FC<ReportAdditionalDetailsProps> = (
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="bg-white dark:bg-[#16241F] border border-[#E4DFD3] dark:border-white/10 rounded-2xl overflow-hidden transition-colors shadow-xs">
+    <div className="bg-white dark:bg-[#0F172A] border border-[#E4DFD3] dark:border-white/10 rounded-2xl overflow-hidden transition-colors shadow-xs">
       <button
         type="button"
         id="btn-toggle-optional-details"
@@ -111,7 +111,7 @@ export const ReportAdditionalDetails: React.FC<ReportAdditionalDetailsProps> = (
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-bold text-[#063B2C] dark:text-emerald-400">
+        <div className="flex items-center gap-2 text-xs font-bold text-[#007AFF] dark:text-blue-400">
           <span className="text-[11px]">{isOpen ? 'Hide' : 'Expand'}</span>
           {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </div>
@@ -122,7 +122,7 @@ export const ReportAdditionalDetails: React.FC<ReportAdditionalDetailsProps> = (
           {/* 1. Landmark or Nearby Area */}
           <div className="space-y-1.5 pt-3">
             <label className="text-xs font-bold text-[#11241C] dark:text-white flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400" />
+              <MapPin className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400" />
               Nearest Landmark / Spot
             </label>
             <input
@@ -130,14 +130,14 @@ export const ReportAdditionalDetails: React.FC<ReportAdditionalDetailsProps> = (
               value={landmark}
               onChange={(e) => onChangeLandmark(e.target.value)}
               placeholder="e.g. Opposite Kadamtala Girls High School, Next to SBI ATM"
-              className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-[#121E19] border border-[#D2CEBE] dark:border-white/10 rounded-xl text-xs font-medium text-[#11241C] dark:text-white placeholder:text-[#8C9B93] dark:placeholder:text-[#A2B3AA] focus:outline-none focus:border-[#063B2C] dark:focus:border-emerald-500"
+              className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-[#121E19] border border-[#D2CEBE] dark:border-white/10 rounded-xl text-xs font-medium text-[#11241C] dark:text-white placeholder:text-[#8C9B93] dark:placeholder:text-[#A2B3AA] focus:outline-none focus:border-[#007AFF] dark:focus:border-blue-500"
             />
           </div>
 
           {/* 2. When did you notice it? */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-[#11241C] dark:text-white flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400" />
+              <Clock className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400" />
               When was this first noticed?
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -150,7 +150,7 @@ export const ReportAdditionalDetails: React.FC<ReportAdditionalDetailsProps> = (
                     onClick={() => onChangeNoticedWhen(opt)}
                     className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer text-center ${
                       isSelected
-                        ? 'bg-[#063B2C] dark:bg-emerald-600 text-white border-[#063B2C] dark:border-emerald-600 shadow-xs'
+                        ? 'bg-[#007AFF] dark:bg-blue-600 text-white border-[#007AFF] dark:border-blue-600 shadow-xs'
                         : 'bg-[#FAF8F5] dark:bg-[#121E19] text-[#11241C] dark:text-white border-[#E4DFD3] dark:border-white/10 hover:bg-[#F2EFE8] dark:hover:bg-[#1A2A22]'
                     }`}
                   >
@@ -164,7 +164,7 @@ export const ReportAdditionalDetails: React.FC<ReportAdditionalDetailsProps> = (
           {/* 3. How serious is the issue? (Severity cards) */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-[#11241C] dark:text-white flex items-center gap-1.5">
-              <AlertTriangle className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400" />
+              <AlertTriangle className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400" />
               Issue Urgency & Severity
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -178,7 +178,7 @@ export const ReportAdditionalDetails: React.FC<ReportAdditionalDetailsProps> = (
                     onClick={() => onChangeSeverity(sev.id)}
                     className={`p-3 rounded-xl border text-left transition-all cursor-pointer relative ${
                       isSelected
-                        ? `bg-white dark:bg-[#1A2A22] ${sev.borderActive} ring-2 ring-[#063B2C]/10 dark:ring-emerald-500/20 shadow-xs`
+                        ? `bg-white dark:bg-[#1A2A22] ${sev.borderActive} ring-2 ring-[#007AFF]/10 dark:ring-blue-500/20 shadow-xs`
                         : 'bg-[#FAF8F5] dark:bg-[#121E19] border-[#E4DFD3] dark:border-white/10 hover:bg-[#F2EFE8] dark:hover:bg-[#1A2A22]'
                     }`}
                   >

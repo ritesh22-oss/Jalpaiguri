@@ -52,20 +52,13 @@ export const JalpaigiAssistantModal: React.FC = () => {
   const [selectedTier, setSelectedTier] = useState<'complex' | 'general' | 'fast'>('general');
   const [showRoleSelector, setShowRoleSelector] = useState(false);
 
-  const [chatHistory, setChatHistory] = useState<AssistantMsg[]>([
-    {
-      role: 'model',
-      text: 'Nomoshkar! I am your **Jalpaigi AI Assistant** powered by **Gemini & Google Maps Grounding**.\n\nTell me what you need in Jalpaiguri—such as finding a verified electrician, Sadar Hospital emergency help, blood donors, or exploring heritage places.',
-      groundingPlaces: [
-        {
-          title: 'Jalpaiguri District Sadar Hospital',
-          uri: 'https://maps.google.com/?q=Jalpaiguri+District+Sadar+Hospital',
-          address: 'Hospital Road, Kadamtala, Jalpaiguri',
-          snippets: ['24x7 Emergency Trauma Unit & Blood Bank']
-        }
-      ]
-    }
-  ]);
+  const [chatHistory, setChatHistory] = useState<AssistantMsg[]>(() => {
+    const lang = localStorage.getItem('jpg_ai_language') || 'en';
+    const text = lang === 'bn' 
+      ? 'নমস্কার! আমি আপনার **Jalpaigi AI Assistant**। আমি আপনাকে কীভাবে সাহায্য করতে পারি?'
+      : 'Nomoshkar! I am your **Jalpaigi AI Assistant**. How can I help you today?';
+    return [{ role: 'model', text, groundingPlaces: [] }];
+  });
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -76,12 +69,11 @@ export const JalpaigiAssistantModal: React.FC = () => {
   if (!isAssistantOpen) return null;
 
   const quickChips = [
-    { label: 'Need Electrician', query: 'I need a verified electrician urgently near Kadamtala', role: 'services' as const },
-    { label: 'Find O+ Blood', query: 'Need O+ blood donor near Sadar hospital', role: 'emergency' as const },
-    { label: 'Report Pothole', query: 'I want to report broken road waterlogging near Adarpara', role: 'civic' as const },
-    { label: 'Hospital Emergency', query: 'What is Jalpaiguri Sadar Hospital emergency phone & address?', role: 'emergency' as const },
-    { label: 'Visit Rajbari Dighi', query: 'Tell me about Rajbari Dighi & Baikunthapur Palace timings', role: 'tourism' as const },
-    { label: 'Vehicle Breakdown', query: 'My bike broke down near Teesta bridge, need mechanic', role: 'services' as const }
+    { label: 'Verified Electrician', query: 'I need a verified electrician in Jalpaiguri', role: 'services' as const },
+    { label: 'Find Blood', query: 'Help me find blood donors in Jalpaiguri', role: 'emergency' as const },
+    { label: 'Civic Report', query: 'How to report a civic issue in Jalpaiguri?', role: 'civic' as const },
+    { label: 'Explore Dooars', query: 'Tell me about tourism spots in Dooars', role: 'tourism' as const },
+    { label: 'Vehicle Help', query: 'Need a mechanic for my vehicle in Jalpaiguri', role: 'services' as const }
   ];
 
   const handleSend = async (textToSend?: string) => {
@@ -148,7 +140,7 @@ export const JalpaigiAssistantModal: React.FC = () => {
         ...prev,
         {
           role: 'model',
-          text: 'Nomoshkar! For immediate emergency healthcare, contact District Sadar Hospital at `03561-230006` or visit Hospital Road.',
+          text: 'Nomoshkar! I am having trouble connecting. Please try again later.',
           action: detectedAction
         }
       ]);
@@ -164,7 +156,7 @@ export const JalpaigiAssistantModal: React.FC = () => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-[#063B2C] text-white p-4 flex items-center justify-between shadow-xs">
+        <div className="bg-[#007AFF] text-white p-4 flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center text-[#A7D7B9]">
               <Sparkles className="w-5 h-5" />
@@ -172,7 +164,7 @@ export const JalpaigiAssistantModal: React.FC = () => {
             <div>
               <div className="flex items-center gap-1.5">
                 <h3 className="font-bold text-base tracking-tight">Jalpaigi AI Assistant</h3>
-                <span className="text-[9px] bg-emerald-700 text-emerald-100 font-bold px-1.5 py-0.2 rounded">
+                <span className="text-[9px] bg-blue-700 text-blue-100 font-bold px-1.5 py-0.2 rounded">
                   Gemini + Maps
                 </span>
               </div>
@@ -207,7 +199,7 @@ export const JalpaigiAssistantModal: React.FC = () => {
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value as any)}
-              className="bg-white border border-[#D2CEBE] rounded-lg px-2 py-1 text-xs font-bold text-[#063B2C] focus:outline-none"
+              className="bg-white border border-[#D2CEBE] rounded-lg px-2 py-1 text-xs font-bold text-[#007AFF] focus:outline-none"
             >
               <option value="general">City Guide</option>
               <option value="emergency">Emergency & Healthcare</option>
@@ -222,11 +214,11 @@ export const JalpaigiAssistantModal: React.FC = () => {
             <select
               value={selectedTier}
               onChange={(e) => setSelectedTier(e.target.value as any)}
-              className="bg-white border border-[#D2CEBE] rounded-lg px-2 py-1 text-xs font-bold text-[#063B2C] focus:outline-none"
+              className="bg-white border border-[#D2CEBE] rounded-lg px-2 py-1 text-xs font-bold text-[#007AFF] focus:outline-none cursor-pointer"
             >
-              <option value="general">Flash (Default)</option>
-              <option value="complex">Pro (Complex)</option>
-              <option value="fast">Lite (Fast)</option>
+              <option value="general">Flash (gemini-3.5-flash)</option>
+              <option value="complex">Pro (gemini-3.1-pro-preview)</option>
+              <option value="fast">Lite (gemini-3.1-flash-lite)</option>
             </select>
           </div>
         </div>
@@ -238,10 +230,21 @@ export const JalpaigiAssistantModal: React.FC = () => {
               key={i}
               className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} space-y-1.5`}
             >
+              {msg.role === 'model' && (
+                <div className="flex items-center gap-1 text-[10px] text-[#73827B] px-1 font-bold">
+                  <Sparkles className="w-3 h-3 text-[#007AFF]" />
+                  <span className="text-[#007AFF]">Jalpaigi AI</span>
+                  {msg.modelUsed && (
+                    <span className="bg-[#E6F4EA] text-[#007AFF] px-1.5 py-0.2 rounded font-mono text-[9px]">
+                      {msg.modelUsed}
+                    </span>
+                  )}
+                </div>
+              )}
               <div
                 className={`max-w-[88%] rounded-2xl p-3.5 text-xs leading-relaxed ${
                   msg.role === 'user'
-                    ? 'bg-[#063B2C] text-white rounded-br-none shadow-xs font-medium'
+                    ? 'bg-[#007AFF] text-white rounded-br-none shadow-xs font-medium'
                     : 'bg-white text-[#11241C] border border-[#E8E4DA] rounded-bl-none shadow-xs'
                 }`}
               >
@@ -255,7 +258,7 @@ export const JalpaigiAssistantModal: React.FC = () => {
                         ul: ({ children }) => <ul className="list-disc pl-4 space-y-0.5 my-1">{children}</ul>,
                         ol: ({ children }) => <ol className="list-decimal pl-4 space-y-0.5 my-1">{children}</ol>,
                         li: ({ children }) => <li>{children}</li>,
-                        strong: ({ children }) => <strong className="font-extrabold text-[#063B2C]">{children}</strong>
+                        strong: ({ children }) => <strong className="font-extrabold text-[#007AFF]">{children}</strong>
                       }}
                     >
                       {msg.text}
@@ -271,7 +274,7 @@ export const JalpaigiAssistantModal: React.FC = () => {
                     setIsAssistantOpen(false);
                     navigate(msg.action!.view, msg.action!.params);
                   }}
-                  className="inline-flex items-center gap-2 bg-[#E6F4EA] border border-[#A7D7B9] text-[#063B2C] px-3 py-1.5 rounded-xl text-xs font-extrabold shadow-xs hover:bg-[#C8E6C9] active:scale-95 transition-all cursor-pointer"
+                  className="inline-flex items-center gap-2 bg-[#E6F4EA] border border-[#A7D7B9] text-[#007AFF] px-3 py-1.5 rounded-xl text-xs font-extrabold shadow-xs hover:bg-[#C8E6C9] active:scale-95 transition-all cursor-pointer"
                 >
                   <span>{msg.action.label}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -281,8 +284,8 @@ export const JalpaigiAssistantModal: React.FC = () => {
               {/* Grounding Places Card */}
               {msg.groundingPlaces && msg.groundingPlaces.length > 0 && (
                 <div className="w-full max-w-[90%] space-y-2 mt-1">
-                  <div className="text-[11px] font-extrabold text-[#063B2C] flex items-center gap-1 px-1">
-                    <MapPin className="w-3.5 h-3.5 text-[#063B2C]" />
+                  <div className="text-[11px] font-extrabold text-[#007AFF] flex items-center gap-1 px-1">
+                    <MapPin className="w-3.5 h-3.5 text-[#007AFF]" />
                     <span>Google Maps Grounded Locations:</span>
                   </div>
                   {msg.groundingPlaces.map((place, idx) => (
@@ -293,7 +296,7 @@ export const JalpaigiAssistantModal: React.FC = () => {
                       <div className="flex items-start justify-between gap-1.5">
                         <h4 className="text-xs font-bold text-[#11241C]">{place.title}</h4>
                         {place.category && (
-                          <span className="text-[9px] font-bold bg-[#E6F4EA] text-[#063B2C] px-1.5 py-0.2 rounded-full">
+                          <span className="text-[9px] font-bold bg-[#E6F4EA] text-[#007AFF] px-1.5 py-0.2 rounded-full">
                             {place.category}
                           </span>
                         )}
@@ -310,7 +313,7 @@ export const JalpaigiAssistantModal: React.FC = () => {
                         href={place.uri || `https://maps.google.com/?q=${encodeURIComponent(place.title + ' Jalpaiguri')}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-1 w-full bg-[#063B2C] text-white py-1 rounded-xl text-xs font-bold hover:bg-[#084D3A] transition-all cursor-pointer"
+                        className="inline-flex items-center justify-center gap-1 w-full bg-[#007AFF] text-white py-1 rounded-xl text-xs font-bold hover:bg-[#084D3A] transition-all cursor-pointer"
                       >
                         <Navigation className="w-3 h-3" />
                         <span>Open in Google Maps</span>
@@ -324,8 +327,8 @@ export const JalpaigiAssistantModal: React.FC = () => {
           ))}
 
           {loading && (
-            <div className="flex items-center gap-2 text-xs font-bold text-[#063B2C] bg-white border border-[#A7D7B9] p-3 rounded-2xl max-w-[220px] shadow-xs">
-              <div className="w-2 h-2 rounded-full bg-[#063B2C] animate-ping"></div>
+            <div className="flex items-center gap-2 text-xs font-bold text-[#007AFF] bg-white border border-[#A7D7B9] p-3 rounded-2xl max-w-[220px] shadow-xs">
+              <div className="w-2 h-2 rounded-full bg-[#007AFF] animate-ping"></div>
               <span>Jalpaigi AI is reasoning…</span>
             </div>
           )}
@@ -342,7 +345,7 @@ export const JalpaigiAssistantModal: React.FC = () => {
                 setSelectedRole(chip.role);
                 handleSend(chip.query);
               }}
-              className="shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-[#FAF8F5] border border-[#E0DCD3] text-[#11241C] hover:bg-[#E6F4EA] hover:text-[#063B2C] transition-colors cursor-pointer"
+              className="shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-[#FAF8F5] border border-[#E0DCD3] text-[#11241C] hover:bg-[#E6F4EA] hover:text-[#007AFF] transition-colors cursor-pointer"
             >
               {chip.label}
             </button>
@@ -358,12 +361,12 @@ export const JalpaigiAssistantModal: React.FC = () => {
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-full px-4 py-2.5 text-xs font-semibold text-[#11241C] focus:outline-none focus:border-[#063B2C] pr-10"
+              className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-full px-4 py-2.5 text-xs font-semibold text-[#11241C] focus:outline-none focus:border-[#007AFF] pr-10"
               disabled={loading}
             />
             <button
               onClick={() => handleSend('Tell me 24x7 emergency contacts and hospitals in Jalpaiguri')}
-              className="absolute right-2.5 text-[#55685F] hover:text-[#063B2C]"
+              className="absolute right-2.5 text-[#55685F] hover:text-[#007AFF]"
               title="Quick query"
             >
               <Mic className="w-4 h-4" />
@@ -372,7 +375,7 @@ export const JalpaigiAssistantModal: React.FC = () => {
           <button
             onClick={() => handleSend()}
             disabled={!prompt.trim() || loading}
-            className="w-10 h-10 rounded-full bg-[#063B2C] text-white flex items-center justify-center hover:bg-[#084D3A] disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer shrink-0"
+            className="w-10 h-10 rounded-full bg-[#007AFF] text-white flex items-center justify-center hover:bg-[#084D3A] disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer shrink-0"
           >
             <Send className="w-4 h-4" />
           </button>

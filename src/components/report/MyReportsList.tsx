@@ -77,7 +77,7 @@ export const MyReportsList: React.FC<MyReportsListProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by ID, category, or ward location…"
-            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#16241F] border border-[#E4DFD3] dark:border-white/10 rounded-2xl text-xs font-medium text-[#11241C] dark:text-white placeholder:text-[#8C9B93] focus:outline-none focus:border-[#063B2C] dark:focus:border-emerald-500 shadow-xs"
+            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#0F172A] border border-[#E4DFD3] dark:border-white/10 rounded-2xl text-xs font-medium text-[#11241C] dark:text-white placeholder:text-[#8C9B93] focus:outline-none focus:border-[#007AFF] dark:focus:border-blue-500 shadow-xs"
           />
         </div>
 
@@ -98,14 +98,14 @@ export const MyReportsList: React.FC<MyReportsListProps> = ({
                 onClick={() => setFilterTab(tab)}
                 className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                   isSelected
-                    ? 'bg-white dark:bg-[#16241F] text-[#063B2C] dark:text-emerald-400 shadow-xs border border-[#E4DFD3]/60 dark:border-white/10'
+                    ? 'bg-white dark:bg-[#0F172A] text-[#007AFF] dark:text-blue-400 shadow-xs border border-[#E4DFD3]/60 dark:border-white/10'
                     : 'text-[#55685F] dark:text-[#A2B3AA] hover:text-[#11241C] dark:hover:text-white'
                 }`}
               >
                 <span>{tab}</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
                   isSelected
-                    ? 'bg-[#063B2C]/10 dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-400'
+                    ? 'bg-[#007AFF]/10 dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-400'
                     : 'bg-black/5 dark:bg-white/5 text-[#8C9B93]'
                 }`}>
                   {count}
@@ -130,12 +130,12 @@ export const MyReportsList: React.FC<MyReportsListProps> = ({
             <div
               key={report.id}
               onClick={() => onSelectReport(report)}
-              className="group bg-white dark:bg-[#16241F] border border-[#E4DFD3] dark:border-white/10 rounded-2xl p-4 hover:border-[#063B2C]/30 dark:hover:border-emerald-500/30 hover:shadow-sm transition-all cursor-pointer space-y-3 relative"
+              className="group bg-white dark:bg-[#0F172A] border border-[#E4DFD3] dark:border-white/10 rounded-2xl p-4 hover:border-[#007AFF]/30 dark:hover:border-blue-500/30 hover:shadow-sm transition-all cursor-pointer space-y-3 relative"
             >
               {/* Card top row */}
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-[#FAF8F5] dark:bg-[#121E19] border border-[#E4DFD3] dark:border-white/10 flex items-center justify-center text-[#063B2C] dark:text-emerald-400 shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-[#FAF8F5] dark:bg-[#121E19] border border-[#E4DFD3] dark:border-white/10 flex items-center justify-center text-[#007AFF] dark:text-blue-400 shrink-0">
                     <CatIcon className="w-4 h-4 stroke-[2]" />
                   </div>
                   <div className="min-w-0">
@@ -144,7 +144,7 @@ export const MyReportsList: React.FC<MyReportsListProps> = ({
                         {report.category}
                       </h4>
                       {isMySubmission && (
-                        <span className="text-[9px] font-bold bg-[#E6F4EA] dark:bg-emerald-950/70 text-[#063B2C] dark:text-emerald-400 px-1.5 py-0.2 rounded-md">
+                        <span className="text-[9px] font-bold bg-[#E6F4EA] dark:bg-blue-950/70 text-[#007AFF] dark:text-blue-400 px-1.5 py-0.2 rounded-md">
                           My Report
                         </span>
                       )}
@@ -159,7 +159,7 @@ export const MyReportsList: React.FC<MyReportsListProps> = ({
                 <span
                   className={`text-[11px] font-bold px-2.5 py-1 rounded-full border flex items-center gap-1 shrink-0 ${
                     isResolved
-                      ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/40'
+                      ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/40'
                       : isInProgress
                       ? 'bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800/40'
                       : 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/40'
@@ -184,13 +184,13 @@ export const MyReportsList: React.FC<MyReportsListProps> = ({
               {/* Bottom location & time row */}
               <div className="flex items-center justify-between pt-2 border-t border-[#F2EFE8] dark:border-white/5 text-[11px] text-[#8C9B93] dark:text-[#A2B3AA]">
                 <div className="flex items-center gap-1 truncate max-w-[200px]">
-                  <MapPin className="w-3 h-3 text-[#063B2C] dark:text-emerald-400 shrink-0" />
+                  <MapPin className="w-3 h-3 text-[#007AFF] dark:text-blue-400 shrink-0" />
                   <span className="truncate">{report.location}</span>
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0">
                   <span>{report.reportedAt || 'Recent'}</span>
-                  <div className="flex items-center gap-1 text-[#063B2C] dark:text-emerald-400 font-bold">
+                  <div className="flex items-center gap-1 text-[#007AFF] dark:text-blue-400 font-bold">
                     <ThumbsUp className="w-3 h-3" />
                     <span>{report.upvotes || 1}</span>
                   </div>
@@ -202,8 +202,8 @@ export const MyReportsList: React.FC<MyReportsListProps> = ({
         })}
 
         {filteredReports.length === 0 && (
-          <div className="py-12 px-4 text-center bg-white dark:bg-[#16241F] rounded-3xl border border-[#E4DFD3] dark:border-white/10 space-y-3">
-            <div className="w-12 h-12 rounded-full bg-[#FAF8F5] dark:bg-[#121E19] text-[#063B2C] dark:text-emerald-400 flex items-center justify-center mx-auto">
+          <div className="py-12 px-4 text-center bg-white dark:bg-[#0F172A] rounded-3xl border border-[#E4DFD3] dark:border-white/10 space-y-3">
+            <div className="w-12 h-12 rounded-full bg-[#FAF8F5] dark:bg-[#121E19] text-[#007AFF] dark:text-blue-400 flex items-center justify-center mx-auto">
               <FileText className="w-6 h-6 stroke-[1.8]" />
             </div>
             <div>
@@ -219,7 +219,7 @@ export const MyReportsList: React.FC<MyReportsListProps> = ({
             <button
               type="button"
               onClick={onNewReport}
-              className="mt-2 px-4 py-2.5 rounded-xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] text-white text-xs font-bold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="mt-2 px-4 py-2.5 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-bold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <PlusCircle className="w-3.5 h-3.5" />
               <span>Report a Problem</span>

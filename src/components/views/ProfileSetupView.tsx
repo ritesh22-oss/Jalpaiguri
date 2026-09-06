@@ -104,7 +104,7 @@ export const ProfileSetupView: React.FC = () => {
         <div className="flex items-center bg-[#E8E4DA] dark:bg-white/10 p-0.5 rounded-full">
           <button
             onClick={() => setLanguage(language === 'bn' ? 'en' : 'bn')}
-            className="text-[11px] font-bold px-2 py-0.5 rounded-full text-[#063B2C] dark:text-emerald-300 hover:bg-white/50 cursor-pointer"
+            className="text-[11px] font-bold px-2 py-0.5 rounded-full text-[#007AFF] dark:text-blue-300 hover:bg-white/50 cursor-pointer"
           >
             {language === 'bn' ? 'EN' : 'বাংলা'}
           </button>
@@ -159,7 +159,7 @@ export const ProfileSetupView: React.FC = () => {
             <div className="bg-[#F8FAFC] dark:bg-[#17231E] border border-gray-200 dark:border-white/10 rounded-xl p-3 space-y-2 transition-colors">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-start gap-2 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
                     <MapPin className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
@@ -184,7 +184,7 @@ export const ProfileSetupView: React.FC = () => {
               </div>
 
               {!location.isApproximate && location.accuracy && (
-                <div className="flex items-center gap-1 text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md font-medium">
+                <div className="flex items-center gap-1 text-[10px] text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-md font-medium">
                   <Sparkles className="w-3 h-3" />
                   <span>
                     {isBengali
@@ -347,11 +347,6 @@ export const ProfileSetupView: React.FC = () => {
             </button>
           </div>
         </form>
-      </div>
-
-      {/* Bottom iOS Home Indicator */}
-      <div className="w-full flex justify-center pb-1 pt-2">
-        <div className="w-32 h-1 bg-black/80 dark:bg-white/60 rounded-full"></div>
       </div>
     </div>
   );

@@ -1,88 +1,47 @@
 import React, { useState } from 'react';
 import {
   ShieldCheck,
-  ShieldAlert,
-  Fingerprint,
   ChevronLeft,
   Loader2,
   AlertCircle,
   CheckCircle2,
-  Sparkles,
-  Lock,
-  UserCheck,
-  RotateCcw,
-  Info,
-  Globe
+  Phone,
+  ArrowRight
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNav } from '../../context/NavigationContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { HandshakePinLogo } from '../common/HandshakePinLogo';
-import { FingerprintScannerModal } from '../common/FingerprintScannerModal';
-import { isAuthorizedAdminEmail } from '../../types';
-import { EnrolledFingerprint } from '../../lib/biometrics';
+import { JalpaiguriLogo } from '../common/JalpaiguriLogo';
 
 export const AuthView: React.FC = () => {
-  const {
-    loginWithGoogle,
-    enrolledFingerprint,
-    registerWithFingerprint,
-    loginWithFingerprint,
-    removeFingerprint,
-    refreshEnrolledFingerprint
-  } = useAuth();
+  const { loginWithGoogle } = useAuth();
   const { navigate, replaceView } = useNav();
-  const { isBengali, language, setLanguage, formatNumber, tLocality } = useLanguage();
-
-  // Tab: 'citizen' | 'admin'
-  const [authMode, setAuthMode] = useState<'citizen' | 'admin'>('citizen');
-
-  // Citizen biometric registration form state
-  const [citizenName, setCitizenName] = useState('');
-  const [citizenLocation, setCitizenLocation] = useState('Kadamtala, Jalpaiguri');
-
-  // Scanner modal state
-  const [scannerOpen, setScannerOpen] = useState(false);
-  const [scannerMode, setScannerMode] = useState<'enroll' | 'verify'>('enroll');
+  const { isBengali, language, setLanguage } = useLanguage();
 
   // Loading & Alert states
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  // 1. Google Sign-In for all users / Admin
-  const handleGoogleClick = async (isAdminAttempt: boolean = false) => {
+  // 1. Google Sign-In
+  const handleGoogleClick = async () => {
     setLoading(true);
     setErrorMsg('');
     setSuccessMsg('');
 
     try {
-      const res = await loginWithGoogle({ asAdmin: isAdminAttempt });
+      const res = await loginWithGoogle();
       setLoading(false);
 
       if (res.success) {
-        if (isAdminAttempt && res.isAdmin) {
-          setSuccessMsg(isBengali ? 'স্বাগতম প্রশাসক! পৌর কর্তৃপক্ষের প্রমাণপত্র যাচাই হয়েছে।' : 'Welcome Administrator! Municipal authority credentials verified.');
-          setTimeout(() => {
-            navigate('admin-dashboard');
-          }, 600);
-        } else if (isAdminAttempt && !res.isAdmin) {
-          setErrorMsg(
-            res.message ||
-              (isBengali
-                ? 'অনুমতি অস্বীকৃত: শুধুমাত্র যাচাইকৃত পৌর প্রশাসকরা অ্যাডমিন পোর্টালে প্রবেশ করতে পারবেন। আপনি সাধারণ নাগরিক হিসেবে সংযুক্ত হয়েছেন।'
-                : 'Access Denied: Only verified municipal administrators can access the Admin portal. You have been connected with citizen privileges.')
-          );
-        } else {
-          setSuccessMsg(res.isNewUser ? (isBengali ? 'জলপাইগুড়ি কানেক্টে স্বাগতম!' : 'Welcome to Jalpaiguri Connect!') : (isBengali ? 'আবার স্বাগতম!' : 'Welcome back!'));
-          setTimeout(() => {
-            if (res.isNewUser) {
-              replaceView('profile-setup');
-            } else {
-              replaceView('home');
-            }
-          }, 500);
-        }
+        setSuccessMsg(res.isNewUser ? (isBengali ? 'MYJPG-এ স্বাগতম!' : 'Welcome to MYJPG!') : (isBengali ? 'আবার স্বাগতম!' : 'Welcome back!'));
+        setTimeout(() => {
+          if (res.isNewUser) {
+            replaceView('profile-setup');
+          } else {
+            replaceView('home');
+          }
+        }, 500);
       } else {
         if (res.message) {
           setErrorMsg(res.message);
@@ -94,456 +53,191 @@ export const AuthView: React.FC = () => {
     }
   };
 
-  // 2. Trigger Fingerprint Enrollment
-  const handleStartFingerprintSignUp = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!citizenName.trim()) {
-      setErrorMsg(isBengali ? 'বায়োমেট্রিক ফিঙ্গারপ্রিন্ট নথিভুক্ত করতে আপনার পুরো নাম লিখুন।' : 'Please enter your full name to enroll your biometric fingerprint.');
-      return;
-    }
+  // 2. Admin Google Sign-In
+  const handleAdminGoogleClick = async () => {
+    setLoading(true);
     setErrorMsg('');
-    setScannerMode('enroll');
-    setScannerOpen(true);
-  };
+    setSuccessMsg('');
 
-  // 3. Trigger Fingerprint Verification / Login
-  const handleStartFingerprintLogin = () => {
-    setErrorMsg('');
-    setScannerMode('verify');
-    setScannerOpen(true);
-  };
+    try {
+      const res = await loginWithGoogle({ asAdmin: true });
+      setLoading(false);
 
-  // Callback from scanner modal upon successful biometric scan
-  const handleScannerSuccess = async (enrolled: EnrolledFingerprint) => {
-    if (scannerMode === 'enroll') {
-      const res = await registerWithFingerprint(enrolled.userName, citizenLocation);
       if (res.success) {
-        setSuccessMsg(isBengali ? `বায়োমেট্রিক কি নথিভুক্ত হয়েছে! কেবল ${enrolled.userName}-এর সাথে সুরক্ষিত।` : `Biometric Key Enrolled! Locked exclusively to ${enrolled.userName}.`);
+        setSuccessMsg(isBengali ? 'অ্যাডমিন ড্যাশবোর্ডে স্বাগতম!' : 'Welcome to Admin Dashboard!');
         setTimeout(() => {
-          replaceView('home');
-        }, 700);
+          replaceView('admin-dashboard');
+        }, 500);
       } else {
-        setErrorMsg(res.message || (isBengali ? 'নথিভুক্তি ব্যর্থ হয়েছে।' : 'Enrollment registration failed.'));
+        // Specifically show the exact message requested by the user, if denied
+        if (res.message) {
+          if (res.message.toLowerCase().includes('denied')) {
+            setErrorMsg('Admin access denied by the developer.');
+          } else {
+            setErrorMsg(res.message);
+          }
+        } else {
+          setErrorMsg('Admin access denied by the developer.');
+        }
       }
-    } else {
-      const res = await loginWithFingerprint(enrolled.fingerprintSignature);
-      if (res.success) {
-        setSuccessMsg(isBengali ? `বায়োমেট্রিক যাচাইকৃত! স্বাগতম, ${enrolled.userName}।` : `Biometric Verified! Welcome back, ${enrolled.userName}.`);
-        setTimeout(() => {
-          replaceView('home');
-        }, 700);
-      } else {
-        setErrorMsg(res.message || (isBengali ? 'আঙুলের ছাপ যাচাই ব্যর্থ হয়েছে।' : 'Fingerprint verification failed.'));
-      }
+    } catch (err: any) {
+      setLoading(false);
+      setErrorMsg('Admin access denied by the developer.');
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] text-[#11241C] dark:text-white flex flex-col justify-between p-4 max-w-md mx-auto select-none relative shadow-2xl transition-colors">
-      {/* Top Bar */}
-      <div className="w-full flex items-center justify-between pt-2 pb-1">
+    <div className="min-h-screen bg-[#F8FBFF] dark:bg-[#020617] text-[#11241C] dark:text-white flex flex-col p-6 max-w-md mx-auto select-none relative transition-colors overflow-hidden">
+      {/* Background Orbs for Depth */}
+      <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-blue-400/10 dark:bg-blue-600/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-[-5%] left-[-5%] w-48 h-48 bg-blue-300/10 dark:bg-blue-500/5 rounded-full blur-2xl pointer-events-none"></div>
+
+      {/* Top Navigation */}
+      <div className="w-full flex items-center justify-between mb-8 z-10">
         <button
           onClick={() => navigate('onboarding')}
-          className="p-1.5 -ml-1 text-gray-700 dark:text-[#A2B3AA] hover:text-black dark:hover:text-white active:scale-95 transition-all cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-white/10"
+          className="p-2 -ml-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 active:scale-95 transition-all cursor-pointer rounded-full"
           aria-label="Go Back"
         >
-          <ChevronLeft className="w-6 h-6 stroke-[2.2]" />
+          <ChevronLeft className="w-6 h-6" />
         </button>
 
-        <h1 className="text-base font-extrabold text-gray-900 dark:text-white tracking-tight">
-          {isBengali ? 'লগইন ও নাগরিক প্রবেশ' : 'Authentication & Access'}
-        </h1>
-
-        {/* Top Quick Language Switcher */}
-        <div className="flex items-center bg-[#E8E4DA] dark:bg-white/10 p-0.5 rounded-full">
+        <div className="flex items-center bg-white/50 dark:bg-white/5 backdrop-blur-sm p-1 rounded-full border border-blue-100 dark:border-white/10 shadow-sm">
           <button
             onClick={() => setLanguage(language === 'bn' ? 'en' : 'bn')}
-            className="text-[11px] font-bold px-2 py-0.5 rounded-full text-[#063B2C] dark:text-emerald-300 hover:bg-white/50 cursor-pointer"
-            title="Toggle Language"
+            className="text-[11px] font-bold px-3 py-1 rounded-full text-[#2563EB] dark:text-[#3B82F6] hover:bg-white dark:hover:bg-white/10 transition-all cursor-pointer"
           >
-            {language === 'bn' ? 'EN' : 'বাংলা'}
+            {language === 'bn' ? 'ENGLISH' : 'বাংলা'}
           </button>
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="w-full px-1 my-auto flex flex-col items-center">
-        {/* Brand Logo */}
-        <div className="my-4 flex items-center justify-center">
-          <HandshakePinLogo size="md" showText={true} />
-        </div>
+      <div className="flex-1 flex flex-col items-center justify-center space-y-8 z-10">
+        {/* Brand Logo & Header */}
+        <div className="flex flex-col items-center text-center space-y-3">
+          {/* Transparent Logo without background card or border */}
+          <div className="flex flex-col items-center select-none">
+            <div className="relative mb-3 flex items-center justify-center">
+              <JalpaiguriLogo size="xl" showText={false} />
+            </div>
 
-        {/* Mode Selector Tabs: Citizen Access vs Login as Admin */}
-        <div className="w-full grid grid-cols-2 p-1 bg-[#ECE8DF] dark:bg-[#121E19] rounded-2xl mb-4 transition-colors">
-          <button
-            type="button"
-            id="tab-citizen-access"
-            onClick={() => {
-              setAuthMode('citizen');
-              setErrorMsg('');
-              setSuccessMsg('');
-            }}
-            className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              authMode === 'citizen'
-                ? 'bg-white dark:bg-[#17231E] text-[#11241C] dark:text-white shadow-xs'
-                : 'text-gray-600 dark:text-[#A2B3AA] hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            <Fingerprint className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400" />
-            <span>{isBengali ? 'নাগরিক প্রবেশ' : 'Citizen Access'}</span>
-          </button>
+            {/* Unified Brand Typography: MY in black, JPG in brand blue */}
+            <div className="flex items-center tracking-tight leading-none text-3xl sm:text-4xl font-black font-sans">
+              <span className="text-black dark:text-white font-black">
+                MY
+              </span>
+              <span className="text-[#2563EB] dark:text-[#38BDF8] font-black ml-1">
+                JPG
+              </span>
+            </div>
 
-          <button
-            type="button"
-            id="tab-admin-access"
-            onClick={() => {
-              setAuthMode('admin');
-              setErrorMsg('');
-              setSuccessMsg('');
-            }}
-            className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              authMode === 'admin'
-                ? 'bg-[#063B2C] dark:bg-emerald-600 text-white shadow-xs'
-                : 'text-gray-600 dark:text-[#A2B3AA] hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>{isBengali ? 'অ্যাডমিন লগইন' : 'Login as Admin'}</span>
-          </button>
+            {/* Subtitle: Your Jalpaiguri Connected */}
+            <span className="mt-2 font-extrabold text-[#1D4ED8] dark:text-[#60A5FA] text-[9.5px] sm:text-[10.5px] tracking-[0.24em] uppercase font-sans">
+              {isBengali ? 'আপনার জলপাইগুড়ি, সংযুক্ত' : 'Your Jalpaiguri Connected'}
+            </span>
+          </div>
+          
+          <div className="space-y-1 px-2 pt-1">
+            <p className="text-gray-500 dark:text-gray-400 text-[13px] leading-relaxed max-w-[280px] mx-auto font-medium">
+              {isBengali 
+                ? 'নির্ভরযোগ্য স্থানীয় পরিষেবা, দোকান, শ্রমিক এবং স্বাস্থ্যসেবার সাথে সরাসরি সংযুক্ত হন।'
+                : 'Connect with trusted local services, shops, workers, and healthcare.'}
+            </p>
+          </div>
         </div>
 
         {/* Status Alerts */}
-        <div className="w-full space-y-2 mb-3">
+        <div className="w-full max-w-sm px-4">
           {errorMsg && (
-            <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/40 rounded-2xl p-3 text-xs text-rose-900 dark:text-rose-200 flex items-start gap-2.5 animate-in fade-in duration-200">
-              <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+            <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-800/40 rounded-xl p-3 text-rose-900 dark:text-rose-200 flex items-start gap-2.5 animate-in fade-in slide-in-from-top-1 duration-300">
+              <AlertCircle className="w-4 h-4 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" />
               <p className="text-[11px] font-semibold leading-relaxed">{errorMsg}</p>
             </div>
           )}
 
           {successMsg && (
-            <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 rounded-2xl p-3 text-xs text-emerald-900 dark:text-emerald-200 flex items-center gap-2.5 font-bold animate-in fade-in duration-200">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <p className="text-xs leading-snug">{successMsg}</p>
+            <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-800/40 rounded-xl p-3 text-blue-900 dark:text-blue-200 flex items-center gap-2.5 font-bold animate-in fade-in slide-in-from-top-1 duration-300">
+              <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+              <p className="text-[12px] leading-snug">{successMsg}</p>
             </div>
           )}
         </div>
 
-        {/* ----------------- TAB 1: CITIZEN ACCESS ----------------- */}
-        {authMode === 'citizen' && (
-          <div className="w-full space-y-4 animate-in fade-in duration-150">
-            {/* 1. Google Auth for Every User */}
-            <div className="bg-white dark:bg-[#17231E] rounded-2xl p-4 border border-[#E8E4DA] dark:border-white/10 shadow-xs transition-colors">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-bold text-gray-500 dark:text-[#A2B3AA] uppercase tracking-wider">
-                  {isBengali ? 'সর্বজনীন গুগল সাইন ইন' : 'Universal Google Sign-In'}
-                </span>
-              </div>
-              <p className="text-xs text-gray-600 dark:text-[#A2B3AA] mb-3">
-                {isBengali
-                  ? 'প্রতিটি নাগরিক তাঁদের ব্যক্তিগত গুগল অ্যাকাউন্ট দিয়ে সাথে সাথে প্রবেশ করতে পারেন।'
-                  : 'Every citizen can sign in immediately using their personal Google account.'}
-              </p>
+        {/* Auth Buttons */}
+        <div className="w-full max-w-[320px] space-y-3">
+          {/* Google Sign In */}
+          <button
+            onClick={handleGoogleClick}
+            disabled={loading}
+            className="w-full h-12 rounded-xl bg-white dark:bg-[#111C35] border border-gray-200 dark:border-white/10 text-gray-800 dark:text-white font-bold text-sm flex items-center justify-center gap-3 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
+          >
+            <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+              />
+            </svg>
+            <span>{isBengali ? 'গুগল দিয়ে প্রবেশ' : 'Sign in with Google'}</span>
+          </button>
 
-              <button
-                id="btn-google-auth"
-                onClick={() => handleGoogleClick(false)}
-                disabled={loading}
-                className="w-full h-12 rounded-xl bg-[#2F74E9] hover:bg-[#2563EB] active:scale-98 text-white font-semibold text-sm flex items-center justify-center relative shadow-xs transition-all cursor-pointer disabled:opacity-70 px-4"
-              >
-                {loading ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-white" />
-                    <span className="font-semibold text-white">
-                      {isBengali ? 'প্রমাণীকরণ হচ্ছে...' : 'Authenticating...'}
-                    </span>
-                  </div>
-                ) : (
-                  <>
-                    <div className="absolute left-3 w-7 h-7 rounded-lg bg-white flex items-center justify-center shadow-2xs shrink-0">
-                      <svg className="w-4 h-4" viewBox="0 0 24 24">
-                        <path
-                          fill="#4285F4"
-                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                        />
-                        <path
-                          fill="#34A853"
-                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                        />
-                        <path
-                          fill="#FBBC05"
-                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                        />
-                        <path
-                          fill="#EA4335"
-                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                        />
-                      </svg>
-                    </div>
-                    <span className="font-semibold text-white tracking-normal">
-                      {isBengali ? 'গুগল দিয়ে এগিয়ে যান' : 'Continue with Google'}
-                    </span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Divider */}
-            <div className="relative flex py-1 items-center">
-              <div className="grow border-t border-gray-300 dark:border-white/10"></div>
-              <span className="shrink mx-3 text-xs font-semibold text-gray-500 dark:text-[#A2B3AA] uppercase tracking-wider">
-                {isBengali ? 'বা বায়োমেট্রিক গোপনীয়তা' : 'or Biometric Privacy'}
-              </span>
-              <div className="grow border-t border-gray-300 dark:border-white/10"></div>
-            </div>
-
-            {/* 2. Fingerprint Sign Up & Biometric Login Section */}
-            <div className="bg-white dark:bg-[#17231E] rounded-2xl p-4 border border-[#E8E4DA] dark:border-white/10 shadow-xs space-y-3 transition-colors">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#E6F4EA] dark:bg-emerald-950/60 flex items-center justify-center text-[#063B2C] dark:text-emerald-400">
-                    <Fingerprint className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white">
-                      {isBengali ? 'আঙুলের ছাপ বায়োমেট্রিক' : 'Fingerprint Biometrics'}
-                    </h3>
-                    <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold">
-                      {isBengali ? 'ডিভাইসের সাথে সুরক্ষিত • সর্বোচ্চ গোপনীয়তা' : 'Hardware Bound • Strict Privacy'}
-                    </p>
-                  </div>
-                </div>
-                <span className="text-[10px] bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-extrabold px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-700">
-                  {enrolledFingerprint ? (isBengali ? 'সংযুক্ত' : 'Enrolled') : (isBengali ? 'প্রস্তুত' : 'Ready')}
-                </span>
-              </div>
-
-              {/* Strict Privacy Guarantee Description */}
-              <div className="bg-[#FAF8F5] dark:bg-[#121E19] rounded-xl p-2.5 text-[11px] text-gray-600 dark:text-[#A2B3AA] border border-[#E8E4DA] dark:border-white/10 flex items-start gap-2 transition-colors">
-                <Lock className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400 shrink-0 mt-0.5" />
-                <p className="leading-relaxed">
-                  {isBengali
-                    ? 'একবার আপনার আঙুলের ছাপ স্ক্যান করা হলে, এটি সুরক্ষিতভাবে এই ডিভাইসে আবদ্ধ হয়ে যায়। অন্য কেউ লগইন করতে পারবে না।'
-                    : 'Once your fingerprint is scanned, it is cryptographically locked to this device. No one can log in with a different fingerprint.'}
-                </p>
-              </div>
-
-              {/* If Fingerprint is ALREADY enrolled on device */}
-              {enrolledFingerprint ? (
-                <div className="space-y-3 pt-1">
-                  <div className="p-3 bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 rounded-xl flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase text-emerald-800 dark:text-emerald-300 tracking-wider block">
-                        {isBengali ? 'নথিভুক্ত নাগরিক' : 'Registered Citizen'}
-                      </span>
-                      <p className="text-sm font-black text-gray-900 dark:text-white">
-                        {enrolledFingerprint.userName}
-                      </p>
-                      <span className="text-[10px] text-gray-500 dark:text-[#A2B3AA]">
-                        {isBengali ? 'ডিভাইস কি:' : 'Device Key:'} {enrolledFingerprint.credentialId.slice(0, 16)}...
-                      </span>
-                    </div>
-                    <CheckCircle2 className="w-6 h-6 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  </div>
-
-                  {/* Primary Login Button with Enrolled Fingerprint */}
-                  <button
-                    id="btn-login-with-fingerprint"
-                    onClick={handleStartFingerprintLogin}
-                    className="w-full h-12 rounded-xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] active:scale-98 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
-                  >
-                    <Fingerprint className="w-5 h-5 text-emerald-300" />
-                    <span>{isBengali ? 'লগইন করতে সেন্সর স্পর্শ করুন' : 'Touch Sensor to Login'}</span>
-                  </button>
-
-                  <div className="flex items-center justify-between pt-1">
-                    <button
-                      onClick={() => {
-                        removeFingerprint();
-                        setSuccessMsg(isBengali ? 'এই ডিভাইস থেকে ফিঙ্গারপ্রিন্ট মুছে ফেলা হয়েছে।' : 'Enrolled fingerprint cleared from this device.');
-                      }}
-                      className="text-[11px] text-gray-500 dark:text-[#A2B3AA] hover:text-rose-600 dark:hover:text-rose-400 flex items-center gap-1 cursor-pointer transition-colors"
-                    >
-                      <RotateCcw className="w-3 h-3" />
-                      <span>{isBengali ? 'নতুন আঙুলের ছাপ পুনরায় যুক্ত করুন' : 'Re-enroll New Fingerprint'}</span>
-                    </button>
-                    <span className="text-[10px] text-gray-400 dark:text-gray-500">
-                      {isBengali
-                        ? `যুক্ত করা হয়েছে: ${new Date(enrolledFingerprint.enrolledAt).toLocaleDateString()}`
-                        : `Enrolled on ${new Date(enrolledFingerprint.enrolledAt).toLocaleDateString()}`}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                /* If NO Fingerprint is enrolled yet: Sign Up with Fingerprint */
-                <form onSubmit={handleStartFingerprintSignUp} className="space-y-3 pt-1">
-                  <div>
-                    <label className="block text-[11px] font-bold text-gray-700 dark:text-[#A2B3AA] mb-1">
-                      {isBengali ? 'নাগরিকের পুরো নাম' : 'Citizen Full Name'}
-                    </label>
-                    <input
-                      id="input-citizen-name"
-                      type="text"
-                      value={citizenName}
-                      onChange={(e) => setCitizenName(e.target.value)}
-                      placeholder={isBengali ? 'যেমন: সৌরভ সেনগুপ্ত' : 'e.g. Sourav Sengupta'}
-                      className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-[#121E19] border border-gray-300 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[#063B2C] dark:focus:border-emerald-400 focus:bg-white dark:focus:bg-[#17231E] transition-all"
-                    />
-                  </div>
-
-                  <button
-                    id="btn-signup-with-fingerprint"
-                    type="submit"
-                    className="w-full h-12 rounded-xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] active:scale-98 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
-                  >
-                    <Fingerprint className="w-5 h-5 text-emerald-300" />
-                    <span>{isBengali ? 'আঙুলের ছাপ দিয়ে সাইন আপ করুন' : 'Sign Up with Fingerprint'}</span>
-                  </button>
-                </form>
-              )}
-            </div>
-
-            {/* Direct Phone OTP entry option */}
-            <div className="text-center pt-1 space-y-2">
-              <button
-                onClick={() => navigate('phone-auth')}
-                className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 font-semibold cursor-pointer"
-              >
-                <Info className="w-3.5 h-3.5" />
-                <span>{isBengali ? 'মোবাইল ফোন ওটিপি (OTP) দিয়ে প্রবেশ করতে চান?' : 'Sign in using Mobile Phone OTP'}</span>
-              </button>
-
-              <div>
-                <button
-                  id="btn-guest-explore"
-                  type="button"
-                  onClick={() => replaceView('home')}
-                  className="w-full py-2.5 rounded-xl bg-white dark:bg-[#17231E] hover:bg-gray-50 dark:hover:bg-white/5 border border-[#D2CEBE] dark:border-white/10 text-xs font-bold text-[#063B2C] dark:text-[#4ECCA3] transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
-                >
-                  <span>🏪</span>
-                  <span>{isBengali ? 'পরে লগইন করুন • অতিথি হিসেবে বাজার ও দোকান দেখুন' : 'Continue as Guest • Explore Shops & Services'}</span>
-                </button>
-              </div>
-            </div>
+          {/* Divider */}
+          <div className="relative flex items-center py-1">
+            <div className="flex-grow border-t border-gray-100 dark:border-white/5"></div>
+            <span className="flex-shrink mx-3 text-[9px] font-black text-gray-300 dark:text-white/20 uppercase tracking-widest">
+              {isBengali ? 'অথবা' : 'OR'}
+            </span>
+            <div className="flex-grow border-t border-gray-100 dark:border-white/5"></div>
           </div>
-        )}
 
-        {/* ----------------- TAB 2: LOGIN AS ADMIN ----------------- */}
-        {authMode === 'admin' && (
-          <div className="w-full space-y-4 animate-in fade-in duration-150">
-            <div className="bg-[#063B2C] dark:bg-[#082E1E] text-white rounded-3xl p-5 shadow-lg border border-[#084D3A] dark:border-emerald-800/40 space-y-4 transition-colors">
-              <div className="flex items-start justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-[#0F4F3C] border border-[#17664E] flex items-center justify-center text-emerald-300 shadow-inner">
-                  <ShieldCheck className="w-7 h-7" />
-                </div>
-                <div className="px-3 py-1 rounded-full bg-[#114637] border border-[#1E5D4B] text-[10px] font-extrabold tracking-wide uppercase text-emerald-300">
-                  {isBengali ? 'পৌর পোর্টাল' : 'Municipal Portal'}
-                </div>
-              </div>
+          {/* Phone Sign In */}
+          <button
+            onClick={() => navigate('phone-auth')}
+            disabled={loading}
+            className="w-full h-12 rounded-xl bg-[#2563EB] dark:bg-[#3B82F6] text-white font-bold text-sm flex items-center justify-center gap-3 hover:bg-[#1D4ED8] dark:hover:bg-[#2563EB] active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
+          >
+            <Phone className="w-4 h-4" />
+            <span>{isBengali ? 'ফোন নম্বর দিয়ে প্রবেশ' : 'Continue with Phone'}</span>
+          </button>
 
-              <div>
-                <h2 className="text-lg font-black tracking-tight text-white">
-                  {isBengali ? 'জলপাইগুড়ি পৌর প্রশাসন' : 'Jalpaiguri Municipal Administration'}
-                </h2>
-                <p className="text-xs text-emerald-200/80 mt-1 leading-relaxed">
-                  {isBengali
-                    ? 'অভিযোগ প্রেরণ, কর্মী যাচাইকরণ ও পৌর জরুরি সতর্কতার প্রশাসনিক প্যানেল।'
-                    : 'Administrative console for grievance dispatch, civic worker verification, and city alerts.'}
-                </p>
-              </div>
-
-              {/* Strict Security Enforcement Card */}
-              <div className="bg-[#03231A] dark:bg-[#021811] rounded-2xl p-4 border border-[#114637] space-y-2.5">
-                <div className="flex items-center gap-2 text-emerald-300 text-xs font-bold">
-                  <ShieldAlert className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>{isBengali ? 'পৌর আধিকারিক পরিচয় গেটওয়ে' : 'Municipal Officer Identity Gateway'}</span>
-                </div>
-                <div className="text-[11px] text-emerald-100/85 leading-relaxed space-y-1.5">
-                  <p className="flex items-start gap-1.5">
-                    <span className="text-emerald-400 font-bold">•</span>
-                    <span>
-                      {isBengali
-                        ? 'শুধুমাত্র অনুমোদিত পৌর আধিকারিকদের জন্য নির্ধারিত একক সাইন-অন।'
-                        : 'Designated single sign-on for verified municipal authority personnel.'}
-                    </span>
-                  </p>
-                  <p className="flex items-start gap-1.5 text-emerald-200/75 text-[10px]">
-                    <span className="text-emerald-400 font-bold">•</span>
-                    <span>
-                      {isBengali
-                        ? 'প্রশাসনিক অধিকার শুধুমাত্র যাচাইকৃত পৌর কর্মীদের প্রদান করা হয়। অন্যান্য অ্যাকাউন্ট নাগরিক অধিকার পায়।'
-                        : 'Administrative privileges are granted solely to verified municipality staff. Standard accounts receive citizen access.'}
-                    </span>
-                  </p>
-                </div>
-              </div>
-
-              {/* Authenticate Admin via Google Button */}
-              <button
-                id="btn-admin-google-auth"
-                onClick={() => handleGoogleClick(true)}
-                disabled={loading}
-                className="w-full h-12 rounded-xl bg-white hover:bg-emerald-50 active:scale-98 text-[#063B2C] font-black text-sm flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer disabled:opacity-75"
-              >
-                {loading ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-[#063B2C]" />
-                    <span className="font-bold">
-                      {isBengali ? 'অ্যাডমিন প্রমাণপত্র যাচাই করা হচ্ছে...' : 'Verifying Admin Credentials...'}
-                    </span>
-                  </div>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                      <path
-                        fill="#4285F4"
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                      />
-                      <path
-                        fill="#34A853"
-                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                      />
-                      <path
-                        fill="#FBBC05"
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                      />
-                      <path
-                        fill="#EA4335"
-                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                      />
-                    </svg>
-                    <span>{isBengali ? 'গুগল দিয়ে অ্যাডমিন হিসেবে প্রমাণীকরণ' : 'Authenticate as Admin with Google'}</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            <div className="text-center">
-              <button
-                onClick={() => setAuthMode('citizen')}
-                className="text-xs text-gray-500 dark:text-[#A2B3AA] hover:text-gray-900 dark:hover:text-white font-semibold cursor-pointer underline underline-offset-2"
-              >
-                {isBengali ? 'প্রশাসক নন? নাগরিক প্রবেশে ফিরে যান' : 'Not an admin? Return to Citizen Access'}
-              </button>
-            </div>
+          {/* Admin Divider */}
+          <div className="relative flex items-center pt-4 pb-2">
+            <div className="flex-grow border-t border-gray-200 dark:border-white/10 border-dashed"></div>
+            <span className="flex-shrink mx-3 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+              {isBengali ? 'অ্যাডমিনিস্ট্রেটর' : 'Administrator'}
+            </span>
+            <div className="flex-grow border-t border-gray-200 dark:border-white/10 border-dashed"></div>
           </div>
-        )}
+
+          {/* Admin Google Sign In */}
+          <button
+            onClick={handleAdminGoogleClick}
+            disabled={loading}
+            className="w-full h-12 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 text-gray-700 dark:text-gray-300 font-bold text-sm flex items-center justify-center gap-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
+          >
+            <ShieldCheck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <span>{isBengali ? 'অ্যাডমিন লগইন (গুগল)' : 'Admin Sign in (Google)'}</span>
+          </button>
+        </div>
       </div>
 
-      {/* Biometric Scanner Modal */}
-      <FingerprintScannerModal
-        isOpen={scannerOpen}
-        onClose={() => setScannerOpen(false)}
-        mode={scannerMode}
-        userName={citizenName || enrolledFingerprint?.userName}
-        enrolledUser={enrolledFingerprint}
-        onSuccess={handleScannerSuccess}
-        onError={(msg) => setErrorMsg(msg)}
-      />
-
-      {/* Bottom iOS Home Indicator */}
-      <div className="w-full flex justify-center pb-1 pt-3">
-        <div className="w-32 h-1 bg-black/40 dark:bg-white/40 rounded-full"></div>
+      {/* Footer Branding */}
+      <div className="w-full flex flex-col items-center pb-6 z-10">
+        <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+          {isBengali ? 'জলপাইগুড়ি পৌরসভা দ্বারা চালিত' : 'Powered by Jalpaiguri Municipality'}
+        </p>
       </div>
     </div>
   );

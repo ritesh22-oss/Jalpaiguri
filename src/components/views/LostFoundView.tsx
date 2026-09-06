@@ -15,6 +15,7 @@ import {
 import { useNav } from '../../context/NavigationContext';
 import { useApp } from '../../context/AppContext';
 import { LostFoundItem } from '../../types';
+import { EmptyState } from '../common/EmptyState';
 
 export const LostFoundView: React.FC = () => {
   const { goBack } = useNav();
@@ -82,7 +83,7 @@ export const LostFoundView: React.FC = () => {
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="px-3 py-2 rounded-full bg-[#063B2C] hover:bg-[#084D3A] text-white text-xs font-bold flex items-center gap-1 shadow-xs active:scale-95 transition-all cursor-pointer"
+          className="px-3 py-2 rounded-full bg-[#007AFF] hover:bg-[#084D3A] text-white text-xs font-bold flex items-center gap-1 shadow-xs active:scale-95 transition-all cursor-pointer"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Report Item</span>
@@ -110,7 +111,7 @@ export const LostFoundView: React.FC = () => {
               onClick={() => setFilter(f as any)}
               className={`px-4 py-1.5 rounded-full text-xs font-bold capitalize transition-all cursor-pointer ${
                 filter === f
-                  ? 'bg-[#063B2C] text-white shadow-xs'
+                  ? 'bg-[#007AFF] text-white shadow-xs'
                   : 'bg-white border border-[#D2CEBE] text-[#11241C]'
               }`}
             >
@@ -122,31 +123,34 @@ export const LostFoundView: React.FC = () => {
         {/* Items List */}
         <div className="space-y-3 pt-1">
           {filteredItems.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-3xl p-6 border border-[#E8E4DA]">
-              <HelpCircle className="w-12 h-12 text-[#8C9B93] mx-auto mb-3 opacity-60" />
-              <h3 className="font-bold text-base text-[#11241C]">No items reported</h3>
-              <p className="text-xs text-[#55685F] mt-1">
-                Lost an item or found someone's belonging? Post a notice for Jalpaiguri citizens.
-              </p>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="mt-4 px-4 py-2 bg-[#063B2C] text-white text-xs font-bold rounded-xl cursor-pointer"
-              >
-                Post Notice
-              </button>
-            </div>
+            <EmptyState
+              icon={HelpCircle}
+              title={lostFound.length === 0 ? "No Items Reported" : "No Match Found"}
+              description={lostFound.length === 0 
+                ? "Jalpaiguri's community lost & found board is empty. Helping neighbors find their belongings starts here."
+                : "No lost or found notices match your current search or filter."}
+              actionLabel={lostFound.length === 0 ? "Post a Notice" : "Clear Search"}
+              onAction={() => {
+                if (lostFound.length === 0) {
+                  setIsModalOpen(true);
+                } else {
+                  setFilter('all');
+                  setSearch('');
+                }
+              }}
+            />
           ) : (
             filteredItems.map((item) => (
               <div
                 key={item.id}
-                className="bg-white border border-[#E8E4DA] rounded-3xl p-4 shadow-xs space-y-2.5 hover:border-[#063B2C] transition-all"
+                className="bg-white border border-[#E8E4DA] rounded-3xl p-4 shadow-xs space-y-2.5 hover:border-[#007AFF] transition-all"
               >
                 <div className="flex items-center justify-between">
                   <span
                     className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold ${
                       item.type === 'Lost'
                         ? 'bg-[#FFEBEA] text-[#D9383A]'
-                        : 'bg-[#E6F4EA] text-[#063B2C]'
+                        : 'bg-[#E6F4EA] text-[#007AFF]'
                     }`}
                   >
                     {item.type}
@@ -160,7 +164,7 @@ export const LostFoundView: React.FC = () => {
                 <h3 className="font-extrabold text-sm text-[#11241C]">{item.title}</h3>
 
                 <p className="text-xs text-[#55685F] flex items-center gap-1 font-medium">
-                  <MapPin className="w-3.5 h-3.5 text-[#063B2C] shrink-0" />
+                  <MapPin className="w-3.5 h-3.5 text-[#007AFF] shrink-0" />
                   <span>{item.location}</span>
                 </p>
 
@@ -176,7 +180,7 @@ export const LostFoundView: React.FC = () => {
                     onClick={() =>
                       (window.location.href = `tel:${item.contactPreference.replace(/\s+/g, '')}`)
                     }
-                    className="px-3.5 py-1.5 rounded-xl bg-[#063B2C] hover:bg-[#084D3A] text-white text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-xl bg-[#007AFF] hover:bg-[#084D3A] text-white text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
                   >
                     <Phone className="w-3 h-3" />
                     <span>Contact</span>
@@ -295,7 +299,7 @@ export const LostFoundView: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-2xl bg-[#063B2C] text-white font-bold text-sm shadow-md hover:bg-[#084D3A] active:scale-98 transition-all cursor-pointer"
+                className="w-full py-3.5 rounded-2xl bg-[#007AFF] text-white font-bold text-sm shadow-md hover:bg-[#084D3A] active:scale-98 transition-all cursor-pointer"
               >
                 Post Community Notice
               </button>

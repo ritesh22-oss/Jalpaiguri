@@ -2,6 +2,7 @@ import React from 'react';
 import { ShieldAlert, Lock, Loader2, ArrowLeft } from 'lucide-react';
 import { useAdminGuard } from '../../hooks/useAdminGuard';
 import { useNav } from '../../context/NavigationContext';
+import { JalpaiguriLogo } from './JalpaiguriLogo';
 
 interface AdminRouteGuardProps {
   children: React.ReactNode;
@@ -26,10 +27,10 @@ export const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({ children, fall
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#063B2C] flex flex-col items-center justify-center p-6 text-white">
+      <div className="min-h-screen bg-[#007AFF] flex flex-col items-center justify-center p-6 text-white">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-emerald-400" />
-          <p className="text-xs text-emerald-200/90 font-medium">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
+          <p className="text-xs text-blue-200/90 font-medium">
             Verifying municipal administrative credentials...
           </p>
         </div>
@@ -47,8 +48,12 @@ export const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({ children, fall
 
   // Restricted Access Barrier
   return (
-    <div className="min-h-screen bg-[#063B2C] text-white flex flex-col items-center justify-center p-6 select-none animate-in fade-in duration-200">
+    <div className="min-h-screen bg-[#007AFF] text-white flex flex-col items-center justify-center p-6 select-none animate-in fade-in duration-200">
       <div className="max-w-md w-full bg-[#042A1F] border border-[#0F5A43] rounded-3xl p-6 md:p-8 shadow-2xl flex flex-col items-center text-center">
+        <div className="mb-4">
+          <JalpaiguriLogo size="sm" showText={true} textColor="text-white" />
+        </div>
+
         <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4 shadow-inner">
           <ShieldAlert className="w-8 h-8" />
         </div>
@@ -62,7 +67,7 @@ export const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({ children, fall
           Municipal Admin Access
         </h1>
 
-        <p className="text-xs text-emerald-200/80 leading-relaxed mb-6">
+        <p className="text-xs text-blue-200/80 leading-relaxed mb-6">
           Access to the Jalpaiguri Municipal Administration Console is restricted exclusively to authorized municipal officers.
         </p>
 
@@ -81,10 +86,10 @@ export const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({ children, fall
           </div>
         ) : (
           <div className="w-full bg-[#06382A] border border-[#0F5A43] rounded-2xl p-3.5 mb-6 text-left">
-            <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider block">
+            <span className="text-[10px] uppercase font-bold text-blue-400 tracking-wider block">
               Official Sign-In Required
             </span>
-            <p className="text-xs text-emerald-200/90 mt-0.5 leading-relaxed">
+            <p className="text-xs text-blue-200/90 mt-0.5 leading-relaxed">
               Please authenticate using your municipal administration Google credentials to proceed.
             </p>
           </div>
@@ -99,7 +104,7 @@ export const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({ children, fall
         <div className="w-full space-y-3">
           <button
             onClick={() => loginAsAdmin()}
-            className="w-full py-3.5 px-4 rounded-xl bg-white hover:bg-emerald-50 active:scale-98 text-[#063B2C] font-black text-sm shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-all"
+            className="w-full py-3.5 px-4 rounded-xl bg-white hover:bg-blue-50 active:scale-98 text-[#007AFF] font-black text-sm shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-all"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
@@ -124,7 +129,7 @@ export const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({ children, fall
 
           <button
             onClick={() => navigate('home')}
-            className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-emerald-300 hover:text-white flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+            className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-blue-300 hover:text-white flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Return to Citizen Portal</span>

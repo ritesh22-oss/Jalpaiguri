@@ -8,9 +8,9 @@ export const Toast: React.FC = () => {
   if (!toast) return null;
 
   const icons = {
-    success: <CheckCircle2 className="w-5 h-5 text-[#063B2C]" />,
+    success: <CheckCircle2 className="w-5 h-5 text-[#007AFF]" />,
     error: <AlertCircle className="w-5 h-5 text-[#D9383A]" />,
-    info: <Info className="w-5 h-5 text-[#0A58CA]" />
+    info: <Info className="w-5 h-5 text-[#0056b3]" />
   };
 
   return (

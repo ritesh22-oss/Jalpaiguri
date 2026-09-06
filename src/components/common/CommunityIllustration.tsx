@@ -12,23 +12,23 @@ export const CommunityIllustration: React.FC<{ className?: string }> = ({ classN
         {/* Soft pastel mint background foliage / clouds */}
         <path
           d="M60 140C40 100 80 50 140 55C170 30 230 35 255 70C295 50 340 85 335 130C355 165 340 215 295 225C255 245 190 235 150 230C100 240 50 200 60 140Z"
-          fill="#E5F6EE"
+          fill="#E6F0FF"
           opacity="0.85"
         />
 
         {/* --- Top Left: Doctor Avatar in Green Circle Badge --- */}
         <g transform="translate(62, 35)">
-          <circle cx="34" cy="34" r="28" fill="#E8F7F0" stroke="#34A853" strokeWidth="2" />
+          <circle cx="34" cy="34" r="28" fill="#E6F0FF" stroke="#007AFF" strokeWidth="2" />
           {/* Doctor hair */}
           <path d="M23 24C23 18 28 14 34 14C40 14 45 18 45 24V26H23V24Z" fill="#2D3748" />
           {/* Doctor face */}
           <circle cx="34" cy="26" r="9" fill="#FBD38D" />
-          {/* Doctor white coat & green scrubs */}
-          <path d="M19 54C19 44 25 37 34 37C43 37 49 44 49 54" fill="#FFFFFF" stroke="#34A853" strokeWidth="1.8" />
-          <path d="M28 37L34 45L40 37" fill="#34A853" />
+          {/* Doctor white coat & blue scrubs */}
+          <path d="M19 54C19 44 25 37 34 37C43 37 49 44 49 54" fill="#FFFFFF" stroke="#007AFF" strokeWidth="1.8" />
+          <path d="M28 37L34 45L40 37" fill="#007AFF" />
           {/* Stethoscope */}
-          <path d="M28 39V47C28 50 40 50 40 47V39" stroke="#34A853" strokeWidth="1.8" fill="none" />
-          <circle cx="34" cy="50" r="2.2" fill="#34A853" />
+          <path d="M28 39V47C28 50 40 50 40 47V39" stroke="#007AFF" strokeWidth="1.8" fill="none" />
+          <circle cx="34" cy="50" r="2.2" fill="#007AFF" />
         </g>
 
         {/* --- Top Center: Chat Bubble --- */}
@@ -43,10 +43,10 @@ export const CommunityIllustration: React.FC<{ className?: string }> = ({ classN
         {/* --- Top Right: Government/Civic Hall with Pillars & Flag --- */}
         <g transform="translate(285, 30)">
           {/* Roof Pediment */}
-          <path d="M10 28L40 12L70 28H10Z" fill="#CDE9DD" stroke="#3B6554" strokeWidth="1.8" />
-          {/* Flagpole & Green Flag */}
-          <line x1="40" y1="12" x2="40" y2="3" stroke="#3B6554" strokeWidth="1.5" />
-          <path d="M40 3L49 6L40 9V3Z" fill="#22C55E" />
+          <path d="M10 28L40 12L70 28H10Z" fill="#D6E4FF" stroke="#2B6CB0" strokeWidth="1.8" />
+          {/* Flagpole & Blue Flag */}
+          <line x1="40" y1="12" x2="40" y2="3" stroke="#2B6CB0" strokeWidth="1.5" />
+          <path d="M40 3L49 6L40 9V3Z" fill="#007AFF" />
           {/* Entablature beam */}
           <rect x="14" y="28" width="52" height="5" fill="#E2E8F0" stroke="#3B6554" strokeWidth="1.5" />
           {/* Columns */}
@@ -75,12 +75,12 @@ export const CommunityIllustration: React.FC<{ className?: string }> = ({ classN
           <path d="M30 35V95" stroke="#CBD5E1" strokeWidth="1.5" strokeDasharray="2 2" />
           <path d="M60 45V105" stroke="#CBD5E1" strokeWidth="1.5" strokeDasharray="2 2" />
 
-          {/* Central Green Location Pin */}
+          {/* Central Blue Location Pin */}
           <g transform="translate(45, 30)">
             <path
               d="M0 0C-6.5 0 -12 5.5 -12 12C-12 21 0 32 0 32C0 32 12 21 12 12C12 5.5 6.5 0 0 0Z"
-              fill="#22C55E"
-              stroke="#15803D"
+              fill="#007AFF"
+              stroke="#1D4ED8"
               strokeWidth="1.5"
             />
             <circle cx="0" cy="11" r="4" fill="#FFFFFF" />
@@ -90,8 +90,8 @@ export const CommunityIllustration: React.FC<{ className?: string }> = ({ classN
 
         {/* Small verified badge near map */}
         <g transform="translate(295, 115)">
-          <circle cx="10" cy="10" r="9" fill="#DCFCE7" stroke="#22C55E" strokeWidth="1.5" />
-          <path d="M6 10L9 13L14 7" stroke="#16A34A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="10" cy="10" r="9" fill="#E6F0FF" stroke="#007AFF" strokeWidth="1.5" />
+          <path d="M6 10L9 13L14 7" stroke="#1D4ED8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </g>
 
         {/* --- Left Middle: Blood Donor sitting in clinic chair with IV bag --- */}
@@ -131,17 +131,17 @@ export const CommunityIllustration: React.FC<{ className?: string }> = ({ classN
 
         {/* --- Center: Two Citizens / Community Members Shaking Hands --- */}
 
-        {/* Person A (Left - Green Polo / Professional) */}
+        {/* Person A (Left - Blue Polo / Professional) */}
         <g transform="translate(145, 120)">
           {/* Head & Hair */}
           <path d="M12 18C12 11 18 7 24 7C30 7 34 11 34 18H12Z" fill="#1A202C" />
           <circle cx="23" cy="20" r="8" fill="#FBD38D" />
-          {/* Green Shirt */}
-          <path d="M10 30L34 30L36 72L8 72Z" fill="#48BB78" stroke="#276749" strokeWidth="1.5" />
-          {/* Blue Pants */}
-          <path d="M8 72L8 116L18 116L19 80L21 80L22 116L32 116L34 72Z" fill="#2C5282" stroke="#1A365D" strokeWidth="1.5" />
+          {/* Blue Shirt */}
+          <path d="M10 30L34 30L36 72L8 72Z" fill="#3182CE" stroke="#2B6CB0" strokeWidth="1.5" />
+          {/* Navy Pants */}
+          <path d="M8 72L8 116L18 116L19 80L21 80L22 116L32 116L34 72Z" fill="#1A365D" stroke="#102A43" strokeWidth="1.5" />
           {/* Arm extending forward to shake */}
-          <path d="M26 36L48 48" stroke="#48BB78" strokeWidth="5.5" strokeLinecap="round" />
+          <path d="M26 36L48 48" stroke="#3182CE" strokeWidth="5.5" strokeLinecap="round" />
           <path d="M46 47L56 50" stroke="#FBD38D" strokeWidth="4.5" strokeLinecap="round" />
         </g>
 
@@ -171,8 +171,8 @@ export const CommunityIllustration: React.FC<{ className?: string }> = ({ classN
           <circle cx="25" cy="20" r="8" fill="#FBD38D" />
           {/* White Blouse */}
           <path d="M16 30H34L37 60H13L16 30Z" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="1.5" />
-          {/* Teal / Emerald Skirt */}
-          <path d="M13 60L9 98H41L37 60H13Z" fill="#319795" stroke="#234E52" strokeWidth="1.5" />
+          {/* Navy / Blue Skirt */}
+          <path d="M13 60L9 98H41L37 60H13Z" fill="#2A4365" stroke="#1A365D" strokeWidth="1.5" />
           {/* Legs */}
           <line x1="20" y1="98" x2="20" y2="118" stroke="#FBD38D" strokeWidth="3" />
           <line x1="30" y1="98" x2="30" y2="118" stroke="#FBD38D" strokeWidth="3" />
@@ -186,9 +186,9 @@ export const CommunityIllustration: React.FC<{ className?: string }> = ({ classN
         <g transform="translate(325, 205)">
           <path d="M8 20L12 36H24L28 20H8Z" fill="#E2E8F0" stroke="#718096" strokeWidth="1.5" />
           {/* Plant Leaves */}
-          <path d="M18 20C12 12 10 2 18 0C26 2 24 12 18 20Z" fill="#38A169" stroke="#22543D" strokeWidth="1" />
-          <path d="M14 18C9 14 6 7 11 5C16 7 16 14 14 18Z" fill="#48BB78" />
-          <path d="M22 18C27 14 30 7 25 5C20 7 20 14 22 18Z" fill="#2F855A" />
+          <path d="M18 20C12 12 10 2 18 0C26 2 24 12 18 20Z" fill="#3182CE" stroke="#2C5282" strokeWidth="1" />
+          <path d="M14 18C9 14 6 7 11 5C16 7 16 14 14 18Z" fill="#63B3ED" />
+          <path d="M22 18C27 14 30 7 25 5C20 7 20 14 22 18Z" fill="#2B6CB0" />
         </g>
       </svg>
     </div>

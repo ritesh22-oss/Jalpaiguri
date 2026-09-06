@@ -1,334 +1,633 @@
 {
   "entities": {
     "UserProfile": {
-      "title": "UserProfile",
-      "description": "Registered citizen or admin profile",
+      "title": "User Profile",
+      "description": "User profile information",
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string" },
-        "email": { "type": "string" },
-        "phone": { "type": "string" },
-        "bloodGroup": { "type": "string" },
-        "location": { "type": "string" },
-        "role": { "type": "string", "enum": ["citizen", "admin", "worker", "shop_owner"] },
-        "language": { "type": "string" },
-        "isBloodDonor": { "type": "boolean" },
-        "isVolunteer": { "type": "boolean" },
-        "createdAt": { "type": "string" }
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "age": {
+          "type": "number"
+        },
+        "gender": {
+          "type": "string",
+          "enum": [
+            "Male",
+            "Female",
+            "Other",
+            "Prefer not to say"
+          ]
+        },
+        "bloodGroup": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        },
+        "avatarUrl": {
+          "type": "string"
+        },
+        "isVolunteer": {
+          "type": "boolean"
+        },
+        "isBloodDonor": {
+          "type": "boolean"
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "English",
+            "বাংলা",
+            "हिन्दी"
+          ]
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "citizen",
+            "admin",
+            "worker",
+            "shop_owner"
+          ]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
       },
-      "required": ["id", "name", "role"]
+      "required": [
+        "id",
+        "name",
+        "phone",
+        "location",
+        "language",
+        "createdAt"
+      ]
     },
     "Worker": {
       "title": "Worker",
-      "description": "Local skilled worker in Jalpaiguri",
+      "description": "Service provider listing",
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string" },
-        "profession": { "type": "string" },
-        "phone": { "type": "string" },
-        "location": { "type": "string" },
-        "rating": { "type": "number" },
-        "reviewsCount": { "type": "number" },
-        "experience": { "type": "string" },
-        "price": { "type": "string" },
-        "isVerified": { "type": "boolean" },
-        "isAvailableNow": { "type": "boolean" },
-        "category": { "type": "string" }
+        "id": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "profession": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "avatarUrl": {
+          "type": "string"
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "rating": {
+          "type": "number"
+        },
+        "reviewCount": {
+          "type": "number"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "experienceYears": {
+          "type": "number"
+        },
+        "experience": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "serviceArea": {
+          "type": "string"
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "description": {
+          "type": "string"
+        },
+        "completedJobs": {
+          "type": "number"
+        },
+        "availability": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
       },
-      "required": ["id", "name", "profession", "phone", "location"]
-    },
-    "CivicReport": {
-      "title": "CivicReport",
-      "description": "Citizen civic issue report for Jalpaiguri municipality",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "category": { "type": "string" },
-        "location": { "type": "string" },
-        "locality": { "type": "string" },
-        "city": { "type": "string" },
-        "district": { "type": "string" },
-        "state": { "type": "string" },
-        "lat": { "type": "number" },
-        "lng": { "type": "number" },
-        "accuracy": { "type": "number" },
-        "description": { "type": "string" },
-        "photoUrl": { "type": "string" },
-        "videoUrl": { "type": "string" },
-        "mediaType": { "type": "string" },
-        "severity": { "type": "string", "enum": ["Low", "Medium", "High", "Critical"] },
-        "landmark": { "type": "string" },
-        "nearbyArea": { "type": "string" },
-        "noticedWhen": { "type": "string" },
-        "aiAssisted": { "type": "boolean" },
-        "reportedAt": { "type": "string" },
-        "createdAt": { "type": "string" },
-        "updatedAt": { "type": "string" },
-        "officialResponse": { "type": "string" },
-        "status": { "type": "string", "enum": ["Submitted", "Under Review", "Assigned", "In Progress", "Resolved", "Closed", "Action Taken", "Verified"] },
-        "upvotes": { "type": "number" },
-        "userId": { "type": "string" }
-      },
-      "required": ["id", "category", "location", "description", "status"]
-    },
-    "LocalAlert": {
-      "title": "LocalAlert",
-      "description": "Emergency or municipal alert in Jalpaiguri",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "title": { "type": "string" },
-        "category": { "type": "string" },
-        "area": { "type": "string" },
-        "timeAgo": { "type": "string" },
-        "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
-        "description": { "type": "string" },
-        "confirmedCount": { "type": "number" },
-        "lat": { "type": "number" },
-        "lng": { "type": "number" },
-        "isOfficial": { "type": "boolean" }
-      },
-      "required": ["id", "title", "category", "area", "description", "severity"]
-    },
-    "BloodDonor": {
-      "title": "BloodDonor",
-      "description": "Registered voluntary blood donor",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string" },
-        "bloodGroup": { "type": "string" },
-        "location": { "type": "string" },
-        "phone": { "type": "string" },
-        "verified": { "type": "boolean" },
-        "donationsCount": { "type": "number" },
-        "availability": { "type": "string" },
-        "lastDonation": { "type": "string" }
-      },
-      "required": ["id", "name", "bloodGroup", "phone", "location"]
-    },
-    "BloodRequest": {
-      "title": "BloodRequest",
-      "description": "Emergency blood request at local hospital",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "patientName": { "type": "string" },
-        "bloodGroup": { "type": "string" },
-        "hospital": { "type": "string" },
-        "units": { "type": "number" },
-        "urgency": { "type": "string" },
-        "contactPerson": { "type": "string" },
-        "phone": { "type": "string" },
-        "location": { "type": "string" },
-        "status": { "type": "string" },
-        "postedAt": { "type": "string" }
-      },
-      "required": ["id", "patientName", "bloodGroup", "hospital", "phone", "status"]
-    },
-    "Job": {
-      "title": "Job",
-      "description": "Local employment or gig listing",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "title": { "type": "string" },
-        "employer": { "type": "string" },
-        "location": { "type": "string" },
-        "salary": { "type": "string" },
-        "jobType": { "type": "string" },
-        "postedTime": { "type": "string" },
-        "description": { "type": "string" },
-        "phone": { "type": "string" }
-      },
-      "required": ["id", "title", "employer", "location", "phone"]
-    },
-    "RentalProperty": {
-      "title": "RentalProperty",
-      "description": "Rental house, flat or commercial space",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "title": { "type": "string" },
-        "type": { "type": "string" },
-        "rent": { "type": "string" },
-        "deposit": { "type": "string" },
-        "area": { "type": "string" },
-        "contact": { "type": "string" },
-        "description": { "type": "string" }
-      },
-      "required": ["id", "title", "rent", "area", "contact"]
-    },
-    "LostFoundItem": {
-      "title": "LostFoundItem",
-      "description": "Lost or found report",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "type": { "type": "string", "enum": ["Lost", "Found"] },
-        "category": { "type": "string" },
-        "title": { "type": "string" },
-        "location": { "type": "string" },
-        "date": { "type": "string" },
-        "description": { "type": "string" },
-        "status": { "type": "string" }
-      },
-      "required": ["id", "type", "title", "location", "status"]
-    },
-    "ServiceRequest": {
-      "title": "ServiceRequest",
-      "description": "Direct worker service request",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "workerId": { "type": "string" },
-        "workerName": { "type": "string" },
-        "workerProfession": { "type": "string" },
-        "serviceType": { "type": "string" },
-        "address": { "type": "string" },
-        "problemDescription": { "type": "string" },
-        "timing": { "type": "string" },
-        "status": { "type": "string" },
-        "createdAt": { "type": "string" }
-      },
-      "required": ["id", "workerId", "serviceType", "address", "status"]
+      "required": [
+        "userId",
+        "name",
+        "profession",
+        "category",
+        "phone",
+        "serviceArea",
+        "description"
+      ]
     },
     "Shop": {
       "title": "Shop",
-      "description": "Registered local merchant shop in Jalpaiguri",
+      "description": "Merchant shop listing",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "ownerId": {
+          "type": "string"
+        },
+        "ownerName": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "locality": {
+          "type": "string"
+        },
+        "pincode": {
+          "type": "string"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "photoUrl": {
+          "type": "string"
+        },
+        "isVerified": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "verified",
+            "rejected",
+            "suspended"
+          ]
+        },
+        "rating": {
+          "type": "number"
+        },
+        "reviewCount": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "name",
+        "category",
+        "address",
+        "locality",
+        "pincode",
+        "lat",
+        "lng"
+      ]
+    },
+    "CivicReport": {
+      "title": "Civic Report",
+      "description": "User reported civic issue",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "photoUrl": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "reportedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "upvotes": {
+          "type": "number"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "userId",
+        "category",
+        "location",
+        "description",
+        "status",
+        "reportedAt"
+      ]
+    },
+    "BloodDonor": {
+      "title": "Blood Donor",
+      "description": "User registered as blood donor",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "bloodGroup": {
+          "type": "string"
+        },
+        "area": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "availability": {
+          "type": "string"
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "donationsCount": {
+          "type": "number"
+        },
+        "lastDonation": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "userId",
+        "name",
+        "bloodGroup",
+        "area",
+        "phone",
+        "availability"
+      ]
+    },
+    "LocalAlert": {
+      "title": "Local Alert",
+      "description": "Community or official alert",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "area": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "isOfficial": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "title",
+        "category",
+        "area",
+        "severity",
+        "description",
+        "createdAt"
+      ]
+    },
+    "Restaurant": {
+      "title": "Restaurant",
+      "description": "Restaurant or Cafe listing",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "ownerId": {
+          "type": "string"
+        },
+        "ownerName": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "locality": {
+          "type": "string"
+        },
+        "pincode": {
+          "type": "string"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "photoUrl": {
+          "type": "string"
+        },
+        "isVerified": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "verified",
+            "rejected",
+            "suspended"
+          ]
+        },
+        "rating": {
+          "type": "number"
+        },
+        "reviewCount": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "name",
+        "category",
+        "address",
+        "locality",
+        "pincode",
+        "lat",
+        "lng"
+      ]
+    },
+    "MenuItem": {
+      "title": "MenuItem",
+      "description": "Menu item inside a restaurant",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "restaurantId": {
+          "type": "string"
+        },
+        "ownerId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "nameBn": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number"
+        },
+        "isVeg": {
+          "type": "boolean"
+        },
+        "isEgg": {
+          "type": "boolean"
+        },
+        "inStock": {
+          "type": "boolean"
+        },
+        "photoUrl": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "restaurantId",
+        "ownerId",
+        "name",
+        "category",
+        "price",
+        "createdAt"
+      ]
+    },
+    "DurgaPandal": {
+      "title": "DurgaPandal",
+      "description": "Verified or pending Durga Puja Pandal listing in Jalpaiguri",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
-        "ownerId": { "type": "string" },
-        "ownerName": { "type": "string" },
-        "ownerPhone": { "type": "string" },
-        "ownerEmail": { "type": "string" },
-        "whatsappNumber": { "type": "string" },
         "name": { "type": "string" },
-        "nameBn": { "type": "string" },
-        "category": { "type": "string" },
-        "categories": { "type": "array", "items": { "type": "string" } },
-        "description": { "type": "string" },
+        "committee": { "type": "string" },
         "locality": { "type": "string" },
         "address": { "type": "string" },
-        "landmark": { "type": "string" },
-        "pincode": { "type": "string" },
         "lat": { "type": "number" },
         "lng": { "type": "number" },
-        "openingTime": { "type": "string" },
-        "closingTime": { "type": "string" },
-        "weeklyOff": { "type": "string" },
-        "homeDelivery": { "type": "boolean" },
-        "minOrderAmount": { "type": "number" },
-        "deliveryRadiusKm": { "type": "number" },
-        "paymentMethods": { "type": "array", "items": { "type": "string" } },
-        "photoUrl": { "type": "string" },
-        "insidePhotoUrl": { "type": "string" },
-        "logoUrl": { "type": "string" },
-        "isVerified": { "type": "boolean" },
-        "status": { "type": "string", "enum": ["pending", "verified", "rejected", "suspended"] },
-        "featured": { "type": "boolean" },
-        "isOpen": { "type": "boolean" },
-        "rating": { "type": "number" },
-        "reviewCount": { "type": "number" },
-        "subscriptionPlan": { "type": "string", "enum": ["free", "monthly", "yearly"] },
-        "subscriptionExpiresAt": { "type": "string" },
-        "totalViews": { "type": "number" },
-        "inquiryClicks": { "type": "number" },
-        "createdAt": { "type": "string" },
-        "updatedAt": { "type": "string" }
+        "season": { "type": "string" },
+        "isCurrentSeason": { "type": "boolean" },
+        "category": { "type": "string" },
+        "themeName": { "type": "string" },
+        "description": { "type": "string" },
+        "primaryPhoto": { "type": "string" },
+        "verificationStatus": { "type": "string", "enum": ["verified", "pending", "rejected"] },
+        "createdAt": { "type": "string" }
       },
-      "required": ["id", "ownerId", "ownerPhone", "name", "category", "locality", "address", "pincode", "status"]
+      "required": ["name", "committee", "address", "lat", "lng", "verificationStatus", "createdAt"]
     },
-    "Product": {
-      "title": "Product",
-      "description": "Product item listed by a Jalpaiguri shop owner",
+    "PandalReport": {
+      "title": "PandalReport",
+      "description": "User report or correction for a Durga Puja Pandal listing",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
-        "shopId": { "type": "string" },
-        "ownerId": { "type": "string" },
-        "name": { "type": "string" },
-        "nameBn": { "type": "string" },
-        "category": { "type": "string" },
-        "price": { "type": "number" },
-        "discountPrice": { "type": "number" },
-        "unit": { "type": "string" },
-        "inStock": { "type": "boolean" },
-        "photoUrl": { "type": "string" },
+        "pandalId": { "type": "string" },
+        "pandalName": { "type": "string" },
+        "issueType": { "type": "string" },
         "description": { "type": "string" },
         "createdAt": { "type": "string" },
-        "updatedAt": { "type": "string" }
+        "status": { "type": "string" }
       },
-      "required": ["id", "shopId", "ownerId", "name", "price", "inStock"]
+      "required": ["pandalId", "issueType", "description", "createdAt", "status"]
     },
-    "ShoppingList": {
-      "title": "ShoppingList",
-      "description": "Citizen personal shopping list for local Jalpaiguri matching",
+    "PandalReview": {
+      "title": "PandalReview",
+      "description": "User rating and review for a Durga Puja pandal",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "pandalId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userPhoto": { "type": "string" },
+        "rating": { "type": "number" },
+        "reviewText": { "type": "string" },
+        "visitDate": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "isEdited": { "type": "boolean" },
+        "reportStatus": { "type": "string" }
+      },
+      "required": ["pandalId", "userId", "userName", "rating", "createdAt"]
+    },
+    "SavedPandal": {
+      "title": "SavedPandal",
+      "description": "Bookmarked Durga Puja Pandal for a user",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
         "userId": { "type": "string" },
-        "items": { "type": "array" },
-        "updatedAt": { "type": "string" }
+        "pandalId": { "type": "string" },
+        "createdAt": { "type": "string" }
       },
-      "required": ["id", "userId", "items"]
+      "required": ["userId", "pandalId", "createdAt"]
     }
   },
   "firestore": {
-    "/users/{userId}": {
+    "users/{userId}": {
       "schema": "UserProfile",
-      "description": "Citizen user profiles"
+      "description": "Individual user profiles"
     },
-    "/workers/{workerId}": {
+    "workers/{workerId}": {
       "schema": "Worker",
-      "description": "Verified local worker directory"
+      "description": "Available workers directory"
     },
-    "/civic_reports/{reportId}": {
-      "schema": "CivicReport",
-      "description": "Municipal civic issue reports"
-    },
-    "/local_alerts/{alertId}": {
-      "schema": "LocalAlert",
-      "description": "Public safety and weather alerts"
-    },
-    "/blood_donors/{donorId}": {
-      "schema": "BloodDonor",
-      "description": "Voluntary blood donor records"
-    },
-    "/blood_requests/{requestId}": {
-      "schema": "BloodRequest",
-      "description": "Urgent hospital blood requests"
-    },
-    "/jobs/{jobId}": {
-      "schema": "Job",
-      "description": "Local jobs and gigs"
-    },
-    "/rentals/{rentalId}": {
-      "schema": "RentalProperty",
-      "description": "Housing and rental properties"
-    },
-    "/lost_found/{itemId}": {
-      "schema": "LostFoundItem",
-      "description": "Lost and found directory"
-    },
-    "/service_requests/{requestId}": {
-      "schema": "ServiceRequest",
-      "description": "Direct service bookings"
-    },
-    "/shops/{shopId}": {
+    "shops/{shopId}": {
       "schema": "Shop",
-      "description": "Local marketplace shops in Jalpaiguri"
+      "description": "Verified shops directory"
     },
-    "/products/{productId}": {
-      "schema": "Product",
-      "description": "Product catalog items for Jalpaiguri shops"
+    "civic_reports/{reportId}": {
+      "schema": "CivicReport",
+      "description": "Civic issues reported by citizens"
     },
-    "/shopping_lists/{listId}": {
-      "schema": "ShoppingList",
-      "description": "Citizen shopping lists"
+    "blood_donors/{donorId}": {
+      "schema": "BloodDonor",
+      "description": "Registered blood donors"
+    },
+    "local_alerts/{alertId}": {
+      "schema": "LocalAlert",
+      "description": "Local and official alerts"
+    },
+    "restaurants/{restaurantId}": {
+      "schema": "Restaurant",
+      "description": "Verified restaurants directory"
+    },
+    "restaurants/{restaurantId}/menuItems/{menuItemId}": {
+      "schema": "MenuItem",
+      "description": "Menu items for a restaurant"
+    },
+    "puja_pandals/{pandalId}": {
+      "schema": "DurgaPandal",
+      "description": "Durga Puja pandals directory and submission queue"
+    },
+    "puja_pandals/{pandalId}/reviews/{reviewId}": {
+      "schema": "PandalReview",
+      "description": "User ratings and reviews for a specific pandal"
+    },
+    "users/{userId}/saved_pandals/{pandalId}": {
+      "schema": "SavedPandal",
+      "description": "User saved pandals"
+    },
+    "pandal_reports/{reportId}": {
+      "schema": "PandalReport",
+      "description": "Correction reports for Durga Puja pandals"
     }
   }
 }

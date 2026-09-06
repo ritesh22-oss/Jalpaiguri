@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft,
   Search,
@@ -13,11 +13,14 @@ import {
   Trash2,
   ChevronRight,
   Loader2,
-  Clock
+  Clock,
+  X
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { Shop, Product } from '../../types';
+
+const SEARCH_HISTORY_KEY = 'myjpg_search_history';
 
 export const SmartShoppingSearchView: React.FC = () => {
   const { navigate, goBack } = useNav();
@@ -30,6 +33,7 @@ export const SmartShoppingSearchView: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<{ shop: Shop; matchingProducts: Product[] }[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
 
   // Shopping List State
   const [listItems, setListItems] = useState<string[]>([
@@ -41,15 +45,58 @@ export const SmartShoppingSearchView: React.FC = () => {
   const [isMatchingList, setIsMatchingList] = useState(false);
   const [matchedShops, setMatchedShops] = useState<any[]>([]);
 
-  // Search single item
-  const handleSearchItem = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!query.trim()) return;
+  // Load search history on mount
+  useEffect(() => {
+    const savedHistory = localStorage.getItem(SEARCH_HISTORY_KEY);
+    if (savedHistory) {
+      try {
+        setSearchHistory(JSON.parse(savedHistory));
+      } catch (e) {
+        console.error('Failed to parse search history', e);
+      }
+    }
+  }, []);
 
+  // Save history to localStorage
+  const saveToHistory = (searchTerm: string) => {
+    const term = searchTerm.trim();
+    if (!term) return;
+
+    setSearchHistory(prev => {
+      const filtered = prev.filter(item => item.toLowerCase() !== term.toLowerCase());
+      const newHistory = [term, ...filtered].slice(0, 10);
+      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory));
+      return newHistory;
+    });
+  };
+
+  const handleClearHistory = () => {
+    setSearchHistory([]);
+    localStorage.removeItem(SEARCH_HISTORY_KEY);
+  };
+
+  const handleRemoveHistoryItem = (e: React.MouseEvent, itemToRemove: string) => {
+    e.stopPropagation();
+    setSearchHistory(prev => {
+      const newHistory = prev.filter(item => item !== itemToRemove);
+      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory));
+      return newHistory;
+    });
+  };
+
+  // Search single item
+  const handleSearchItem = async (e?: React.FormEvent, customQuery?: string) => {
+    if (e) e.preventDefault();
+    const searchTerm = customQuery || query;
+    if (!searchTerm.trim()) return;
+
+    if (customQuery) setQuery(customQuery);
     setIsSearching(true);
     setHasSearched(true);
+    saveToHistory(searchTerm);
+
     try {
-      const res = await fetch(`/api/shops/search-item?q=${encodeURIComponent(query.trim())}`);
+      const res = await fetch(`/api/shops/search-item?q=${encodeURIComponent(searchTerm.trim())}`);
       if (res.ok) {
         const data = await res.json();
         setSearchResults(data.results || []);
@@ -98,20 +145,20 @@ export const SmartShoppingSearchView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 max-w-md mx-auto select-none transition-colors">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 max-w-md mx-auto select-none transition-colors">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#0F1A15]/95 backdrop-blur-md px-4 py-3 border-b border-[#E8E4DA]/60 dark:border-white/10 transition-colors flex items-center justify-between">
+      <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#0B132B]/95 backdrop-blur-md px-4 py-3 border-b border-[#E8E4DA]/60 dark:border-white/10 transition-colors flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <button
             onClick={goBack}
-            className="w-10 h-10 rounded-full bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
+            className="w-10 h-10 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
           >
             <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
           </button>
           <div>
             <h1 className="text-base font-black text-[#11241C] dark:text-white leading-tight flex items-center gap-1.5">
               <span>{language === 'bn' ? 'স্মার্ট শপিং' : 'Smart Shopping'}</span>
-              <Sparkles className="w-4 h-4 text-emerald-600" />
+              <Sparkles className="w-4 h-4 text-blue-600" />
             </h1>
             <p className="text-[11px] font-semibold text-[#55685F] dark:text-[#A2B3AA]">
               {language === 'bn' ? 'জলপাইগুড়ির দোকানে পণ্য সন্ধান' : 'Find items in Jalpaiguri stores'}
@@ -127,7 +174,7 @@ export const SmartShoppingSearchView: React.FC = () => {
             onClick={() => setActiveTab('finder')}
             className={`flex-1 py-2 rounded-xl text-center transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               activeTab === 'finder'
-                ? 'bg-white dark:bg-[#17231E] text-[#063B2C] dark:text-emerald-400 shadow-xs font-black'
+                ? 'bg-white dark:bg-[#0F172A] text-[#007AFF] dark:text-blue-400 shadow-xs font-black'
                 : 'text-[#55685F] dark:text-[#A2B3AA]'
             }`}
           >
@@ -139,7 +186,7 @@ export const SmartShoppingSearchView: React.FC = () => {
             onClick={() => setActiveTab('list')}
             className={`flex-1 py-2 rounded-xl text-center transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               activeTab === 'list'
-                ? 'bg-white dark:bg-[#17231E] text-[#063B2C] dark:text-emerald-400 shadow-xs font-black'
+                ? 'bg-white dark:bg-[#0F172A] text-[#007AFF] dark:text-blue-400 shadow-xs font-black'
                 : 'text-[#55685F] dark:text-[#A2B3AA]'
             }`}
           >
@@ -160,17 +207,57 @@ export const SmartShoppingSearchView: React.FC = () => {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={language === 'bn' ? 'যেকোনো পণ্যের নাম লিখুন (যেমন: Dolo 650, চাল, মিষ্টি)...' : 'Type item name (e.g. Dolo 650, Rice, Mustard Oil)...'}
-                className="w-full pl-10 pr-20 py-3 bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-2xl text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#063B2C] shadow-xs"
+                className="w-full pl-10 pr-20 py-3 bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-2xl text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#007AFF] shadow-xs"
               />
               <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <button
                 type="submit"
                 disabled={isSearching || !query.trim()}
-                className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-[#063B2C] dark:bg-emerald-600 text-white text-xs font-bold shadow-2xs cursor-pointer active:scale-95 disabled:opacity-50"
+                className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white text-xs font-bold shadow-2xs cursor-pointer active:scale-95 disabled:opacity-50"
               >
                 {isSearching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Search'}
               </button>
             </form>
+
+            {/* Recent Searches (Only show if history exists and not actively displaying search results) */}
+            {!hasSearched && searchHistory.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-[10px] font-black text-[#55685F] dark:text-[#A2B3AA] uppercase tracking-wider flex items-center gap-1.5">
+                    <Clock className="w-3 h-3" />
+                    {language === 'bn' ? 'সাম্প্রতিক অনুসন্ধান' : 'Recent Searches'}
+                  </span>
+                  <button
+                    onClick={handleClearHistory}
+                    className="text-[10px] font-bold text-rose-500 hover:text-rose-600 cursor-pointer"
+                  >
+                    {language === 'bn' ? 'সব মুছুন' : 'Clear All'}
+                  </button>
+                </div>
+                <div className="space-y-1">
+                  {searchHistory.map((term, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => handleSearchItem(undefined, term)}
+                      className="group flex items-center justify-between p-2.5 bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-xl hover:border-blue-300 dark:hover:border-blue-800 transition-all cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600" />
+                        <span className="text-xs font-semibold text-gray-700 dark:text-gray-200">
+                          {term}
+                        </span>
+                      </div>
+                      <button
+                        onClick={(e) => handleRemoveHistoryItem(e, term)}
+                        className="p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-gray-400 hover:text-rose-500 transition-all"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Quick Suggestions Chips */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-[11px] font-bold">
@@ -178,18 +265,8 @@ export const SmartShoppingSearchView: React.FC = () => {
               {['Rice 5kg', 'Mustard Oil', 'Paracetamol', 'Sandesh', 'Fresh Paneer', 'LED Bulb'].map((chip) => (
                 <button
                   key={chip}
-                  onClick={() => {
-                    setQuery(chip);
-                    setTimeout(() => {
-                      fetch(`/api/shops/search-item?q=${encodeURIComponent(chip)}`)
-                        .then(r => r.json())
-                        .then(d => {
-                          setSearchResults(d.results || []);
-                          setHasSearched(true);
-                        });
-                    }, 50);
-                  }}
-                  className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 text-gray-700 dark:text-gray-300 shrink-0 hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleSearchItem(undefined, chip)}
+                  className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 text-gray-700 dark:text-gray-300 shrink-0 hover:bg-gray-50 cursor-pointer"
                 >
                   {chip}
                 </button>
@@ -203,10 +280,21 @@ export const SmartShoppingSearchView: React.FC = () => {
                   <span>
                     Found in {searchResults.length} store{searchResults.length === 1 ? '' : 's'} in Jalpaiguri:
                   </span>
+                  {searchResults.length > 0 && (
+                    <button
+                      onClick={() => {
+                        setHasSearched(false);
+                        setQuery('');
+                      }}
+                      className="text-[10px] text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                      Clear Results
+                    </button>
+                  )}
                 </div>
 
                 {searchResults.length === 0 ? (
-                  <div className="py-8 text-center bg-white dark:bg-[#17231E] rounded-3xl border border-[#E8E4DA] dark:border-white/10 p-6 space-y-2">
+                  <div className="py-8 text-center bg-white dark:bg-[#0F172A] rounded-3xl border border-[#E8E4DA] dark:border-white/10 p-6 space-y-2">
                     <Store className="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto" />
                     <p className="text-xs font-bold text-[#11241C] dark:text-white">
                       Item currently not listed in digital catalogs
@@ -214,13 +302,19 @@ export const SmartShoppingSearchView: React.FC = () => {
                     <p className="text-[11px] text-gray-500">
                       Try searching a general category (e.g. "Grocery", "Pharmacy") or message nearest local shops directly.
                     </p>
+                    <button
+                      onClick={() => setHasSearched(false)}
+                      className="mt-2 px-4 py-2 bg-[#E8E4DA]/40 dark:bg-white/5 rounded-xl text-[10px] font-black text-gray-700 dark:text-gray-300"
+                    >
+                      Back to Search
+                    </button>
                   </div>
                 ) : (
                   searchResults.map(({ shop, matchingProducts }) => (
                     <div
                       key={shop.id}
                       onClick={() => navigate('shop-detail', { shopId: shop.id })}
-                      className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-3.5 shadow-2xs hover:border-[#063B2C] transition-all cursor-pointer space-y-2.5"
+                      className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-3.5 shadow-2xs hover:border-[#007AFF] transition-all cursor-pointer space-y-2.5"
                     >
                       <div className="flex items-start justify-between">
                         <div>
@@ -228,7 +322,7 @@ export const SmartShoppingSearchView: React.FC = () => {
                             {shop.name}
                           </h4>
                           <div className="flex items-center gap-1.5 text-[11px] text-[#55685F] dark:text-[#A2B3AA] font-semibold mt-0.5">
-                            <MapPin className="w-3 h-3 text-[#063B2C] dark:text-emerald-400" />
+                            <MapPin className="w-3 h-3 text-[#007AFF] dark:text-blue-400" />
                             <span>{shop.locality}</span>
                             <span>•</span>
                             <span>{shop.distance}</span>
@@ -236,7 +330,7 @@ export const SmartShoppingSearchView: React.FC = () => {
                         </div>
 
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                          shop.isOpen ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                          shop.isOpen ? 'bg-blue-100 text-blue-800' : 'bg-rose-100 text-rose-800'
                         }`}>
                           {shop.isOpen ? 'Open Now' : 'Closed'}
                         </span>
@@ -251,11 +345,11 @@ export const SmartShoppingSearchView: React.FC = () => {
                           >
                             <div>
                               <p className="font-bold text-[#11241C] dark:text-white">{p.name}</p>
-                              <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold">
+                              <span className="text-[10px] text-blue-700 dark:text-blue-400 font-semibold">
                                 {p.inStock ? '✓ In Stock' : 'Out of Stock'}
                               </span>
                             </div>
-                            <span className="font-black text-sm text-[#063B2C] dark:text-emerald-400">
+                            <span className="font-black text-sm text-[#007AFF] dark:text-blue-400">
                               ₹{p.price}
                             </span>
                           </div>
@@ -269,7 +363,7 @@ export const SmartShoppingSearchView: React.FC = () => {
                             e.stopPropagation();
                             window.location.href = `tel:${shop.phone.replace(/\s+/g, '')}`;
                           }}
-                          className="px-3 py-1.5 rounded-xl bg-[#D2EBE0] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-300 font-bold text-xs flex items-center gap-1 cursor-pointer"
+                          className="px-3 py-1.5 rounded-xl bg-[#dbeafe] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 font-bold text-xs flex items-center gap-1 cursor-pointer"
                         >
                           <Phone className="w-3 h-3" />
                           <span>Call</span>
@@ -277,11 +371,11 @@ export const SmartShoppingSearchView: React.FC = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            const msg = encodeURIComponent(`Nomoshkar ${shop.name}! Is "${matchingProducts[0]?.name || query}" available right now? Saw on Jalpaiguri Connect.`);
+                            const msg = encodeURIComponent(`Nomoshkar ${shop.name}! Is "${matchingProducts[0]?.name || query}" available right now? Saw on MYJPG.`);
                             const wa = (shop.whatsappNumber || shop.phone).replace(/\D/g, '');
                             window.open(`https://wa.me/91${wa.slice(-10)}?text=${msg}`, '_blank');
                           }}
-                          className="px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center gap-1 cursor-pointer shadow-2xs"
+                          className="px-3 py-1.5 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center gap-1 cursor-pointer shadow-2xs"
                         >
                           <MessageSquare className="w-3 h-3" />
                           <span>WhatsApp Order</span>
@@ -298,7 +392,7 @@ export const SmartShoppingSearchView: React.FC = () => {
         {/* TAB 2: MY SHOPPING LIST */}
         {activeTab === 'list' && (
           <div className="space-y-4">
-            <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+            <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
               <h3 className="text-sm font-black text-[#11241C] dark:text-white">
                 {language === 'bn' ? 'আপনার কেনাকাটার ফর্দ' : 'Jalpaiguri Family Shopping List'}
               </h3>
@@ -317,7 +411,7 @@ export const SmartShoppingSearchView: React.FC = () => {
                 />
                 <button
                   type="submit"
-                  className="px-3 py-2 rounded-xl bg-[#063B2C] dark:bg-emerald-600 text-white text-xs font-bold cursor-pointer shrink-0 flex items-center gap-1"
+                  className="px-3 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white text-xs font-bold cursor-pointer shrink-0 flex items-center gap-1"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add</span>
@@ -346,7 +440,7 @@ export const SmartShoppingSearchView: React.FC = () => {
               <button
                 onClick={handleMatchList}
                 disabled={isMatchingList || listItems.length === 0}
-                className="w-full py-3 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all disabled:opacity-50"
+                className="w-full py-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all disabled:opacity-50"
               >
                 {isMatchingList ? (
                   <>
@@ -365,14 +459,14 @@ export const SmartShoppingSearchView: React.FC = () => {
             {/* Matched Shops Results */}
             {matchedShops.length > 0 && (
               <div className="space-y-3">
-                <span className="text-xs font-black text-emerald-800 dark:text-emerald-300 block">
+                <span className="text-xs font-black text-blue-800 dark:text-blue-300 block">
                   ✓ Best Local Stores for Your List:
                 </span>
 
                 {matchedShops.map((m, idx) => (
                   <div
                     key={idx}
-                    className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-4 shadow-2xs space-y-2.5"
+                    className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-4 shadow-2xs space-y-2.5"
                   >
                     <div className="flex items-start justify-between">
                       <div>
@@ -384,18 +478,18 @@ export const SmartShoppingSearchView: React.FC = () => {
                         </p>
                       </div>
 
-                      <span className="text-xs font-black text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-lg">
+                      <span className="text-xs font-black text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-950/60 px-2 py-0.5 rounded-lg">
                         {m.matchCount} of {listItems.length} items found
                       </span>
                     </div>
 
                     <button
                       onClick={() => {
-                        const msg = `Nomoshkar ${m.shop.name}! I would like to order the following items from Jalpaiguri Connect:\n${listItems.map((it, i) => `${i+1}. ${it}`).join('\n')}\nCan you deliver to my address?`;
+                        const msg = `Nomoshkar ${m.shop.name}! I would like to order the following items from MYJPG:\n${listItems.map((it, i) => `${i+1}. ${it}`).join('\n')}\nCan you deliver to my address?`;
                         const wa = (m.shop.whatsappNumber || m.shop.phone).replace(/\D/g, '');
                         window.open(`https://wa.me/91${wa.slice(-10)}?text=${encodeURIComponent(msg)}`, '_blank');
                       }}
-                      className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                      className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                     >
                       <MessageSquare className="w-4 h-4" />
                       <span>Send Entire List via WhatsApp</span>

@@ -1,5 +1,5 @@
 /**
- * Jalpaiguri Connect - Official Service Area & Geographic Coverage Configuration
+ * MYJPG - Official Service Area & Geographic Coverage Configuration
  * 
  * JALPAIGURI CONNECT IS A JALPAIGURI-ONLY APPLICATION.
  * This file is the single source of truth for service area boundaries,
@@ -194,7 +194,7 @@ export function validateServiceArea(
     configuredMode: mode,
     boundaryName: boundary.name,
     centerDistanceKm: Math.round(centerDist * 10) / 10,
-    reason: `Coordinates (${lat.toFixed(4)}, ${lng.toFixed(4)}) are outside ${boundary.name}. Jalpaiguri Connect is strictly available only within Jalpaiguri.`
+    reason: `Coordinates (${lat.toFixed(4)}, ${lng.toFixed(4)}) are outside ${boundary.name}. MYJPG is strictly available only within Jalpaiguri.`
   };
 }
 

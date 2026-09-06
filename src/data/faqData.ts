@@ -1,4 +1,4 @@
-// Centralized FAQ Knowledge Base for Jalpaiguri Connect
+// Centralized FAQ Knowledge Base for MYJPG
 // Standardized schema allowing dynamic updates, instant keywords filtering, and category matching.
 
 export type FAQCategory =
@@ -42,15 +42,15 @@ export const FAQ_DATA: FAQItem[] = [
   // --- GETTING STARTED ---
   {
     id: 'faq-gs-1',
-    question: 'What is Jalpaiguri Connect?',
-    answer: 'Jalpaiguri Connect is a dedicated citizen-access and community navigation platform designed specifically for the residents of Jalpaiguri, West Bengal. It brings together verified local tradespeople, blood donors, healthcare directories, emergency services, civic grievance reporting, and verified official government service portals into a single unified mobile hub.',
+    question: 'What is MYJPG?',
+    answer: 'MYJPG is a dedicated citizen-access and community navigation platform designed specifically for the residents of Jalpaiguri, West Bengal. It brings together verified local tradespeople, blood donors, healthcare directories, emergency services, civic grievance reporting, and verified official government service portals into a single unified mobile hub.',
     category: 'Getting Started',
-    keywords: ['what', 'about', 'jalpaiguri connect', 'purpose', 'overview', 'app'],
+    keywords: ['what', 'about', 'MYJPG', 'purpose', 'overview', 'app'],
     lastUpdated: 'September 2024'
   },
   {
     id: 'faq-gs-2',
-    question: 'How does Jalpaiguri Connect work?',
+    question: 'How does MYJPG work?',
     answer: 'The app provides an instant directory and assistance layer. You can find nearby service workers, search specialist doctors, locate registered blood donors, check municipal notices, or navigate directly to official government portals to apply for certificates and welfare schemes. You can also report civic issues (like streetlights or potholes) directly to ward administration.',
     category: 'Getting Started',
     keywords: ['how it works', 'features', 'overview', 'use', 'benefits'],
@@ -58,8 +58,8 @@ export const FAQ_DATA: FAQItem[] = [
   },
   {
     id: 'faq-gs-3',
-    question: 'Is Jalpaiguri Connect a government app?',
-    answer: 'No. Jalpaiguri Connect is an independent civic technology platform. It is NOT the government, nor does it pretend to be an official municipal authority. For all government applications, certificates, and tax payments, the app serves strictly as a safe navigation bridge directing citizens to genuine, verified government portals (.gov.in, .wb.gov.in, and jalpaigurimunicipality.org).',
+    question: 'Is MYJPG a government app?',
+    answer: 'No. MYJPG is an independent civic technology platform. It is NOT the government, nor does it pretend to be an official municipal authority. For all government applications, certificates, and tax payments, the app serves strictly as a safe navigation bridge directing citizens to genuine, verified government portals (.gov.in, .wb.gov.in, and jalpaigurimunicipality.org).',
     category: 'Getting Started',
     keywords: ['government', 'official', 'municipality', 'agency', 'authority', 'legal'],
     lastUpdated: 'September 2024'
@@ -67,7 +67,7 @@ export const FAQ_DATA: FAQItem[] = [
   {
     id: 'faq-gs-4',
     question: 'Which areas are supported?',
-    answer: 'Jalpaiguri Connect primarily covers the entire Jalpaiguri Municipal jurisdiction (Wards 1 through 25) as well as adjoining sub-divisions including Kadamtala, Dinbazar, Pandapara, Mohanta Para, Deshbandhu Para, Kotwali, Maynaguri, Rajganj, and Malbazar.',
+    answer: 'MYJPG primarily covers the entire Jalpaiguri Municipal jurisdiction (Wards 1 through 25) as well as adjoining sub-divisions including Kadamtala, Dinbazar, Pandapara, Mohanta Para, Deshbandhu Para, Kotwali, Maynaguri, Rajganj, and Malbazar.',
     category: 'Getting Started',
     keywords: ['areas', 'wards', 'coverage', 'location', 'municipal', 'maynaguri', 'malbazar'],
     lastUpdated: 'September 2024'
@@ -93,7 +93,7 @@ export const FAQ_DATA: FAQItem[] = [
   {
     id: 'faq-acc-2',
     question: 'Can I sign in with Google?',
-    answer: 'Yes. Jalpaiguri Connect supports fast, secure Google authentication. Your email address and basic profile picture are synchronized securely without storing any sensitive passwords.',
+    answer: 'Yes. MYJPG supports fast, secure Google authentication. Your email address and basic profile picture are synchronized securely without storing any sensitive passwords.',
     category: 'Account',
     keywords: ['google', 'sso', 'gmail', 'sign in', 'oauth'],
     lastUpdated: 'September 2024'
@@ -117,7 +117,7 @@ export const FAQ_DATA: FAQItem[] = [
   {
     id: 'faq-acc-5',
     question: 'How do I log out?',
-    answer: 'Open the "Profile" tab, scroll to the bottom of the screen, and tap "Log Out of Jalpaiguri Connect". Your local session credentials will be cleared safely.',
+    answer: 'Open the "Profile" tab, scroll to the bottom of the screen, and tap "Log Out of MYJPG". Your local session credentials will be cleared safely.',
     category: 'Account',
     keywords: ['logout', 'sign out', 'disconnect', 'leave'],
     lastUpdated: 'September 2024'
@@ -242,8 +242,8 @@ export const FAQ_DATA: FAQItem[] = [
   },
   {
     id: 'faq-med-3',
-    question: 'Can Jalpaiguri Connect diagnose my medical condition?',
-    answer: 'NO. Jalpaiguri Connect is strictly an informational directory and navigation platform. The app does NOT provide medical advice, diagnosis, or treatment. Always consult a qualified registered medical practitioner for any health concerns.',
+    question: 'Can MYJPG diagnose my medical condition?',
+    answer: 'NO. MYJPG is strictly an informational directory and navigation platform. The app does NOT provide medical advice, diagnosis, or treatment. Always consult a qualified registered medical practitioner for any health concerns.',
     category: 'Medical',
     keywords: ['diagnosis', 'medical advice', 'disclaimer', 'doctor substitute', 'treatment'],
     lastUpdated: 'September 2024'
@@ -268,8 +268,8 @@ export const FAQ_DATA: FAQItem[] = [
   // --- GOVERNMENT SERVICES ---
   {
     id: 'faq-gov-1',
-    question: 'Can I apply for government certificates through Jalpaiguri Connect?',
-    answer: 'Jalpaiguri Connect does not process or issue government certificates directly. Instead, it provides a safe, verified gateway. When you tap "Apply Online" on a service card (such as Birth Certificate, Caste Certificate, or Trade License), the app opens the genuine, authorized government portal in a secure window.',
+    question: 'Can I apply for government certificates through MYJPG?',
+    answer: 'MYJPG does not process or issue government certificates directly. Instead, it provides a safe, verified gateway. When you tap "Apply Online" on a service card (such as Birth Certificate, Caste Certificate, or Trade License), the app opens the genuine, authorized government portal in a secure window.',
     category: 'Government Services',
     keywords: ['apply certificate', 'government', 'caste certificate', 'birth certificate', 'trade license'],
     lastUpdated: 'September 2024'
@@ -277,7 +277,7 @@ export const FAQ_DATA: FAQItem[] = [
   {
     id: 'faq-gov-2',
     question: 'Are the government portals official?',
-    answer: 'Yes! Every government service listed in Jalpaiguri Connect undergoes strict URL verification. We only connect to official domains belonging to the Government of West Bengal (.wb.gov.in), Government of India (.gov.in / .nic.in), and the Jalpaiguri Municipality (jalpaigurimunicipality.org). We never link to unverified third-party intermediaries.',
+    answer: 'Yes! Every government service listed in MYJPG undergoes strict URL verification. We only connect to official domains belonging to the Government of West Bengal (.wb.gov.in), Government of India (.gov.in / .nic.in), and the Jalpaiguri Municipality (jalpaigurimunicipality.org). We never link to unverified third-party intermediaries.',
     category: 'Government Services',
     keywords: ['official portal', 'verification', 'genuine url', 'government domain', 'safe link'],
     lastUpdated: 'September 2024'
@@ -301,7 +301,7 @@ export const FAQ_DATA: FAQItem[] = [
   {
     id: 'faq-gov-5',
     question: 'How do I verify whether a government link is genuine?',
-    answer: 'Look for the green "✓ Official Source" verification badge on each service card. You can also verify the website address in your browser bar: legitimate Indian government sites end in .gov.in or .nic.in, and the municipal portal is jalpaigurimunicipality.org.',
+    answer: 'Look for the blue "✓ Official Source" verification badge on each service card. You can also verify the website address in your browser bar: legitimate Indian government sites end in .gov.in or .nic.in, and the municipal portal is jalpaigurimunicipality.org.',
     category: 'Government Services',
     keywords: ['verify link', 'genuine', 'badge', 'official source', 'scam warning'],
     lastUpdated: 'September 2024'
@@ -309,7 +309,7 @@ export const FAQ_DATA: FAQItem[] = [
   {
     id: 'faq-gov-6',
     question: 'Why was I redirected to another website?',
-    answer: 'To protect your citizen rights and privacy, government applications must be submitted directly to authorized statutory departments. Jalpaiguri Connect never intercepts or stores your government passwords, biometric scans, or confidential certificate records.',
+    answer: 'To protect your citizen rights and privacy, government applications must be submitted directly to authorized statutory departments. MYJPG never intercepts or stores your government passwords or confidential certificate records.',
     category: 'Government Services',
     keywords: ['redirect', 'external website', 'data privacy', 'safety', 'why external'],
     lastUpdated: 'September 2024'
@@ -353,7 +353,7 @@ export const FAQ_DATA: FAQItem[] = [
   {
     id: 'faq-emg-1',
     question: 'What should I do during an emergency?',
-    answer: 'For immediate life, fire, or crime emergencies, call the official government hotlines immediately: Police (100 or 112), Fire (101), Ambulance (102). Jalpaiguri Connect also provides a quick-dial emergency directory on the Home and Emergency views.',
+    answer: 'For immediate life, fire, or crime emergencies, call the official government hotlines immediately: Police (100 or 112), Fire (101), Ambulance (102). MYJPG also provides a quick-dial emergency directory on the Home and Emergency views.',
     category: 'Emergency',
     keywords: ['emergency', 'police', 'fire', 'ambulance', 'hotline', '112', '100'],
     lastUpdated: 'September 2024'
@@ -376,8 +376,8 @@ export const FAQ_DATA: FAQItem[] = [
   },
   {
     id: 'faq-emg-4',
-    question: 'Does Jalpaiguri Connect replace emergency services?',
-    answer: 'NO. Jalpaiguri Connect is not an emergency dispatch operator. It does not replace 112, 100, 101, or 102. In life-threatening emergencies, always dial official emergency services first.',
+    question: 'Does MYJPG replace emergency services?',
+    answer: 'NO. MYJPG is not an emergency dispatch operator. It does not replace 112, 100, 101, or 102. In life-threatening emergencies, always dial official emergency services first.',
     category: 'Emergency',
     keywords: ['replace emergency', 'dispatch', 'first responders', 'disclaimer'],
     lastUpdated: 'September 2024'
@@ -386,7 +386,7 @@ export const FAQ_DATA: FAQItem[] = [
   // --- LOCATION ---
   {
     id: 'faq-loc-1',
-    question: 'Why does Jalpaiguri Connect need my location?',
+    question: 'Why does MYJPG need my location?',
     answer: 'Location permissions allow the app to calculate accurate distances to nearby electricians, medical clinics, blood donors, and show localized municipal warnings relevant to your neighborhood.',
     category: 'Location',
     keywords: ['location permission', 'gps', 'why location', 'distance calculation'],
@@ -429,9 +429,9 @@ export const FAQ_DATA: FAQItem[] = [
   {
     id: 'faq-prv-2',
     question: 'How is my personal information protected?',
-    answer: 'All data communication is encrypted over HTTPS. Biometric fingerprint credentials use the standard W3C Web Authentication API and never leave your physical device hardware security enclave.',
+    answer: 'All data communication is encrypted over HTTPS. We adhere to strict data privacy protocols to ensure your basic profile information remains secure.',
     category: 'Privacy & Safety',
-    keywords: ['data protection', 'encryption', 'security', 'webauthn', 'biometrics'],
+    keywords: ['data protection', 'encryption', 'security'],
     lastUpdated: 'September 2024'
   },
   {

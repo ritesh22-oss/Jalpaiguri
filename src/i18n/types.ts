@@ -392,8 +392,6 @@ export interface Translations {
     languageDesc: string;
     themeSetting: string;
     themeDesc: string;
-    biometricLogin: string;
-    biometricDesc: string;
     notificationsSetting: string;
     offlineSync: string;
     myActivity: string;

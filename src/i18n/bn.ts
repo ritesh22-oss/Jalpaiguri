@@ -392,8 +392,6 @@ export const bn: Translations = {
     languageDesc: 'বাংলা অথবা English নির্বাচন করুন',
     themeSetting: 'রঙের থিম',
     themeDesc: 'লাইট অথবা ডার্ক মোড',
-    biometricLogin: 'বায়োমেট্রিক নিরাপত্তা',
-    biometricDesc: 'আঙুলের ছাপ (ফিঙ্গারপ্রিন্ট) লগইন',
     notificationsSetting: 'পুশ নোটিফিকেশন',
     offlineSync: 'অফলাইন ডেটা সংরক্ষণ',
     myActivity: 'আমার নাগরিক কার্যকলাপ',

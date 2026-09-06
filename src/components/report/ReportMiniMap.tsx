@@ -301,8 +301,11 @@ export const ReportMiniMap: React.FC<ReportMiniMapProps> = ({
     return () => {
       isMounted = false;
       if (fallbackTimeout) clearTimeout(fallbackTimeout);
+      leafletMarkerRef.current = null;
       if (leafletMapRef.current) {
-        leafletMapRef.current.remove();
+        try {
+          leafletMapRef.current.remove();
+        } catch {}
         leafletMapRef.current = null;
       }
     };
@@ -340,7 +343,7 @@ export const ReportMiniMap: React.FC<ReportMiniMapProps> = ({
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 text-[11px] font-semibold text-[#063B2C] dark:text-[#5CE6B0] hover:bg-[#F0ECE1] transition-colors"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 text-[11px] font-semibold text-[#007AFF] dark:text-[#93C5FD] hover:bg-[#F0ECE1] transition-colors"
           >
             {isExpanded ? (
               <>
@@ -377,7 +380,7 @@ export const ReportMiniMap: React.FC<ReportMiniMapProps> = ({
           <div
             className={`px-2.5 py-1 rounded-lg text-[10px] font-bold shadow-md backdrop-blur-md flex items-center gap-1 ${
               isInside
-                ? 'bg-emerald-800/90 text-emerald-100 border border-emerald-500/30'
+                ? 'bg-blue-800/90 text-blue-100 border border-blue-500/30'
                 : 'bg-rose-900/90 text-rose-100 border border-rose-500/30'
             }`}
           >

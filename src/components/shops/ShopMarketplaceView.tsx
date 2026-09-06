@@ -27,8 +27,8 @@ import {
 import { useNav } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useApp } from '../../context/AppContext';
 import { Shop, ShopCategory } from '../../types';
-import { FALLBACK_JALPAIGURI_SHOPS } from '../../data/jalpaiguriShopsFallback';
 
 const CATEGORIES: { key: string; labelEn: string; labelBn: string; icon: string }[] = [
   { key: 'All', labelEn: 'All Stores', labelBn: 'সব দোকান', icon: '🏬' },
@@ -49,9 +49,8 @@ export const ShopMarketplaceView: React.FC = () => {
   const { navigate, goBack } = useNav();
   const { user } = useAuth();
   const { language } = useLanguage();
+  const { shops } = useApp();
 
-  const [shops, setShops] = useState<Shop[]>(FALLBACK_JALPAIGURI_SHOPS);
-  const [loading, setLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState(() => {
     try {
@@ -78,40 +77,8 @@ export const ShopMarketplaceView: React.FC = () => {
   const [minRating4, setMinRating4] = useState(false);
   const [selectedLocality, setSelectedLocality] = useState<string>('All');
 
-  // Fetch shops from backend API
-  const fetchShops = async () => {
-    try {
-      const res = await fetch('/api/shops');
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          setShops(data);
-        }
-      }
-    } catch (err) {
-      console.error('Error fetching shops:', err);
-    }
-  };
-
-  useEffect(() => {
-    fetchShops();
-  }, []);
-
-  // Common product keyword dictionary to allow cross-matching products in both Bengali and English
-  const PRODUCT_CATEGORY_KEYWORDS: Record<string, string[]> = {
-    'Grocery & Departmental': ['চাল', 'ডাল', 'আটা', 'ময়দা', 'তেল', 'চিনি', 'লবণ', 'মসলা', 'মুদি', 'রেশন', 'rice', 'dal', 'flour', 'oil', 'sugar', 'salt', 'spices', 'grocery', 'ration'],
-    'Pharmacy & Medical': ['ওষুধ', 'প্যারাসিটামল', 'স্যাভলন', 'ব্যান্ডেজ', 'ট্যাবলেট', 'ক্যাপসুল', 'থার্মোমিটার', 'ড্রপ', 'syrup', 'medicine', 'paracetamol', 'tablet', 'capsule', 'dettol', 'bandage'],
-    'Bakery & Sweets': ['মিষ্টি', 'রসগোল্লা', 'সন্দেশ', 'দই', 'কেক', 'বিস্কুট', 'চমচম', 'sweet', 'sweets', 'rasgulla', 'sandesh', 'curd', 'mishti', 'cake', 'bakery', 'pastry', 'cookie'],
-    'Electronics & Mobile': ['মোবাইল', 'চার্জার', 'হেডফোন', 'ব্যাটারি', 'টিভি', 'ফ্যান', 'স্মার্টফোন', 'mobile', 'phone', 'charger', 'cable', 'headphone', 'earphone', 'battery', 'tv', 'fan'],
-    'Clothing & Garments': ['পোশাক', 'শার্ট', 'প্যান্ট', 'শাড়ি', 'পাঞ্জাবি', 'জিন্স', 'টি-শার্ট', 'cloth', 'clothes', 'shirt', 'saree', 'pant', 'jeans', 'tshirt', 'garments', 'kurti'],
-    'Hardware & Electricals': ['হার্ডওয়্যার', 'রং', 'পেইন্ট', 'সিমেন্ট', 'তার', 'সুইচ', 'বাল্ব', 'hardware', 'paint', 'cement', 'wire', 'switch', 'bulb', 'pipe', 'electrical'],
-    'Books & Stationery': ['বই', 'খাতা', 'পেন', 'কলম', 'পেন্সিল', 'গাইড', 'স্টেশনারি', 'book', 'books', 'notebook', 'pen', 'pencil', 'diary', 'stationery', 'paper'],
-    'Fresh Meat & Fish': ['মাছ', 'মাংস', 'মুরগি', 'খাসি', 'রুই', 'কাতলা', 'ইলিশ', 'fish', 'meat', 'chicken', 'mutton', 'prawn', 'fish market'],
-    'Dairy & Milk': ['দুধ', 'পনির', 'ঘি', 'মাখন', 'দই', 'লস্যি', 'milk', 'dairy', 'paneer', 'ghee', 'butter', 'curd']
-  };
-
   // Filter logic: match shop name, bengali name, category, products, locality, address, landmark, pincode
-  const filteredShops = shops.filter((shop) => {
+  const filteredShops = (shops || []).filter((shop) => {
     if (selectedCategory !== 'All' && shop.category !== selectedCategory) {
       return false;
     }
@@ -149,11 +116,7 @@ export const ShopMarketplaceView: React.FC = () => {
         (p.category || '').toLowerCase().includes(q)
       );
 
-      // Match category semantic keywords for product searches
-      const keywords = PRODUCT_CATEGORY_KEYWORDS[shop.category] || [];
-      const matchSemanticProduct = keywords.some(k => k.toLowerCase().includes(q) || q.includes(k.toLowerCase()));
-
-      if (!matchName && !matchBn && !matchLoc && !matchAddr && !matchLandmark && !matchPin && !matchCat && !matchSub && !matchDesc && !matchProduct && !matchSemanticProduct) {
+      if (!matchName && !matchBn && !matchLoc && !matchAddr && !matchLandmark && !matchPin && !matchCat && !matchSub && !matchDesc && !matchProduct) {
         return false;
       }
     }
@@ -162,8 +125,8 @@ export const ShopMarketplaceView: React.FC = () => {
 
   // Calculate shop count per category
   const getCategoryCount = (categoryKey: string) => {
-    if (categoryKey === 'All') return shops.length;
-    return shops.filter(s => s.category === categoryKey).length;
+    if (categoryKey === 'All') return (shops || []).length;
+    return (shops || []).filter(s => s.category === categoryKey).length;
   };
 
   const handleResetFilters = () => {
@@ -181,8 +144,8 @@ export const ShopMarketplaceView: React.FC = () => {
     const phone = shop.phone || (shop as any).ownerPhone || '';
     if (navigator.share) {
       navigator.share({
-        title: `${shop.name} - Jalpaiguri Connect`,
-        text: `Check out ${shop.name} in ${shop.locality}, Jalpaiguri on Jalpaiguri Connect! Contact: ${phone}`,
+        title: `${shop.name} - MYJPG`,
+        text: `Check out ${shop.name} in ${shop.locality}, Jalpaiguri on MYJPG! Contact: ${phone}`,
         url: window.location.href
       }).catch(() => {});
     } else if (navigator.clipboard) {
@@ -193,14 +156,14 @@ export const ShopMarketplaceView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 max-w-md mx-auto select-none transition-colors relative">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 max-w-md mx-auto select-none transition-colors relative">
       {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#0F1A15]/95 backdrop-blur-md px-4 pt-3 pb-2.5 border-b border-[#E8E4DA]/60 dark:border-white/10 transition-colors">
+      <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#0B132B]/95 backdrop-blur-md px-4 pt-3 pb-2.5 border-b border-[#E8E4DA]/60 dark:border-white/10 transition-colors">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <button
               onClick={goBack}
-              className="w-10 h-10 rounded-full bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
+              className="w-10 h-10 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
               aria-label="Go Back"
             >
               <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
@@ -208,7 +171,7 @@ export const ShopMarketplaceView: React.FC = () => {
             <div>
               <h1 className="text-lg font-black text-[#11241C] dark:text-white leading-tight flex items-center gap-1.5">
                 <span>{language === 'bn' ? 'জলপাইগুড়ি বাজার' : 'Jalpaiguri Shops'}</span>
-                <span className="text-[10px] font-bold bg-[#E6F4EA] dark:bg-emerald-950/80 text-[#063B2C] dark:text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-800/40">
+                <span className="text-[10px] font-bold bg-[#eff6ff] dark:bg-blue-950/80 text-[#007AFF] dark:text-blue-300 px-2 py-0.5 rounded-full border border-blue-200/50 dark:border-blue-800/40">
                   {filteredShops.length}
                 </span>
               </h1>
@@ -219,13 +182,22 @@ export const ShopMarketplaceView: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-1.5">
+            {/* Upgrade Plan Button for merchants */}
+            <button
+              onClick={() => navigate('merchant-dashboard')}
+              className="p-1.5 rounded-xl bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700/50 text-amber-700 dark:text-amber-400 shadow-2xs hover:bg-amber-200 dark:hover:bg-amber-900 transition-all cursor-pointer"
+              title={language === 'bn' ? 'মার্চেন্ট প্ল্যান আপগ্রেড করুন' : 'Upgrade Merchant Plan'}
+            >
+              <Sparkles className="w-5 h-5" />
+            </button>
+            
             {/* View Mode Toggle: List / Map */}
-            <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 p-0.5 rounded-xl flex items-center shadow-2xs">
+            <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 p-0.5 rounded-xl flex items-center shadow-2xs">
               <button
                 onClick={() => setViewMode('list')}
                 className={`p-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   viewMode === 'list'
-                    ? 'bg-[#063B2C] text-white shadow-xs'
+                    ? 'bg-[#007AFF] text-white shadow-xs'
                     : 'text-[#55685F] dark:text-[#A2B3AA] hover:text-[#11241C]'
                 }`}
                 title="List View"
@@ -236,7 +208,7 @@ export const ShopMarketplaceView: React.FC = () => {
                 onClick={() => setViewMode('map')}
                 className={`p-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   viewMode === 'map'
-                    ? 'bg-[#063B2C] text-white shadow-xs'
+                    ? 'bg-[#007AFF] text-white shadow-xs'
                     : 'text-[#55685F] dark:text-[#A2B3AA] hover:text-[#11241C]'
                 }`}
                 title="Map View"
@@ -249,7 +221,7 @@ export const ShopMarketplaceView: React.FC = () => {
             <button
               id="btn-header-add-shop"
               onClick={() => navigate('add-shop')}
-              className="px-3 py-2 rounded-xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1 shadow-xs active:scale-95 transition-all cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1 shadow-xs active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
               title="Register Your Shop"
             >
               <Plus className="w-4 h-4" />
@@ -260,7 +232,7 @@ export const ShopMarketplaceView: React.FC = () => {
 
         {/* Toast Alert */}
         {toastMessage && (
-          <div className="mt-2 bg-emerald-700 text-white text-xs font-bold py-1.5 px-3 rounded-xl shadow-md text-center animate-fade-in flex items-center justify-center gap-2">
+          <div className="mt-2 bg-blue-700 text-white text-xs font-bold py-1.5 px-3 rounded-xl shadow-md text-center animate-fade-in flex items-center justify-center gap-2">
             <CheckCircle2 className="w-3.5 h-3.5" />
             <span>{toastMessage}</span>
           </div>
@@ -275,7 +247,7 @@ export const ShopMarketplaceView: React.FC = () => {
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder={language === 'bn' ? 'দোকান, পণ্য (চাল, মিষ্টি, ওষুধ) বা এলাকা খুঁজুন...' : 'Search shops, products (rice, sweets, medicine) or area...'}
-            className="w-full pl-9.5 pr-8 py-2.5 bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-2xl text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-[#8A9A92] dark:placeholder:text-[#657970] focus:outline-none focus:border-[#063B2C] dark:focus:border-emerald-500 shadow-2xs transition-colors"
+            className="w-full pl-9.5 pr-8 py-2.5 bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-2xl text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-[#8A9A92] dark:placeholder:text-[#657970] focus:outline-none focus:border-[#007AFF] dark:focus:border-blue-500 shadow-2xs transition-colors"
           />
           {searchQuery && (
             <button
@@ -298,7 +270,7 @@ export const ShopMarketplaceView: React.FC = () => {
             {selectedCategory !== 'All' && (
               <button
                 onClick={() => setSelectedCategory('All')}
-                className="text-[10px] font-extrabold text-[#063B2C] dark:text-emerald-400 hover:underline cursor-pointer"
+                className="text-[10px] font-extrabold text-[#007AFF] dark:text-blue-400 hover:underline cursor-pointer"
               >
                 {language === 'bn' ? 'সব দেখুন' : 'Show All'}
               </button>
@@ -316,8 +288,8 @@ export const ShopMarketplaceView: React.FC = () => {
                   onClick={() => setSelectedCategory(cat.key)}
                   className={`px-3 py-2 rounded-2xl shrink-0 transition-all cursor-pointer flex flex-col justify-between text-left min-w-[112px] border ${
                     isSelected
-                      ? 'bg-[#063B2C] text-white border-[#063B2C] shadow-sm ring-2 ring-[#063B2C]/20'
-                      : 'bg-white dark:bg-[#17231E] border-[#E8E4DA] dark:border-white/10 text-[#44554E] dark:text-[#C5D5CC] hover:border-[#063B2C]/40 shadow-2xs'
+                      ? 'bg-[#007AFF] text-white border-[#007AFF] shadow-sm ring-2 ring-[#007AFF]/20'
+                      : 'bg-white dark:bg-[#0F172A] border-[#E8E4DA] dark:border-white/10 text-[#44554E] dark:text-[#C5D5CC] hover:border-[#007AFF]/40 shadow-2xs'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-1 w-full">
@@ -351,13 +323,13 @@ export const ShopMarketplaceView: React.FC = () => {
           <div
             id="banner-smart-product-search"
             onClick={() => navigate('smart-shopping-search')}
-            className="bg-gradient-to-br from-[#E6F4EA] to-[#D5EADB] dark:from-[#132B22] dark:to-[#0C1E18] p-3 rounded-2xl border border-emerald-200/60 dark:border-emerald-800/40 cursor-pointer shadow-2xs hover:border-emerald-400 transition-all active:scale-98"
+            className="bg-gradient-to-br from-[#eff6ff] to-[#dbeafe] dark:from-[#132B22] dark:to-[#0C1E18] p-3 rounded-2xl border border-blue-200/60 dark:border-blue-800/40 cursor-pointer shadow-2xs hover:border-blue-400 transition-all active:scale-98"
           >
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-white dark:bg-emerald-900/60 flex items-center justify-center text-emerald-800 dark:text-emerald-300 shadow-2xs">
+              <div className="w-8 h-8 rounded-xl bg-white dark:bg-blue-900/60 flex items-center justify-center text-blue-800 dark:text-blue-300 shadow-2xs">
                 <Sparkles className="w-4 h-4" />
               </div>
-              <span className="text-[10px] font-extrabold uppercase tracking-wide text-emerald-800 dark:text-emerald-300">
+              <span className="text-[10px] font-extrabold uppercase tracking-wide text-blue-800 dark:text-blue-300">
                 {language === 'bn' ? 'স্মার্ট খোঁজ' : 'Smart Search'}
               </span>
             </div>
@@ -398,8 +370,8 @@ export const ShopMarketplaceView: React.FC = () => {
             onClick={() => setOpenNowOnly(!openNowOnly)}
             className={`px-3 py-1.5 rounded-full border transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
               openNowOnly
-                ? 'bg-[#063B2C] text-white border-[#063B2C]'
-                : 'bg-white dark:bg-[#17231E] border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-[#A2B3AA]'
+                ? 'bg-[#007AFF] text-white border-[#007AFF]'
+                : 'bg-white dark:bg-[#0F172A] border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-[#A2B3AA]'
             }`}
           >
             <Clock className="w-3 h-3" />
@@ -410,8 +382,8 @@ export const ShopMarketplaceView: React.FC = () => {
             onClick={() => setVerifiedOnly(!verifiedOnly)}
             className={`px-3 py-1.5 rounded-full border transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
               verifiedOnly
-                ? 'bg-[#063B2C] text-white border-[#063B2C]'
-                : 'bg-white dark:bg-[#17231E] border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-[#A2B3AA]'
+                ? 'bg-[#007AFF] text-white border-[#007AFF]'
+                : 'bg-white dark:bg-[#0F172A] border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-[#A2B3AA]'
             }`}
           >
             <ShieldCheck className="w-3 h-3" />
@@ -422,8 +394,8 @@ export const ShopMarketplaceView: React.FC = () => {
             onClick={() => setDeliveryOnly(!deliveryOnly)}
             className={`px-3 py-1.5 rounded-full border transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
               deliveryOnly
-                ? 'bg-[#063B2C] text-white border-[#063B2C]'
-                : 'bg-white dark:bg-[#17231E] border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-[#A2B3AA]'
+                ? 'bg-[#007AFF] text-white border-[#007AFF]'
+                : 'bg-white dark:bg-[#0F172A] border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-[#A2B3AA]'
             }`}
           >
             <Truck className="w-3 h-3" />
@@ -434,8 +406,8 @@ export const ShopMarketplaceView: React.FC = () => {
             onClick={() => setMinRating4(!minRating4)}
             className={`px-3 py-1.5 rounded-full border transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
               minRating4
-                ? 'bg-[#063B2C] text-white border-[#063B2C]'
-                : 'bg-white dark:bg-[#17231E] border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-[#A2B3AA]'
+                ? 'bg-[#007AFF] text-white border-[#007AFF]'
+                : 'bg-white dark:bg-[#0F172A] border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-[#A2B3AA]'
             }`}
           >
             <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
@@ -445,10 +417,10 @@ export const ShopMarketplaceView: React.FC = () => {
 
         {/* MAP VIEW */}
         {viewMode === 'map' && (
-          <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-[#11241C] dark:text-white flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400" />
+                <MapPin className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400" />
                 <span>{language === 'bn' ? 'জলপাইগুড়ির মানচিত্রে দোকান' : 'Jalpaiguri Local Store Map'}</span>
               </span>
               <span className="text-[10px] font-semibold text-[#55685F] dark:text-[#A2B3AA]">
@@ -457,7 +429,7 @@ export const ShopMarketplaceView: React.FC = () => {
             </div>
 
             {/* Custom Interactive SVG Jalpaiguri Map with Pins */}
-            <div className="relative w-full h-56 bg-[#E8F0EC] dark:bg-[#0B1713] rounded-2xl overflow-hidden border border-emerald-900/10 dark:border-white/10 p-3 flex flex-col justify-between">
+            <div className="relative w-full h-56 bg-[#f1f5f9] dark:bg-[#0B1713] rounded-2xl overflow-hidden border border-blue-900/10 dark:border-white/10 p-3 flex flex-col justify-between">
               {/* Map background illustration of Teesta River & Jalpaiguri Grid */}
               <svg className="absolute inset-0 w-full h-full opacity-30 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M 10 180 Q 80 120 140 140 T 260 90 T 360 40" fill="none" stroke="#2B7A68" strokeWidth="12" />
@@ -476,10 +448,10 @@ export const ShopMarketplaceView: React.FC = () => {
                   <button
                     key={shop.id}
                     onClick={() => navigate('shop-detail', { shopId: shop.id })}
-                    className="bg-white/95 dark:bg-[#17231E]/95 border border-[#063B2C]/30 dark:border-emerald-500/40 rounded-xl p-2 text-left shadow-md hover:scale-105 transition-all cursor-pointer backdrop-blur-xs"
+                    className="bg-white/95 dark:bg-[#0F172A]/95 border border-[#007AFF]/30 dark:border-blue-500/40 rounded-xl p-2 text-left shadow-md hover:scale-105 transition-all cursor-pointer backdrop-blur-xs"
                   >
-                    <div className="flex items-center gap-1 text-[10px] font-extrabold text-[#063B2C] dark:text-emerald-300 truncate">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                    <div className="flex items-center gap-1 text-[10px] font-extrabold text-[#007AFF] dark:text-blue-300 truncate">
+                      <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
                       <span className="truncate">{shop.name}</span>
                     </div>
                     <div className="text-[9px] font-semibold text-gray-500 dark:text-gray-400 truncate mt-0.5">
@@ -498,21 +470,14 @@ export const ShopMarketplaceView: React.FC = () => {
         )}
 
         {/* SHOP LIST VIEW */}
-        {loading ? (
-          <div className="py-12 text-center space-y-2">
-            <div className="w-8 h-8 border-3 border-[#063B2C] border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="text-xs font-bold text-[#55685F] dark:text-[#A2B3AA]">
-              {language === 'bn' ? 'দোকান লোড হচ্ছে...' : 'Loading Jalpaiguri shops...'}
-            </p>
-          </div>
-        ) : filteredShops.length === 0 ? (
+        {filteredShops.length === 0 ? (
           /* Smart Empty State conforming strictly to Rule 34 */
-          <div className="py-10 text-center bg-white dark:bg-[#17231E] rounded-3xl border border-[#E8E4DA] dark:border-white/10 p-6 space-y-3">
-            <div className="w-14 h-14 rounded-2xl bg-[#E6F4EA] dark:bg-emerald-950/50 flex items-center justify-center mx-auto text-[#063B2C] dark:text-emerald-300 shadow-2xs">
+          <div className="py-10 text-center bg-white dark:bg-[#0F172A] rounded-3xl border border-[#E8E4DA] dark:border-white/10 p-6 space-y-3">
+            <div className="w-14 h-14 rounded-2xl bg-[#eff6ff] dark:bg-blue-950/50 flex items-center justify-center mx-auto text-[#007AFF] dark:text-blue-300 shadow-2xs">
               <Store className="w-7 h-7" />
             </div>
             <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white">
-              {language === 'bn' ? 'জলপাইগুড়ি কানেক্টে নতুন দোকান যুক্ত হচ্ছে।' : 'New shops are joining Jalpaiguri Connect.'}
+              {language === 'bn' ? 'জলপাইগুড়ি কানেক্টে নতুন দোকান যুক্ত হচ্ছে।' : 'New shops are joining MYJPG.'}
             </h3>
             <p className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA] max-w-xs mx-auto">
               {language === 'bn'
@@ -529,7 +494,7 @@ export const ShopMarketplaceView: React.FC = () => {
               </button>
               <button
                 onClick={() => navigate('add-shop')}
-                className="px-4 py-2.5 rounded-xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shadow-xs"
+                className="px-4 py-2.5 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1.5 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-xs"
               >
                 <Plus className="w-4 h-4" />
                 <span>{language === 'bn' ? '+ আপনার দোকান যোগ করুন' : '+ Add Your Shop'}</span>
@@ -542,7 +507,7 @@ export const ShopMarketplaceView: React.FC = () => {
               <div
                 key={shop.id}
                 onClick={() => navigate('shop-detail', { shopId: shop.id })}
-                className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl overflow-hidden shadow-xs hover:border-[#063B2C] dark:hover:border-emerald-500 transition-all cursor-pointer group"
+                className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl overflow-hidden shadow-xs hover:border-[#007AFF] dark:hover:border-blue-500 transition-all cursor-pointer group"
               >
                 {/* Shop Cover & Status Badges */}
                 <div className="relative h-36 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
@@ -579,7 +544,7 @@ export const ShopMarketplaceView: React.FC = () => {
                       <span
                         className={`px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1 ${
                           shop.isOpen
-                            ? 'bg-emerald-500/90 text-white'
+                            ? 'bg-blue-500/90 text-white'
                             : 'bg-rose-500/90 text-white'
                         }`}
                       >
@@ -588,9 +553,9 @@ export const ShopMarketplaceView: React.FC = () => {
                       </span>
 
                       {shop.isVerified && (
-                        <span className="bg-[#063B2C]/90 text-emerald-300 text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-400/40">
+                        <span className="bg-[#007AFF]/90 text-blue-300 text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 border border-blue-400/40">
                           <CheckCircle2 className="w-3 h-3" />
-                          <span>Verified on Jalpaiguri Connect</span>
+                          <span>Verified on MYJPG</span>
                         </span>
                       )}
                     </div>
@@ -608,7 +573,7 @@ export const ShopMarketplaceView: React.FC = () => {
                 <div className="p-3.5 space-y-2">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <h3 className="text-sm font-black text-[#11241C] dark:text-white leading-snug group-hover:text-[#063B2C] dark:group-hover:text-emerald-400 transition-colors">
+                      <h3 className="text-sm font-black text-[#11241C] dark:text-white leading-snug group-hover:text-[#007AFF] dark:group-hover:text-blue-400 transition-colors">
                         {shop.name}
                       </h3>
                       {shop.nameBengali && (
@@ -638,8 +603,8 @@ export const ShopMarketplaceView: React.FC = () => {
                     </div>
 
                     {(shop.deliveryAvailable ?? (shop as any).homeDelivery ?? true) ? (
-                      <div className="flex items-center gap-1 text-emerald-800 dark:text-emerald-300 font-bold">
-                        <Truck className="w-3 h-3 text-emerald-600" />
+                      <div className="flex items-center gap-1 text-blue-800 dark:text-blue-300 font-bold">
+                        <Truck className="w-3 h-3 text-blue-600" />
                         <span>{language === 'bn' ? 'হোম ডেলিভারি আছে' : 'Home Delivery'}</span>
                       </div>
                     ) : (
@@ -666,7 +631,7 @@ export const ShopMarketplaceView: React.FC = () => {
                           const ph = shop.phone || (shop as any).ownerPhone || '+919832011094';
                           window.location.href = `tel:${ph.replace(/\s+/g, '')}`;
                         }}
-                        className="p-2 rounded-xl bg-[#D2EBE0] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-300 hover:bg-[#C2E4D5] active:scale-95 transition-all cursor-pointer border border-emerald-200/50 dark:border-emerald-800/40"
+                        className="p-2 rounded-xl bg-[#dbeafe] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 hover:bg-[#C2E4D5] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer border border-blue-200/50 dark:border-blue-800/40"
                         title="Call Store"
                       >
                         <Phone className="w-3.5 h-3.5" />
@@ -675,11 +640,11 @@ export const ShopMarketplaceView: React.FC = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          const msg = encodeURIComponent(`Nomoshkar! I found your shop ${shop.name} on Jalpaiguri Connect. Are you open right now?`);
+                          const msg = encodeURIComponent(`Nomoshkar! I found your shop ${shop.name} on MYJPG. Are you open right now?`);
                           const waPhone = (shop.whatsappNumber || shop.phone || (shop as any).ownerPhone || '9832011094').replace(/\D/g, '');
                           window.open(`https://wa.me/91${waPhone.slice(-10)}?text=${msg}`, '_blank');
                         }}
-                        className="p-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all cursor-pointer shadow-2xs"
+                        className="p-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer shadow-2xs"
                         title="Chat on WhatsApp"
                       >
                         <MessageSquare className="w-3.5 h-3.5" />
@@ -687,7 +652,7 @@ export const ShopMarketplaceView: React.FC = () => {
 
                       <button
                         onClick={() => navigate('shop-detail', { shopId: shop.id })}
-                        className="px-3 py-2 rounded-xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 transition-all"
+                        className="px-3 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all"
                       >
                         <span>{language === 'bn' ? 'পণ্য দেখুন' : 'View Store'}</span>
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -705,8 +670,8 @@ export const ShopMarketplaceView: React.FC = () => {
       <button
         id="btn-floating-add-shop"
         onClick={() => navigate('add-shop')}
-        className="fixed bottom-20 right-4 z-40 sm:bottom-6 sm:right-6 bg-[#063B2C] hover:bg-[#084D3A] dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white px-4 py-3 rounded-full shadow-xl hover:shadow-2xl flex items-center gap-2 font-black text-xs cursor-pointer active:scale-95 transition-all group border-2 border-white/20 backdrop-blur-xs"
-        title="Register Your Shop on Jalpaiguri Connect"
+        className="fixed bottom-20 right-4 z-40 sm:bottom-6 sm:right-6 bg-[#007AFF] hover:bg-[#084D3A] dark:bg-blue-600 dark:hover:bg-blue-700 text-white px-4 py-3 rounded-full shadow-xl hover:shadow-2xl flex items-center gap-2 font-black text-xs cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all group border-2 border-white/20 backdrop-blur-xs"
+        title="Register Your Shop on MYJPG"
       >
         <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
           <Plus className="w-4 h-4 text-white stroke-[2.8]" />

@@ -68,9 +68,9 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] text-[#11241C] dark:text-white flex flex-col max-w-lg mx-auto pb-24 select-none transition-colors">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] text-[#11241C] dark:text-white flex flex-col max-w-lg mx-auto pb-24 select-none transition-colors">
       {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-white/95 dark:bg-[#17231E]/95 backdrop-blur-md border-b border-[#E8E4DA] dark:border-white/10 px-4 py-3 flex items-center justify-between transition-colors">
+      <header className="sticky top-0 z-30 bg-white/95 dark:bg-[#0F172A]/95 backdrop-blur-md border-b border-[#E8E4DA] dark:border-white/10 px-4 py-3 flex items-center justify-between transition-colors">
         <div className="flex items-center gap-2">
           <button
             onClick={onBack}
@@ -102,12 +102,12 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
       <div className="bg-[#FFF4E5] dark:bg-amber-950/40 border-b border-[#FFE0B2] dark:border-amber-800/30 px-4 py-2.5 flex items-start gap-2 text-xs text-[#7A4100] dark:text-amber-300">
         <Info className="w-4 h-4 text-[#B76E00] dark:text-amber-400 shrink-0 mt-0.5" />
         <p className="leading-snug">
-          <strong className="font-bold">Disclaimer:</strong> Jalpaiguri Connect is not a law enforcement, healthcare, or medical provider. All helplines and legal aid bodies listed below are verified official Indian governmental and municipal services.
+          <strong className="font-bold">Disclaimer:</strong> MYJPG is not a law enforcement, healthcare, or medical provider. All helplines and legal aid bodies listed below are verified official Indian governmental and municipal services.
         </p>
       </div>
 
       {/* Section Filter Pills */}
-      <div className="bg-white dark:bg-[#17231E] border-b border-[#E8E4DA] dark:border-white/10 px-4 py-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-bold transition-colors">
+      <div className="bg-white dark:bg-[#0F172A] border-b border-[#E8E4DA] dark:border-white/10 px-4 py-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-bold transition-colors">
         {[
           { id: 'immediate', label: '🚨 Immediate Safety' },
           { id: 'triage', label: '🧭 Quick Triage' },
@@ -121,7 +121,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
             onClick={() => setActiveSection(sec.id as any)}
             className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
               activeSection === sec.id
-                ? 'bg-[#063B2C] dark:bg-emerald-600 text-white'
+                ? 'bg-[#007AFF] dark:bg-blue-600 text-white'
                 : 'text-[#55685F] dark:text-[#A2B3AA] hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A]'
             }`}
           >
@@ -147,7 +147,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
               </div>
 
               <div className="space-y-3 text-xs">
-                <div className="flex items-start gap-3 bg-white/80 dark:bg-[#17231E]/80 p-3 rounded-2xl border border-[#FECDCA] dark:border-red-800/40">
+                <div className="flex items-start gap-3 bg-white/80 dark:bg-[#0F172A]/80 p-3 rounded-2xl border border-[#FECDCA] dark:border-red-800/40">
                   <span className="w-6 h-6 rounded-full bg-[#D92D20] text-white font-bold flex items-center justify-center shrink-0">
                     1
                   </span>
@@ -161,8 +161,8 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 bg-white/80 dark:bg-[#17231E]/80 p-3 rounded-2xl border border-[#FECDCA] dark:border-red-800/40">
-                  <span className="w-6 h-6 rounded-full bg-[#063B2C] dark:bg-emerald-600 text-white font-bold flex items-center justify-center shrink-0">
+                <div className="flex items-start gap-3 bg-white/80 dark:bg-[#0F172A]/80 p-3 rounded-2xl border border-[#FECDCA] dark:border-red-800/40">
+                  <span className="w-6 h-6 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">
                     2
                   </span>
                   <div>
@@ -175,8 +175,8 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 bg-white/80 dark:bg-[#17231E]/80 p-3 rounded-2xl border border-[#FECDCA] dark:border-red-800/40">
-                  <span className="w-6 h-6 rounded-full bg-[#063B2C] dark:bg-emerald-600 text-white font-bold flex items-center justify-center shrink-0">
+                <div className="flex items-start gap-3 bg-white/80 dark:bg-[#0F172A]/80 p-3 rounded-2xl border border-[#FECDCA] dark:border-red-800/40">
+                  <span className="w-6 h-6 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white font-bold flex items-center justify-center shrink-0">
                     3
                   </span>
                   <div>
@@ -201,21 +201,21 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
 
                 <button
                   onClick={shareEmergencyLocation}
-                  className="py-3.5 px-3 rounded-2xl bg-white dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 text-[#11241C] dark:text-white font-extrabold text-xs flex items-center justify-center gap-1.5 hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] active:scale-95 cursor-pointer transition-colors"
+                  className="py-3.5 px-3 rounded-2xl bg-white dark:bg-[#0F172A] border border-[#D2CEBE] dark:border-white/10 text-[#11241C] dark:text-white font-extrabold text-xs flex items-center justify-center gap-1.5 hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] active:scale-95 cursor-pointer transition-colors"
                 >
-                  <Share2 className="w-4 h-4 text-[#063B2C] dark:text-emerald-400" />
+                  <Share2 className="w-4 h-4 text-[#007AFF] dark:text-blue-400" />
                   <span>Share Location</span>
                 </button>
               </div>
             </div>
 
             {/* Kotwali Police Station Card */}
-            <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-3 transition-colors">
+            <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-3 transition-colors">
               <div className="flex items-center justify-between">
                 <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white">
                   Kotwali Police Station (Jalpaiguri Headquarters)
                 </h3>
-                <span className="text-[11px] font-bold text-[#063B2C] dark:text-emerald-400 bg-[#E6F4EA] dark:bg-emerald-950/60 border border-transparent dark:border-emerald-800/40 px-2 py-0.5 rounded-full">
+                <span className="text-[11px] font-bold text-[#007AFF] dark:text-blue-400 bg-[#E6F4EA] dark:bg-blue-950/60 border border-transparent dark:border-blue-800/40 px-2 py-0.5 rounded-full">
                   Open 24/7
                 </span>
               </div>
@@ -225,7 +225,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
               <div className="flex items-center gap-2 pt-1">
                 <a
                   href="tel:03561224100"
-                  className="flex-1 py-2.5 px-3 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-1.5"
+                  className="flex-1 py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5"
                 >
                   <Phone className="w-3.5 h-3.5" />
                   <span>03561-224100</span>
@@ -270,28 +270,28 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
                   desc: 'Nearest 24/7 emergency hospitals & forensic medical units.',
                   action: () => setActiveSection('medical'),
                   btnLabel: 'View Hospitals',
-                  color: 'border-[#E8E4DA] dark:border-white/10 bg-white dark:bg-[#17231E] text-[#11241C] dark:text-white'
+                  color: 'border-[#E8E4DA] dark:border-white/10 bg-white dark:bg-[#0F172A] text-[#11241C] dark:text-white'
                 },
                 {
                   title: 'I want confidential official legal advice',
                   desc: 'Free government legal aid under DLSA Jalpaiguri & NALSA.',
                   action: () => setActiveSection('legal'),
                   btnLabel: 'View Legal Aid',
-                  color: 'border-[#E8E4DA] dark:border-white/10 bg-white dark:bg-[#17231E] text-[#11241C] dark:text-white'
+                  color: 'border-[#E8E4DA] dark:border-white/10 bg-white dark:bg-[#0F172A] text-[#11241C] dark:text-white'
                 },
                 {
                   title: 'I want to speak with a counselor / helpline',
                   desc: '24/7 Women in Distress (181) and Women Helpline (1091).',
                   action: () => setActiveSection('helplines'),
                   btnLabel: 'Call Helplines',
-                  color: 'border-[#E8E4DA] dark:border-white/10 bg-white dark:bg-[#17231E] text-[#11241C] dark:text-white'
+                  color: 'border-[#E8E4DA] dark:border-white/10 bg-white dark:bg-[#0F172A] text-[#11241C] dark:text-white'
                 },
                 {
                   title: 'I want to record private incident notes safely',
                   desc: 'Saved strictly on your device. Never uploaded to servers.',
                   action: () => setActiveSection('diary'),
                   btnLabel: 'Open Private Diary',
-                  color: 'border-[#E8E4DA] dark:border-white/10 bg-white dark:bg-[#17231E] text-[#11241C] dark:text-white'
+                  color: 'border-[#E8E4DA] dark:border-white/10 bg-white dark:bg-[#0F172A] text-[#11241C] dark:text-white'
                 }
               ].map((item, idx) => (
                 <div
@@ -310,7 +310,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
                   </div>
                   <button
                     onClick={item.action}
-                    className="w-full py-2.5 px-3 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                    className="w-full py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                   >
                     <span>{item.btnLabel}</span>
                   </button>
@@ -389,7 +389,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
               ].map((hl, idx) => (
                 <div
                   key={idx}
-                  className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-2 transition-colors"
+                  className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-2 transition-colors"
                 >
                   <div className="flex items-start justify-between">
                     <div>
@@ -414,7 +414,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
 
                   <a
                     href={`tel:${hl.number.replace(/[^0-9]/g, '')}`}
-                    className="w-full py-2.5 px-3 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 hover:bg-[#084D3A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors"
+                    className="w-full py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors"
                   >
                     <Phone className="w-3.5 h-3.5" />
                     <span>Call {hl.number}</span>
@@ -441,7 +441,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
 
             <div className="space-y-3">
               {/* Jalpaiguri District Hospital */}
-              <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3 transition-colors">
+              <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3 transition-colors">
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white">
@@ -450,7 +450,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
                     <p className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA] mt-0.5">
                       Hospital Road, Jalpaiguri (Near District Court)
                     </p>
-                    <span className="inline-block mt-1 text-[11px] font-bold text-[#063B2C] dark:text-emerald-400 bg-[#E6F4EA] dark:bg-emerald-950/60 border border-transparent dark:border-emerald-800/40 px-2 py-0.5 rounded-full">
+                    <span className="inline-block mt-1 text-[11px] font-bold text-[#007AFF] dark:text-blue-400 bg-[#E6F4EA] dark:bg-blue-950/60 border border-transparent dark:border-blue-800/40 px-2 py-0.5 rounded-full">
                       24/7 Emergency & Forensic Wing
                     </span>
                   </div>
@@ -463,7 +463,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
                 <div className="flex gap-2">
                   <a
                     href="tel:03561224001"
-                    className="flex-1 py-2.5 px-3 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-1.5"
+                    className="flex-1 py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5"
                   >
                     <Phone className="w-3.5 h-3.5" />
                     <span>Emergency (03561-224001)</span>
@@ -479,7 +479,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
               </div>
 
               {/* North Bengal Medical College */}
-              <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3 transition-colors">
+              <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3 transition-colors">
                 <div>
                   <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white">
                     North Bengal Medical College & Hospital (NBMCH)
@@ -487,7 +487,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
                   <p className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA] mt-0.5">
                     Sushrutanagar, Siliguri-Jalpaiguri Link (Apex Referral Center)
                   </p>
-                  <span className="inline-block mt-1 text-[11px] font-bold text-[#063B2C] dark:text-emerald-400 bg-[#E6F4EA] dark:bg-emerald-950/60 border border-transparent dark:border-emerald-800/40 px-2 py-0.5 rounded-full">
+                  <span className="inline-block mt-1 text-[11px] font-bold text-[#007AFF] dark:text-blue-400 bg-[#E6F4EA] dark:bg-blue-950/60 border border-transparent dark:border-blue-800/40 px-2 py-0.5 rounded-full">
                     Tertiary Medical Care & Specialty Trauma
                   </span>
                 </div>
@@ -519,7 +519,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
 
             <div className="space-y-3">
               {/* DLSA Jalpaiguri */}
-              <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3 transition-colors">
+              <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3 transition-colors">
                 <div>
                   <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white">
                     District Legal Services Authority (DLSA) Jalpaiguri
@@ -527,7 +527,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
                   <p className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA] mt-0.5">
                     District Judges Court Compound, Jalpaiguri 735101
                   </p>
-                  <span className="inline-block mt-1 text-[11px] font-bold text-[#063B2C] dark:text-emerald-400 bg-[#E6F4EA] dark:bg-emerald-950/60 border border-transparent dark:border-emerald-800/40 px-2 py-0.5 rounded-full">
+                  <span className="inline-block mt-1 text-[11px] font-bold text-[#007AFF] dark:text-blue-400 bg-[#E6F4EA] dark:bg-blue-950/60 border border-transparent dark:border-blue-800/40 px-2 py-0.5 rounded-full">
                     Free Legal Defense & Legal Counseling
                   </span>
                 </div>
@@ -539,7 +539,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
                 <div className="flex gap-2">
                   <a
                     href="tel:03561224108"
-                    className="flex-1 py-2.5 px-3 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-1.5"
+                    className="flex-1 py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5"
                   >
                     <Phone className="w-3.5 h-3.5" />
                     <span>03561-224108</span>
@@ -548,7 +548,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
                     href="tel:15100"
                     className="flex-1 py-2.5 px-3 rounded-2xl bg-[#FAF8F5] dark:bg-[#121E19] border border-[#D2CEBE] dark:border-white/10 text-[#11241C] dark:text-white font-bold text-xs flex items-center justify-center gap-1.5"
                   >
-                    <Scale className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400" />
+                    <Scale className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400" />
                     <span>15100 (NALSA 24/7)</span>
                   </a>
                 </div>
@@ -578,7 +578,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base font-extrabold text-[#11241C] dark:text-white flex items-center gap-1.5">
-                  <Lock className="w-4 h-4 text-[#063B2C] dark:text-emerald-400" />
+                  <Lock className="w-4 h-4 text-[#007AFF] dark:text-blue-400" />
                   <span>Private Incident Diary</span>
                 </h2>
                 <p className="text-xs text-[#55685F] dark:text-[#A2B3AA]">
@@ -588,7 +588,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
 
               <button
                 onClick={() => setIsAddingNote(true)}
-                className="px-3 py-1.5 rounded-full bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
+                className="px-3 py-1.5 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>New Note</span>
@@ -597,15 +597,15 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
 
             {/* Privacy Guarantee Box */}
             <div className="bg-[#FAF8F5] dark:bg-[#121E19] border border-[#E5E1D5] dark:border-white/10 rounded-2xl p-3.5 flex items-start gap-2.5 text-xs text-[#55685F] dark:text-[#A2B3AA] transition-colors">
-              <Lock className="w-4 h-4 text-[#063B2C] dark:text-emerald-400 shrink-0 mt-0.5" />
+              <Lock className="w-4 h-4 text-[#007AFF] dark:text-blue-400 shrink-0 mt-0.5" />
               <p>
                 <strong className="text-[#11241C] dark:text-white font-bold">100% Private:</strong> Notes are saved only in your device's private browser memory. They are <strong className="underline">never automatically uploaded</strong> to public servers or visible to other users.
               </p>
             </div>
 
             {savedNoteRef && (
-              <div className="bg-[#E6F4EA] dark:bg-emerald-950/60 border border-[#A6E9B9] dark:border-emerald-800/40 rounded-2xl p-3 text-xs flex items-center justify-between">
-                <span className="text-[#063B2C] dark:text-emerald-300 font-bold">
+              <div className="bg-[#E6F4EA] dark:bg-blue-950/60 border border-[#A6E9B9] dark:border-blue-800/40 rounded-2xl p-3 text-xs flex items-center justify-between">
+                <span className="text-[#007AFF] dark:text-blue-300 font-bold">
                   ✓ Note saved with Reference ID: {savedNoteRef}
                 </span>
                 <button
@@ -622,12 +622,12 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
               {privateNotes.map((note) => (
                 <div
                   key={note.id}
-                  className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-2.5 transition-colors"
+                  className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-2.5 transition-colors"
                 >
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded-full bg-[#FAF8F5] dark:bg-[#121E19] border border-[#D2CEBE] dark:border-white/10 font-bold text-[10px] text-[#063B2C] dark:text-emerald-400">
+                        <span className="px-2 py-0.5 rounded-full bg-[#FAF8F5] dark:bg-[#121E19] border border-[#D2CEBE] dark:border-white/10 font-bold text-[10px] text-[#007AFF] dark:text-blue-400">
                           {note.category}
                         </span>
                         <span className="text-[11px] font-mono font-bold text-[#8C9B93] dark:text-[#A2B3AA]">
@@ -668,7 +668,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
               ))}
 
               {privateNotes.length === 0 && (
-                <div className="bg-white dark:bg-[#17231E] border border-dashed border-[#D2CEBE] dark:border-white/15 rounded-3xl p-6 text-center space-y-2 transition-colors">
+                <div className="bg-white dark:bg-[#0F172A] border border-dashed border-[#D2CEBE] dark:border-white/15 rounded-3xl p-6 text-center space-y-2 transition-colors">
                   <FileText className="w-8 h-8 text-[#8C9B93] dark:text-[#A2B3AA] mx-auto" />
                   <p className="text-sm font-bold text-[#11241C] dark:text-white">No Private Notes Recorded</p>
                   <p className="text-xs text-[#55685F] dark:text-[#A2B3AA]">
@@ -676,7 +676,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
                   </p>
                   <button
                     onClick={() => setIsAddingNote(true)}
-                    className="mt-2 px-4 py-2 bg-[#063B2C] dark:bg-emerald-600 text-white font-bold text-xs rounded-2xl cursor-pointer"
+                    className="mt-2 px-4 py-2 bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs rounded-2xl cursor-pointer"
                   >
                     Add Private Record
                   </button>
@@ -692,7 +692,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
       {/* ========================================================= */}
       {isAddingNote && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#17231E] rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-xl border border-[#E8E4DA] dark:border-white/10 transition-colors">
+          <div className="bg-white dark:bg-[#0F172A] rounded-3xl p-5 w-full max-w-sm space-y-4 shadow-xl border border-[#E8E4DA] dark:border-white/10 transition-colors">
             <h3 className="font-extrabold text-base text-[#11241C] dark:text-white">
               Record Private Incident Note
             </h3>
@@ -753,7 +753,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
                 </button>
                 <button
                   type="submit"
-                  className="w-1/2 py-2.5 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 text-white font-bold hover:bg-[#084D3A] cursor-pointer"
+                  className="w-1/2 py-2.5 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold hover:bg-[#084D3A] cursor-pointer"
                 >
                   Save Privately
                 </button>

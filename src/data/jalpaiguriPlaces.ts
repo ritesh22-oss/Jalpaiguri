@@ -171,7 +171,7 @@ export const JALPAIGURI_EXPLORE_PLACES: ExplorePlaceItem[] = [
     userRatingCount: 395,
     googleMapsUri: 'https://www.google.com/maps/search/?api=1&query=Kadamtala+Market+Jalpaiguri&query_place_id=ChIJvXf5y3945TkRo9L5Y1o8xQk',
     photoResourceName: 'places/ChIJvXf5y3945TkRo9L5Y1o8xQk/photos/AW15-kadamtala_market_junction',
-    photoAttribution: '© Jalpaiguri Connect Contributors / Google Maps',
+    photoAttribution: '© MYJPG Contributors / Google Maps',
     openStatus: '8:30 AM - 9:00 PM',
     phone: '03561-222400',
     description: 'Vibrant commercial square with modern stationery stores, electronics, tailoring hubs, bakeries, and banking ATMs.',

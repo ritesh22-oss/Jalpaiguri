@@ -1,5 +1,5 @@
 /**
- * Jalpaiguri Connect - Google Maps JavaScript API Loader
+ * MYJPG - Google Maps JavaScript API Loader
  * 
  * Complies strictly with Google Maps Platform guidelines:
  * - Uses dynamic asynchronous bootstrap script loader

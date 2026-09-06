@@ -1,5 +1,5 @@
 /**
- * Jalpaiguri Connect - Category & Landmark Architectural Illustrations
+ * MYJPG - Category & Landmark Architectural Illustrations
  * 
  * Provides bespoke, authentic Bengal architectural & landscape SVG illustrations
  * tailored strictly to Jalpaiguri landmarks and civic categories.
@@ -380,7 +380,7 @@ const FUEL_UTILITIES_SVG = `
     <linearGradient id="flSky" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#047857"/>
       <stop offset="60%" stop-color="#059669"/>
-      <stop offset="100%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#60A5FA"/>
     </linearGradient>
   </defs>
 

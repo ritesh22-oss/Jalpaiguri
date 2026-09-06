@@ -58,7 +58,7 @@ export const VehicleView: React.FC = () => {
         {/* 24/7 Breakdown Hotline */}
         <div className="bg-[#FAF2EC] dark:bg-[#251A14] border border-[#F3E2D5] dark:border-orange-950/40 rounded-3xl p-4 shadow-xs flex items-center justify-between transition-colors">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-[#063B2C] dark:bg-emerald-600 text-white flex items-center justify-center">
+            <div className="w-11 h-11 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white flex items-center justify-center">
               <Car className="w-6 h-6" />
             </div>
             <div>
@@ -68,7 +68,7 @@ export const VehicleView: React.FC = () => {
           </div>
           <button
             onClick={() => window.location.href = 'tel:9832077412'}
-            className="px-3.5 py-2 rounded-xl bg-[#063B2C] dark:bg-emerald-600 text-white text-xs font-bold shadow-xs cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white text-xs font-bold shadow-xs cursor-pointer"
           >
             Call Now
           </button>
@@ -84,16 +84,16 @@ export const VehicleView: React.FC = () => {
               <div className="flex items-start justify-between">
                 <div>
                   <h4 className="font-extrabold text-sm text-[#11241C] dark:text-white">{m.name}</h4>
-                  <span className="text-xs font-semibold text-[#063B2C] dark:text-emerald-400">{m.category}</span>
+                  <span className="text-xs font-semibold text-[#007AFF] dark:text-blue-400">{m.category}</span>
                 </div>
-                <span className="text-xs font-bold text-[#063B2C] dark:text-emerald-400 bg-[#E6F4EA] dark:bg-emerald-950/60 border border-transparent dark:border-emerald-800/40 px-2 py-0.5 rounded-full">
+                <span className="text-xs font-bold text-[#007AFF] dark:text-blue-400 bg-[#E6F4EA] dark:bg-blue-950/60 border border-transparent dark:border-blue-800/40 px-2 py-0.5 rounded-full">
                   ★ {m.rating}
                 </span>
               </div>
 
               <div className="flex items-center justify-between text-xs text-[#55685F] dark:text-[#A2B3AA] font-semibold">
                 <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-[#063B2C] dark:text-emerald-400" />
+                  <MapPin className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400" />
                   <span>{m.area}</span>
                 </span>
                 <span>{m.timing}</span>
@@ -102,7 +102,7 @@ export const VehicleView: React.FC = () => {
               <div className="pt-2 border-t border-[#F0ECE1] dark:border-white/10 flex justify-end">
                 <button
                   onClick={() => window.location.href = `tel:${m.phone.replace(/\s+/g, '')}`}
-                  className="px-4 py-2 rounded-xl bg-[#D2EBE0] dark:bg-emerald-950/60 text-[#063B2C] dark:text-emerald-300 font-bold text-xs flex items-center gap-1.5 cursor-pointer border border-transparent dark:border-emerald-800/40 hover:bg-[#C2E4D5] dark:hover:bg-emerald-900/60"
+                  className="px-4 py-2 rounded-xl bg-[#D2EBE0] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 font-bold text-xs flex items-center gap-1.5 cursor-pointer border border-transparent dark:border-blue-800/40 hover:bg-[#C2E4D5] dark:hover:bg-blue-900/60"
                 >
                   <Phone className="w-3.5 h-3.5" />
                   <span>Call Provider</span>
