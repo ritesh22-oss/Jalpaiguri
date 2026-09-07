@@ -1,7 +1,6 @@
 
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
-import { apiKeyService } from '../../server/apiKeyService';
 
 // Replicating helper functions
 function formatGeminiHistory(
@@ -52,14 +51,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'A valid message string is required.' });
   }
 
-  const ai = apiKeyService.getGeminiClient();
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: 'Gemini API not configured.' });
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
+
   let selectedModel = 'gemini-3.5-flash';
   if (modelType === 'complex' || modelType === 'pro') selectedModel = 'gemini-3.1-pro-preview';
   else if (modelType === 'fast' || modelType === 'lite') selectedModel = 'gemini-3.1-flash-lite';
-
-  if (!ai) {
-    return res.status(500).json({ error: 'Gemini API not configured.' });
-  }
 
   try {
     const formattedContents = formatGeminiHistory(history, message);
