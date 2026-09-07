@@ -5,7 +5,6 @@ import {
   MapPin,
   Sparkles,
   ShieldCheck,
-  Building,
   HeartPulse,
   Compass,
   Car,
@@ -17,7 +16,6 @@ import {
   Sun,
   Moon,
   X,
-  SlidersHorizontal,
   RefreshCw,
   AlertCircle
 } from 'lucide-react';
@@ -29,6 +27,7 @@ import { JALPAIGURI_EXPLORE_PLACES } from '../../data/jalpaiguriPlaces';
 import { ExplorePlaceCard } from '../explore/ExplorePlaceCard';
 import { PlaceDetailsModal } from '../explore/PlaceDetailsModal';
 import { ExplorePlacesMapView } from '../explore/ExplorePlacesMapView';
+import { GooglePlacesMap } from '../common/GooglePlacesMap';
 import {
   validateServiceArea,
   calculateHaversineDistance,
@@ -42,7 +41,7 @@ export const MapsExplorerView: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ExplorePlaceCategory>('All');
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'map' | 'search'>('list');
   const [selectedPlaceForModal, setSelectedPlaceForModal] = useState<ExplorePlaceItem | null>(null);
 
   // User coordinates (defaults to Kadamtala, Jalpaiguri if not detected)
@@ -206,7 +205,18 @@ export const MapsExplorerView: React.FC = () => {
               }`}
             >
               <MapIcon className="w-3.5 h-3.5" />
-              <span>Map View</span>
+              <span>Jalpaiguri Map</span>
+            </button>
+             <button
+              onClick={() => setViewMode('search')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                viewMode === 'search'
+                  ? 'bg-white dark:bg-[#1E3B2E] text-[#007AFF] dark:text-[#93C5FD] shadow-xs'
+                  : 'text-[#55685F] dark:text-[#A2B3AA] hover:text-[#11241C] dark:hover:text-white'
+              }`}
+            >
+              <Search className="w-3.5 h-3.5" />
+              <span>Search Map</span>
             </button>
           </div>
 
@@ -242,14 +252,16 @@ export const MapsExplorerView: React.FC = () => {
       {/* Main Content Area */}
       <main className="p-4 space-y-4">
         {/* Results Counter & Active Filter Badge */}
-        <div className="flex items-center justify-between text-xs font-bold text-[#55685F] dark:text-[#9FB2A8] px-1">
-          <span>
-            {filteredPlaces.length} {filteredPlaces.length === 1 ? 'Place' : 'Places'} in Jalpaiguri
-          </span>
-          <span className="text-[11px] text-[#007AFF] dark:text-[#93C5FD]">
-            Google Places Verified
-          </span>
-        </div>
+        {viewMode !== 'search' && (
+            <div className="flex items-center justify-between text-xs font-bold text-[#55685F] dark:text-[#9FB2A8] px-1">
+            <span>
+                {filteredPlaces.length} {filteredPlaces.length === 1 ? 'Place' : 'Places'} in Jalpaiguri
+            </span>
+            <span className="text-[11px] text-[#007AFF] dark:text-[#93C5FD]">
+                Google Places Verified
+            </span>
+            </div>
+        )}
 
         {/* View Mode: Map or List */}
         {viewMode === 'map' ? (
@@ -259,6 +271,8 @@ export const MapsExplorerView: React.FC = () => {
             userLng={userLng}
             onSelectPlace={(place) => setSelectedPlaceForModal(place)}
           />
+        ) : viewMode === 'search' ? (
+            <GooglePlacesMap className="h-[520px]" />
         ) : (
           <div className="space-y-4">
             {filteredPlaces.length > 0 ? (
