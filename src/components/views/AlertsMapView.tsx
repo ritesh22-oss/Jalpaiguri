@@ -25,9 +25,10 @@ export const AlertsMapView: React.FC = () => {
   const [selectedNotice, setSelectedNotice] = useState<any | null>(null);
 
   return (
-    <div className="relative min-h-screen bg-[#FAF8F5] dark:bg-[#0E1714] text-[#11241C] dark:text-[#E8F0EC] pb-28 max-w-md mx-auto select-none transition-colors duration-200">
+    <div className="w-full relative min-h-screen bg-[#FAF8F5] dark:bg-[#0E1714] text-[#11241C] dark:text-[#E8F0EC] pb-28 select-none transition-colors duration-200">
       {/* Sticky Header */}
-      <header className="sticky top-0 z-40 bg-[#FAF8F5]/95 dark:bg-[#0E1714]/95 backdrop-blur-md px-4 pt-5 pb-3 border-b border-[#E8E4DA] dark:border-white/10 space-y-3">
+      <header className="w-full sticky top-0 z-40 bg-[#FAF8F5]/95 dark:bg-[#0E1714]/95 backdrop-blur-md border-b border-[#E8E4DA] dark:border-white/10">
+        <div className="max-w-4xl mx-auto px-4 pt-5 pb-3 space-y-3">
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
@@ -77,10 +78,11 @@ export const AlertsMapView: React.FC = () => {
             );
           })}
         </div>
+        </div>
       </header>
 
       {/* Main Content Area */}
-      <div className="p-4 space-y-4">
+      <div className="max-w-4xl mx-auto p-4 space-y-4">
         {/* Real-time Google Maps Traffic & Waterlogging Component */}
         {(activeFilter === 'ALL' || activeFilter === 'TRAFFIC' || activeFilter === 'WATERLOGGING') && (
           <LiveTrafficWaterlogging

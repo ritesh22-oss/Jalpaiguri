@@ -39,9 +39,10 @@ export const WorkerDetailView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 max-w-md mx-auto select-none transition-colors">
+    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 select-none transition-colors">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0F1A15]/90 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-[#E8E4DA]/50 dark:border-white/10 transition-colors">
+      <header className="w-full sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0F1A15]/90 backdrop-blur-md border-b border-[#E8E4DA]/50 dark:border-white/10 transition-colors">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
         <button
           onClick={goBack}
           className="w-10 h-10 rounded-full bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-sm hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] cursor-pointer"
@@ -57,9 +58,10 @@ export const WorkerDetailView: React.FC = () => {
             <Heart className={`w-4 h-4 ${isSaved ? 'fill-[#D9383A] text-[#D9383A]' : 'text-[#11241C] dark:text-white'}`} />
           </button>
         </div>
+        </div>
       </header>
 
-      <div className="p-5 space-y-5">
+      <div className="max-w-3xl mx-auto p-5 space-y-5">
         {/* Profile Card */}
         <div className="bg-white dark:bg-[#17231E] rounded-3xl p-5 border border-[#E8E4DA] dark:border-white/10 shadow-xs space-y-4 text-center transition-colors">
           <div className="relative inline-block mx-auto">
@@ -140,8 +142,8 @@ export const WorkerDetailView: React.FC = () => {
       </div>
 
       {/* Bottom Sticky Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-[#0F1A15]/95 backdrop-blur-md border-t border-[#E8E4DA] dark:border-white/10 p-4 max-w-md mx-auto transition-colors">
-        <div className="grid grid-cols-3 gap-2">
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-[#0F1A15]/95 backdrop-blur-md border-t border-[#E8E4DA] dark:border-white/10 p-4 transition-colors">
+        <div className="max-w-3xl mx-auto grid grid-cols-3 gap-2">
           <button
             onClick={handleCall}
             className="py-3.5 px-3 rounded-2xl bg-[#D2EBE0] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-[#C2E4D5] dark:hover:bg-blue-900/60 border border-transparent dark:border-blue-800/40 cursor-pointer"

@@ -155,7 +155,7 @@ export const OfferServicesView: React.FC = () => {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-[#FAF8F5] p-6 flex flex-col justify-between max-w-md mx-auto select-none">
+      <div className="w-full min-h-screen bg-[#FAF8F5] p-6 flex flex-col justify-between max-w-2xl mx-auto select-none">
         <div className="pt-16 text-center space-y-4 animate-in zoom-in-95 duration-300">
           <div className="w-20 h-20 bg-[#E6F4EA] text-[#007AFF] rounded-full flex items-center justify-center mx-auto shadow-sm">
             <CheckCircle2 className="w-10 h-10" />
@@ -199,8 +199,9 @@ export const OfferServicesView: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] pb-28 max-w-md mx-auto select-none">
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-[#E8E4DA]/50">
+    <div className="w-full min-h-screen bg-[#FAF8F5] pb-28 select-none">
+      <header className="w-full sticky top-0 z-30 bg-[#FAF8F5]/90 backdrop-blur-md border-b border-[#E8E4DA]/50">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={goBack}
@@ -213,9 +214,10 @@ export const OfferServicesView: React.FC = () => {
             <p className="text-[11px] text-[#55685F] font-semibold">Register Trade & Services</p>
           </div>
         </div>
+        </div>
       </header>
 
-      <form onSubmit={handleSubmit} className="p-4 space-y-4">
+      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto p-4 space-y-4">
         {/* Banner */}
         <div className="bg-gradient-to-r from-[#E6F4EA] to-[#F1F9F4] p-4 rounded-3xl border border-[#A7D7B9] space-y-1">
           <div className="flex items-center gap-1.5 text-[#007AFF] font-extrabold text-sm">

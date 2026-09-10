@@ -85,7 +85,8 @@ export const ProfileSetupView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0F1A15] text-[#11241C] dark:text-white flex flex-col justify-between p-5 max-w-md mx-auto select-none relative shadow-2xl transition-colors">
+    <div className="w-full min-h-screen bg-white dark:bg-[#0F1A15] text-[#11241C] dark:text-white flex flex-col justify-between p-5 select-none relative transition-colors">
+      <div className="w-full max-w-xl mx-auto flex-1 flex flex-col justify-between">
       {/* Top Header Bar with Back button, Title & Language Switcher */}
       <div className="w-full flex items-center justify-between pt-2 pb-2">
         <button
@@ -347,6 +348,7 @@ export const ProfileSetupView: React.FC = () => {
             </button>
           </div>
         </form>
+      </div>
       </div>
     </div>
   );

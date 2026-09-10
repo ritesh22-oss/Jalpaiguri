@@ -261,9 +261,10 @@ export const GeminiChatView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#020617] flex flex-col justify-between max-w-md mx-auto select-none transition-colors">
+    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#020617] flex flex-col justify-between select-none transition-colors">
       {/* Top App Bar */}
-      <header className="sticky top-0 z-30 bg-white/95 dark:bg-[#0B1224]/95 backdrop-blur-md px-4 py-3 border-b border-[#E8E4DA] dark:border-white/10 shadow-xs">
+      <header className="w-full sticky top-0 z-30 bg-white/95 dark:bg-[#0B1224]/95 backdrop-blur-md border-b border-[#E8E4DA] dark:border-white/10 shadow-xs">
+        <div className="max-w-4xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -413,10 +414,11 @@ export const GeminiChatView: React.FC = () => {
             <span>Maps Grounding {useMapsGrounding ? 'ON' : 'OFF'}</span>
           </button>
         </div>
+        </div>
       </header>
 
       {/* Main Chat Thread Scroll Area */}
-      <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+      <div className="flex-1 w-full max-w-4xl mx-auto p-4 space-y-4 overflow-y-auto">
         {!selectedLanguage && (
           <div className="flex flex-col items-center justify-center h-full space-y-6 text-center animate-in fade-in duration-500">
             <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-2">
@@ -604,45 +606,49 @@ export const GeminiChatView: React.FC = () => {
     </div>
 
       {/* Suggested Quick Prompts */}
-      <div className="px-3 py-2 bg-white dark:bg-[#0F172A] border-t border-[#F0ECE1] dark:border-white/10 overflow-x-auto no-scrollbar flex gap-2">
-        {samplePrompts.map((p, idx) => (
-          <button
-            key={idx}
-            onClick={() => {
-              setSelectedRole(p.role);
-              handleSend(p.text);
-            }}
-            className="shrink-0 px-3 py-1 rounded-full text-xs font-semibold bg-[#FAF8F5] dark:bg-[#1E293B] border border-[#E0DCD3] dark:border-white/10 text-[#11241C] dark:text-slate-300 hover:bg-[#E6F4EA] dark:hover:bg-blue-900/30 hover:border-[#007AFF] hover:text-[#007AFF] transition-all cursor-pointer"
-          >
-            {p.text}
-          </button>
-        ))}
+      <div className="w-full bg-white dark:bg-[#0F172A] border-t border-[#F0ECE1] dark:border-white/10">
+        <div className="max-w-4xl mx-auto px-3 py-2 overflow-x-auto no-scrollbar flex gap-2">
+          {samplePrompts.map((p, idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                setSelectedRole(p.role);
+                handleSend(p.text);
+              }}
+              className="shrink-0 px-3 py-1 rounded-full text-xs font-semibold bg-[#FAF8F5] dark:bg-[#1E293B] border border-[#E0DCD3] dark:border-white/10 text-[#11241C] dark:text-slate-300 hover:bg-[#E6F4EA] dark:hover:bg-blue-900/30 hover:border-[#007AFF] hover:text-[#007AFF] transition-all cursor-pointer"
+            >
+              {p.text}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Input Form Bar */}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSend();
-        }}
-        className="p-3 bg-white dark:bg-[#0B1224] border-t border-[#E8E4DA] dark:border-white/10 flex items-center gap-2 shadow-lg"
-      >
-        <input
-          type="text"
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          placeholder={`Ask Jalpaigi AI (${rolesConfig[selectedRole].badge})...`}
-          className="flex-1 bg-[#FAF8F5] dark:bg-[#1E293B] border border-[#D2CEBE] dark:border-white/10 rounded-full px-4 py-2.5 text-xs font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF] dark:focus:border-blue-500"
-          disabled={loading}
-        />
-        <button
-          type="submit"
-          disabled={!inputText.trim() || loading}
-          className="w-10 h-10 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white flex items-center justify-center shadow-md hover:bg-blue-700 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer shrink-0"
+      <div className="w-full bg-white dark:bg-[#0B1224] border-t border-[#E8E4DA] dark:border-white/10 shadow-lg">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSend();
+          }}
+          className="max-w-4xl mx-auto p-3 flex items-center gap-2"
         >
-          <Send className="w-4 h-4 fill-white" />
-        </button>
-      </form>
+          <input
+            type="text"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder={`Ask Jalpaigi AI (${rolesConfig[selectedRole].badge})...`}
+            className="flex-1 bg-[#FAF8F5] dark:bg-[#1E293B] border border-[#D2CEBE] dark:border-white/10 rounded-full px-4 py-2.5 text-xs font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF] dark:focus:border-blue-500"
+            disabled={loading}
+          />
+          <button
+            type="submit"
+            disabled={!inputText.trim() || loading}
+            className="w-10 h-10 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white flex items-center justify-center shadow-md hover:bg-blue-700 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer shrink-0"
+          >
+            <Send className="w-4 h-4 fill-white" />
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

@@ -307,11 +307,13 @@ export const OTPView: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen bg-[#F8FBFF] dark:bg-[#020617] text-[#11241C] dark:text-white flex flex-col p-6 max-w-md mx-auto select-none relative transition-colors overflow-hidden"
+      className="w-full min-h-screen bg-[#F8FBFF] dark:bg-[#020617] text-[#11241C] dark:text-white flex flex-col p-6 select-none relative transition-colors overflow-hidden"
       onPaste={handlePaste}
     >
       {/* Background Orbs */}
       <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-blue-400/10 dark:bg-blue-600/5 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div className="w-full max-w-lg mx-auto flex-1 flex flex-col justify-between">
 
       {/* Hidden input for mobile keyboard */}
       <input
@@ -545,6 +547,7 @@ export const OTPView: React.FC = () => {
             );
           })}
         </div>
+      </div>
       </div>
     </div>
   );

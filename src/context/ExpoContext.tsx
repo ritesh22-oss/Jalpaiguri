@@ -45,13 +45,7 @@ interface ExpoContextType {
 const ExpoContext = createContext<ExpoContextType | undefined>(undefined);
 
 export const ExpoProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [deviceType, setDeviceTypeState] = useState<ExpoDeviceType>(() => {
-    try {
-      const saved = localStorage.getItem('expo_device_type');
-      if (saved) return saved as ExpoDeviceType;
-    } catch (_) {}
-    return 'iphone-16-pro';
-  });
+  const [deviceType, setDeviceTypeState] = useState<ExpoDeviceType>('fullscreen');
 
   const [pushNotification, setPushNotification] = useState<ExpoPushNotificationData | null>(null);
   const [latestOtp, setLatestOtp] = useState<string | null>(null);

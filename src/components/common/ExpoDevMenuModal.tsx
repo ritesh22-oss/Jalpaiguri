@@ -184,37 +184,6 @@ export const ExpoDevMenuModal: React.FC = () => {
             </div>
           </div>
 
-          {/* Device Frame Switcher */}
-          <div className="p-3 bg-gray-50 rounded-2xl border border-gray-200/70 space-y-1.5">
-            <p className="text-[11px] font-bold text-gray-700 flex items-center gap-1.5">
-              <Smartphone className="w-3.5 h-3.5 text-gray-600" />
-              <span>Device Frame Simulator</span>
-            </p>
-            <div className="grid grid-cols-2 gap-1.5">
-              {(
-                [
-                  { id: 'iphone-16-pro', label: 'iPhone 16 Pro' },
-                  { id: 'pixel-9', label: 'Google Pixel 9' },
-                  { id: 'compact', label: 'Native Mobile' },
-                  { id: 'fullscreen', label: 'Fullscreen' }
-                ] as const
-              ).map((frame) => (
-                <button
-                  key={frame.id}
-                  onClick={() => setDeviceType(frame.id)}
-                  className={`py-1.5 px-2 rounded-xl text-[11px] font-medium flex items-center justify-between transition-all cursor-pointer ${
-                    deviceType === frame.id
-                      ? 'bg-black text-white font-bold shadow-xs'
-                      : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-                  }`}
-                >
-                  <span>{frame.label}</span>
-                  {deviceType === frame.id && <CheckCircle2 className="w-3 h-3 text-blue-400" />}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Fast Test Profiles Switcher */}
           <div className="p-3 bg-blue-50/60 rounded-2xl border border-blue-100 space-y-2">
             <p className="text-[11px] font-bold text-blue-900 flex items-center gap-1.5">

@@ -82,10 +82,11 @@ export const PhoneAuthView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FBFF] dark:bg-[#020617] text-[#11241C] dark:text-white flex flex-col p-6 max-w-md mx-auto select-none relative transition-colors overflow-hidden">
+    <div className="w-full min-h-screen bg-[#F8FBFF] dark:bg-[#020617] text-[#11241C] dark:text-white flex flex-col p-6 select-none relative transition-colors overflow-hidden">
       {/* Background Orbs */}
       <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-blue-400/10 dark:bg-blue-600/5 rounded-full blur-3xl pointer-events-none"></div>
       
+      <div className="w-full max-w-lg mx-auto flex-1 flex flex-col justify-between">
       {/* Top Header */}
       <div className="w-full flex items-center justify-between mb-8 z-10">
         <button
@@ -186,6 +187,7 @@ export const PhoneAuthView: React.FC = () => {
         <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">
           {isBengali ? 'নিরাপদ ও এনক্রিপ্টেড সংযোগ' : 'Secure & Encrypted Connection'}
         </p>
+      </div>
       </div>
     </div>
   );

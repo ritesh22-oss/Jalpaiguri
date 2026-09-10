@@ -77,9 +77,10 @@ export const BloodView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 max-w-md mx-auto select-none transition-colors">
+    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 select-none transition-colors">
       {/* Exact Header matching Screenshot 8 */}
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0B132B]/90 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-[#E8E4DA]/40 dark:border-white/10 transition-colors">
+      <header className="w-full sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0B132B]/90 backdrop-blur-md border-b border-[#E8E4DA]/40 dark:border-white/10 transition-colors">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
         <div
           onClick={() => navigate('profile')}
           className="w-10 h-10 rounded-full bg-[#EFECE6] dark:bg-[#0F172A] flex items-center justify-center text-[#11241C] dark:text-white cursor-pointer transition-colors"
@@ -97,9 +98,10 @@ export const BloodView: React.FC = () => {
         >
           <MapPin className="w-5 h-5 stroke-[2]" />
         </div>
+        </div>
       </header>
 
-      <div className="p-5 space-y-6">
+      <div className="max-w-4xl mx-auto p-5 space-y-6">
         {/* Top Blood Droplet Icon & Title */}
         <div className="text-center space-y-2 pt-1">
           <div className="w-14 h-14 rounded-full bg-[#FFEBEA] dark:bg-red-950/50 text-[#D9383A] dark:text-red-400 flex items-center justify-center mx-auto shadow-xs border border-transparent dark:border-red-900/40">
@@ -114,7 +116,7 @@ export const BloodView: React.FC = () => {
         </div>
 
         {/* 3 Prominent Action Cards matching Screenshot 8 */}
-        <div className="space-y-3.5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {/* 1. I Need Blood (Soft Pink Card) */}
           <div
             onClick={() => setActiveSection(activeSection === 'request' ? 'main' : 'request')}

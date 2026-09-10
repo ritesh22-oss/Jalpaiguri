@@ -111,9 +111,10 @@ export const MapsExplorerView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] text-[#11241C] dark:text-white pb-24 max-w-md mx-auto transition-colors duration-200">
+    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] text-[#11241C] dark:text-white pb-24 transition-colors duration-200">
       {/* 1. Header with Jalpaiguri Identity, Theme Toggle & Navigation */}
-      <header className="sticky top-0 z-30 bg-white/95 dark:bg-[#13201A]/95 backdrop-blur-md px-4 py-3 border-b border-[#E8E4DA] dark:border-white/10 shadow-xs transition-colors">
+      <header className="w-full sticky top-0 z-30 bg-white/95 dark:bg-[#13201A]/95 backdrop-blur-md border-b border-[#E8E4DA] dark:border-white/10 shadow-xs transition-colors">
+        <div className="max-w-5xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <button
@@ -247,10 +248,11 @@ export const MapsExplorerView: React.FC = () => {
             );
           })}
         </div>
+        </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="p-4 space-y-4">
+      <main className="max-w-5xl mx-auto p-4 space-y-4">
         {/* Results Counter & Active Filter Badge */}
         {viewMode !== 'search' && (
             <div className="flex items-center justify-between text-xs font-bold text-[#55685F] dark:text-[#9FB2A8] px-1">
@@ -279,14 +281,16 @@ export const MapsExplorerView: React.FC = () => {
                 Address Descriptor Demo
             </a>
             {filteredPlaces.length > 0 ? (
-              filteredPlaces.map((place) => (
-                <ExplorePlaceCard
-                  key={place.id}
-                  place={place}
-                  onSelect={(p) => setSelectedPlaceForModal(p)}
-                  onAskAI={handleAskAI}
-                />
-              ))
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredPlaces.map((place) => (
+                  <ExplorePlaceCard
+                    key={place.id}
+                    place={place}
+                    onSelect={(p) => setSelectedPlaceForModal(p)}
+                    onAskAI={handleAskAI}
+                  />
+                ))}
+              </div>
             ) : (
               // Empty State (Strictly enforcing Jalpaiguri boundaries)
               <div className="bg-white dark:bg-[#16231E] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-8 text-center space-y-3 shadow-xs">

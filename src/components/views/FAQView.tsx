@@ -52,18 +52,19 @@ export const FAQView: React.FC = () => {
 
   return (
     <div
-      className={`min-h-screen pb-28 max-w-md mx-auto select-none transition-colors duration-200 ${
+      className={`w-full min-h-screen pb-28 select-none transition-colors duration-200 ${
         isDarkMode ? 'bg-[#0E1714] text-[#E6EFEA]' : 'bg-[#FAF8F5] text-[#11241C]'
       }`}
     >
       {/* Sticky Header */}
       <header
-        className={`sticky top-0 z-30 px-5 pt-6 pb-3.5 border-b backdrop-blur-md transition-colors ${
+        className={`w-full sticky top-0 z-30 border-b backdrop-blur-md transition-colors ${
           isDarkMode
             ? 'bg-[#0E1714]/90 border-[#1F332B]'
             : 'bg-[#FAF8F5]/90 border-[#E8E4DA]/70'
-        } flex items-center justify-between`}
+        }`}
       >
+        <div className="max-w-4xl mx-auto px-5 pt-6 pb-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={() => goBack()}
@@ -93,9 +94,10 @@ export const FAQView: React.FC = () => {
           <HelpCircle className="w-3.5 h-3.5" />
           <span>v1.0.0</span>
         </div>
+        </div>
       </header>
 
-      <div className="p-5 space-y-5">
+      <div className="max-w-4xl mx-auto p-5 space-y-5">
         {/* Hero Section */}
         <div
           className={`p-4 rounded-3xl border transition-colors ${
