@@ -205,9 +205,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // This is crucial for environments where popup authentication is unreliable.
       getRedirectResult(auth)
         .then((result) => {
-          // Clear the pending flag regardless of result
-          localStorage.removeItem('jpg_redirect_auth_pending');
-          
           if (result && result.user) {
             console.log('[FIREBASE AUTH] Redirect sign-in success for:', result.user.email);
             // Ensure the Firebase user state is updated immediately
@@ -222,9 +219,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }
             } catch (e) {}
           }
+          // We only clear the pending flag AFTER result is processed
+          // This prevents the UI from flipping back to the splash screen too early
+          localStorage.removeItem('jpg_redirect_auth_pending');
         })
         .catch((err) => {
           console.warn('[FIREBASE AUTH] Redirect result notice:', err);
+          localStorage.removeItem('jpg_redirect_auth_pending');
         });
 
       unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
