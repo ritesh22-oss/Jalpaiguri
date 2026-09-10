@@ -119,6 +119,7 @@ const AppContent: React.FC = () => {
   const { user, isAuthenticated, isProfileComplete, isLoading } = useAuth();
   const { isWithinServiceRegion, serviceAreaStatus, status: locationStatus, location } = useLocation();
   const { pujaPandals, addPujaPandal, reportPandalInfo } = useApp();
+  const { isBengali } = useLanguage();
 
   // Automatic auth state transition: if user is authenticated but has not completed profile setup
   // and is currently on auth/onboarding views, smoothly navigate them to profile-setup immediately
@@ -207,23 +208,24 @@ const AppContent: React.FC = () => {
 
   // Handle case where we are returning from a redirect or restoring a session
   if (isLoading) {
-    // If we are returning from a redirect, show a direct "Completing login" state
-    if (isRedirectPending) {
+    // If we are returning from a redirect or it's a sub-sequent reload in the same session, 
+    // skip the full splash animation and show a subtle loader.
+    if (isRedirectPending || hasShownSplash) {
       return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-white">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
-            <p className="text-sm font-bold text-gray-500 animate-pulse">Completing Google Sign-in...</p>
+          <div className="flex flex-col items-center gap-6">
+            <div className="relative">
+              <JalpaiguriLogo size="xl" showText={false} outline={true} />
+              <div className="absolute -bottom-2 -right-2">
+                 <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+              </div>
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-bold text-gray-500 animate-pulse tracking-wide uppercase">
+                {isRedirectPending ? 'Completing Google Sign-in...' : 'Connecting to Jalpaiguri...'}
+              </p>
+            </div>
           </div>
-        </div>
-      );
-    }
-    
-    // If we are authenticated (from cache) and it's NOT the very first startup, skip splash
-    if (isAuthenticated && hasShownSplash) {
-      return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAF8F5]">
-           <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
         </div>
       );
     }
@@ -387,7 +389,6 @@ const AppContent: React.FC = () => {
     'add-shop'
   ];
   const showBottomNav = !hideBottomNavViews.includes(currentView);
-  const { isBengali } = useLanguage();
   const isPostLogin = !['splash', 'onboarding', 'auth', 'phone-auth', 'otp', 'profile-setup', 'profile-onboarding'].includes(currentView);
 
   return (
