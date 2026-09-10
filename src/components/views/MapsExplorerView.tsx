@@ -275,6 +275,9 @@ export const MapsExplorerView: React.FC = () => {
             <GooglePlacesMap className="h-[520px]" />
         ) : (
           <div className="space-y-4">
+            <a href="/address-descriptor.html" target="_blank" className="block text-center p-2 text-xs font-bold text-[#007AFF] dark:text-[#93C5FD] underline cursor-pointer">
+                Address Descriptor Demo
+            </a>
             {filteredPlaces.length > 0 ? (
               filteredPlaces.map((place) => (
                 <ExplorePlaceCard

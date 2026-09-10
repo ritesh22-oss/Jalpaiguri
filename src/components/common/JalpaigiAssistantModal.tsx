@@ -5,26 +5,14 @@ import {
   Send,
   Mic,
   ArrowRight,
-  ShieldCheck,
-  Heart,
-  Wrench,
-  AlertTriangle,
-  Briefcase,
-  Car,
-  MapPin,
-  ExternalLink,
-  Navigation,
-  RotateCcw,
   Maximize2,
-  ChevronDown,
-  Building,
-  HeartPulse,
-  Compass
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
 import { useNav } from '../../context/NavigationContext';
 import { useLocation } from '../../context/LocationContext';
 import { apiClient } from '../../services/apiClient';
+import logo from '../../assets/logo.png';
 
 interface GroundingPlace {
   title: string;
@@ -42,15 +30,125 @@ interface AssistantMsg {
   modelUsed?: string;
 }
 
+const CONTEXT_SUGGESTIONS = {
+  en: {
+    medical: ['Hospitals', 'Medical Services', 'Nearby Doctors'],
+    education: ['Colleges', 'Schools', 'Admissions'],
+    food: ['Cafes', 'Restaurants', 'Nearby Food'],
+    jobs: ['Local Jobs', 'Workers', 'Job Opportunities'],
+    blood: ['Blood Donors', 'Blood Banks', 'Blood Donation Info'],
+    transport: ['Buses', 'Trains', 'Transport Info'],
+    general: ['Doctors', 'Workers', 'Cafes', 'Blood Donors']
+  },
+  bn: {
+    medical: ['হাসপাতাল', 'চিকিৎসা পরিষেবা', 'ডাক্তার'],
+    education: ['কলেজ', 'স্কুল', 'ভর্তি সংক্রান্ত'],
+    food: ['ক্যাফে', 'রেস্তোরাঁ', 'খাবার'],
+    jobs: ['চাকরি', 'কাজের লোক', 'কাজের সুযোগ'],
+    blood: ['রক্তদাতা', 'ব্লাড ব্যাংক', 'রক্তদানের তথ্য'],
+    transport: ['বাস', 'ট্রেন', 'পরিবহন তথ্য'],
+    general: ['ডাক্তার', 'কাজের লোক', 'ক্যাফে', 'রক্তদাতা']
+  }
+};
+
 export const JalpaigiAssistantModal: React.FC = () => {
   const { isAssistantOpen, setIsAssistantOpen, navigate } = useNav();
   const { location } = useLocation();
 
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<'general' | 'emergency' | 'civic' | 'services' | 'tourism'>('general');
-  const [selectedTier, setSelectedTier] = useState<'complex' | 'general' | 'fast'>('general');
-  const [showRoleSelector, setShowRoleSelector] = useState(false);
+  const [lang, setLang] = useState<'en' | 'bn'>(() => (localStorage.getItem('jpg_ai_language') as 'en' | 'bn') || 'en');
+
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioLevel, setAudioLevel] = useState(0);
+  const recognitionRef = useRef<any>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+
+  const stopRecording = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+    }
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      audioContextRef.current.close();
+    }
+    setIsRecording(false);
+    setAudioLevel(0);
+  };
+
+  const startRecording = async () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert(lang === 'bn' ? 'আপনার ব্রাউজার ভয়েস সমর্থন করে না।' : 'Your browser does not support voice input.');
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      const audioContext = new AudioCtx();
+      audioContextRef.current = audioContext;
+      const analyser = audioContext.createAnalyser();
+      const microphone = audioContext.createMediaStreamSource(stream);
+      microphone.connect(analyser);
+      analyser.fftSize = 256;
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      
+      const updateVolume = () => {
+        if (!streamRef.current) return;
+        analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          sum += dataArray[i];
+        }
+        setAudioLevel(sum / dataArray.length);
+        animationFrameRef.current = requestAnimationFrame(updateVolume);
+      };
+      updateVolume();
+
+      const recognition = new SpeechRecognition();
+      recognition.lang = lang === 'bn' ? 'bn-IN' : 'en-US';
+      recognition.interimResults = true;
+      recognition.continuous = false;
+      
+      recognition.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((result: any) => result[0])
+          .map((result: any) => result.transcript)
+          .join('');
+        setPrompt(transcript);
+      };
+      
+      recognition.onerror = () => {
+        stopRecording();
+      };
+      
+      recognition.onend = () => {
+        stopRecording();
+      };
+      
+      recognition.start();
+      recognitionRef.current = recognition;
+      setIsRecording(true);
+    } catch (e) {
+      console.error(e);
+      alert(lang === 'bn' ? 'মাইক্রোফোন অ্যাক্সেস করতে সমস্যা হয়েছে।' : 'Could not access the microphone.');
+      stopRecording();
+    }
+  };
+
+  useEffect(() => {
+    localStorage.setItem('jpg_ai_language', lang);
+  }, [lang]);
 
   const [chatHistory, setChatHistory] = useState<AssistantMsg[]>(() => {
     const lang = localStorage.getItem('jpg_ai_language') || 'en';
@@ -76,36 +174,27 @@ export const JalpaigiAssistantModal: React.FC = () => {
     { label: 'Vehicle Help', query: 'Need a mechanic for my vehicle in Jalpaiguri', role: 'services' as const }
   ];
 
+  const getSuggestions = (text: string) => {
+    const lower = text.toLowerCase();
+    const suggestions = CONTEXT_SUGGESTIONS[lang];
+    if (lower.includes('doctor') || lower.includes('hospital') || lower.includes('medical') || lower.includes('ডাক্তার') || lower.includes('হাসপাতাল')) return suggestions.medical;
+    if (lower.includes('college') || lower.includes('school') || lower.includes('education') || lower.includes('শিক্ষা')) return suggestions.education;
+    if (lower.includes('cafe') || lower.includes('food') || lower.includes('restaurant') || lower.includes('খাবার')) return suggestions.food;
+    if (lower.includes('job') || lower.includes('work') || lower.includes('worker') || lower.includes('চাকরি') || lower.includes('কাজের')) return suggestions.jobs;
+    if (lower.includes('blood') || lower.includes('রক্ত')) return suggestions.blood;
+    if (lower.includes('transport') || lower.includes('bus') || lower.includes('train') || lower.includes('বাস') || lower.includes('ট্রেন')) return suggestions.transport;
+    return suggestions.general;
+  };
+
   const handleSend = async (textToSend?: string) => {
     const query = (textToSend || prompt).trim();
     if (!query || loading) return;
 
-    const lower = query.toLowerCase();
     const userMsg: AssistantMsg = { role: 'user', text: query };
     const updatedHistory = [...chatHistory, userMsg];
     setChatHistory(updatedHistory);
     setPrompt('');
     setLoading(true);
-
-    let detectedAction: { label: string; view: any; params?: any } | undefined;
-
-    if (lower.includes('electrician') || lower.includes('plumber') || lower.includes('carpenter') || lower.includes('worker') || lower.includes('repair') || lower.includes('ac')) {
-      detectedAction = { label: 'View Verified Workers', view: 'workers' };
-    } else if (lower.includes('blood') || lower.includes('donor')) {
-      detectedAction = { label: 'Open Blood Help', view: 'blood' };
-    } else if (lower.includes('road') || lower.includes('pothole') || lower.includes('garbage') || lower.includes('waterlogging') || lower.includes('light') || lower.includes('civic') || lower.includes('fix')) {
-      detectedAction = { label: 'Report Civic Issue', view: 'report-problem' };
-    } else if (lower.includes('doctor') || lower.includes('hospital') || lower.includes('clinic') || lower.includes('cardiologist') || lower.includes('physician') || lower.includes('medicine')) {
-      detectedAction = { label: 'Find Healthcare Near You', view: 'medical' };
-    } else if (lower.includes('vehicle') || lower.includes('puncture') || lower.includes('towing') || lower.includes('bike') || lower.includes('car') || lower.includes('mechanic')) {
-      detectedAction = { label: 'Request Vehicle Help', view: 'vehicle' };
-    } else if (lower.includes('job') || lower.includes('hiring') || lower.includes('vacancy') || lower.includes('work')) {
-      detectedAction = { label: 'Browse Local Jobs', view: 'jobs' };
-    } else if (lower.includes('rental') || lower.includes('room') || lower.includes('flat') || lower.includes('pg') || lower.includes('house')) {
-      detectedAction = { label: 'View Rentals', view: 'rentals' };
-    } else if (lower.includes('lost') || lower.includes('found') || lower.includes('wallet') || lower.includes('keys')) {
-      detectedAction = { label: 'Lost & Found Board', view: 'lost-found' };
-    }
 
     try {
       const historyPayload = updatedHistory.slice(-8).map((m) => ({
@@ -113,11 +202,13 @@ export const JalpaigiAssistantModal: React.FC = () => {
         text: m.text
       }));
 
+      const finalQuery = lang === 'bn' ? `${query} (Reply in Bengali)` : query;
+
       const res = await apiClient.geminiChat({
-        message: query,
+        message: finalQuery,
         history: historyPayload,
-        role: selectedRole,
-        modelType: selectedTier,
+        role: 'general',
+        modelType: 'general',
         useMaps: true,
         userLocation: {
           latitude: location.lat || 26.5414,
@@ -129,8 +220,7 @@ export const JalpaigiAssistantModal: React.FC = () => {
         ...prev,
         {
           role: 'model',
-          text: res?.reply || 'Nomoshkar! I am here to help you connect with Jalpaiguri civic services and emergency contacts.',
-          action: detectedAction,
+          text: res?.reply || (lang === 'bn' ? 'নমস্কার! আমি আপনাকে কীভাবে সাহায্য করতে পারি?' : 'Nomoshkar! How can I help you?'),
           groundingPlaces: res?.groundingPlaces,
           modelUsed: res?.modelUsed
         }
@@ -140,8 +230,7 @@ export const JalpaigiAssistantModal: React.FC = () => {
         ...prev,
         {
           role: 'model',
-          text: 'Nomoshkar! I am having trouble connecting. Please try again later.',
-          action: detectedAction
+          text: lang === 'bn' ? 'দুঃখিত, সংযোগে সমস্যা হচ্ছে। পরে আবার চেষ্টা করুন।' : 'Sorry, I am having trouble connecting. Please try again later.'
         }
       ]);
     } finally {
@@ -149,238 +238,151 @@ export const JalpaigiAssistantModal: React.FC = () => {
     }
   };
 
+// ... inside the component
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-xs p-0 sm:p-4">
-      <div
-        className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col h-[88vh] max-h-[680px] overflow-hidden animate-in slide-in-from-bottom duration-300"
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="w-full max-w-lg bg-white dark:bg-[#11241C] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col h-[90vh] max-h-[750px] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="bg-[#007AFF] text-white p-4 flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center text-[#A7D7B9]">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h3 className="font-bold text-base tracking-tight">Jalpaigi AI Assistant</h3>
-                <span className="text-[9px] bg-blue-700 text-blue-100 font-bold px-1.5 py-0.2 rounded">
-                  Gemini + Maps
-                </span>
-              </div>
-              <p className="text-xs text-[#D2EBE0]">Civic Intelligence • বাংলা & English</p>
-            </div>
+        {/* New Header Structure */}
+        <div className="flex items-center p-4 border-b border-[#E8E4DA] dark:border-white/10">
+          <img src={logo} alt="MYJPG Logo" className="w-8 h-8 mr-3 rounded-lg" />
+          <div className="flex-1">
+            <h3 className="font-bold text-base text-[#11241C] dark:text-white">Jalpaiguri AI Assistant</h3>
+            <p className="text-xs text-[#55685F] dark:text-[#A2B3AA]">Civic intelligence • বাংলা & English</p>
+          </div>
+          
+          <div className="flex items-center gap-1 bg-gray-100 dark:bg-[#1C2C24] p-1 rounded-full text-[10px] font-bold">
+            <button onClick={() => setLang('bn')} className={`px-2 py-1 rounded-full ${lang === 'bn' ? 'bg-white dark:bg-blue-900 shadow-sm text-blue-600' : 'text-gray-500'}`}>বাংলা</button>
+            <button onClick={() => setLang('en')} className={`px-2 py-1 rounded-full ${lang === 'en' ? 'bg-white dark:bg-blue-900 shadow-sm text-blue-600' : 'text-gray-500'}`}>English</button>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => {
-                setIsAssistantOpen(false);
-                navigate('ai-chat');
-              }}
-              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
-              title="Open Full Screen AI Chat"
-            >
-              <Maximize2 className="w-4 h-4" />
+          <div className="flex items-center gap-2 ml-2">
+            <button onClick={() => setIsAssistantOpen(false)} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10">
+              <X className="w-4 h-4 text-[#55685F] dark:text-[#A2B3AA]" />
             </button>
-            <button
-              onClick={() => setIsAssistantOpen(false)}
-              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Role Bar */}
-        <div className="bg-[#FAF8F5] px-3 py-2 border-b border-[#E8E4DA] flex items-center justify-between text-xs">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-bold text-[#55685F]">Role:</span>
-            <select
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value as any)}
-              className="bg-white border border-[#D2CEBE] rounded-lg px-2 py-1 text-xs font-bold text-[#007AFF] focus:outline-none"
-            >
-              <option value="general">City Guide</option>
-              <option value="emergency">Emergency & Healthcare</option>
-              <option value="civic">Municipal Grievances</option>
-              <option value="services">Verified Services</option>
-              <option value="tourism">Tourism & Heritage</option>
-            </select>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <span className="text-[11px] font-bold text-[#55685F]">Model:</span>
-            <select
-              value={selectedTier}
-              onChange={(e) => setSelectedTier(e.target.value as any)}
-              className="bg-white border border-[#D2CEBE] rounded-lg px-2 py-1 text-xs font-bold text-[#007AFF] focus:outline-none cursor-pointer"
-            >
-              <option value="general">Flash (gemini-3.5-flash)</option>
-              <option value="complex">Pro (gemini-3.1-pro-preview)</option>
-              <option value="fast">Lite (gemini-3.1-flash-lite)</option>
-            </select>
           </div>
         </div>
 
         {/* Chat Body */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FAF8F5]">
-          {chatHistory.map((msg, i) => (
-            <div
-              key={i}
-              className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} space-y-1.5`}
+        <div className="flex-1 overflow-y-auto px-4 pb-20 space-y-6 bg-white dark:bg-[#11241C]">
+          {chatHistory.length <= 1 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center justify-center h-full text-center p-6 space-y-6"
             >
-              {msg.role === 'model' && (
-                <div className="flex items-center gap-1 text-[10px] text-[#73827B] px-1 font-bold">
-                  <Sparkles className="w-3 h-3 text-[#007AFF]" />
-                  <span className="text-[#007AFF]">Jalpaigi AI</span>
-                  {msg.modelUsed && (
-                    <span className="bg-[#E6F4EA] text-[#007AFF] px-1.5 py-0.2 rounded font-mono text-[9px]">
-                      {msg.modelUsed}
-                    </span>
-                  )}
-                </div>
-              )}
-              <div
-                className={`max-w-[88%] rounded-2xl p-3.5 text-xs leading-relaxed ${
-                  msg.role === 'user'
-                    ? 'bg-[#007AFF] text-white rounded-br-none shadow-xs font-medium'
-                    : 'bg-white text-[#11241C] border border-[#E8E4DA] rounded-bl-none shadow-xs'
-                }`}
-              >
-                {msg.role === 'user' ? (
-                  <p>{msg.text}</p>
-                ) : (
-                  <div className="prose prose-xs max-w-none text-[#11241C] space-y-1">
-                    <ReactMarkdown
-                      components={{
-                        p: ({ children }) => <p className="mb-1.5 leading-relaxed">{children}</p>,
-                        ul: ({ children }) => <ul className="list-disc pl-4 space-y-0.5 my-1">{children}</ul>,
-                        ol: ({ children }) => <ol className="list-decimal pl-4 space-y-0.5 my-1">{children}</ol>,
-                        li: ({ children }) => <li>{children}</li>,
-                        strong: ({ children }) => <strong className="font-extrabold text-[#007AFF]">{children}</strong>
-                      }}
-                    >
-                      {msg.text}
-                    </ReactMarkdown>
-                  </div>
-                )}
+              <div className="w-16 h-16 bg-blue-100 dark:bg-blue-950/30 rounded-full flex items-center justify-center animate-pulse">
+                <Sparkles className="w-8 h-8 text-[#007AFF]" />
               </div>
-
-              {/* Action Button */}
-              {msg.action && (
-                <button
-                  onClick={() => {
-                    setIsAssistantOpen(false);
-                    navigate(msg.action!.view, msg.action!.params);
-                  }}
-                  className="inline-flex items-center gap-2 bg-[#E6F4EA] border border-[#A7D7B9] text-[#007AFF] px-3 py-1.5 rounded-xl text-xs font-extrabold shadow-xs hover:bg-[#C8E6C9] active:scale-95 transition-all cursor-pointer"
+              <div className="space-y-2">
+                <h2 className="text-xl font-bold text-[#11241C] dark:text-white">
+                  {lang === 'bn' ? 'নমস্কার! আমি Jalpaiguri AI Assistant। জলপাইগুড়ি সম্পর্কে যেকোনো তথ্য খুঁজে পেতে আমি আপনাকে সাহায্য করতে পারি।' : 'How can I help you?'}
+                </h2>
+                <p className="text-sm text-[#55685F] dark:text-[#A2B3AA] max-w-xs">{lang === 'bn' ? 'আপনি কী জানতে চান?' : 'Ask about Jalpaiguri services, education, transport, jobs, healthcare and more.'}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
+                {quickChips.map((chip, i) => (
+                  <button key={i} onClick={() => handleSend(chip.query)} className="px-4 py-2 bg-[#FAF8F5] dark:bg-[#1C2C24] border border-[#E8E4DA] dark:border-white/5 rounded-xl text-xs font-semibold text-[#11241C] dark:text-white hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors">
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          ) : (
+            chatHistory.map((msg, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.2 }}
+                className={`flex flex-col gap-1 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+              >
+                <div
+                  className={`max-w-[85%] rounded-2xl p-4 text-sm leading-relaxed shadow-sm ${
+                    msg.role === 'user'
+                      ? 'bg-[#007AFF] text-white rounded-br-none'
+                      : 'bg-gray-100 dark:bg-[#1C2C24] text-[#11241C] dark:text-white rounded-bl-none border border-gray-200 dark:border-white/5'
+                  }`}
                 >
-                  <span>{msg.action.label}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              )}
-
-              {/* Grounding Places Card */}
-              {msg.groundingPlaces && msg.groundingPlaces.length > 0 && (
-                <div className="w-full max-w-[90%] space-y-2 mt-1">
-                  <div className="text-[11px] font-extrabold text-[#007AFF] flex items-center gap-1 px-1">
-                    <MapPin className="w-3.5 h-3.5 text-[#007AFF]" />
-                    <span>Google Maps Grounded Locations:</span>
-                  </div>
-                  {msg.groundingPlaces.map((place, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-white border border-[#A7D7B9] rounded-2xl p-2.5 shadow-xs space-y-1.5"
-                    >
-                      <div className="flex items-start justify-between gap-1.5">
-                        <h4 className="text-xs font-bold text-[#11241C]">{place.title}</h4>
-                        {place.category && (
-                          <span className="text-[9px] font-bold bg-[#E6F4EA] text-[#007AFF] px-1.5 py-0.2 rounded-full">
-                            {place.category}
-                          </span>
-                        )}
-                      </div>
-                      {place.address && (
-                        <p className="text-[10px] text-[#55685F]">{place.address}</p>
-                      )}
-                      {place.snippets && place.snippets[0] && (
-                        <p className="text-[10px] italic text-[#55685F] bg-[#FAF8F5] p-1.5 rounded-lg border border-[#E8E4DA]">
-                          "{place.snippets[0]}"
-                        </p>
-                      )}
-                      <a
-                        href={place.uri || `https://maps.google.com/?q=${encodeURIComponent(place.title + ' Jalpaiguri')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-1 w-full bg-[#007AFF] text-white py-1 rounded-xl text-xs font-bold hover:bg-[#084D3A] transition-all cursor-pointer"
-                      >
-                        <Navigation className="w-3 h-3" />
-                        <span>Open in Google Maps</span>
-                        <ExternalLink className="w-3 h-3 opacity-80 ml-auto mr-1" />
-                      </a>
-                    </div>
-                  ))}
+                  <ReactMarkdown>{msg.text}</ReactMarkdown>
                 </div>
-              )}
-            </div>
-          ))}
-
-          {loading && (
-            <div className="flex items-center gap-2 text-xs font-bold text-[#007AFF] bg-white border border-[#A7D7B9] p-3 rounded-2xl max-w-[220px] shadow-xs">
-              <div className="w-2 h-2 rounded-full bg-[#007AFF] animate-ping"></div>
-              <span>Jalpaigi AI is reasoning…</span>
-            </div>
+                {msg.role === 'model' && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="flex flex-wrap gap-2 mt-2 px-1 max-w-[85%]"
+                  >
+                    <p className="w-full text-[10px] text-gray-500 mb-1">{lang === 'bn' ? 'আপনি আরও খুঁজতে পারেন' : 'You may also want to find'}</p>
+                    {getSuggestions(msg.text).map((s, idx) => (
+                      <button key={idx} onClick={() => handleSend(s)} className="px-3 py-1.5 bg-white dark:bg-[#1C2C24] border border-gray-200 dark:border-white/10 rounded-full text-[11px] font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 shadow-sm transition-all hover:scale-105 active:scale-95">
+                        {s}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </motion.div>
+            ))
           )}
-
+          {loading && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3 justify-start items-center">
+               <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#1C2C24] flex items-center justify-center border border-gray-200 dark:border-white/5">
+                  <Sparkles className="w-4 h-4 text-[#007AFF]" />
+               </div>
+               <div className="bg-gray-100 dark:bg-[#1C2C24] rounded-2xl px-4 py-2 flex items-center shadow-sm border border-gray-200 dark:border-white/5 text-xs text-gray-500">
+                 Fetching results...
+               </div>
+            </motion.div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Quick Chips */}
-        <div className="p-2.5 bg-white border-t border-[#F0ECE1] overflow-x-auto no-scrollbar flex gap-2">
-          {quickChips.map((chip, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                setSelectedRole(chip.role);
-                handleSend(chip.query);
-              }}
-              className="shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-[#FAF8F5] border border-[#E0DCD3] text-[#11241C] hover:bg-[#E6F4EA] hover:text-[#007AFF] transition-colors cursor-pointer"
-            >
-              {chip.label}
-            </button>
-          ))}
-        </div>
-
         {/* Input Bar */}
-        <div className="p-3 bg-white border-t border-[#E8E4DA] flex items-center gap-2">
-          <div className="flex-1 relative flex items-center">
-            <input
-              type="text"
-              placeholder="Ask anything about Jalpaiguri..."
+        <div className="absolute bottom-0 left-0 right-0 p-2 bg-white/80 dark:bg-[#11241C]/80 backdrop-blur-sm border-t border-[#E8E4DA] dark:border-white/10">
+          <div className="relative flex items-center gap-1 bg-gray-100 dark:bg-[#1C2C24] rounded-full p-1 border border-gray-200 dark:border-white/10 focus-within:border-[#007AFF]">
+            <button 
+              onClick={isRecording ? stopRecording : startRecording}
+              className={`p-2 transition-colors relative flex items-center justify-center ${isRecording ? 'text-red-500' : 'text-[#55685F] dark:text-[#A2B3AA] hover:text-[#007AFF]'}`}
+            >
+              {isRecording ? (
+                <div className="flex items-center justify-center gap-[2px] w-5 h-5">
+                   <div style={{ height: `${Math.min(20, Math.max(4, audioLevel * 0.15))}px` }} className="w-1 bg-red-500 rounded-full transition-all duration-75" />
+                   <div style={{ height: `${Math.min(20, Math.max(4, audioLevel * 0.3))}px` }} className="w-1 bg-red-500 rounded-full transition-all duration-75" />
+                   <div style={{ height: `${Math.min(20, Math.max(4, audioLevel * 0.15))}px` }} className="w-1 bg-red-500 rounded-full transition-all duration-75" />
+                </div>
+              ) : (
+                <Mic className="w-5 h-5" />
+              )}
+            </button>
+            <textarea
+              placeholder={lang === 'bn' ? 'জলপাইগুড়ি সম্পর্কে যেকোনো কিছু জিজ্ঞাসা করুন...' : 'Ask anything about Jalpaiguri...'}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              className="w-full bg-[#FAF8F5] border border-[#D2CEBE] rounded-full px-4 py-2.5 text-xs font-semibold text-[#11241C] focus:outline-none focus:border-[#007AFF] pr-10"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              className="w-full bg-transparent px-2 py-1.5 text-sm text-[#11241C] dark:text-white focus:outline-none resize-none overflow-hidden whitespace-nowrap"
+              rows={1}
               disabled={loading}
             />
             <button
-              onClick={() => handleSend('Tell me 24x7 emergency contacts and hospitals in Jalpaiguri')}
-              className="absolute right-2.5 text-[#55685F] hover:text-[#007AFF]"
-              title="Quick query"
+                onClick={() => handleSend()}
+                disabled={!prompt.trim() || loading}
+                className="p-2 rounded-full bg-[#007AFF] text-white hover:bg-[#0056b3] disabled:opacity-40 transition-all shadow-sm"
             >
-              <Mic className="w-4 h-4" />
+                <Send className="w-4 h-4" />
             </button>
           </div>
-          <button
-            onClick={() => handleSend()}
-            disabled={!prompt.trim() || loading}
-            className="w-10 h-10 rounded-full bg-[#007AFF] text-white flex items-center justify-center hover:bg-[#084D3A] disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer shrink-0"
-          >
-            <Send className="w-4 h-4" />
-          </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

@@ -72,6 +72,8 @@ export type ViewType =
   | 'dining-detail'
   | 'add-restaurant'
   | 'restaurant-dashboard'
+  | 'restaurantOwner-dashboard'
+  | 'smart-dining-search'
   | 'shop-marketplace'
   | 'add-shop'
   | 'merchant-dashboard'
@@ -714,8 +716,10 @@ export interface Restaurant {
   whatsappNumber?: string;
   name: string;
   nameBn?: string;
+  nameBengali?: string;
   category: RestaurantCategory | string;
   cuisineTypes: string[];
+  subcategories?: string[];
   description: string;
   locality: string;
   address: string;
@@ -725,12 +729,16 @@ export interface Restaurant {
   lng: number;
   distanceKm?: number;
   distanceText?: string;
+  distance?: number;
   openingTime?: string;
   closingTime?: string;
   openingHours?: { open: string; close: string; weeklyOff?: string };
   weeklyOff?: string;
   homeDelivery?: boolean;
+  deliveryAvailable?: boolean;
   minOrderAmount?: number;
+  freeDeliveryAbove?: number;
+  deliveryRadiusKm?: number;
   paymentMethods: string[];
   upiId?: string;
   photoUrl?: string;
@@ -740,6 +748,7 @@ export interface Restaurant {
   isVerified: boolean;
   status: 'pending' | 'verified' | 'rejected' | 'suspended';
   featured?: boolean;
+  isFeatured?: boolean;
   isOpen: boolean;
   rating: number;
   reviewCount: number;
@@ -758,12 +767,14 @@ export interface MenuItem {
   ownerId: string;
   name: string;
   nameBn?: string;
+  nameBengali?: string;
   category: string;
   price: number;
   discountPrice?: number;
   isVeg: boolean;
   isEgg: boolean;
   inStock: boolean;
+  unit?: string;
   photoUrl?: string;
   description?: string;
   createdAt: string;
@@ -917,6 +928,14 @@ export interface EducationalInstitution {
   reviewCount?: number;
   isVerified: boolean;
   createdAt: string;
+  // New fields
+  establishedYear?: number;
+  schoolLevel?: 'Primary' | 'Secondary' | 'Higher Secondary' | 'Other';
+  board?: 'WB Board' | 'CBSE' | 'ICSE' | 'Other';
+  classes?: string;
+  medium?: 'Bengali' | 'English' | 'Hindi' | 'Mixed';
+  standardTiming?: string;
+  subjects?: string[];
 }
 
 export interface DurgaPandalItem {

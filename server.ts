@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import path from 'path';
+import fs from 'fs';
 import crypto from 'crypto';
-import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 import { apiKeyService } from './server/apiKeyService';
@@ -481,7 +481,7 @@ app.post('/api/gemini/chat', async (req: Request, res: Response) => {
   // - gemini-3.1-pro-preview for particularly complex tasks
   // - gemini-3.5-flash for general tasks
   // - gemini-3.1-flash-lite for tasks that should happen fast
-  let selectedModel = 'gemini-3.5-flash';
+  let selectedModel = 'gemini-3.1-flash-lite';
   if (modelType === 'complex' || modelType === 'pro') {
     selectedModel = 'gemini-3.1-pro-preview';
   } else if (modelType === 'fast' || modelType === 'lite') {
@@ -639,7 +639,7 @@ app.post('/api/gemini/maps-grounding', async (req: Request, res: Response) => {
     const prompt = `Provide the top authentic, accurate places, contact landmarks, and descriptions in or immediately around Jalpaiguri, West Bengal matching: "${query}" (Category: ${category}). Include practical tips on getting there.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-3.1-flash-lite',
       contents: prompt,
       config: {
         systemInstruction: 'You are a Google Maps grounded local geography expert for Jalpaiguri, West Bengal, India. Provide clear recommendations with exact names and local context. ONLY provide results relevant to the specific search query.',
@@ -727,8 +727,14 @@ app.get('/api/config/maps-key', (req: Request, res: Response) => {
   });
 });
 
+let quotaExhaustedUntil = 0;
+
 // Gemini AI Place Image Generation Endpoint (Tier 3 fallback)
 app.post('/api/places/generate-image', async (req: Request, res: Response) => {
+  if (Date.now() < quotaExhaustedUntil) {
+    return res.json({ imageUrl: null, message: 'Quota exhausted temporarily' });
+  }
+
   const { placeId, name, category, subcategory, address } = req.body;
   if (!name) {
     return res.status(400).json({ error: 'Place name is required' });
@@ -795,6 +801,9 @@ app.post('/api/places/generate-image', async (req: Request, res: Response) => {
       return res.json({ imageUrl: null });
     }
   } catch (err: any) {
+    if (err?.status === 429 || err?.message?.includes('RESOURCE_EXHAUSTED')) {
+      quotaExhaustedUntil = Date.now() + 60 * 60 * 1000; // 1 hour
+    }
     console.error('Gemini place image generation error:', err);
     return res.json({ imageUrl: null, error: err?.message });
   }
@@ -949,7 +958,7 @@ app.post('/api/ai/jalpaigi-chat', async (req: Request, res: Response) => {
   }
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-3.1-flash-lite',
       contents: `You are Jalpaigi AI for Jalpaiguri, West Bengal. Answer briefly: "${message}"`
     });
     return res.json({ reply: response.text || 'Nomoshkar!' });
@@ -966,7 +975,7 @@ app.post('/api/ai/assistant', async (req: Request, res: Response) => {
   }
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-3.1-flash-lite',
       contents: `You are Jalpaigi AI for Jalpaiguri, West Bengal. Provide a helpful 2-sentence response for: "${prompt}"`
     });
     return res.json({ reply: response.text || 'How can I assist you in Jalpaiguri today?' });
@@ -1130,6 +1139,7 @@ app.post('/api/shops/:shopId/subscription', (req: Request, res: Response) => {
 // Start Server with Vite Middleware
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa'

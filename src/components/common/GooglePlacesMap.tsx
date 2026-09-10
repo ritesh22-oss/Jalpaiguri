@@ -26,34 +26,40 @@ const MapHandler = ({ place, marker }: { place: google.maps.places.PlaceResult |
   return null;
 };
 
-// Place Autocomplete component
-const PlaceAutocomplete = ({ onPlaceSelect }: { onPlaceSelect: (place: google.maps.places.PlaceResult | null) => void }) => {
-  const [placeAutocomplete, setPlaceAutocomplete] =
-    useState<google.maps.places.Autocomplete | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+// Place Search helper
+const PlaceSearch = ({ onPlaceSelect }: { onPlaceSelect: (place: google.maps.places.PlaceResult | null) => void }) => {
+  const [query, setQuery] = useState('');
   const places = useMapsLibrary('places');
+  const map = useMap();
 
-  useEffect(() => {
-    if (!places || !inputRef.current) return;
-
-    const options = {
-      fields: ['geometry', 'name', 'formatted_address']
+  const handleSearch = () => {
+    if (!places || !map || !query) return;
+    
+    const service = new places.PlacesService(map);
+    const request = {
+      query: query,
+      fields: ['geometry', 'name', 'formatted_address', 'place_id']
     };
 
-    setPlaceAutocomplete(new places.Autocomplete(inputRef.current, options));
-  }, [places]);
-
-  useEffect(() => {
-    if (!placeAutocomplete) return;
-
-    placeAutocomplete.addListener('place_changed', () => {
-      onPlaceSelect(placeAutocomplete.getPlace());
+    service.textSearch(request, (results, status) => {
+      if (status === places.PlacesServiceStatus.OK && results && results[0]) {
+        onPlaceSelect(results[0]);
+      } else {
+        alert("Couldn't find that location. Try a more specific place name.");
+      }
     });
-  }, [onPlaceSelect, placeAutocomplete]);
+  };
 
   return (
-    <div className="autocomplete-container">
-      <input ref={inputRef} placeholder="Search for a place..." className="p-2 border rounded-md" />
+    <div className="flex gap-2">
+      <input 
+        value={query} 
+        onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+        placeholder="Search for a place..." 
+        className="p-2 border rounded-md" 
+      />
+      <button onClick={handleSearch} className="bg-blue-500 text-white p-2 rounded-md">Search</button>
     </div>
   );
 };
@@ -63,11 +69,22 @@ export const GooglePlacesMap: React.FC<{className?: string}> = ({ className }) =
     useState<google.maps.places.PlaceResult | null>(null);
   const [markerRef, marker] = useAdvancedMarkerRef();
 
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+  if (!apiKey) {
+    return (
+      <div className={`flex flex-col items-center justify-center bg-gray-100 border border-gray-200 rounded-2xl ${className}`}>
+        <p className="text-gray-500 font-medium text-sm">Google Maps Unavailable</p>
+        <p className="text-gray-400 text-xs mt-1">Configure VITE_GOOGLE_MAPS_API_KEY</p>
+      </div>
+    );
+  }
+
   return (
     <div className={className}>
       <APIProvider
-        apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-        internalUsageAttributionIds={["gmp_mcp_codeassist_v1_aistudio"]}>
+        apiKey={apiKey}
+        solutionChannel="gmp_mcp_codeassist_v1_aistudio">
         <Map
           mapId={'DEMO_MAP_ID'}
           defaultZoom={13}
@@ -80,7 +97,7 @@ export const GooglePlacesMap: React.FC<{className?: string}> = ({ className }) =
         </Map>
         <MapControl position={ControlPosition.TOP_CENTER}>
           <div className="bg-white p-2 rounded-lg shadow-md m-2">
-            <PlaceAutocomplete onPlaceSelect={setSelectedPlace} />
+            <PlaceSearch onPlaceSelect={setSelectedPlace} />
           </div>
         </MapControl>
         <MapHandler place={selectedPlace} marker={marker} />

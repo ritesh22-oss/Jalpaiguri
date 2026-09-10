@@ -50,3 +50,10 @@
   animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
+
+.leaflet-container {
+  cursor: crosshair !important;
+}
+.leaflet-interactive {
+  cursor: pointer !important;
+}
