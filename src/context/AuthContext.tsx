@@ -3,6 +3,8 @@ import { UserProfile, BloodGroup, isAuthorizedAdminEmail } from '../types';
 import { auth, db, googleProvider, isFirebaseConfigured, validateFirestoreConnection } from '../lib/firebase';
 import {
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   User as FirebaseUser,
@@ -155,6 +157,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [activeOtp, setActiveOtp] = useState<string | null>(null);
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
+  // Helper to detect mobile browser or WebView / APK environment
+  const isMobileOrWebView = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    const ua = navigator.userAgent || navigator.vendor || (window as any).opera || '';
+    const isAndroidWebView = /wv|Android.*Version\/[0-9]+\.[0-9]+/i.test(ua);
+    const isIOSWebView = /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(ua);
+    const isMobileDevice = /android|iphone|ipad|ipod|blackberry|opera mini|iemobile|mobile/i.test(ua);
+    const isWebifyOrWrapper = !!(window as any).ReactNativeWebView || !!(window as any).Android || isAndroidWebView || isIOSWebView;
+    return isWebifyOrWrapper || (isMobileDevice && !ua.includes('Desktop') && !ua.includes('Macintosh') && !ua.includes('Windows'));
+  };
+
   // Synchronize user to local storage
   useEffect(() => {
     if (user) {
@@ -173,6 +186,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let unsubscribe = () => {};
 
     if (isFirebaseConfigured && auth) {
+      // Handle redirect auth result for APK / mobile WebView environments
+      // This is crucial for environments where popup authentication is unreliable.
+      getRedirectResult(auth)
+        .then((result) => {
+          if (result && result.user) {
+            console.log('[FIREBASE AUTH] Redirect sign-in success for:', result.user.email);
+            // Handle Admin navigation intent stored before redirect
+            try {
+              const asAdmin = sessionStorage.getItem('jpg_auth_as_admin') === 'true';
+              sessionStorage.removeItem('jpg_auth_as_admin');
+              if (asAdmin && isAuthorizedAdminEmail(result.user.email)) {
+                // We mark it in a way that navigation logic can pick it up
+                // or just rely on the fact that role will be 'admin'
+                localStorage.setItem('jpg_admin_login_detected', 'true');
+              }
+            } catch (e) {}
+          }
+        })
+        .catch((err) => {
+          console.warn('[FIREBASE AUTH] Redirect result notice:', err);
+        });
+
       unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
         setFirebaseUser(fbUser);
 
@@ -236,7 +271,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  // 1. Google Sign-In with Firebase Popup (Supports any citizen + strict Admin verification)
+  // 1. Google Sign-In with Firebase Popup (Desktop) or Redirect (Mobile / APK WebView)
   const loginWithGoogle = async (
     options?: { asAdmin?: boolean }
   ): Promise<{ success: boolean; isNewUser?: boolean; isAdmin?: boolean; message?: string }> => {
@@ -244,6 +279,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       if (!isFirebaseConfigured || !auth) {
         throw new Error('Firebase Auth is not initialized');
+      }
+
+      if (isMobileOrWebView()) {
+        if (options?.asAdmin) {
+          try {
+            sessionStorage.setItem('jpg_auth_as_admin', 'true');
+          } catch (e) {}
+        }
+        await signInWithRedirect(auth, googleProvider);
+        return { success: true, message: 'Redirecting to Google...' };
       }
 
       const result = await signInWithPopup(auth, googleProvider);
@@ -316,13 +361,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err: any) {
       setIsLoading(false);
       console.warn('Google sign-in error:', err);
-      let msg = 'Google sign-in could not be completed.';
+      let msg = 'Google sign-in could not be completed. Please try again.';
       if (err.code === 'auth/popup-closed-by-user') {
         msg = 'Sign-in popup was closed.';
       } else if (err.code === 'auth/popup-blocked') {
         msg = 'Sign-in popup was blocked by browser. Please allow popups.';
-      } else if (err.message) {
-        msg = err.message;
       }
       return { success: false, message: msg };
     }
