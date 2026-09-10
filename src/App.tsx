@@ -111,6 +111,8 @@ import { FiltersBottomSheet } from './components/common/FiltersBottomSheet';
 import { LocationSelectorModal } from './components/common/LocationSelectorModal';
 import { JalpaigiAssistantModal } from './components/common/JalpaigiAssistantModal';
 import { Toast } from './components/common/Toast';
+import { Loader2 } from 'lucide-react';
+import { JalpaiguriLogo } from './components/common/JalpaiguriLogo';
 
 const AppContent: React.FC = () => {
   const { currentView, replaceView, navigate, goBack } = useNav();
@@ -158,6 +160,8 @@ const AppContent: React.FC = () => {
 
   // If user switched to admin role and is on admin dashboard
   if (user?.role === 'admin' && currentView === 'admin-dashboard') {
+    // Mark splash as shown if we reached here
+    sessionStorage.setItem('jpg_splash_shown', 'true');
     return (
       <div className="min-h-screen bg-[#FAF8F5]">
         <AdminDashboardView />
@@ -196,6 +200,33 @@ const AppContent: React.FC = () => {
         <Toast />
       </ExpoDeviceShell>
     );
+  }
+
+  const isRedirectPending = localStorage.getItem('jpg_redirect_auth_pending') === 'true';
+  const hasShownSplash = sessionStorage.getItem('jpg_splash_shown') === 'true';
+
+  // Handle case where we are returning from a redirect or restoring a session
+  if (isLoading) {
+    // If we are returning from a redirect, show a direct "Completing login" state
+    if (isRedirectPending) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+            <p className="text-sm font-bold text-gray-500 animate-pulse">Completing Google Sign-in...</p>
+          </div>
+        </div>
+      );
+    }
+    
+    // If we are authenticated (from cache) and it's NOT the very first startup, skip splash
+    if (isAuthenticated && hasShownSplash) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAF8F5]">
+           <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+        </div>
+      );
+    }
   }
 
   const renderView = () => {
