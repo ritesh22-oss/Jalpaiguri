@@ -122,7 +122,12 @@ const AppContent: React.FC = () => {
   // and is currently on auth/onboarding views, smoothly navigate them to profile-setup immediately
   React.useEffect(() => {
     if (!isLoading && isAuthenticated && !isProfileComplete) {
-      if (currentView === 'auth' || currentView === 'phone-auth' || currentView === 'onboarding') {
+      if (
+        currentView === 'splash' ||
+        currentView === 'auth' ||
+        currentView === 'phone-auth' ||
+        currentView === 'onboarding'
+      ) {
         replaceView('profile-setup');
       }
     }
