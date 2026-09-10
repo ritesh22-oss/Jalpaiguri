@@ -140,7 +140,13 @@ const AppContent: React.FC = () => {
         currentView === 'otp' ||
         currentView === 'onboarding'
       ) {
-        replaceView('home');
+        const isAdminLogin = localStorage.getItem('jpg_admin_login_detected') === 'true';
+        if (isAdminLogin && user?.role === 'admin') {
+          localStorage.removeItem('jpg_admin_login_detected');
+          replaceView('admin-dashboard');
+        } else {
+          replaceView('home');
+        }
       }
     }
   }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView]);
