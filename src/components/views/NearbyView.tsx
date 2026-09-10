@@ -141,9 +141,10 @@ export const NearbyView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 max-w-md mx-auto select-none transition-colors">
+    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 select-none transition-colors">
       {/* Top Location & Search Header */}
-      <header className="sticky top-0 z-30 bg-white/95 dark:bg-[#0B132B]/95 backdrop-blur-md px-5 pt-6 pb-3 border-b border-[#E8E4DA] dark:border-white/10 space-y-3 shadow-xs transition-colors">
+      <header className="w-full sticky top-0 z-30 bg-white/95 dark:bg-[#0B132B]/95 backdrop-blur-md border-b border-[#E8E4DA] dark:border-white/10 shadow-xs transition-colors">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-3 space-y-3">
         <div className="flex items-center justify-between">
           <div>
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#55685F] dark:text-[#A2B3AA] block">
@@ -249,10 +250,11 @@ export const NearbyView: React.FC = () => {
             );
           })}
         </div>
+        </div>
       </header>
 
       {/* Main Content: LIST or MAP */}
-      <div className="p-4 space-y-4">
+      <div className="max-w-5xl mx-auto p-4 sm:p-6 space-y-4">
         {/* Results Header Info */}
         <div className="flex items-center justify-between px-1">
           <span className="text-xs font-extrabold text-[#11241C] dark:text-white">
@@ -265,7 +267,7 @@ export const NearbyView: React.FC = () => {
 
         {/* LIST VIEW */}
         {activeTab === 'list' && (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
             {filteredItems.map((item) => (
               <div
                 key={item.id}

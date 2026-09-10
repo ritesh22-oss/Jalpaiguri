@@ -132,9 +132,10 @@ export const SafetySosView: React.FC<SafetySosViewProps> = ({ onBack, onNavigate
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#020617] text-[#11241C] dark:text-[#F8FAFC] flex flex-col max-w-lg mx-auto pb-24 transition-colors">
+    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#020617] text-[#11241C] dark:text-[#F8FAFC] flex flex-col pb-24 transition-colors">
       {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-white/95 dark:bg-[#15211B]/95 backdrop-blur-md border-b border-[#E8E4DA] dark:border-white/10 px-4 py-3 flex items-center justify-between transition-colors">
+      <header className="w-full sticky top-0 z-30 bg-white/95 dark:bg-[#15211B]/95 backdrop-blur-md border-b border-[#E8E4DA] dark:border-white/10 transition-colors">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
             onClick={onBack}
@@ -160,18 +161,22 @@ export const SafetySosView: React.FC<SafetySosViewProps> = ({ onBack, onNavigate
           <Phone className="w-3.5 h-3.5 fill-current" />
           <span>CALL 112</span>
         </button>
+        </div>
       </header>
 
       {/* Official Government Emergency Services Disclaimer */}
-      <div className="bg-[#FFF4E5] dark:bg-amber-950/40 border-b border-[#FFE0B2] dark:border-amber-900/40 px-4 py-2.5 flex items-start gap-2 text-xs text-[#7A4100] dark:text-amber-200">
-        <Info className="w-4 h-4 text-[#B76E00] dark:text-amber-400 shrink-0 mt-0.5" />
-        <p className="leading-snug">
-          <strong className="font-bold">Important Notice:</strong> MYJPG notifies selected trusted contacts and opted-in community responders. It <strong className="underline">does not replace official emergency services</strong>. For immediate danger, always call 112 directly.
-        </p>
+      <div className="w-full bg-[#FFF4E5] dark:bg-amber-950/40 border-b border-[#FFE0B2] dark:border-amber-900/40">
+        <div className="max-w-4xl mx-auto px-4 py-2.5 flex items-start gap-2 text-xs text-[#7A4100] dark:text-amber-200">
+          <Info className="w-4 h-4 text-[#B76E00] dark:text-amber-400 shrink-0 mt-0.5" />
+          <p className="leading-snug">
+            <strong className="font-bold">Important Notice:</strong> MYJPG notifies selected trusted contacts and opted-in community responders. It <strong className="underline">does not replace official emergency services</strong>. For immediate danger, always call 112 directly.
+          </p>
+        </div>
       </div>
 
       {/* Navigation Sub-Tabs */}
-      <div className="bg-white dark:bg-[#15211B] border-b border-[#E8E4DA] dark:border-white/10 px-4 flex items-center justify-between gap-1 overflow-x-auto no-scrollbar py-2 text-xs font-bold transition-colors">
+      <div className="w-full bg-white dark:bg-[#15211B] border-b border-[#E8E4DA] dark:border-white/10 transition-colors">
+        <div className="max-w-4xl mx-auto px-4 flex items-center justify-between gap-1 overflow-x-auto no-scrollbar py-2 text-xs font-bold">
         <button
           onClick={() => setActiveTab('sos')}
           className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
@@ -217,9 +222,10 @@ export const SafetySosView: React.FC<SafetySosViewProps> = ({ onBack, onNavigate
             <span>Community ({nearbyAlerts.length})</span>
           </button>
         )}
+        </div>
       </div>
 
-      <main className="p-4 space-y-4 flex-1">
+      <main className="w-full max-w-4xl mx-auto p-4 space-y-4 flex-1">
         {/* ========================================================= */}
         {/* ACTIVE SOS STATUS BANNER (When SOS is actively broadcasting) */}
         {/* ========================================================= */}

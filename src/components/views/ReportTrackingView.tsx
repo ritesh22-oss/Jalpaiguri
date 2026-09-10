@@ -91,9 +91,10 @@ export const ReportTrackingView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 max-w-md mx-auto select-none transition-colors">
+    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 select-none transition-colors">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0F1A15]/90 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-[#E8E4DA]/50 dark:border-white/10 transition-colors">
+      <header className="w-full sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0F1A15]/90 backdrop-blur-md border-b border-[#E8E4DA]/50 dark:border-white/10 transition-colors">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={goBack}
@@ -117,9 +118,10 @@ export const ReportTrackingView: React.FC = () => {
         >
           <Share2 className="w-4 h-4" />
         </button>
+        </div>
       </header>
 
-      <div className="p-4 sm:p-5 space-y-4">
+      <div className="max-w-3xl mx-auto p-4 sm:p-5 space-y-4">
         {/* Status Card */}
         <div className="bg-white dark:bg-[#16241F] rounded-3xl p-5 border border-[#E8E4DA] dark:border-white/10 shadow-xs space-y-3.5 transition-colors">
           <div className="flex items-center justify-between">

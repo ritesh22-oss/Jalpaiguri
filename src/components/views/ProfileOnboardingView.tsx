@@ -82,7 +82,8 @@ export const ProfileOnboardingView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] flex flex-col justify-between p-6 max-w-md mx-auto select-none transition-colors">
+    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] flex flex-col justify-between p-6 select-none transition-colors">
+      <div className="w-full max-w-xl mx-auto flex-1 flex flex-col justify-between">
       {/* Top Header */}
       <div className="pt-4">
         <div className="flex items-center justify-between mb-4">
@@ -326,6 +327,7 @@ export const ProfileOnboardingView: React.FC = () => {
           <span>{step === 5 ? 'Save & Start Exploring' : 'Continue'}</span>
           <ArrowRight className="w-4 h-4" />
         </button>
+      </div>
       </div>
     </div>
   );

@@ -256,18 +256,19 @@ export const GovernmentServicesView: React.FC = () => {
 
   return (
     <div
-      className={`min-h-screen pb-28 max-w-md mx-auto select-none transition-colors duration-200 ${
+      className={`w-full min-h-screen pb-28 select-none transition-colors duration-200 ${
         isDarkMode ? 'bg-[#0B1310] text-[#E1EBE6]' : 'bg-[#FAF8F5] text-[#11241C]'
       }`}
     >
       {/* Sticky Header */}
       <header
-        className={`sticky top-0 z-30 px-4 pt-5 pb-3 border-b backdrop-blur-md transition-colors ${
+        className={`w-full sticky top-0 z-30 border-b backdrop-blur-md transition-colors ${
           isDarkMode
             ? 'bg-[#0B1310]/90 border-[#1B2B24]'
             : 'bg-[#FAF8F5]/90 border-[#E8E4DA]/70'
-        } flex items-center justify-between`}
+        }`}
       >
+        <div className="max-w-4xl mx-auto px-4 pt-5 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <button
             onClick={goBack}
@@ -303,9 +304,10 @@ export const GovernmentServicesView: React.FC = () => {
           <HelpCircle className="w-3.5 h-3.5" />
           <span className="text-[11px]">FAQ</span>
         </button>
+        </div>
       </header>
 
-      <div className="p-4 space-y-4">
+      <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-4">
         {/* Transparency / Non-Government Platform Disclaimer Card */}
         <div
           className={`rounded-3xl p-4 border transition-colors ${

@@ -67,8 +67,9 @@ export const LostFoundView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] pb-28 max-w-md mx-auto select-none">
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-[#E8E4DA]/50">
+    <div className="w-full min-h-screen bg-[#FAF8F5] pb-28 select-none">
+      <header className="w-full sticky top-0 z-30 bg-[#FAF8F5]/90 backdrop-blur-md border-b border-[#E8E4DA]/50">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={goBack}
@@ -88,9 +89,10 @@ export const LostFoundView: React.FC = () => {
           <Plus className="w-3.5 h-3.5" />
           <span>Report Item</span>
         </button>
+        </div>
       </header>
 
-      <div className="p-4 space-y-4">
+      <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-4">
         {/* Search */}
         <div className="bg-white border border-[#D2CEBE] rounded-2xl px-3.5 py-3 flex items-center gap-2.5 shadow-xs">
           <Search className="w-4 h-4 text-[#55685F]" />
@@ -140,54 +142,56 @@ export const LostFoundView: React.FC = () => {
               }}
             />
           ) : (
-            filteredItems.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white border border-[#E8E4DA] rounded-3xl p-4 shadow-xs space-y-2.5 hover:border-[#007AFF] transition-all"
-              >
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold ${
-                      item.type === 'Lost'
-                        ? 'bg-[#FFEBEA] text-[#D9383A]'
-                        : 'bg-[#E6F4EA] text-[#007AFF]'
-                    }`}
-                  >
-                    {item.type}
-                  </span>
-                  <span className="text-[11px] font-semibold text-[#8C9B93] flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    <span>{item.date}</span>
-                  </span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              {filteredItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white border border-[#E8E4DA] rounded-3xl p-4 shadow-xs space-y-2.5 hover:border-[#007AFF] transition-all"
+                >
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold ${
+                        item.type === 'Lost'
+                          ? 'bg-[#FFEBEA] text-[#D9383A]'
+                          : 'bg-[#E6F4EA] text-[#007AFF]'
+                      }`}
+                    >
+                      {item.type}
+                    </span>
+                    <span className="text-[11px] font-semibold text-[#8C9B93] flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      <span>{item.date}</span>
+                    </span>
+                  </div>
+
+                  <h3 className="font-extrabold text-sm text-[#11241C]">{item.title}</h3>
+
+                  <p className="text-xs text-[#55685F] flex items-center gap-1 font-medium">
+                    <MapPin className="w-3.5 h-3.5 text-[#007AFF] shrink-0" />
+                    <span>{item.location}</span>
+                  </p>
+
+                  {item.description && (
+                    <p className="text-xs text-[#73827B]">{item.description}</p>
+                  )}
+
+                  <div className="pt-2 border-t border-[#F0ECE1] flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-[#55685F]">
+                      Category: <strong className="text-[#11241C]">{item.category}</strong>
+                    </span>
+                    <button
+                      onClick={() =>
+                        (window.location.href = `tel:${item.contactPreference.replace(/\s+/g, '')}`)
+                      }
+                      className="px-3.5 py-1.5 rounded-xl bg-[#007AFF] hover:bg-[#084D3A] text-white text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                    >
+                      <Phone className="w-3 h-3" />
+                      <span>Contact</span>
+                    </button>
+                  </div>
                 </div>
-
-                <h3 className="font-extrabold text-sm text-[#11241C]">{item.title}</h3>
-
-                <p className="text-xs text-[#55685F] flex items-center gap-1 font-medium">
-                  <MapPin className="w-3.5 h-3.5 text-[#007AFF] shrink-0" />
-                  <span>{item.location}</span>
-                </p>
-
-                {item.description && (
-                  <p className="text-xs text-[#73827B]">{item.description}</p>
-                )}
-
-                <div className="pt-2 border-t border-[#F0ECE1] flex items-center justify-between">
-                  <span className="text-[11px] font-semibold text-[#55685F]">
-                    Category: <strong className="text-[#11241C]">{item.category}</strong>
-                  </span>
-                  <button
-                    onClick={() =>
-                      (window.location.href = `tel:${item.contactPreference.replace(/\s+/g, '')}`)
-                    }
-                    className="px-3.5 py-1.5 rounded-xl bg-[#007AFF] hover:bg-[#084D3A] text-white text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
-                  >
-                    <Phone className="w-3 h-3" />
-                    <span>Contact</span>
-                  </button>
-                </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
       </div>

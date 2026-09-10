@@ -87,11 +87,12 @@ export const AuthView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FBFF] dark:bg-[#020617] text-[#11241C] dark:text-white flex flex-col p-6 max-w-md mx-auto select-none relative transition-colors overflow-hidden">
+    <div className="w-full min-h-screen bg-[#F8FBFF] dark:bg-[#020617] text-[#11241C] dark:text-white flex flex-col p-6 select-none relative transition-colors overflow-hidden">
       {/* Background Orbs for Depth */}
       <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-blue-400/10 dark:bg-blue-600/5 rounded-full blur-3xl pointer-events-none"></div>
       <div className="absolute bottom-[-5%] left-[-5%] w-48 h-48 bg-blue-300/10 dark:bg-blue-500/5 rounded-full blur-2xl pointer-events-none"></div>
 
+      <div className="w-full max-w-lg mx-auto flex-1 flex flex-col justify-between">
       {/* Top Navigation */}
       <div className="w-full flex items-center justify-between mb-8 z-10">
         <button
@@ -238,6 +239,7 @@ export const AuthView: React.FC = () => {
         <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
           {isBengali ? 'জলপাইগুড়ি পৌরসভা দ্বারা চালিত' : 'Powered by Jalpaiguri Municipality'}
         </p>
+      </div>
       </div>
     </div>
   );

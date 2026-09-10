@@ -42,9 +42,10 @@ export const ChatView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] flex flex-col justify-between max-w-md mx-auto select-none">
+    <div className="w-full min-h-screen bg-[#FAF8F5] flex flex-col justify-between select-none">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-[#E8E4DA]/50">
+      <header className="w-full sticky top-0 z-30 bg-[#FAF8F5]/90 backdrop-blur-md border-b border-[#E8E4DA]/50">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={goBack}
@@ -67,10 +68,11 @@ export const ChatView: React.FC = () => {
         >
           <Phone className="w-4 h-4" />
         </button>
+        </div>
       </header>
 
       {/* Messages Scroll Area */}
-      <div className="flex-1 p-4 space-y-3 overflow-y-auto">
+      <div className="flex-1 w-full max-w-3xl mx-auto p-4 space-y-3 overflow-y-auto">
         <div className="text-center my-2">
           <span className="text-[10px] font-bold bg-[#EFECE6] text-[#55685F] px-3 py-1 rounded-full">
             Realtime Direct Connection
@@ -104,21 +106,23 @@ export const ChatView: React.FC = () => {
       </div>
 
       {/* Input bar */}
-      <form onSubmit={handleSend} className="p-3 bg-white border-t border-[#E8E4DA] flex items-center gap-2">
-        <input
-          type="text"
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          placeholder={`Message ${recipientName.split(' ')[0]}...`}
-          className="flex-1 bg-[#FAF8F5] border border-[#D2CEBE] rounded-full px-4 py-2.5 text-xs font-semibold text-[#11241C] focus:outline-none focus:border-[#007AFF]"
-        />
-        <button
-          type="submit"
-          className="w-10 h-10 rounded-full bg-[#007AFF] text-white flex items-center justify-center shadow-md active:scale-95 transition-all cursor-pointer shrink-0"
-        >
-          <Send className="w-4 h-4 fill-white" />
-        </button>
-      </form>
+      <div className="w-full bg-white border-t border-[#E8E4DA]">
+        <form onSubmit={handleSend} className="max-w-3xl mx-auto p-3 flex items-center gap-2">
+          <input
+            type="text"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder={`Message ${recipientName.split(' ')[0]}...`}
+            className="flex-1 bg-[#FAF8F5] border border-[#D2CEBE] rounded-full px-4 py-2.5 text-xs font-semibold text-[#11241C] focus:outline-none focus:border-[#007AFF]"
+          />
+          <button
+            type="submit"
+            className="w-10 h-10 rounded-full bg-[#007AFF] text-white flex items-center justify-center shadow-md active:scale-95 transition-all cursor-pointer shrink-0"
+          >
+            <Send className="w-4 h-4 fill-white" />
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

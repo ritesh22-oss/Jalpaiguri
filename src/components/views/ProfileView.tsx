@@ -150,8 +150,9 @@ export const ProfileView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 max-w-md mx-auto select-none transition-colors">
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0B132B]/90 backdrop-blur-md px-5 pt-6 pb-3 border-b border-[#E8E4DA]/50 dark:border-white/10 flex items-center justify-between transition-colors">
+    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 select-none transition-colors">
+      <header className="w-full sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0B132B]/90 backdrop-blur-md border-b border-[#E8E4DA]/50 dark:border-white/10 transition-colors">
+        <div className="max-w-4xl mx-auto px-5 pt-6 pb-3 flex items-center justify-between">
         <h1 className="text-2xl font-extrabold text-[#11241C] dark:text-white tracking-tight">
           {isBengali ? 'নাগরিক প্রোফাইল' : 'Citizen Profile'}
         </h1>
@@ -190,9 +191,10 @@ export const ProfileView: React.FC = () => {
             </button>
           )}
         </div>
+        </div>
       </header>
 
-      <div className="p-5 space-y-5">
+      <div className="max-w-4xl mx-auto p-5 space-y-5">
         {/* User Card OR Guest Card */}
         {user ? (
           <div className="bg-white dark:bg-[#0F172A] rounded-3xl p-5 border border-[#E8E4DA] dark:border-white/10 shadow-xs space-y-4 transition-colors">

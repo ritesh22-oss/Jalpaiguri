@@ -20,7 +20,8 @@ export const OnboardingView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#EFF6FF] via-[#F8FAFC] to-[#F1F5F9] dark:from-[#030712] dark:via-[#0B1329] dark:to-[#020617] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col justify-between p-6 max-w-md mx-auto select-none shadow-2xl transition-colors">
+    <div className="w-full min-h-screen bg-gradient-to-b from-[#EFF6FF] via-[#F8FAFC] to-[#F1F5F9] dark:from-[#030712] dark:via-[#0B1329] dark:to-[#020617] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col justify-between p-6 select-none transition-colors">
+      <div className="w-full max-w-lg mx-auto flex-1 flex flex-col justify-between">
       {/* Top bar with Language Switcher */}
       <div className="w-full pt-1 flex items-center justify-between">
         <JalpaiguriLogo size="sm" showText={true} />
@@ -92,6 +93,7 @@ export const OnboardingView: React.FC = () => {
             </button>
           </p>
         </div>
+      </div>
       </div>
     </div>
   );

@@ -104,9 +104,10 @@ export const EmergencyView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 max-w-md mx-auto select-none transition-colors">
+    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 select-none transition-colors">
       {/* Header matching Screenshot 6 */}
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0F1A15]/90 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-[#E8E4DA]/40 dark:border-white/10 transition-colors">
+      <header className="w-full sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0F1A15]/90 backdrop-blur-md border-b border-[#E8E4DA]/40 dark:border-white/10 transition-colors">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
         <button
           onClick={goBack}
           className="w-10 h-10 rounded-full bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-sm hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
@@ -136,9 +137,10 @@ export const EmergencyView: React.FC = () => {
             {user?.name ? user.name.charAt(0) : 'U'}
           </div>
         </div>
+        </div>
       </header>
 
-      <div className="p-5 space-y-6">
+      <div className="max-w-4xl mx-auto p-5 space-y-6">
         {/* Emergency Assistance Heading with red alert icon */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">

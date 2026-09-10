@@ -166,64 +166,64 @@ export const ReportProblemView: React.FC = () => {
   const isFormValid = description.trim().length >= 15 && locationData.isInsideJalpaiguri;
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-32 max-w-md mx-auto select-none transition-colors">
+    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-32 select-none transition-colors">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#0F1A15]/95 backdrop-blur-md px-4 py-3 border-b border-[#E8E4DA]/60 dark:border-white/10 transition-colors">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={goBack}
-              className="w-10 h-10 rounded-full bg-white dark:bg-[#16241F] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
-              aria-label="Go back"
-            >
-              <ArrowLeft className="w-5 h-5 stroke-[2]" />
-            </button>
+      <header className="w-full sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#0F1A15]/95 backdrop-blur-md border-b border-[#E8E4DA]/60 dark:border-white/10 transition-colors">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={goBack}
+            className="w-10 h-10 rounded-full bg-white dark:bg-[#16241F] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
+            aria-label="Go back"
+          >
+            <ArrowLeft className="w-5 h-5 stroke-[2]" />
+          </button>
 
-            <div>
-              <h1 className="text-base font-extrabold text-[#11241C] dark:text-white tracking-tight">
-                Report a Problem
-              </h1>
-              <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">
-                Jalpaiguri Municipal Grievance Portal
-              </p>
-            </div>
+          <div>
+            <h1 className="text-base font-extrabold text-[#11241C] dark:text-white tracking-tight">
+              Report a Problem
+            </h1>
+            <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">
+              Jalpaiguri Municipal Grievance Portal
+            </p>
           </div>
+        </div>
 
-          {/* Quick tab switcher pill */}
-          <div className="flex items-center gap-1 bg-[#EAE6DB] dark:bg-[#16241F] p-1 rounded-xl border border-[#D2CEBE]/50 dark:border-white/10">
-            <button
-              type="button"
-              id="tab-btn-report"
-              onClick={() => setActiveTab('form')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                activeTab === 'form'
-                  ? 'bg-white dark:bg-blue-600 text-[#007AFF] dark:text-white shadow-xs'
-                  : 'text-[#55685F] dark:text-[#A2B3AA] hover:text-[#11241C] dark:hover:text-white'
-              }`}
-            >
-              Report
-            </button>
-            <button
-              type="button"
-              id="tab-btn-my-reports"
-              onClick={() => setActiveTab('my-reports')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeTab === 'my-reports'
-                  ? 'bg-white dark:bg-blue-600 text-[#007AFF] dark:text-white shadow-xs'
-                  : 'text-[#55685F] dark:text-[#A2B3AA] hover:text-[#11241C] dark:hover:text-white'
-              }`}
-            >
-              <span>Track</span>
-              <span className="w-4 h-4 rounded-full bg-[#007AFF]/10 dark:bg-white/20 text-[#007AFF] dark:text-white text-[10px] flex items-center justify-center font-bold">
-                {civicReports.length}
-              </span>
-            </button>
-          </div>
+        {/* Quick tab switcher pill */}
+        <div className="flex items-center gap-1 bg-[#EAE6DB] dark:bg-[#16241F] p-1 rounded-xl border border-[#D2CEBE]/50 dark:border-white/10">
+          <button
+            type="button"
+            id="tab-btn-report"
+            onClick={() => setActiveTab('form')}
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'form'
+                ? 'bg-white dark:bg-blue-600 text-[#007AFF] dark:text-white shadow-xs'
+                : 'text-[#55685F] dark:text-[#A2B3AA] hover:text-[#11241C] dark:hover:text-white'
+            }`}
+          >
+            Report
+          </button>
+          <button
+            type="button"
+            id="tab-btn-my-reports"
+            onClick={() => setActiveTab('my-reports')}
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'my-reports'
+                ? 'bg-white dark:bg-blue-600 text-[#007AFF] dark:text-white shadow-xs'
+                : 'text-[#55685F] dark:text-[#A2B3AA] hover:text-[#11241C] dark:hover:text-white'
+            }`}
+          >
+            <span>Track</span>
+            <span className="w-4 h-4 rounded-full bg-[#007AFF]/10 dark:bg-white/20 text-[#007AFF] dark:text-white text-[10px] flex items-center justify-center font-bold">
+              {civicReports.length}
+            </span>
+          </button>
+        </div>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <div className="p-4 sm:p-5 space-y-6">
+      <div className="max-w-4xl mx-auto p-4 sm:p-5 space-y-6">
         {activeTab === 'my-reports' ? (
           /* Track & My Reports Section */
           <div className="space-y-4">
@@ -330,7 +330,7 @@ export const ReportProblemView: React.FC = () => {
 
             {/* Fixed Bottom Action Bar */}
             <div className="fixed bottom-0 left-0 right-0 z-30 p-4 bg-[#FAF8F5]/90 dark:bg-[#0F1A15]/90 backdrop-blur-md border-t border-[#E8E4DA]/70 dark:border-white/10">
-              <div className="max-w-md mx-auto">
+              <div className="max-w-4xl mx-auto">
                 <button
                   type="submit"
                   id="btn-submit-civic-report"

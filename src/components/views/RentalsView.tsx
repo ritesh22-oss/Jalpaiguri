@@ -78,8 +78,9 @@ export const RentalsView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 max-w-md mx-auto select-none transition-colors">
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0F1A15]/90 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-[#E8E4DA]/50 dark:border-white/10 transition-colors">
+    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#0F1A15] pb-28 select-none transition-colors">
+      <header className="w-full sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0F1A15]/90 backdrop-blur-md border-b border-[#E8E4DA]/50 dark:border-white/10 transition-colors">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={goBack}
@@ -99,9 +100,10 @@ export const RentalsView: React.FC = () => {
           <Plus className="w-3.5 h-3.5" />
           <span>Post Listing</span>
         </button>
+        </div>
       </header>
 
-      <div className="p-4 space-y-4">
+      <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-4">
         {/* Search Input */}
         <div className="bg-white dark:bg-[#17231E] border border-[#D2CEBE] dark:border-white/10 rounded-2xl px-3.5 py-3 flex items-center gap-2.5 shadow-xs transition-colors">
           <Search className="w-4 h-4 text-[#55685F] dark:text-[#A2B3AA]" />
@@ -151,7 +153,8 @@ export const RentalsView: React.FC = () => {
               }}
             />
           ) : (
-            filteredRentals.map((p) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              {filteredRentals.map((p) => (
               <div
                 key={p.id}
                 className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-2.5 hover:border-[#007AFF] dark:hover:border-blue-500 transition-all"
@@ -188,7 +191,8 @@ export const RentalsView: React.FC = () => {
                   </button>
                 </div>
               </div>
-            ))
+            ))}
+            </div>
           )}
         </div>
       </div>
