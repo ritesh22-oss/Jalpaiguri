@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { db } from '../../lib/firebase';
+import { query, collection, getDocs } from 'firebase/firestore';
 import {
   ArrowLeft,
   Share2,

@@ -36,11 +36,20 @@ export async function loadGoogleMapsJsApi(): Promise<any> {
       } catch {
         // Fallback without key or with prototype demo key
       }
+      
+      if (!apiKey) {
+        return reject(new Error('Google Maps API key is not configured.'));
+      }
 
       // 3. Configure Google Maps bootstrap script with solution attribution
       const callbackName = '__initGoogleMapsJsLoaderCallback';
       (window as any)[callbackName] = () => {
         resolve((window as any).google.maps);
+      };
+
+      (window as any).gm_authFailure = () => {
+        window.dispatchEvent(new Event('google-maps-auth-failure'));
+        reject(new Error('Google Maps API authentication failed.'));
       };
 
       const params = new URLSearchParams({

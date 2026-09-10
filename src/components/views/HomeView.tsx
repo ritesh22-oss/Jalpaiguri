@@ -39,6 +39,7 @@ import { JalpaiguriLogo } from '../common/JalpaiguriLogo';
 import { useLocation } from '../../context/LocationContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { LiveJalpaiguriMap } from '../common/LiveJalpaiguriMap';
+import { HomeSearchAssistant } from '../common/HomeSearchAssistant';
 import { UNIFIED_NEARBY_DIRECTORY } from '../../data/nearbyServicesDirectory';
 import { calculateHaversineDistance, formatDistanceString } from '../../data/jalpaiguriLocalities';
 import { NearbyCategoryType, DurgaPandalItem } from '../../types';
@@ -59,6 +60,7 @@ export const HomeView: React.FC = () => {
 
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [mapSearchQuery, setMapSearchQuery] = useState('');
 
   const placeholders = isBengali
     ? [
@@ -503,7 +505,11 @@ export const HomeView: React.FC = () => {
             </button>
           </div>
 
-          <LiveJalpaiguriMap height={200} showDetails={true} />
+          <HomeSearchAssistant onSearch={(query) => {
+              console.log('Map query submitted:', query);
+              setMapSearchQuery(query);
+          }} />
+          <LiveJalpaiguriMap height={200} showDetails={true} searchQuery={mapSearchQuery} />
         </div>
 
         {/* Live Traffic & Waterlogging Highlights */}

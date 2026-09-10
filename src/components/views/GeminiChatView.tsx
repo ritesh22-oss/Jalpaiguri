@@ -98,7 +98,7 @@ export const GeminiChatView: React.FC = () => {
         text: greeting,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         roleUsed: 'general',
-        modelUsed: 'gemini-3.5-flash',
+        modelUsed: 'gemini-3.1-flash-lite',
         groundingPlaces: []
       }]);
     }
@@ -163,7 +163,7 @@ export const GeminiChatView: React.FC = () => {
     },
     general: {
       label: 'General & Maps Grounding',
-      modelName: 'gemini-3.5-flash',
+      modelName: 'gemini-3.1-flash-lite',
       icon: <Sparkles className="w-3.5 h-3.5 text-blue-600" />,
       tag: 'Flash'
     },

@@ -43,7 +43,7 @@ export const BottomNav: React.FC = () => {
       <button
         id="nav-home"
         onClick={() => navigate('home')}
-        className="flex flex-col items-center justify-center py-1 px-2 min-w-[56px] transition-all cursor-pointer group"
+        className="flex flex-col items-center justify-center py-1 px-2 min-w-[56px] transition-all cursor-pointer group hover:scale-105 active:scale-95"
         title="Home"
       >
         <div className={`p-1 rounded-xl transition-colors ${isHomeActive ? 'text-[#007AFF] dark:text-[#38BDF8]' : 'text-[#64748B] dark:text-gray-400 group-hover:text-gray-900'}`}>
@@ -58,7 +58,7 @@ export const BottomNav: React.FC = () => {
       <button
         id="nav-shops"
         onClick={() => navigate('shop-marketplace')}
-        className="flex flex-col items-center justify-center py-1 px-2 min-w-[56px] transition-all cursor-pointer group"
+        className="flex flex-col items-center justify-center py-1 px-2 min-w-[56px] transition-all cursor-pointer group hover:scale-105 active:scale-95"
         title="Shops"
       >
         <div className={`p-1 rounded-xl transition-colors ${isShopActive ? 'text-[#007AFF] dark:text-[#38BDF8]' : 'text-[#64748B] dark:text-gray-400 group-hover:text-gray-900'}`}>
@@ -105,7 +105,7 @@ export const BottomNav: React.FC = () => {
       <button
         id="nav-discover"
         onClick={() => navigate('discover')}
-        className="flex flex-col items-center justify-center py-1 px-2 min-w-[56px] transition-all cursor-pointer group"
+        className="flex flex-col items-center justify-center py-1 px-2 min-w-[56px] transition-all cursor-pointer group hover:scale-105 active:scale-95"
         title="Discover"
       >
         <div className={`p-1 rounded-xl transition-colors ${isDiscoverActive ? 'text-[#007AFF] dark:text-[#38BDF8]' : 'text-[#64748B] dark:text-gray-400 group-hover:text-gray-900'}`}>
@@ -120,7 +120,7 @@ export const BottomNav: React.FC = () => {
       <button
         id="nav-profile"
         onClick={() => navigate('profile')}
-        className="flex flex-col items-center justify-center py-1 px-2 min-w-[56px] transition-all cursor-pointer group"
+        className="flex flex-col items-center justify-center py-1 px-2 min-w-[56px] transition-all cursor-pointer group hover:scale-105 active:scale-95"
         title="Profile"
       >
         <div className={`p-1 rounded-xl transition-colors ${isProfileActive ? 'text-[#007AFF] dark:text-[#38BDF8]' : 'text-[#64748B] dark:text-gray-400 group-hover:text-gray-900'}`}>

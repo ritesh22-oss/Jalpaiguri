@@ -23,6 +23,8 @@ import {
 import { useTheme } from '../../context/ThemeContext';
 import { useNav } from '../../context/NavigationContext';
 import { loadGoogleMapsJsApi } from '../../utils/googleMapsLoader';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 // Jalpaiguri Town Center & Strict Geographic Bounds
 const JALPAIGURI_CENTER = { lat: 26.5228, lng: 88.7245 };
@@ -174,7 +176,9 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
 
   // Map DOM and Instance References
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const leafletContainerRef = useRef<HTMLDivElement | null>(null);
   const googleMapInstanceRef = useRef<any>(null);
+  const leafletMapInstanceRef = useRef<L.Map | null>(null);
   const trafficLayerRef = useRef<any>(null);
   const corridorMarkersRef = useRef<any[]>([]);
   const autoRefreshTimerRef = useRef<any>(null);
@@ -212,14 +216,19 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
   // 2. Initialize Google Maps JavaScript API with Real-time Traffic Layer
   useEffect(() => {
     let isCancelled = false;
+    
+    const handleAuthFailure = () => {
+      setMapEngineStatus('error');
+    };
+    window.addEventListener('google-maps-auth-failure', handleAuthFailure);
 
     async function initMap() {
-      if (!mapContainerRef.current) return;
+      if (mapEngineStatus === 'error') return;
 
       try {
         setMapEngineStatus('loading');
         const googleMaps = await loadGoogleMapsJsApi();
-        if (isCancelled || !mapContainerRef.current) return;
+        if (isCancelled) return;
 
         // If map is already initialized, update styling and map type
         if (googleMapInstanceRef.current) {
@@ -230,6 +239,8 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
           setMapEngineStatus('ready');
           return;
         }
+
+        if (!mapContainerRef.current) return;
 
         const mapOptions: any = {
           center: JALPAIGURI_CENTER,
@@ -271,12 +282,62 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
       }
     }
 
-    initMap();
+    if (mapEngineStatus !== 'error') {
+      initMap();
+    }
 
     return () => {
       isCancelled = true;
+      window.removeEventListener('google-maps-auth-failure', handleAuthFailure);
     };
-  }, [isDarkMode]);
+  }, [isDarkMode, mapEngineStatus]);
+
+  // Leaflet Fallback logic when Google Maps fails
+  useEffect(() => {
+    if (mapEngineStatus === 'error' && leafletContainerRef.current && !leafletMapInstanceRef.current) {
+      const map = L.map(leafletContainerRef.current, {
+        center: [JALPAIGURI_CENTER.lat, JALPAIGURI_CENTER.lng],
+        zoom: 14,
+        zoomControl: false,
+        attributionControl: false
+      });
+
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        minZoom: 2
+      }).addTo(map);
+
+      leafletMapInstanceRef.current = map;
+
+      // Add Corridor Markers
+      if (layers.corridors) {
+        JALPAIGURI_CORRIDORS.forEach(corridor => {
+          const icon = L.divIcon({
+            className: 'fallback-marker',
+            html: `<div style="width: 14px; height: 14px; background: #007AFF; border: 2px solid white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+            iconSize: [14, 14],
+            iconAnchor: [7, 7]
+          });
+          const marker = L.marker([corridor.lat, corridor.lng], { icon }).addTo(map);
+          marker.bindPopup(`
+            <div style="padding: 4px; font-family: sans-serif; max-width: 200px;">
+              <strong style="color: #007AFF; font-size: 13px;">${corridor.name}</strong>
+              <p style="font-size: 11px; margin: 4px 0 0; color: #555;">${corridor.desc}</p>
+            </div>
+          `);
+        });
+      }
+    }
+
+    return () => {
+      if (leafletMapInstanceRef.current) {
+        try {
+          leafletMapInstanceRef.current.remove();
+        } catch {}
+        leafletMapInstanceRef.current = null;
+      }
+    };
+  }, [mapEngineStatus, layers.corridors]);
 
   // Helper to render corridor markers on map
   const renderCorridorMarkers = (googleMaps: any, map: any) => {
@@ -395,6 +456,8 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
     if (googleMapInstanceRef.current) {
       googleMapInstanceRef.current.panTo(JALPAIGURI_CENTER);
       googleMapInstanceRef.current.setZoom(14);
+    } else if (leafletMapInstanceRef.current) {
+      leafletMapInstanceRef.current.setView([JALPAIGURI_CENTER.lat, JALPAIGURI_CENTER.lng], 14, { animate: true });
     }
   };
 
@@ -561,11 +624,22 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
         style={{ height: formattedHeight }}
       >
         {/* Google Maps Container */}
-        <div
-          ref={mapContainerRef}
-          className="w-full h-full"
-          id="google-maps-live-traffic-canvas"
-        />
+        {mapEngineStatus !== 'error' && (
+          <div
+            ref={mapContainerRef}
+            className="w-full h-full"
+            id="google-maps-live-traffic-canvas"
+          />
+        )}
+        
+        {/* Leaflet Fallback Container */}
+        {mapEngineStatus === 'error' && (
+          <div
+            ref={leafletContainerRef}
+            className="w-full h-full z-0"
+            id="leaflet-fallback-canvas"
+          />
+        )}
 
         {/* Map Loading State Overlay */}
         {mapEngineStatus === 'loading' && (
@@ -580,25 +654,27 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
           </div>
         )}
 
-        {/* Map Load Error State */}
+        {/* Map Load Error State / Fallback Notice */}
         {mapEngineStatus === 'error' && (
-          <div className="absolute inset-0 bg-[#FAF8F5]/95 dark:bg-[#0E1714]/95 p-6 flex flex-col items-center justify-center text-center gap-3 z-10">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">
-                Google Maps Traffic Unavailable
-              </h3>
-              <p className="text-[11px] text-[#55685F] dark:text-[#9FB2A8] mt-1 max-w-xs">
-                Ensure <code className="px-1 py-0.5 rounded bg-black/5 dark:bg-white/10 text-[10px]">GOOGLE_MAPS_API_KEY</code> is set in settings.
-              </p>
+          <div className="absolute inset-x-3 top-3 bg-white/95 dark:bg-[#0E1714]/95 backdrop-blur-md p-3 rounded-2xl flex items-center justify-between shadow-lg border border-[#E8E4DA] dark:border-white/10 z-20">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">
+                  Live Traffic Offline
+                </h3>
+                <p className="text-[10px] font-semibold text-[#55685F] dark:text-[#9FB2A8]">
+                  Showing standard map. Configure GOOGLE_MAPS_API_KEY.
+                </p>
+              </div>
             </div>
             <button
-              onClick={handleManualRefresh}
-              className="px-3 py-1.5 rounded-xl bg-[#007AFF] text-white text-xs font-bold active:scale-95"
+              onClick={fetchTelemetry}
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 transition-colors"
             >
-              Retry Connection
+              <RefreshCw className="w-3.5 h-3.5 text-gray-700 dark:text-gray-300" />
             </button>
           </div>
         )}

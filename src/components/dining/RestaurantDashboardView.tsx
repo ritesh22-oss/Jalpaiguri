@@ -33,7 +33,7 @@ import {
 import { useNav } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { Restaurant, MenuItem, RestaurantSubscription } from '../../types';
+import { Restaurant, MenuItem, ShopSubscription } from '../../types';
 
 export const RestaurantDashboardView: React.FC = () => {
   const { navigate, goBack, navParams } = useNav();
@@ -305,7 +305,7 @@ export const RestaurantDashboardView: React.FC = () => {
         // Simulating the Razorpay checkout overlay experience
         await new Promise((resolve) => setTimeout(resolve, 1500));
         
-        const newSubscription: RestaurantSubscription = {
+        const newSubscription: ShopSubscription = {
            ...restaurant.subscription,
            plan: selectedPlan as 'monthly' | 'yearly',
            status: 'active' as const,
