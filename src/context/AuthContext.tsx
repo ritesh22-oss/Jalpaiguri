@@ -161,11 +161,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isMobileOrWebView = (): boolean => {
     if (typeof window === 'undefined') return false;
     const ua = navigator.userAgent || navigator.vendor || (window as any).opera || '';
-    const isAndroidWebView = /wv|Android.*Version\/[0-9]+\.[0-9]+/i.test(ua);
+    
+    // Explicit WebView indicators
+    const isAndroidWebView = ua.includes('; wv') || (ua.includes('Android') && ua.includes('Version/'));
     const isIOSWebView = /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(ua);
+    
+    // Check for "wrapper" indicators commonly used by Webify or other APK creators
+    const isWrapper = !!(window as any).ReactNativeWebView || 
+                      !!(window as any).Android || 
+                      !!(window as any).webkit?.messageHandlers ||
+                      ua.includes('Webify') ||
+                      ua.includes('FBAN') || ua.includes('FBAV') || 
+                      ua.includes('Instagram');
+                      
     const isMobileDevice = /android|iphone|ipad|ipod|blackberry|opera mini|iemobile|mobile/i.test(ua);
-    const isWebifyOrWrapper = !!(window as any).ReactNativeWebView || !!(window as any).Android || isAndroidWebView || isIOSWebView;
-    return isWebifyOrWrapper || (isMobileDevice && !ua.includes('Desktop') && !ua.includes('Macintosh') && !ua.includes('Windows'));
+    const isStandalone = (window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches;
+    
+    // We favor redirect for any WebView, Standalone PWA, or known wrapper on mobile
+    // Desktop browsers (Mac/Windows/Desktop UA) continue using popups.
+    return isWrapper || isAndroidWebView || isIOSWebView || isStandalone || 
+           (isMobileDevice && !ua.includes('Desktop') && !ua.includes('Macintosh') && !ua.includes('Windows'));
   };
 
   // Synchronize user to local storage
@@ -192,13 +207,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .then((result) => {
           if (result && result.user) {
             console.log('[FIREBASE AUTH] Redirect sign-in success for:', result.user.email);
+            // Ensure the Firebase user state is updated immediately
+            setFirebaseUser(result.user);
+            
             // Handle Admin navigation intent stored before redirect
             try {
               const asAdmin = sessionStorage.getItem('jpg_auth_as_admin') === 'true';
               sessionStorage.removeItem('jpg_auth_as_admin');
               if (asAdmin && isAuthorizedAdminEmail(result.user.email)) {
-                // We mark it in a way that navigation logic can pick it up
-                // or just rely on the fact that role will be 'admin'
                 localStorage.setItem('jpg_admin_login_detected', 'true');
               }
             } catch (e) {}
