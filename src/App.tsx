@@ -115,14 +115,14 @@ import { Loader2 } from 'lucide-react';
 import { JalpaiguriLogo } from './components/common/JalpaiguriLogo';
 
 const AppContent: React.FC = () => {
+  // 1. ALL HOOKS MUST BE AT THE VERY TOP, UNCONDITIONAL
   const { currentView, replaceView, navigate, goBack } = useNav();
   const { user, isAuthenticated, isProfileComplete, isLoading } = useAuth();
   const { isWithinServiceRegion, serviceAreaStatus, status: locationStatus, location } = useLocation();
   const { pujaPandals, addPujaPandal, reportPandalInfo } = useApp();
   const { isBengali } = useLanguage();
 
-  // Automatic auth state transition: if user is authenticated but has not completed profile setup
-  // and is currently on auth/onboarding views, smoothly navigate them to profile-setup immediately
+  // Effects
   React.useEffect(() => {
     if (!isLoading && isAuthenticated && !isProfileComplete) {
       if (
@@ -136,9 +136,6 @@ const AppContent: React.FC = () => {
     }
   }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView]);
 
-  // Persistent Authentication Session Restoration:
-  // If the session is still valid (authenticated + profile complete), automatically open the user
-  // directly to the Home screen without showing login, signup, splash, or onboarding again.
   React.useEffect(() => {
     if (!isLoading && isAuthenticated && isProfileComplete) {
       if (
@@ -159,9 +156,40 @@ const AppContent: React.FC = () => {
     }
   }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView]);
 
-  // If user switched to admin role and is on admin dashboard
+  // 2. DERIVED STATE (No hooks here)
+  const isRedirectPending = localStorage.getItem('jpg_redirect_auth_pending') === 'true';
+  const hasShownSplash = sessionStorage.getItem('jpg_splash_shown') === 'true';
+  
+  const hideBottomNavViews = [
+    'splash',
+    'onboarding',
+    'auth',
+    'phone-auth',
+    'otp',
+    'profile-setup',
+    'profile-onboarding',
+    'location-permission',
+    'outside-area',
+    'location-permission-required',
+    'safety-sos',
+    'sexual-violence-support',
+    'chat',
+    'ai-chat',
+    'admin-dashboard',
+    'add-shop'
+  ];
+  const showBottomNav = !hideBottomNavViews.includes(currentView);
+
+  const isExemptView =
+    currentView === 'outside-area' ||
+    currentView === 'safety-sos' ||
+    currentView === 'sexual-violence-support' ||
+    currentView === 'splash';
+
+  // 3. CONDITIONAL EARLY RETURNS (Must be AFTER all hooks)
+  
+  // Admin bypass
   if (user?.role === 'admin' && currentView === 'admin-dashboard') {
-    // Mark splash as shown if we reached here
     sessionStorage.setItem('jpg_splash_shown', 'true');
     return (
       <div className="min-h-screen bg-[#FAF8F5]">
@@ -171,15 +199,7 @@ const AppContent: React.FC = () => {
     );
   }
 
-  // JALPAIGURI-ONLY ACCESS ENFORCEMENT:
-  // If the user's detected GPS coordinates are outside the Jalpaiguri service area,
-  // enforce the Outside Area restriction unless accessing Safety SOS or Sexual Violence Support.
-  const isExemptView =
-    currentView === 'outside-area' ||
-    currentView === 'safety-sos' ||
-    currentView === 'sexual-violence-support' ||
-    currentView === 'splash';
-
+  // Location bypass
   if (serviceAreaStatus === 'outside' && !isExemptView) {
     return (
       <ExpoDeviceShell>
@@ -191,7 +211,6 @@ const AppContent: React.FC = () => {
     );
   }
 
-  // If GPS location permission is denied and not in exempt safety views:
   if ((locationStatus === 'denied' || locationStatus === 'permission_denied') && !isExemptView) {
     return (
       <ExpoDeviceShell>
@@ -203,13 +222,8 @@ const AppContent: React.FC = () => {
     );
   }
 
-  const isRedirectPending = localStorage.getItem('jpg_redirect_auth_pending') === 'true';
-  const hasShownSplash = sessionStorage.getItem('jpg_splash_shown') === 'true';
-
-  // Handle case where we are returning from a redirect or restoring a session
+  // Loading / Redirect states
   if (isLoading) {
-    // If we are returning from a redirect or it's a sub-sequent reload in the same session, 
-    // skip the full splash animation and show a subtle loader.
     if (isRedirectPending || hasShownSplash) {
       return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-white">
@@ -369,26 +383,6 @@ const AppContent: React.FC = () => {
     }
   };
 
-  // Determine if BottomNav should be visible
-  const hideBottomNavViews = [
-    'splash',
-    'onboarding',
-    'auth',
-    'phone-auth',
-    'otp',
-    'profile-setup',
-    'profile-onboarding',
-    'location-permission',
-    'outside-area',
-    'location-permission-required',
-    'safety-sos',
-    'sexual-violence-support',
-    'chat',
-    'ai-chat',
-    'admin-dashboard',
-    'add-shop'
-  ];
-  const showBottomNav = !hideBottomNavViews.includes(currentView);
   const isPostLogin = !['splash', 'onboarding', 'auth', 'phone-auth', 'otp', 'profile-setup', 'profile-onboarding'].includes(currentView);
 
   return (
