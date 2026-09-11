@@ -177,10 +177,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const isMobileDevice = /android|iphone|ipad|ipod|blackberry|opera mini|iemobile|mobile/i.test(ua);
     const isStandalone = (window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches;
     
-    // We favor redirect for any WebView, Standalone PWA, or known wrapper on mobile
-    // Desktop browsers (Mac/Windows/Desktop UA) continue using popups.
-    return isWrapper || isAndroidWebView || isIOSWebView || isStandalone || 
-           (isMobileDevice && !ua.includes('Desktop') && !ua.includes('Macintosh') && !ua.includes('Windows'));
+    // We favor popup for standard mobile browsers (Chrome/Safari) to avoid cross-origin storage issues on Vercel.
+    // We only use redirect if it's a known restricted environment (PWA standalone, WebView, or Wrapper).
+    // However, the user specifically requested to evaluate signInWithPopup for the web application.
+    return isWrapper || isAndroidWebView || isIOSWebView || isStandalone;
   };
 
   // Synchronize user to local storage
@@ -197,6 +197,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Global Firebase Auth State Listener
   useEffect(() => {
     validateFirestoreConnection();
+
+    console.log(`[AUTH SYSTEM] Initialization...`);
+    console.log(`[AUTH SYSTEM] ORIGIN: ${window.location.origin}`);
+    console.log(`[AUTH SYSTEM] AUTH DOMAIN: gen-lang-client-0813805041.firebaseapp.com`);
 
     let unsubscribe = () => {};
     let redirectChecked = false;
@@ -234,7 +238,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           finishInitialization();
         })
         .catch((err) => {
-          console.warn('[FIREBASE AUTH] Redirect result notice:', err);
+          console.error('[FIREBASE AUTH] Redirect result error:', {
+            code: err.code,
+            message: err.message,
+            customData: err.customData
+          });
           localStorage.removeItem('jpg_redirect_auth_pending');
           redirectChecked = true;
           finishInitialization();
@@ -244,6 +252,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setFirebaseUser(fbUser);
 
         if (fbUser) {
+          console.log('[FIREBASE AUTH] Auth state changed: AUTHENTICATED', fbUser.email);
           try {
             const isOfficialAdmin = isAuthorizedAdminEmail(fbUser.email);
             // Fetch Firestore Profile
@@ -289,6 +298,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.warn('Firestore profile fetch warning:', err);
           }
         } else {
+          console.log('[FIREBASE AUTH] Auth state changed: UNAUTHENTICATED');
           setUser(null);
         }
 
@@ -304,17 +314,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  // 1. Google Sign-In with Firebase Popup (Desktop) or Redirect (Mobile / APK WebView)
+  // 1. Google Sign-In with Firebase Popup (Desktop/Mobile Web) or Redirect (Specific APK WebView)
   const loginWithGoogle = async (
     options?: { asAdmin?: boolean }
   ): Promise<{ success: boolean; isNewUser?: boolean; isAdmin?: boolean; message?: string }> => {
     setIsLoading(true);
+    const method = isMobileOrWebView() ? 'redirect' : 'popup';
+    console.log(`[AUTH ACTION] Sign-in with Google started using: ${method}`);
+
     try {
       if (!isFirebaseConfigured || !auth) {
         throw new Error('Firebase Auth is not initialized');
       }
 
-      if (isMobileOrWebView()) {
+      if (method === 'redirect') {
         localStorage.setItem('jpg_redirect_auth_pending', 'true');
         if (options?.asAdmin) {
           try {
@@ -329,6 +342,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const fbUser = result.user;
 
       if (fbUser) {
+        console.log('[FIREBASE AUTH] Popup sign-in success:', fbUser.email);
         const isOfficialAdmin = isAuthorizedAdminEmail(fbUser.email);
 
         // Strict Admin Security Check: Only verified municipal administrators are granted admin access
