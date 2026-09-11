@@ -199,6 +199,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     validateFirestoreConnection();
 
     let unsubscribe = () => {};
+    let redirectChecked = false;
+    let authStateChecked = false;
+
+    const finishInitialization = () => {
+      if (redirectChecked && authStateChecked) {
+        setIsLoading(false);
+      }
+    };
 
     if (isFirebaseConfigured && auth) {
       // Handle redirect auth result for APK / mobile WebView environments
@@ -222,10 +230,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // We only clear the pending flag AFTER result is processed
           // This prevents the UI from flipping back to the splash screen too early
           localStorage.removeItem('jpg_redirect_auth_pending');
+          redirectChecked = true;
+          finishInitialization();
         })
         .catch((err) => {
           console.warn('[FIREBASE AUTH] Redirect result notice:', err);
           localStorage.removeItem('jpg_redirect_auth_pending');
+          redirectChecked = true;
+          finishInitialization();
         });
 
       unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
@@ -280,7 +292,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(null);
         }
 
-        setIsLoading(false);
+        authStateChecked = true;
+        finishInitialization();
       });
     } else {
       setIsLoading(false);

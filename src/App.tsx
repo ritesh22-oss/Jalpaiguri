@@ -248,6 +248,21 @@ const AppContent: React.FC = () => {
   const renderView = () => {
     switch (currentView) {
       case 'splash':
+        // If we are authenticated but still on the splash view (before the auto-navigation effect fires),
+        // we render a clean loading state instead of the full splash animation to prevent visual flickering.
+        if (isAuthenticated) {
+          return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+              <div className="flex flex-col items-center gap-6">
+                <JalpaiguriLogo size="xl" showText={false} outline={true} />
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                  <p className="text-xs font-bold text-gray-400 tracking-widest uppercase">Restoring Session</p>
+                </div>
+              </div>
+            </div>
+          );
+        }
         return <SplashScreen />;
       case 'onboarding':
         return <OnboardingView />;
