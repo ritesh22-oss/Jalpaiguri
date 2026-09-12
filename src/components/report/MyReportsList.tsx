@@ -219,7 +219,7 @@ export const MyReportsList: React.FC<MyReportsListProps> = ({
             <button
               type="button"
               onClick={onNewReport}
-              className="mt-2 px-4 py-2.5 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-bold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="mt-2 px-4 py-2.5 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <PlusCircle className="w-3.5 h-3.5" />
               <span>Report a Problem</span>

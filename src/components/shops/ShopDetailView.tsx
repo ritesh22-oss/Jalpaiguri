@@ -88,7 +88,7 @@ export const ShopDetailView: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] flex flex-col items-center justify-center p-6 space-y-3">
+      <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#020617] flex flex-col items-center justify-center p-6 space-y-3">
         <div className="w-10 h-10 border-4 border-[#007AFF] border-t-transparent rounded-full animate-spin"></div>
         <p className="text-xs font-bold text-[#55685F] dark:text-[#A2B3AA]">
           {language === 'bn' ? 'দোকানের বিবরণ লোড হচ্ছে...' : 'Loading shop catalog...'}
@@ -99,10 +99,10 @@ export const ShopDetailView: React.FC = () => {
 
   if (!shop) {
     return (
-      <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] p-6 text-center space-y-4">
+      <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#020617] p-6 text-center space-y-4">
         <button
           onClick={goBack}
-          className="p-2 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10"
+          className="p-2 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10"
         >
           <ArrowLeft className="w-5 h-5 text-gray-700 dark:text-white" />
         </button>
@@ -153,12 +153,12 @@ export const ShopDetailView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 max-w-md mx-auto select-none transition-colors">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#020617] pb-28 max-w-md mx-auto select-none transition-colors">
       {/* Top Floating Action Bar */}
-      <div className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0B132B]/90 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-[#E8E4DA]/60 dark:border-white/10">
+      <div className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#020617]/90 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-[#E8E4DA]/60 dark:border-white/10">
         <button
           onClick={goBack}
-          className="w-10 h-10 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
+          className="w-10 h-10 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
         </button>
@@ -170,7 +170,7 @@ export const ShopDetailView: React.FC = () => {
         <div className="flex items-center gap-1.5">
           <button
             onClick={handleShare}
-            className="w-10 h-10 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
+            className="w-10 h-10 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
             title="Share"
           >
             <Share2 className="w-4 h-4" />
@@ -228,10 +228,10 @@ export const ShopDetailView: React.FC = () => {
 
       <div className="p-4 space-y-4">
         {/* Core Metadata Card */}
-        <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+        <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
           {/* Category & Rating */}
           <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold text-[#007AFF] dark:text-blue-400 bg-[#E6F4EA] dark:bg-blue-950/60 px-2.5 py-1 rounded-xl border border-blue-200/50 dark:border-blue-800/40">
+            <span className="text-xs font-extrabold text-[#007AFF] dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1 rounded-xl border border-blue-200/50 dark:border-blue-800/40">
               {shop.category}
             </span>
 
@@ -272,7 +272,7 @@ export const ShopDetailView: React.FC = () => {
           {/* Delivery & UPI Badges */}
           <div className="pt-2 border-t border-[#F0ECE1] dark:border-white/10 flex items-center justify-between text-xs flex-wrap gap-2">
             {(shop.deliveryAvailable ?? (shop as any).homeDelivery ?? true) ? (
-              <div className="flex items-center gap-1.5 text-blue-800 dark:text-blue-300 font-bold bg-[#E6F4EA] dark:bg-blue-950/60 px-2.5 py-1 rounded-xl">
+              <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-300 font-bold bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1 rounded-xl">
                 <Truck className="w-3.5 h-3.5 text-blue-600" />
                 <span>{language === 'bn' ? 'হোম ডেলিভারি উপলব্ধ' : 'Home Delivery Available'}</span>
               </div>
@@ -283,7 +283,7 @@ export const ShopDetailView: React.FC = () => {
             {shop.paymentMethods?.includes('UPI') && (
               <button
                 onClick={() => setShowUpiModal(true)}
-                className="flex items-center gap-1.5 text-[#007AFF] dark:text-blue-300 font-bold bg-[#D2EBE0] dark:bg-blue-950/70 px-2.5 py-1 rounded-xl hover:bg-[#C2E4D5] cursor-pointer transition-colors"
+                className="flex items-center gap-1.5 text-[#007AFF] dark:text-blue-300 font-bold bg-blue-100 dark:bg-blue-950/70 px-2.5 py-1 rounded-xl hover:bg-blue-200 cursor-pointer transition-colors"
               >
                 <QrCode className="w-3.5 h-3.5" />
                 <span>{language === 'bn' ? 'UPI পেমেন্ট QR' : 'Pay via UPI'}</span>
@@ -300,7 +300,7 @@ export const ShopDetailView: React.FC = () => {
               const ph = shop.phone || (shop as any).ownerPhone || '+919832011094';
               window.location.href = `tel:${ph.replace(/\s+/g, '')}`;
             }}
-            className="py-3 px-3 rounded-2xl bg-[#D2EBE0] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 font-bold text-xs flex flex-col items-center justify-center gap-1 hover:bg-[#C2E4D5] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer border border-blue-200/50 dark:border-blue-800/40"
+            className="py-3 px-3 rounded-2xl bg-blue-100 dark:bg-blue-900/30 text-[#007AFF] dark:text-blue-300 font-bold text-xs flex flex-col items-center justify-center gap-1 hover:bg-blue-200 active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer border border-blue-200/50 dark:border-blue-800/40"
           >
             <Phone className="w-4 h-4" />
             <span>{language === 'bn' ? 'কল করুন' : 'Call Store'}</span>
@@ -325,7 +325,7 @@ export const ShopDetailView: React.FC = () => {
               const q = encodeURIComponent(`${shop.name}, ${shop.locality}, Jalpaiguri, West Bengal`);
               window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank');
             }}
-            className="py-3 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-700 text-white font-bold text-xs flex flex-col items-center justify-center gap-1 hover:bg-[#084D3A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer shadow-xs"
+            className="py-3 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-700 text-white font-bold text-xs flex flex-col items-center justify-center gap-1 hover:bg-blue-700 active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer shadow-xs"
           >
             <MapPin className="w-4 h-4" />
             <span>{language === 'bn' ? 'লোকেশন' : 'Directions'}</span>
@@ -384,7 +384,7 @@ export const ShopDetailView: React.FC = () => {
                 value={productSearch}
                 onChange={(e) => setProductSearch(e.target.value)}
                 placeholder={language === 'bn' ? 'দোকানের মধ্যে পণ্য খুঁজুন...' : 'Search items in this store...'}
-                className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-xl text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#007AFF]"
+                className="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-xl text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-[#007AFF]"
               />
             </div>
 
@@ -398,7 +398,7 @@ export const ShopDetailView: React.FC = () => {
                     className={`px-3 py-1 rounded-lg font-bold shrink-0 transition-all cursor-pointer ${
                       selectedProductCategory === cat
                         ? 'bg-[#007AFF] text-white'
-                        : 'bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 text-gray-700 dark:text-gray-300'
+                        : 'bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 text-gray-700 dark:text-gray-300'
                     }`}
                   >
                     {cat}
@@ -409,7 +409,7 @@ export const ShopDetailView: React.FC = () => {
 
             {/* Product items list */}
             {filteredProducts.length === 0 ? (
-              <div className="py-8 text-center bg-white dark:bg-[#0F172A] rounded-2xl border border-[#E8E4DA] dark:border-white/10 p-6 space-y-2">
+              <div className="py-8 text-center bg-white dark:bg-[#1E293B] rounded-2xl border border-[#E8E4DA] dark:border-white/10 p-6 space-y-2">
                 <ShoppingBag className="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto" />
                 <p className="text-xs font-bold text-[#11241C] dark:text-white">
                   {language === 'bn' ? 'কোনো পণ্য পাওয়া যায়নি' : 'No items match your search'}
@@ -423,7 +423,7 @@ export const ShopDetailView: React.FC = () => {
                 {filteredProducts.map((product) => (
                   <div
                     key={product.id}
-                    className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-2xl overflow-hidden p-2.5 flex flex-col justify-between shadow-2xs hover:border-[#007AFF] transition-colors"
+                    className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-2xl overflow-hidden p-2.5 flex flex-col justify-between shadow-2xs hover:border-[#007AFF] transition-colors"
                   >
                     <div>
                       {/* Product Image */}
@@ -444,7 +444,7 @@ export const ShopDetailView: React.FC = () => {
                         </span>
                         <span className={`text-[9px] font-black px-1.5 py-0.2 rounded-md ${
                           product.inStock
-                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                            ? 'bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-300'
                             : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
                         }`}>
                           {product.inStock ? (language === 'bn' ? 'স্টকে আছে' : 'In Stock') : (language === 'bn' ? 'স্টক শেষ' : 'Out of Stock')}
@@ -455,7 +455,7 @@ export const ShopDetailView: React.FC = () => {
                         {product.name}
                       </h4>
                       {product.nameBengali && (
-                        <p className="text-[10px] text-blue-700 dark:text-blue-400 font-semibold truncate">
+                        <p className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold truncate">
                           {product.nameBengali}
                         </p>
                       )}
@@ -478,7 +478,7 @@ export const ShopDetailView: React.FC = () => {
 
                       <button
                         onClick={() => handleProductOrder(product)}
-                        className="w-full py-1.5 px-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-[11px] font-bold flex items-center justify-center gap-1 shadow-2xs active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
+                        className="w-full py-1.5 px-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold flex items-center justify-center gap-1 shadow-2xs active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
                       >
                         <MessageSquare className="w-3 h-3" />
                         <span>{language === 'bn' ? 'অর্ডার করুন' : 'Order'}</span>
@@ -493,7 +493,7 @@ export const ShopDetailView: React.FC = () => {
 
         {/* TAB 2: ABOUT & DELIVERY */}
         {activeTab === 'info' && (
-          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-4 text-xs">
+          <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-4 text-xs">
             <div>
               <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white mb-1">
                 {language === 'bn' ? 'দোকানের পরিচিতি' : 'About This Shop'}
@@ -543,7 +543,7 @@ export const ShopDetailView: React.FC = () => {
                 {(shop.paymentMethods || ['Cash', 'UPI']).map((m) => (
                   <span
                     key={m}
-                    className="px-3 py-1 rounded-xl bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 border border-blue-200/50"
+                    className="px-3 py-1 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-[#007AFF] dark:text-blue-300 border border-blue-200/50"
                   >
                     ✓ {m}
                   </span>
@@ -555,7 +555,7 @@ export const ShopDetailView: React.FC = () => {
 
         {/* TAB 3: REVIEWS */}
         {activeTab === 'reviews' && (
-          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3 text-xs">
+          <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3 text-xs">
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-2xl font-black text-[#11241C] dark:text-white">
@@ -563,7 +563,7 @@ export const ShopDetailView: React.FC = () => {
                 </span>
                 <span className="text-xs text-gray-500 ml-1 font-semibold">/ 5.0</span>
               </div>
-              <span className="text-xs font-bold text-blue-700 dark:text-blue-400 bg-[#E6F4EA] dark:bg-blue-950/60 px-2 py-0.5 rounded-lg">
+              <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-lg">
                 100% Jalpaiguri Local Reviews
               </span>
             </div>
@@ -602,7 +602,7 @@ export const ShopDetailView: React.FC = () => {
       {/* UPI QR CODE MODAL */}
       {showUpiModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0F172A] rounded-3xl max-w-xs w-full p-5 text-center space-y-3 border border-[#E8E4DA] dark:border-white/10 shadow-2xl animate-in zoom-in-95">
+          <div className="bg-white dark:bg-[#1E293B] rounded-3xl max-w-xs w-full p-5 text-center space-y-3 border border-[#E8E4DA] dark:border-white/10 shadow-2xl animate-in zoom-in-95">
             <div className="flex justify-between items-center">
               <span className="text-xs font-extrabold text-[#007AFF] dark:text-blue-400">
                 Direct Contactless Payment
@@ -672,7 +672,7 @@ export const ShopDetailView: React.FC = () => {
                 navigator.clipboard.writeText(upi);
                 alert('UPI ID copied to clipboard!');
               }}
-              className="w-full py-2.5 rounded-xl bg-[#007AFF] text-white text-xs font-bold hover:bg-[#084D3A] transition-colors cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-[#007AFF] text-white text-xs font-bold hover:bg-blue-700 transition-colors cursor-pointer"
             >
               Copy UPI ID
             </button>

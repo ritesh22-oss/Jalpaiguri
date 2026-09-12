@@ -1,9 +1,9 @@
 import React from 'react';
-import { ArrowLeft, Search, Shield, Sparkles, Sun, Moon, Globe } from 'lucide-react';
+import { ArrowLeft, Search, Shield, Sparkles, Sun, Moon, Globe, Home } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { JalpaiguriLogo } from './JalpaiguriLogo';
+import { JPGLogo } from './JPGLogo';
 
 interface HeaderProps {
   title?: string;
@@ -28,24 +28,35 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#020617]/90 backdrop-blur-md border-b border-[#E8E4DA]/60 dark:border-white/10 px-4 py-3 flex items-center justify-between transition-colors">
-      <div className="flex items-center gap-3">
-        {showBack ? (
+      <div className="flex items-center gap-2">
+        {showBack && (
           <button
             id="header-back-btn"
             onClick={goBack}
-            className="w-10 h-10 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-[#F8FAFC] shadow-sm hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer"
+            className="w-10 h-10 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-[#F8FAFC] shadow-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 active:scale-95 transition-all cursor-pointer"
             aria-label="Go back"
           >
             <ArrowLeft className="w-5 h-5 stroke-[2]" />
           </button>
-        ) : showLogo ? (
-          <div onClick={() => navigate('home')} className="cursor-pointer">
-            <JalpaiguriLogo size="sm" />
+        )}
+
+        <button
+          onClick={() => navigate('home')}
+          className="w-10 h-10 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#007AFF] dark:text-blue-400 shadow-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 active:scale-95 transition-all cursor-pointer"
+          aria-label="Home"
+          title="Return to Dashboard"
+        >
+          <Home className="w-5 h-5 stroke-[2.5]" />
+        </button>
+
+        {showLogo && !showBack && (
+          <div onClick={() => navigate('home')} className="cursor-pointer ml-1">
+            <JPGLogo size="sm" />
           </div>
-        ) : null}
+        )}
 
         {title && (
-          <h1 className="text-lg font-bold text-[#11241C] dark:text-[#F8FAFC] tracking-tight">
+          <h1 className="text-sm font-extrabold text-[#11241C] dark:text-[#F8FAFC] tracking-tight ml-1 truncate max-w-[120px] sm:max-w-none">
             {title}
           </h1>
         )}
@@ -77,8 +88,8 @@ export const Header: React.FC<HeaderProps> = ({
         {/* AI Assistant Quick Trigger */}
         <button
           onClick={() => setIsAssistantOpen(true)}
-          className="w-9 h-9 rounded-full bg-[#E6F4EA] dark:bg-[#153426] text-[#007AFF] dark:text-[#38BDF8] flex items-center justify-center hover:bg-[#C8E6C9] dark:hover:bg-[#1C4532] active:scale-95 transition-all cursor-pointer"
-          title="Ask Jalpaigi AI Assistant"
+          className="w-9 h-9 rounded-full bg-blue-50 dark:bg-blue-900/30 text-[#007AFF] dark:text-[#38BDF8] flex items-center justify-center hover:bg-blue-100 dark:hover:bg-blue-800/40 active:scale-95 transition-all cursor-pointer"
+          title="Ask JPG AI Assistant"
         >
           <Sparkles className="w-4 h-4" />
         </button>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNav } from '../../context/NavigationContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { JalpaiguriLogo } from '../common/JalpaiguriLogo';
+import { JPGLogo } from '../common/JPGLogo';
 import { Globe } from 'lucide-react';
 import { MyJpgLetterMaskHero } from '../common/MyJpgLetterMaskHero';
 
@@ -24,7 +24,7 @@ export const OnboardingView: React.FC = () => {
       <div className="w-full max-w-lg mx-auto flex-1 flex flex-col justify-between">
       {/* Top bar with Language Switcher */}
       <div className="w-full pt-1 flex items-center justify-between">
-        <JalpaiguriLogo size="sm" showText={true} />
+        <JPGLogo size="sm" showText={true} />
         <button
           onClick={toggleLanguage}
           className="h-8 px-3 rounded-full bg-white dark:bg-[#1E293B] border border-gray-200 dark:border-white/10 text-xs font-bold text-[#007AFF] dark:text-blue-400 flex items-center gap-1.5 shadow-2xs hover:bg-gray-50 active:scale-95 transition-all cursor-pointer"

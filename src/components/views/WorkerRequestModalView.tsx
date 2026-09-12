@@ -69,7 +69,7 @@ export const WorkerRequestModalView: React.FC = () => {
         <div className="space-y-3 pb-6">
           <button
             onClick={() => navigate('chat', { recipientId: worker.id, recipientName: worker.name, profession: worker.profession })}
-            className="w-full py-4 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-sm shadow-md hover:bg-[#084D3A] cursor-pointer"
+            className="w-full py-4 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-sm shadow-md hover:bg-blue-700 cursor-pointer"
           >
             Message {worker.name}
           </button>
@@ -164,7 +164,7 @@ export const WorkerRequestModalView: React.FC = () => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-4 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-sm shadow-md hover:bg-[#084D3A] active:scale-98 transition-all cursor-pointer disabled:opacity-50"
+          className="w-full py-4 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-sm shadow-md hover:bg-blue-700 active:scale-98 transition-all cursor-pointer disabled:opacity-50"
         >
           {isSubmitting ? 'Confirming with Provider…' : 'Submit Service Request'}
         </button>

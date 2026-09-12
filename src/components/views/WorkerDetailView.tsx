@@ -160,7 +160,7 @@ export const WorkerDetailView: React.FC = () => {
           </button>
           <button
             onClick={handleRequest}
-            className="py-3.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-[#084D3A] shadow-md cursor-pointer"
+            className="py-3.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-blue-700 shadow-md cursor-pointer"
           >
             <Wrench className="w-4 h-4" />
             <span>Book Now</span>

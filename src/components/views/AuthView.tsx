@@ -11,7 +11,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useNav } from '../../context/NavigationContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { JalpaiguriLogo } from '../common/JalpaiguriLogo';
+import { JPGLogo } from '../common/JPGLogo';
 
 export const AuthView: React.FC = () => {
   const { loginWithGoogle } = useAuth();
@@ -120,7 +120,7 @@ export const AuthView: React.FC = () => {
           {/* Transparent Logo without background card or border */}
           <div className="flex flex-col items-center select-none">
             <div className="relative mb-3 flex items-center justify-center">
-              <JalpaiguriLogo size="xl" showText={false} />
+              <JPGLogo size="xl" showText={false} />
             </div>
 
             {/* Unified Brand Typography: MY in black, JPG in brand blue */}

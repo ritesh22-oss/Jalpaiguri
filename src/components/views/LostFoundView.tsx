@@ -84,7 +84,7 @@ export const LostFoundView: React.FC = () => {
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="px-3 py-2 rounded-full bg-[#007AFF] hover:bg-[#084D3A] text-white text-xs font-bold flex items-center gap-1 shadow-xs active:scale-95 transition-all cursor-pointer"
+          className="px-3 py-2 rounded-full bg-[#007AFF] hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1 shadow-xs active:scale-95 transition-all cursor-pointer"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Report Item</span>
@@ -183,7 +183,7 @@ export const LostFoundView: React.FC = () => {
                       onClick={() =>
                         (window.location.href = `tel:${item.contactPreference.replace(/\s+/g, '')}`)
                       }
-                      className="px-3.5 py-1.5 rounded-xl bg-[#007AFF] hover:bg-[#084D3A] text-white text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-xl bg-[#007AFF] hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
                     >
                       <Phone className="w-3 h-3" />
                       <span>Contact</span>
@@ -303,7 +303,7 @@ export const LostFoundView: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-2xl bg-[#007AFF] text-white font-bold text-sm shadow-md hover:bg-[#084D3A] active:scale-98 transition-all cursor-pointer"
+                className="w-full py-3.5 rounded-2xl bg-[#007AFF] text-white font-bold text-sm shadow-md hover:bg-blue-700 active:scale-98 transition-all cursor-pointer"
               >
                 Post Community Notice
               </button>

@@ -520,7 +520,7 @@ export const AddRestaurantWizardView: React.FC = () => {
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="px-3.5 py-2 bg-[#007AFF] dark:bg-blue-600 text-white rounded-xl text-xs font-black shrink-0 hover:bg-[#084D3A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-xs cursor-pointer flex items-center gap-1"
+              className="px-3.5 py-2 bg-[#007AFF] dark:bg-blue-600 text-white rounded-xl text-xs font-black shrink-0 hover:bg-blue-700 active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-xs cursor-pointer flex items-center gap-1"
             >
               {isSubmitting ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1047,7 +1047,7 @@ export const AddRestaurantWizardView: React.FC = () => {
               )}
               <button
                 onClick={handleNext}
-                className="py-3 px-6 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-xs"
+                className="py-3 px-6 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-xs"
               >
                 <span>{language === 'bn' ? 'পরবর্তী ধাপ' : 'Continue'}</span>
                 <ChevronRight className="w-4 h-4" />
@@ -1057,7 +1057,7 @@ export const AddRestaurantWizardView: React.FC = () => {
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="py-3 px-6 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-md ml-auto disabled:opacity-50"
+              className="py-3 px-6 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-md ml-auto disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>

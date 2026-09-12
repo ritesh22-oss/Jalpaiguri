@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { JalpaiguriLogo } from '../common/JalpaiguriLogo';
+import { JPGLogo } from '../common/JPGLogo';
 import {
   MapPinOff,
   RefreshCw,
@@ -42,7 +42,7 @@ export const LocationPermissionRequiredView: React.FC<LocationPermissionRequired
       <div className="pt-4 sm:pt-6 space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <JalpaiguriLogo size="sm" showText={true} />
+            <JPGLogo size="sm" showText={true} />
           </div>
 
           <button
@@ -100,7 +100,7 @@ export const LocationPermissionRequiredView: React.FC<LocationPermissionRequired
             <button
               onClick={handleAllowAndRetry}
               disabled={isRetrying}
-              className="w-full py-3.5 px-4 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-sm active:scale-98 transition-all disabled:opacity-70 cursor-pointer"
+              className="w-full py-3.5 px-4 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-sm active:scale-98 transition-all disabled:opacity-70 cursor-pointer"
             >
               <RefreshCw className={`w-4 h-4 ${isRetrying ? 'animate-spin' : ''}`} />
               <span>{isRetrying ? 'Checking GPS Signal...' : 'Allow Location & Try Again'}</span>

@@ -325,7 +325,8 @@ app.get('/api/location/reverse-geocode', async (req: Request, res: Response) => 
 // ==========================================
 
 const ROLE_SYSTEM_INSTRUCTIONS: Record<string, string> = {
-  general: `You are "Jalpaigi AI", a smart, friendly, and knowledgeable civic and community assistant for Jalpaiguri, West Bengal, India.
+  general: `You are "JPG AI", a smart, friendly, and knowledgeable civic and community assistant for Jalpaiguri, West Bengal, India.
+CRITICAL: You MUST ALWAYS refer to yourself as "JPG AI". NEVER use "Jalpaiguri AI", "Jalapaiguri AI", or any other name.
 Your goal is to answer questions accurately and helpfully in English and Bengali.
 You understand Jalpaiguri landmarks (Kadamtala, Dinbazar, DBC Road, Hakimpara, Rajbari Dighi, Teesta barrage, Jubilee Park), municipal services, culture, and day-to-day life.
 Maintain conversational context across multiple turns.
@@ -458,7 +459,7 @@ function generateLocalFallback(query: string, role: string): string {
       `• **Jalpesh Temple:** Ancient Shiva temple located approximately 15 km from town.`;
   }
 
-  return `Nomoshkar! I am **Jalpaigi AI**, your local assistant for Jalpaiguri, West Bengal. I can help you with verified electricians & plumbers, blood donor requests, Sadar Hospital emergency contacts, municipal ward grievances, and local Dooars travel advice. How can I assist you right now?`;
+  return `Nomoshkar! I am **JPG AI**, your local assistant for Jalpaiguri, West Bengal. I can help you with verified electricians & plumbers, blood donor requests, Sadar Hospital emergency contacts, municipal ward grievances, and local Dooars travel advice. How can I assist you right now?`;
 }
 
 // Unified Multi-Turn Chat with Gemini & Intent-Based Grounding
@@ -803,8 +804,11 @@ app.post('/api/places/generate-image', async (req: Request, res: Response) => {
   } catch (err: any) {
     if (err?.status === 429 || err?.message?.includes('RESOURCE_EXHAUSTED')) {
       quotaExhaustedUntil = Date.now() + 60 * 60 * 1000; // 1 hour
+      // Log once quietly without spamming console
+      console.warn('Gemini image generation quota exceeded. Falling back to architectural illustrations.');
+      return res.json({ imageUrl: null, message: 'Quota exceeded, using fallback illustration' });
     }
-    console.error('Gemini place image generation error:', err);
+    console.warn('Gemini place image generation unavailable:', err?.message || err);
     return res.json({ imageUrl: null, error: err?.message });
   }
 });
@@ -953,13 +957,13 @@ app.post('/api/ai/jalpaigi-chat', async (req: Request, res: Response) => {
   const ai = getGeminiClient();
   if (!ai) {
     return res.json({
-      reply: 'Nomoshkar! I am Jalpaigi AI, your local Jalpaiguri assistant.'
+      reply: 'Nomoshkar! I am JPG AI, your local Jalpaiguri assistant.'
     });
   }
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3.1-flash-lite',
-      contents: `You are Jalpaigi AI for Jalpaiguri, West Bengal. Answer briefly: "${message}"`
+      contents: `You are JPG AI for Jalpaiguri, West Bengal. Answer briefly: "${message}"`
     });
     return res.json({ reply: response.text || 'Nomoshkar!' });
   } catch {
@@ -976,7 +980,7 @@ app.post('/api/ai/assistant', async (req: Request, res: Response) => {
   try {
     const response = await ai.models.generateContent({
       model: 'gemini-3.1-flash-lite',
-      contents: `You are Jalpaigi AI for Jalpaiguri, West Bengal. Provide a helpful 2-sentence response for: "${prompt}"`
+      contents: `You are JPG AI for Jalpaiguri, West Bengal. Provide a helpful 2-sentence response for: "${prompt}"`
     });
     return res.json({ reply: response.text || 'How can I assist you in Jalpaiguri today?' });
   } catch {

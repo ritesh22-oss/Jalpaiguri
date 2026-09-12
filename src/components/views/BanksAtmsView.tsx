@@ -377,7 +377,7 @@ export const BanksAtmsView: React.FC = () => {
             onClick={() => setActiveTab('ATMs')}
             className={`py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1 ${
               activeTab === 'ATMs'
-                ? 'bg-teal-600 text-white shadow-2xs'
+                ? 'bg-blue-600 text-white shadow-2xs'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
             }`}
           >
@@ -455,7 +455,7 @@ export const BanksAtmsView: React.FC = () => {
                 </button>
                 <div className="flex items-start gap-2.5 pr-6">
                   <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/80 text-[#007AFF] dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-900/40">
-                    {selectedEntity.type === 'BANK' ? <Building2 className="w-5 h-5" /> : <CreditCard className="w-5 h-5 text-teal-600" />}
+                    {selectedEntity.type === 'BANK' ? <Building2 className="w-5 h-5" /> : <CreditCard className="w-5 h-5 text-blue-600" />}
                   </div>
                   <div>
                     <span className="text-[9px] font-black uppercase tracking-wider text-[#007AFF] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/70 px-2 py-0.2 rounded-md">
@@ -546,7 +546,7 @@ export const BanksAtmsView: React.FC = () => {
                           className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
                             isBank
                               ? 'bg-blue-50 dark:bg-blue-950/80 text-[#007AFF] dark:text-blue-400 border-blue-100 dark:border-blue-900/40'
-                              : 'bg-teal-50 dark:bg-teal-950/80 text-teal-600 dark:text-teal-400 border-teal-100 dark:border-teal-900/40'
+                              : 'bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900/40'
                           }`}
                         >
                           {isBank ? <Building2 className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
@@ -667,19 +667,19 @@ export const BanksAtmsView: React.FC = () => {
                     {item.customerCare && (
                       <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/30 text-xs">
                         <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                          <Phone className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
                           <div>
                             <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 block uppercase">
                               {isBengali ? 'কাস্টমার কেয়ার' : 'Customer Care / Helpdesk'}
                             </span>
-                            <span className="font-black text-emerald-800 dark:text-emerald-300 text-xs">
+                            <span className="font-black text-blue-800 dark:text-blue-300 text-xs">
                               {item.customerCare}
                             </span>
                           </div>
                         </div>
                         <a
                           href={`tel:${item.customerCare.split('/')[0].trim()}`}
-                          className="py-1.5 px-3 rounded-lg bg-emerald-600 text-white font-bold text-[11px] shadow-2xs hover:bg-emerald-700 active:scale-95 transition-all flex items-center gap-1"
+                          className="py-1.5 px-3 rounded-lg bg-blue-600 text-white font-bold text-[11px] shadow-2xs hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-1"
                         >
                           <Phone className="w-3 h-3" />
                           <span>{isBengali ? 'কল করুন' : 'Call Helpdesk'}</span>

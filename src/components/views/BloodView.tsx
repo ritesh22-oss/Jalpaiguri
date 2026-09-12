@@ -278,7 +278,7 @@ export const BloodView: React.FC = () => {
                 <div className="pt-1 flex gap-2">
                   <button
                     onClick={() => alert(`Contacting coordinator: ${req.phone}`)}
-                    className="flex-1 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white text-xs font-bold shadow-xs cursor-pointer hover:bg-[#084D3A]"
+                    className="flex-1 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white text-xs font-bold shadow-xs cursor-pointer hover:bg-blue-700"
                   >
                     I Can Donate
                   </button>
@@ -437,7 +437,7 @@ export const BloodView: React.FC = () => {
             <div className="pt-2">
               <button
                 type="submit"
-                className="w-full bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-sm py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-md hover:bg-[#084D3A] active:scale-98 transition-all cursor-pointer"
+                className="w-full bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-sm py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-md hover:bg-blue-700 active:scale-98 transition-all cursor-pointer"
               >
                 <span>Register Now</span>
                 <ArrowRight className="w-4 h-4" />

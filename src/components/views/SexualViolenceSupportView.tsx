@@ -310,7 +310,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
                   </div>
                   <button
                     onClick={item.action}
-                    className="w-full py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                    className="w-full py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                   >
                     <span>{item.btnLabel}</span>
                   </button>
@@ -414,7 +414,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
 
                   <a
                     href={`tel:${hl.number.replace(/[^0-9]/g, '')}`}
-                    className="w-full py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors"
+                    className="w-full py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-colors"
                   >
                     <Phone className="w-3.5 h-3.5" />
                     <span>Call {hl.number}</span>
@@ -753,7 +753,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
                 </button>
                 <button
                   type="submit"
-                  className="w-1/2 py-2.5 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold hover:bg-[#084D3A] cursor-pointer"
+                  className="w-1/2 py-2.5 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold hover:bg-blue-700 cursor-pointer"
                 >
                   Save Privately
                 </button>

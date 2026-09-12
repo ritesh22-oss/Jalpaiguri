@@ -28,7 +28,8 @@ import {
   Save,
   Camera,
   Truck,
-  ExternalLink
+  ExternalLink,
+  Home
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
@@ -425,7 +426,7 @@ export const MerchantDashboardView: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] flex flex-col items-center justify-center p-6 space-y-3">
+      <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#020617] flex flex-col items-center justify-center p-6 space-y-3">
         <div className="w-10 h-10 border-4 border-[#007AFF] border-t-transparent rounded-full animate-spin"></div>
         <p className="text-xs font-bold text-[#55685F] dark:text-[#A2B3AA]">
           Loading Merchant Hub...
@@ -436,8 +437,8 @@ export const MerchantDashboardView: React.FC = () => {
 
   if (!shop) {
     return (
-      <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] p-6 text-center space-y-4">
-        <button onClick={goBack} className="p-2 rounded-full bg-white dark:bg-[#0F172A]">
+      <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#020617] p-6 text-center space-y-4">
+        <button onClick={goBack} className="p-2 rounded-full bg-white dark:bg-[#1E293B]">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <Store className="w-12 h-12 text-gray-400 mx-auto" />
@@ -456,15 +457,23 @@ export const MerchantDashboardView: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 max-w-md mx-auto select-none transition-colors">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#020617] pb-28 max-w-md mx-auto select-none transition-colors">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#0B132B]/95 backdrop-blur-md px-4 py-3 border-b border-[#E8E4DA]/60 dark:border-white/10 transition-colors flex items-center justify-between">
+      <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#020617]/95 backdrop-blur-md px-4 py-3 border-b border-[#E8E4DA]/60 dark:border-white/10 transition-colors flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <button
             onClick={goBack}
-            className="w-10 h-10 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
+            className="w-10 h-10 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
           >
             <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
+          </button>
+          <button
+            onClick={() => navigate('home')}
+            className="w-10 h-10 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#007AFF] dark:text-blue-400 shadow-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 active:scale-95 transition-all cursor-pointer"
+            aria-label="Home"
+            title="Return to Dashboard"
+          >
+            <Home className="w-5 h-5 stroke-[2.5]" />
           </button>
           <div>
             <h1 className="text-base font-black text-[#11241C] dark:text-white leading-tight flex items-center gap-1.5">
@@ -525,35 +534,35 @@ export const MerchantDashboardView: React.FC = () => {
         {/* Quick Analytics Summary Strip */}
         <div className="relative grid grid-cols-4 gap-2 text-center overflow-hidden rounded-2xl">
           {!isPremiumActive && (
-            <div className="absolute inset-0 bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-[1.5px] z-10 flex items-center justify-center border border-[#E8E4DA] dark:border-white/10 rounded-2xl">
+            <div className="absolute inset-0 bg-white/80 dark:bg-[#1E293B]/80 backdrop-blur-[1.5px] z-10 flex items-center justify-center border border-[#E8E4DA] dark:border-white/10 rounded-2xl">
                <div className="text-center px-4">
                  <div className="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 text-[10px] font-black px-2 py-0.5 rounded-md uppercase inline-block mb-1">Locked</div>
                  <p className="text-xs font-bold text-[#11241C] dark:text-white">Upgrade to view store analytics</p>
                </div>
             </div>
           )}
-          <div className="bg-white dark:bg-[#0F172A] p-2.5 rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-2xs">
+          <div className="bg-white dark:bg-[#1E293B] p-2.5 rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-2xs">
             <span className="text-[10px] text-gray-500 block font-semibold">Store Views</span>
             <span className="text-sm font-black text-[#11241C] dark:text-white">
               {shop.analytics?.views || 148}
             </span>
           </div>
 
-          <div className="bg-white dark:bg-[#0F172A] p-2.5 rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-2xs">
+          <div className="bg-white dark:bg-[#1E293B] p-2.5 rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-2xs">
             <span className="text-[10px] text-gray-500 block font-semibold">Calls</span>
             <span className="text-sm font-black text-blue-600">
               {shop.analytics?.callClicks || 24}
             </span>
           </div>
 
-          <div className="bg-white dark:bg-[#0F172A] p-2.5 rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-2xs">
+          <div className="bg-white dark:bg-[#1E293B] p-2.5 rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-2xs">
             <span className="text-[10px] text-gray-500 block font-semibold">WhatsApp</span>
             <span className="text-sm font-black text-blue-600">
               {shop.analytics?.whatsappClicks || 39}
             </span>
           </div>
 
-          <div className="bg-white dark:bg-[#0F172A] p-2.5 rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-2xs">
+          <div className="bg-white dark:bg-[#1E293B] p-2.5 rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-2xs">
             <span className="text-[10px] text-gray-500 block font-semibold">Products</span>
             <span className="text-sm font-black text-[#11241C] dark:text-white">
               {products.length}
@@ -564,7 +573,7 @@ export const MerchantDashboardView: React.FC = () => {
         {/* AI Smart Import Hero Card */}
         <div className="relative overflow-hidden bg-gradient-to-r from-[#eff6ff] to-[#dbeafe] dark:from-[#132B22] dark:to-[#0C1E18] border border-blue-300/60 dark:border-blue-800/50 rounded-3xl p-4 shadow-xs flex items-center justify-between gap-3">
           {!isPremiumActive && (
-            <div className="absolute inset-0 bg-[#eff6ff]/90 dark:bg-[#132B22]/90 backdrop-blur-[2px] z-10 flex items-center justify-center">
+            <div className="absolute inset-0 bg-blue-50/90 dark:bg-blue-950/40/90 backdrop-blur-[2px] z-10 flex items-center justify-center">
                <div className="text-center px-4">
                  <div className="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 text-[10px] font-black px-2 py-0.5 rounded-md uppercase inline-block mb-1">Locked</div>
                  <p className="text-xs font-bold text-blue-900 dark:text-blue-100">AI product import is a premium feature.</p>
@@ -588,7 +597,7 @@ export const MerchantDashboardView: React.FC = () => {
 
           <button
             onClick={() => setShowAiImportModal(true)}
-            className="px-3 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white text-xs font-black shadow-xs hover:bg-[#084D3A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shrink-0 cursor-pointer"
+            className="px-3 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white text-xs font-black shadow-xs hover:bg-blue-700 active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shrink-0 cursor-pointer"
           >
             Import with AI
           </button>
@@ -650,7 +659,7 @@ export const MerchantDashboardView: React.FC = () => {
             </div>
 
             {products.length === 0 ? (
-              <div className="py-8 text-center bg-white dark:bg-[#0F172A] rounded-3xl border border-[#E8E4DA] dark:border-white/10 p-6 space-y-2">
+              <div className="py-8 text-center bg-white dark:bg-[#1E293B] rounded-3xl border border-[#E8E4DA] dark:border-white/10 p-6 space-y-2">
                 <Package className="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto" />
                 <p className="text-xs font-bold text-[#11241C] dark:text-white">
                   No products added yet
@@ -664,7 +673,7 @@ export const MerchantDashboardView: React.FC = () => {
                 {products.map((product) => (
                   <div
                     key={product.id}
-                    className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-2xs"
+                    className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-2xs"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       {product.photoUrl ? (
@@ -727,7 +736,7 @@ export const MerchantDashboardView: React.FC = () => {
 
         {/* TAB 2: PRO PLAN & SUBSCRIPTION */}
         {activeTab === 'subscription' && (
-          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-[10px] font-bold text-gray-500 uppercase">Subscription Status</span>
@@ -827,7 +836,7 @@ export const MerchantDashboardView: React.FC = () => {
         {activeTab === 'profile' && (
           <form onSubmit={handleSaveShopProfile} className="space-y-4">
             {/* Completion Status & View Live Store */}
-            <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+            <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-bold text-gray-500 block uppercase">Shop Status</span>
@@ -870,7 +879,7 @@ export const MerchantDashboardView: React.FC = () => {
             </div>
 
             {/* Photos & Storefront Image */}
-            <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+            <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
               <div className="flex items-center gap-2">
                 <Camera className="w-4 h-4 text-[#007AFF] dark:text-blue-400" />
                 <h4 className="text-xs font-black text-[#11241C] dark:text-white">
@@ -903,7 +912,7 @@ export const MerchantDashboardView: React.FC = () => {
             </div>
 
             {/* Description & AI Auto-Write */}
-            <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+            <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-black text-[#11241C] dark:text-white">
                   Shop Bio / Description (পরিচিতি)
@@ -912,7 +921,7 @@ export const MerchantDashboardView: React.FC = () => {
                   type="button"
                   onClick={handleGenerateAiBioInDashboard}
                   disabled={isGeneratingAiBio}
-                  className="text-[10px] font-bold text-blue-800 dark:text-blue-300 bg-[#eff6ff] dark:bg-blue-950/70 hover:bg-[#dbeafe] px-2.5 py-1 rounded-lg border border-blue-300/50 flex items-center gap-1 cursor-pointer"
+                  className="text-[10px] font-bold text-blue-800 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/70 hover:bg-[#dbeafe] px-2.5 py-1 rounded-lg border border-blue-300/50 flex items-center gap-1 cursor-pointer"
                 >
                   {isGeneratingAiBio ? (
                     <>
@@ -938,7 +947,7 @@ export const MerchantDashboardView: React.FC = () => {
             </div>
 
             {/* Operating Hours & Days */}
-            <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+            <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-[#007AFF] dark:text-blue-400" />
                 <h4 className="text-xs font-black text-[#11241C] dark:text-white">
@@ -984,7 +993,7 @@ export const MerchantDashboardView: React.FC = () => {
             </div>
 
             {/* Delivery & UPI */}
-            <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+            <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
               <div className="flex items-center gap-2">
                 <Truck className="w-4 h-4 text-[#007AFF] dark:text-blue-400" />
                 <h4 className="text-xs font-black text-[#11241C] dark:text-white">
@@ -1043,7 +1052,7 @@ export const MerchantDashboardView: React.FC = () => {
             <button
               type="submit"
               disabled={isSavingProfile}
-              className="w-full py-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all"
+              className="w-full py-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all"
             >
               {isSavingProfile ? (
                 <>
@@ -1064,7 +1073,7 @@ export const MerchantDashboardView: React.FC = () => {
       {/* MODAL 1: ADD SINGLE PRODUCT */}
       {showAddProductModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0F172A] rounded-3xl max-w-sm w-full p-5 space-y-3 border border-[#E8E4DA] dark:border-white/10 shadow-2xl animate-in zoom-in-95">
+          <div className="bg-white dark:bg-[#1E293B] rounded-3xl max-w-sm w-full p-5 space-y-3 border border-[#E8E4DA] dark:border-white/10 shadow-2xl animate-in zoom-in-95">
             <div className="flex justify-between items-center">
               <h3 className="text-sm font-black text-[#11241C] dark:text-white">
                 Add Product to Catalog
@@ -1203,7 +1212,7 @@ export const MerchantDashboardView: React.FC = () => {
       {/* MODAL 2: AI SMART PRODUCT IMPORT */}
       {showAiImportModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0F172A] rounded-3xl max-w-md w-full p-5 space-y-3 border border-[#E8E4DA] dark:border-white/10 shadow-2xl animate-in zoom-in-95 max-h-[90vh] flex flex-col">
+          <div className="bg-white dark:bg-[#1E293B] rounded-3xl max-w-md w-full p-5 space-y-3 border border-[#E8E4DA] dark:border-white/10 shadow-2xl animate-in zoom-in-95 max-h-[90vh] flex flex-col">
             <div className="flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-xl bg-blue-100 dark:bg-blue-950 flex items-center justify-center text-blue-800 dark:text-blue-300">

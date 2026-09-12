@@ -183,7 +183,7 @@ export const OfferServicesView: React.FC = () => {
         <div className="space-y-3 pt-6">
           <button
             onClick={() => navigate('workers')}
-            className="w-full py-4 rounded-2xl bg-[#007AFF] hover:bg-[#084D3A] text-white font-bold text-sm shadow-md cursor-pointer active:scale-98 transition-all"
+            className="w-full py-4 rounded-2xl bg-[#007AFF] hover:bg-blue-700 text-white font-bold text-sm shadow-md cursor-pointer active:scale-98 transition-all"
           >
             View My Profile in Workers List
           </button>
@@ -518,7 +518,7 @@ export const OfferServicesView: React.FC = () => {
             <button
               type="button"
               onClick={handleAddSkill}
-              className="px-4 py-2 bg-[#007AFF] text-white font-bold text-xs rounded-2xl hover:bg-[#084D3A] cursor-pointer"
+              className="px-4 py-2 bg-[#007AFF] text-white font-bold text-xs rounded-2xl hover:bg-blue-700 cursor-pointer"
             >
               Add
             </button>
@@ -570,7 +570,7 @@ export const OfferServicesView: React.FC = () => {
         {/* SUBMIT BUTTON */}
         <button
           type="submit"
-          className="w-full py-4 rounded-2xl bg-[#007AFF] text-white font-extrabold text-sm shadow-md hover:bg-[#084D3A] active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-2xl bg-[#007AFF] text-white font-extrabold text-sm shadow-md hover:bg-blue-700 active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-2"
         >
           <CheckCircle2 className="w-5 h-5" />
           <span>Publish My Worker Profile</span>

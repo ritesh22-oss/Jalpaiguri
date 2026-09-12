@@ -156,14 +156,14 @@ export const ShopMarketplaceView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 max-w-md mx-auto select-none transition-colors relative">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#020617] pb-28 max-w-md mx-auto select-none transition-colors relative">
       {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#0B132B]/95 backdrop-blur-md px-4 pt-3 pb-2.5 border-b border-[#E8E4DA]/60 dark:border-white/10 transition-colors">
+      <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#020617]/95 backdrop-blur-md px-4 pt-3 pb-2.5 border-b border-[#E8E4DA]/60 dark:border-white/10 transition-colors">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <button
               onClick={goBack}
-              className="w-10 h-10 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
+              className="w-10 h-10 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
               aria-label="Go Back"
             >
               <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
@@ -171,7 +171,7 @@ export const ShopMarketplaceView: React.FC = () => {
             <div>
               <h1 className="text-lg font-black text-[#11241C] dark:text-white leading-tight flex items-center gap-1.5">
                 <span>{language === 'bn' ? 'জলপাইগুড়ি বাজার' : 'Jalpaiguri Shops'}</span>
-                <span className="text-[10px] font-bold bg-[#eff6ff] dark:bg-blue-950/80 text-[#007AFF] dark:text-blue-300 px-2 py-0.5 rounded-full border border-blue-200/50 dark:border-blue-800/40">
+                <span className="text-[10px] font-bold bg-blue-50 dark:bg-blue-950/80 text-[#007AFF] dark:text-blue-300 px-2 py-0.5 rounded-full border border-blue-200/50 dark:border-blue-800/40">
                   {filteredShops.length}
                 </span>
               </h1>
@@ -192,7 +192,7 @@ export const ShopMarketplaceView: React.FC = () => {
             </button>
             
             {/* View Mode Toggle: List / Map */}
-            <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 p-0.5 rounded-xl flex items-center shadow-2xs">
+            <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 p-0.5 rounded-xl flex items-center shadow-2xs">
               <button
                 onClick={() => setViewMode('list')}
                 className={`p-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
@@ -221,7 +221,7 @@ export const ShopMarketplaceView: React.FC = () => {
             <button
               id="btn-header-add-shop"
               onClick={() => navigate('add-shop')}
-              className="px-3 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1 shadow-xs active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-black flex items-center gap-1 shadow-xs active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
               title="Register Your Shop"
             >
               <Plus className="w-4 h-4" />
@@ -247,7 +247,7 @@ export const ShopMarketplaceView: React.FC = () => {
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder={language === 'bn' ? 'দোকান, পণ্য (চাল, মিষ্টি, ওষুধ) বা এলাকা খুঁজুন...' : 'Search shops, products (rice, sweets, medicine) or area...'}
-            className="w-full pl-9.5 pr-8 py-2.5 bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-2xl text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-[#8A9A92] dark:placeholder:text-[#657970] focus:outline-none focus:border-[#007AFF] dark:focus:border-blue-500 shadow-2xs transition-colors"
+            className="w-full pl-9.5 pr-8 py-2.5 bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-2xl text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-[#8A9A92] dark:placeholder:text-[#657970] focus:outline-none focus:border-[#007AFF] dark:focus:border-blue-500 shadow-2xs transition-colors"
           />
           {searchQuery && (
             <button
@@ -289,7 +289,7 @@ export const ShopMarketplaceView: React.FC = () => {
                   className={`px-3 py-2 rounded-2xl shrink-0 transition-all cursor-pointer flex flex-col justify-between text-left min-w-[112px] border ${
                     isSelected
                       ? 'bg-[#007AFF] text-white border-[#007AFF] shadow-sm ring-2 ring-[#007AFF]/20'
-                      : 'bg-white dark:bg-[#0F172A] border-[#E8E4DA] dark:border-white/10 text-[#44554E] dark:text-[#C5D5CC] hover:border-[#007AFF]/40 shadow-2xs'
+                      : 'bg-white dark:bg-[#1E293B] border-[#E8E4DA] dark:border-white/10 text-[#44554E] dark:text-[#C5D5CC] hover:border-[#007AFF]/40 shadow-2xs'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-1 w-full">
@@ -371,7 +371,7 @@ export const ShopMarketplaceView: React.FC = () => {
             className={`px-3 py-1.5 rounded-full border transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
               openNowOnly
                 ? 'bg-[#007AFF] text-white border-[#007AFF]'
-                : 'bg-white dark:bg-[#0F172A] border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-[#A2B3AA]'
+                : 'bg-white dark:bg-[#1E293B] border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-[#A2B3AA]'
             }`}
           >
             <Clock className="w-3 h-3" />
@@ -383,7 +383,7 @@ export const ShopMarketplaceView: React.FC = () => {
             className={`px-3 py-1.5 rounded-full border transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
               verifiedOnly
                 ? 'bg-[#007AFF] text-white border-[#007AFF]'
-                : 'bg-white dark:bg-[#0F172A] border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-[#A2B3AA]'
+                : 'bg-white dark:bg-[#1E293B] border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-[#A2B3AA]'
             }`}
           >
             <ShieldCheck className="w-3 h-3" />
@@ -395,7 +395,7 @@ export const ShopMarketplaceView: React.FC = () => {
             className={`px-3 py-1.5 rounded-full border transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
               deliveryOnly
                 ? 'bg-[#007AFF] text-white border-[#007AFF]'
-                : 'bg-white dark:bg-[#0F172A] border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-[#A2B3AA]'
+                : 'bg-white dark:bg-[#1E293B] border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-[#A2B3AA]'
             }`}
           >
             <Truck className="w-3 h-3" />
@@ -407,7 +407,7 @@ export const ShopMarketplaceView: React.FC = () => {
             className={`px-3 py-1.5 rounded-full border transition-all cursor-pointer flex items-center gap-1 shrink-0 ${
               minRating4
                 ? 'bg-[#007AFF] text-white border-[#007AFF]'
-                : 'bg-white dark:bg-[#0F172A] border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-[#A2B3AA]'
+                : 'bg-white dark:bg-[#1E293B] border-[#E8E4DA] dark:border-white/10 text-[#55685F] dark:text-[#A2B3AA]'
             }`}
           >
             <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
@@ -417,7 +417,7 @@ export const ShopMarketplaceView: React.FC = () => {
 
         {/* MAP VIEW */}
         {viewMode === 'map' && (
-          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+          <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-[#11241C] dark:text-white flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400" />
@@ -448,7 +448,7 @@ export const ShopMarketplaceView: React.FC = () => {
                   <button
                     key={shop.id}
                     onClick={() => navigate('shop-detail', { shopId: shop.id })}
-                    className="bg-white/95 dark:bg-[#0F172A]/95 border border-[#007AFF]/30 dark:border-blue-500/40 rounded-xl p-2 text-left shadow-md hover:scale-105 transition-all cursor-pointer backdrop-blur-xs"
+                    className="bg-white/95 dark:bg-[#1E293B]/95 border border-[#007AFF]/30 dark:border-blue-500/40 rounded-xl p-2 text-left shadow-md hover:scale-105 transition-all cursor-pointer backdrop-blur-xs"
                   >
                     <div className="flex items-center gap-1 text-[10px] font-extrabold text-[#007AFF] dark:text-blue-300 truncate">
                       <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
@@ -472,8 +472,8 @@ export const ShopMarketplaceView: React.FC = () => {
         {/* SHOP LIST VIEW */}
         {filteredShops.length === 0 ? (
           /* Smart Empty State conforming strictly to Rule 34 */
-          <div className="py-10 text-center bg-white dark:bg-[#0F172A] rounded-3xl border border-[#E8E4DA] dark:border-white/10 p-6 space-y-3">
-            <div className="w-14 h-14 rounded-2xl bg-[#eff6ff] dark:bg-blue-950/50 flex items-center justify-center mx-auto text-[#007AFF] dark:text-blue-300 shadow-2xs">
+          <div className="py-10 text-center bg-white dark:bg-[#1E293B] rounded-3xl border border-[#E8E4DA] dark:border-white/10 p-6 space-y-3">
+            <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/50 flex items-center justify-center mx-auto text-[#007AFF] dark:text-blue-300 shadow-2xs">
               <Store className="w-7 h-7" />
             </div>
             <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white">
@@ -494,7 +494,7 @@ export const ShopMarketplaceView: React.FC = () => {
               </button>
               <button
                 onClick={() => navigate('add-shop')}
-                className="px-4 py-2.5 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1.5 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-xs"
+                className="px-4 py-2.5 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-black flex items-center gap-1.5 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-xs"
               >
                 <Plus className="w-4 h-4" />
                 <span>{language === 'bn' ? '+ আপনার দোকান যোগ করুন' : '+ Add Your Shop'}</span>
@@ -507,7 +507,7 @@ export const ShopMarketplaceView: React.FC = () => {
               <div
                 key={shop.id}
                 onClick={() => navigate('shop-detail', { shopId: shop.id })}
-                className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl overflow-hidden shadow-xs hover:border-[#007AFF] dark:hover:border-blue-500 transition-all cursor-pointer group"
+                className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl overflow-hidden shadow-xs hover:border-[#007AFF] dark:hover:border-blue-500 transition-all cursor-pointer group"
               >
                 {/* Shop Cover & Status Badges */}
                 <div className="relative h-36 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
@@ -631,7 +631,7 @@ export const ShopMarketplaceView: React.FC = () => {
                           const ph = shop.phone || (shop as any).ownerPhone || '+919832011094';
                           window.location.href = `tel:${ph.replace(/\s+/g, '')}`;
                         }}
-                        className="p-2 rounded-xl bg-[#dbeafe] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 hover:bg-[#C2E4D5] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer border border-blue-200/50 dark:border-blue-800/40"
+                        className="p-2 rounded-xl bg-[#dbeafe] dark:bg-blue-900/30 text-[#007AFF] dark:text-blue-300 hover:bg-blue-200 active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer border border-blue-200/50 dark:border-blue-800/40"
                         title="Call Store"
                       >
                         <Phone className="w-3.5 h-3.5" />
@@ -652,7 +652,7 @@ export const ShopMarketplaceView: React.FC = () => {
 
                       <button
                         onClick={() => navigate('shop-detail', { shopId: shop.id })}
-                        className="px-3 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all"
+                        className="px-3 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all"
                       >
                         <span>{language === 'bn' ? 'পণ্য দেখুন' : 'View Store'}</span>
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -670,7 +670,7 @@ export const ShopMarketplaceView: React.FC = () => {
       <button
         id="btn-floating-add-shop"
         onClick={() => navigate('add-shop')}
-        className="fixed bottom-20 right-4 z-40 sm:bottom-6 sm:right-6 bg-[#007AFF] hover:bg-[#084D3A] dark:bg-blue-600 dark:hover:bg-blue-700 text-white px-4 py-3 rounded-full shadow-xl hover:shadow-2xl flex items-center gap-2 font-black text-xs cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all group border-2 border-white/20 backdrop-blur-xs"
+        className="fixed bottom-20 right-4 z-40 sm:bottom-6 sm:right-6 bg-[#007AFF] hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white px-4 py-3 rounded-full shadow-xl hover:shadow-2xl flex items-center gap-2 font-black text-xs cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all group border-2 border-white/20 backdrop-blur-xs"
         title="Register Your Shop on MYJPG"
       >
         <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">

@@ -424,9 +424,9 @@ export const en: Translations = {
   },
   chat: {
     title: 'Civic AI Assistant',
-    aiAssistantName: 'Jalpaigi Civic AI',
+    aiAssistantName: 'JPG Civic AI',
     aiAssistantSubtitle: 'Ask anything about Jalpaiguri municipal services, directions & emergency help',
-    welcomeMsg: 'Hello! I am Jalpaigi, your civic assistant. How can I help you in Jalpaiguri today?',
+    welcomeMsg: 'Hello! I am JPG AI, your civic assistant. How can I help you in Jalpaiguri today?',
     inputPlaceholder: 'Ask about workers, Sadar Hospital, wards, reporting...',
     send: 'Send',
     suggestedTopics: 'Suggested Queries',

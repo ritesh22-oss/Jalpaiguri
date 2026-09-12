@@ -94,7 +94,7 @@ export const ReportAiAssistModal: React.FC<ReportAiAssistModalProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white flex items-center gap-1.5">
-                Jalpaigi AI Assistant
+                JPG AI Assistant
                 <span className="text-[10px] font-bold text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-950/70 px-2 py-0.5 rounded-full">
                   Verified Municipal AI
                 </span>
@@ -203,7 +203,7 @@ export const ReportAiAssistModal: React.FC<ReportAiAssistModalProps> = ({
             id="btn-apply-ai-enhancement"
             disabled={loading || !editedText.trim()}
             onClick={handleApply}
-            className="flex-1 py-3 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] dark:hover:bg-blue-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
+            className="flex-1 py-3 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50"
           >
             <Check className="w-4 h-4" />
             <span>Apply Enhancement</span>

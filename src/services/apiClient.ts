@@ -158,6 +158,19 @@ class ApiClient {
   }
 
   /**
+   * Resolve API base URL from Vite or Expo environment variables
+   */
+  private getBaseUrl(): string {
+    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) {
+      return (import.meta.env.VITE_API_URL as string).replace(/\/+$/, '');
+    }
+    if (typeof process !== 'undefined' && process.env && process.env.EXPO_PUBLIC_API_URL) {
+      return (process.env.EXPO_PUBLIC_API_URL as string).replace(/\/+$/, '');
+    }
+    return '';
+  }
+
+  /**
    * Centralized HTTP request execution
    */
   public async request<T>(endpoint: string, options: ApiRequestOptions = {}): Promise<T> {
@@ -165,6 +178,11 @@ class ApiClient {
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    const baseUrl = this.getBaseUrl();
+    const targetUrl = endpoint.startsWith('http://') || endpoint.startsWith('https://')
+      ? endpoint
+      : `${baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
 
     const mergedHeaders: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -180,7 +198,7 @@ class ApiClient {
     }
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch(targetUrl, {
         ...fetchOptions,
         headers: mergedHeaders,
         signal: controller.signal

@@ -258,7 +258,7 @@ export const FAQView: React.FC = () => {
                 setSearchQuery('');
                 setSelectedCategory('All');
               }}
-              className="px-4 py-2 bg-[#007AFF] text-white font-bold text-xs rounded-xl shadow-xs hover:bg-[#084D3A] cursor-pointer"
+              className="px-4 py-2 bg-[#007AFF] text-white font-bold text-xs rounded-xl shadow-xs hover:bg-blue-700 cursor-pointer"
             >
               Clear Search & Show All
             </button>
@@ -302,7 +302,7 @@ export const FAQView: React.FC = () => {
               className={`py-2.5 px-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 text-white transition-colors cursor-pointer shadow-xs ${
                 isDarkMode
                   ? 'bg-blue-600 hover:bg-blue-500'
-                  : 'bg-[#007AFF] hover:bg-[#084D3A]'
+                  : 'bg-[#007AFF] hover:bg-blue-700'
               }`}
             >
               <AlertCircle className="w-3.5 h-3.5" />
@@ -373,7 +373,7 @@ export const FAQView: React.FC = () => {
 
             <button
               onClick={() => setContactModalOpen(false)}
-              className="w-full py-2.5 bg-[#007AFF] text-white font-bold text-xs rounded-xl hover:bg-[#084D3A] cursor-pointer"
+              className="w-full py-2.5 bg-[#007AFF] text-white font-bold text-xs rounded-xl hover:bg-blue-700 cursor-pointer"
             >
               Close
             </button>

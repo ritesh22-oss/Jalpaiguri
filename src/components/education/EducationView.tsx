@@ -2,8 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { EducationHeader } from './EducationHeader';
 import { EducationSearch } from './EducationSearch';
 import { EducationCategoryCard } from './EducationCategoryCard';
+import { EducationInstitutionModal } from './EducationInstitutionModal';
 import { EDUCATIONAL_INSTITUTIONS } from '../../data/educationData';
-import { GraduationCap, ShieldCheck, Bookmark, AlertCircle, BookOpen, Search, Calendar } from 'lucide-react';
+import { EducationalInstitution } from '../../types';
+import { GraduationCap, ShieldCheck, Bookmark, AlertCircle, BookOpen, Search, Calendar, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 export const EducationView: React.FC = () => {
@@ -11,6 +13,7 @@ export const EducationView: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'institutions' | 'notices' | 'register' | 'courses'>('institutions');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedInstitution, setSelectedInstitution] = useState<EducationalInstitution | null>(null);
 
   const filteredInstitutions = useMemo(() => {
     return EDUCATIONAL_INSTITUTIONS.filter(inst => {
@@ -64,23 +67,40 @@ export const EducationView: React.FC = () => {
 
         {activeTab === 'institutions' && (
           <div className="space-y-4">
-            <h2 className="text-lg font-black dark:text-white mt-8 mb-4">
-                {selectedCategory ? `${selectedCategory}s` : (isBengali ? 'প্রতিষ্ঠানসমূহ' : 'Featured Institutions')}
-            </h2>
-            <div className="space-y-4">
-                {filteredInstitutions.slice(0, 5).map(inst => (
-                    <div key={inst.id} className="bg-white dark:bg-[#17231E] p-4 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm">
-                         <div className="flex items-center gap-3">
-                            <div className="p-2.5 rounded-xl bg-blue-50 text-[#007AFF] dark:bg-blue-950/40">
-                              <GraduationCap className="w-5 h-5" />
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-1.5">
-                                <h3 className="text-sm font-extrabold text-gray-900 dark:text-white">{inst.name}</h3>
-                                <ShieldCheck className="w-4 h-4 text-blue-500 shrink-0" />
+            <div className="flex items-center justify-between mt-8 mb-4">
+              <h2 className="text-lg font-black dark:text-white">
+                  {selectedCategory ? `${selectedCategory}s (${filteredInstitutions.length})` : (isBengali ? 'প্রতিষ্ঠানসমূহ' : `All Institutions (${filteredInstitutions.length})`)}
+              </h2>
+              {selectedCategory && (
+                <button 
+                  onClick={() => setSelectedCategory(null)}
+                  className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  Show All
+                </button>
+              )}
+            </div>
+            <div className="space-y-3">
+                {filteredInstitutions.map(inst => (
+                    <div 
+                      key={inst.id} 
+                      onClick={() => setSelectedInstitution(inst)}
+                      className="bg-white dark:bg-[#17231E] p-4 rounded-2xl border border-gray-200 dark:border-white/10 shadow-xs hover:border-blue-500 dark:hover:border-blue-400 transition-all cursor-pointer group"
+                    >
+                         <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2.5 rounded-xl bg-blue-50 text-[#007AFF] dark:bg-blue-950/40 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                                <GraduationCap className="w-5 h-5" />
                               </div>
-                              <p className="text-[11px] text-gray-500 font-semibold">{inst.category} • {inst.locality}</p>
+                              <div>
+                                <div className="flex items-center gap-1.5">
+                                  <h3 className="text-sm font-extrabold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{inst.name}</h3>
+                                  <ShieldCheck className="w-4 h-4 text-blue-500 shrink-0" />
+                                </div>
+                                <p className="text-[11px] text-gray-500 font-semibold">{inst.category} • {inst.locality} • {inst.address}</p>
+                              </div>
                             </div>
+                            <ChevronRight className="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform" />
                           </div>
                     </div>
                 ))}
@@ -130,6 +150,12 @@ export const EducationView: React.FC = () => {
             </div>
         )}
       </div>
+
+      {/* Institution Detail Modal */}
+      <EducationInstitutionModal
+        institution={selectedInstitution}
+        onClose={() => setSelectedInstitution(null)}
+      />
     </div>
   );
 };

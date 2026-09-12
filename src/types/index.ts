@@ -988,6 +988,18 @@ export interface PandalReport {
   status: 'pending' | 'resolved';
 }
 
+export interface PlacePhotoSubmission {
+  id: string;
+  placeId: string;
+  placeName: string;
+  category: string;
+  imageUrl: string;
+  uploaderName: string;
+  uploaderEmail: string;
+  timestamp: string;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
 export interface PandalReview {
   id: string;
   pandalId: string;

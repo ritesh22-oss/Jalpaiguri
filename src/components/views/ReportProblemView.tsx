@@ -337,7 +337,7 @@ export const ReportProblemView: React.FC = () => {
                   disabled={isSubmitting || !isFormValid}
                   className={`w-full py-4 px-6 rounded-2xl font-bold text-sm shadow-md flex items-center justify-center gap-2.5 transition-all cursor-pointer ${
                     isFormValid && !isSubmitting
-                      ? 'bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] dark:hover:bg-blue-700 text-white active:scale-98'
+                      ? 'bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 text-white active:scale-98'
                       : 'bg-[#D2CEBE] dark:bg-gray-700 text-white cursor-not-allowed opacity-75'
                   }`}
                 >

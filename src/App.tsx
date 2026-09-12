@@ -1,4 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 
 interface Props {
   children?: ReactNode;
@@ -109,10 +110,13 @@ import { PujaPandalsView } from './components/views/PujaPandalsView';
 import { BottomNav } from './components/common/BottomNav';
 import { FiltersBottomSheet } from './components/common/FiltersBottomSheet';
 import { LocationSelectorModal } from './components/common/LocationSelectorModal';
-import { JalpaigiAssistantModal } from './components/common/JalpaigiAssistantModal';
+import { JPGAssistantModal } from './components/common/JPGAssistantModal';
 import { Toast } from './components/common/Toast';
 import { Loader2 } from 'lucide-react';
-import { JalpaiguriLogo } from './components/common/JalpaiguriLogo';
+import { JPGLogo } from './components/common/JPGLogo';
+import { useOnlineStatus } from './hooks/useOnlineStatus';
+import { OfflineView } from './components/common/OfflineView';
+import { BeautifulLoader } from './components/common/BeautifulLoader';
 
 const AppContent: React.FC = () => {
   // 1. ALL HOOKS MUST BE AT THE VERY TOP, UNCONDITIONAL
@@ -121,12 +125,12 @@ const AppContent: React.FC = () => {
   const { isWithinServiceRegion, serviceAreaStatus, status: locationStatus, location } = useLocation();
   const { pujaPandals, addPujaPandal, reportPandalInfo } = useApp();
   const { isBengali } = useLanguage();
+  const { isOnline } = useOnlineStatus();
 
   // Effects
   React.useEffect(() => {
     if (!isLoading && isAuthenticated && !isProfileComplete) {
       if (
-        currentView === 'splash' ||
         currentView === 'auth' ||
         currentView === 'phone-auth' ||
         currentView === 'onboarding'
@@ -139,7 +143,6 @@ const AppContent: React.FC = () => {
   React.useEffect(() => {
     if (!isLoading && isAuthenticated && isProfileComplete) {
       if (
-        currentView === 'splash' ||
         currentView === 'auth' ||
         currentView === 'phone-auth' ||
         currentView === 'otp' ||
@@ -158,7 +161,6 @@ const AppContent: React.FC = () => {
 
   // 2. DERIVED STATE (No hooks here)
   const isRedirectPending = localStorage.getItem('jpg_redirect_auth_pending') === 'true';
-  const hasShownSplash = sessionStorage.getItem('jpg_splash_shown') === 'true';
   
   const hideBottomNavViews = [
     'splash',
@@ -224,20 +226,25 @@ const AppContent: React.FC = () => {
 
   // Loading / Redirect states
   if (isLoading) {
-    if (isRedirectPending || hasShownSplash) {
+    if (isRedirectPending) {
       return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-white">
           <div className="flex flex-col items-center gap-6">
-            <div className="relative">
-              <JalpaiguriLogo size="xl" showText={false} outline={true} />
-              <div className="absolute -bottom-2 -right-2">
-                 <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+            <div className="relative flex flex-col items-center">
+              <div className="relative mb-8">
+                <BeautifulLoader size={120} className="scale-110" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <JPGLogo size="md" showText={false} outline={false} />
+                </div>
               </div>
             </div>
-            <div className="text-center">
-              <p className="text-sm font-bold text-gray-500 animate-pulse tracking-wide uppercase">
-                {isRedirectPending ? 'Completing Google Sign-in...' : 'Connecting to Jalpaiguri...'}
+            <div className="text-center space-y-3">
+              <p className="text-sm font-black text-blue-600 dark:text-blue-400 animate-pulse tracking-[0.2em] uppercase">
+                {isRedirectPending ? 'Authenticating' : 'Loading'}
               </p>
+              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200">
+                {isRedirectPending ? 'Completing Sign-in' : 'Loading App'}
+              </h2>
             </div>
           </div>
         </div>
@@ -248,21 +255,6 @@ const AppContent: React.FC = () => {
   const renderView = () => {
     switch (currentView) {
       case 'splash':
-        // If we are authenticated but still on the splash view (before the auto-navigation effect fires),
-        // we render a clean loading state instead of the full splash animation to prevent visual flickering.
-        if (isAuthenticated) {
-          return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-white">
-              <div className="flex flex-col items-center gap-6">
-                <JalpaiguriLogo size="xl" showText={false} outline={true} />
-                <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-                  <p className="text-xs font-bold text-gray-400 tracking-widest uppercase">Restoring Session</p>
-                </div>
-              </div>
-            </div>
-          );
-        }
         return <SplashScreen />;
       case 'onboarding':
         return <OnboardingView />;
@@ -402,19 +394,38 @@ const AppContent: React.FC = () => {
 
   return (
     <ExpoDeviceShell>
+      <AnimatePresence>
+        {!isOnline && <OfflineView />}
+      </AnimatePresence>
+
       <main
-        className={`flex-1 w-full ${isBengali ? 'font-bengali' : ''}`}
+        className={`flex-1 w-full ${isBengali ? 'font-bengali' : ''} ${!isOnline ? 'hidden' : ''}`}
         data-lang={isBengali ? 'bn' : 'en'}
       >
-        {renderView()}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentView}
+            initial={{ opacity: 0, y: 12, scale: 0.99 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.99 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className="w-full h-full flex flex-col"
+          >
+            {renderView()}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
-      {showBottomNav && <BottomNav />}
+      {showBottomNav && isOnline && <BottomNav />}
 
       {/* Global Modals & Sheets */}
-      <LocationSelectorModal />
-      <FiltersBottomSheet />
-      <JalpaigiAssistantModal />
+      {isOnline && (
+        <>
+          <LocationSelectorModal />
+          <FiltersBottomSheet />
+          <JPGAssistantModal />
+        </>
+      )}
       <Toast />
     </ExpoDeviceShell>
   );

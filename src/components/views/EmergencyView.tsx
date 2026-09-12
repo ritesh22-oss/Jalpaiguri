@@ -19,7 +19,7 @@ import {
 import { useNav } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { JalpaiguriLogo } from '../common/JalpaiguriLogo';
+import { JPGLogo } from '../common/JPGLogo';
 
 export const EmergencyView: React.FC = () => {
   const { goBack, navigate } = useNav();
@@ -117,7 +117,7 @@ export const EmergencyView: React.FC = () => {
         </button>
 
         <div onClick={() => navigate('home')} className="cursor-pointer">
-          <JalpaiguriLogo size="sm" showText={false} />
+          <JPGLogo size="sm" showText={false} />
         </div>
 
         <div className="flex items-center gap-2">
@@ -320,7 +320,7 @@ export const EmergencyView: React.FC = () => {
             <div className="grid grid-cols-2 gap-2.5">
               <button
                 onClick={() => handleTileClick('03561-224100', isBengali ? 'কোতোয়ালি থানা' : 'Kotwali Police Station')}
-                className="py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs active:scale-95 transition-all cursor-pointer"
+                className="py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs active:scale-95 transition-all cursor-pointer"
               >
                 <Phone className="w-3.5 h-3.5" />
                 <span>{isBengali ? 'এখনই কল করুন' : 'Call Now'}</span>
@@ -356,7 +356,7 @@ export const EmergencyView: React.FC = () => {
             <div className="grid grid-cols-2 gap-2.5">
               <button
                 onClick={() => handleTileClick('03561-224101', isBengali ? 'দমকল জরুরি সেবা' : 'Fire Emergency')}
-                className="py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs active:scale-95 transition-all cursor-pointer"
+                className="py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs active:scale-95 transition-all cursor-pointer"
               >
                 <Phone className="w-3.5 h-3.5" />
                 <span>{isBengali ? 'এখনই কল করুন' : 'Call Now'}</span>

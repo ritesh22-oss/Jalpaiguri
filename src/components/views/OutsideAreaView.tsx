@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { JalpaiguriLogo } from '../common/JalpaiguriLogo';
+import { JPGLogo } from '../common/JPGLogo';
 import {
   MapPin,
   RefreshCw,
@@ -53,7 +53,7 @@ export const OutsideAreaView: React.FC<OutsideAreaViewProps> = ({ onNavigate }) 
       <div className="pt-4 sm:pt-6 space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <JalpaiguriLogo size="sm" showText={true} />
+            <JPGLogo size="sm" showText={true} />
           </div>
 
           <button
@@ -117,7 +117,7 @@ export const OutsideAreaView: React.FC<OutsideAreaViewProps> = ({ onNavigate }) 
             <button
               onClick={handleRefresh}
               disabled={isRefreshing || status === 'detecting'}
-              className="w-full py-3.5 px-4 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-sm active:scale-98 transition-all disabled:opacity-70 cursor-pointer"
+              className="w-full py-3.5 px-4 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-sm active:scale-98 transition-all disabled:opacity-70 cursor-pointer"
             >
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               <span>{isRefreshing ? 'Checking Real GPS...' : 'Check My Location Again'}</span>
@@ -194,7 +194,7 @@ export const OutsideAreaView: React.FC<OutsideAreaViewProps> = ({ onNavigate }) 
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => setSimulatedLocation('JALPAIGURI')}
-                  className="p-2 rounded-xl bg-[#E6F4EA] dark:bg-blue-950/60 border border-transparent dark:border-blue-800/40 text-[#007AFF] dark:text-blue-300 font-bold text-center hover:bg-[#CEEAD6] cursor-pointer"
+                  className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-transparent dark:border-blue-800/40 text-[#007AFF] dark:text-blue-300 font-bold text-center hover:bg-blue-100 cursor-pointer"
                 >
                   ✓ Jalpaiguri (Inside)
                 </button>

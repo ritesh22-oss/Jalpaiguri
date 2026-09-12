@@ -322,7 +322,7 @@ export const ProfileOnboardingView: React.FC = () => {
       <div className="pt-6">
         <button
           onClick={handleNext}
-          className="w-full bg-[#007AFF] dark:bg-blue-600 text-white font-extrabold text-sm py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-md hover:bg-[#084D3A] dark:hover:bg-blue-700 active:scale-98 transition-all cursor-pointer"
+          className="w-full bg-[#007AFF] dark:bg-blue-600 text-white font-extrabold text-sm py-4 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-md hover:bg-blue-700 dark:hover:bg-blue-700 active:scale-98 transition-all cursor-pointer"
         >
           <span>{step === 5 ? 'Save & Start Exploring' : 'Continue'}</span>
           <ArrowRight className="w-4 h-4" />

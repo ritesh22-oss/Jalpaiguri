@@ -177,7 +177,12 @@ export function validateServiceArea(
   // 2. Run Point-in-Polygon Ray Casting
   const inPolygon = inBoundingBox && isPointInPolygon(lat, lng, boundary.polygon);
 
-  if (inPolygon) {
+  // Allow generous 15km buffer around center or district for realistic GPS drift
+  const isWithinBuffer = centerDist <= (mode === 'JALPAIGURI_DISTRICT' ? 45 : 15);
+
+  const isInside = inPolygon || isWithinBuffer;
+
+  if (isInside) {
     return {
       isInside: true,
       serviceAreaStatus: 'inside',

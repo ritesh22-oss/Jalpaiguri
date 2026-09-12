@@ -1,27 +1,36 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   APIProvider,
   ControlPosition,
   MapControl,
-  AdvancedMarker,
+  Marker,
   Map,
   useMap,
-  useMapsLibrary,
-  useAdvancedMarkerRef
+  useMapsLibrary
 } from '@vis.gl/react-google-maps';
+import { apiClient } from '../../services/apiClient';
 
 // Map handler to update map viewport and marker
-const MapHandler = ({ place, marker }: { place: google.maps.places.PlaceResult | null, marker: any }) => {
+const MapHandler = ({ place }: { place: google.maps.places.PlaceResult | null }) => {
   const map = useMap();
 
   useEffect(() => {
-    if (!map || !place || !marker) return;
+    if (!map || !place) return;
 
     if (place.geometry?.viewport) {
       map.fitBounds(place.geometry?.viewport);
+      // Apply terrain view for immersive spatial experience
+      setTimeout(() => {
+        map.setMapTypeId('terrain');
+      }, 100);
+    } else if (place.geometry?.location) {
+      map.setCenter(place.geometry.location);
+      map.setZoom(17);
+      setTimeout(() => {
+        map.setMapTypeId('terrain');
+      }, 100);
     }
-    marker.position = place.geometry?.location || null;
-  }, [map, place, marker]);
+  }, [map, place]);
 
   return null;
 };
@@ -56,10 +65,10 @@ const PlaceSearch = ({ onPlaceSelect }: { onPlaceSelect: (place: google.maps.pla
         value={query} 
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-        placeholder="Search for a place..." 
-        className="p-2 border rounded-md" 
+        placeholder="Search for a location (Terrain View)..." 
+        className="p-2 border border-gray-200 rounded-lg text-sm outline-none text-gray-800 font-semibold focus:border-blue-500 transition-colors shadow-sm" 
       />
-      <button onClick={handleSearch} className="bg-blue-500 text-white p-2 rounded-md">Search</button>
+      <button onClick={handleSearch} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors shadow-sm">Search</button>
     </div>
   );
 };
@@ -67,9 +76,39 @@ const PlaceSearch = ({ onPlaceSelect }: { onPlaceSelect: (place: google.maps.pla
 export const GooglePlacesMap: React.FC<{className?: string}> = ({ className }) => {
   const [selectedPlace, setSelectedPlace] =
     useState<google.maps.places.PlaceResult | null>(null);
-  const [markerRef, marker] = useAdvancedMarkerRef();
+  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  useEffect(() => {
+    const fetchKey = async () => {
+      try {
+        const envKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+        if (envKey) {
+          setApiKey(envKey);
+          setLoading(false);
+          return;
+        }
+        
+        const res = await apiClient.getGoogleMapsKey();
+        if (res.apiKey) {
+          setApiKey(res.apiKey);
+        }
+      } catch (err) {
+        console.error("Failed to load Maps API key", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchKey();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className={`flex items-center justify-center bg-gray-100 border border-gray-200 rounded-2xl ${className}`}>
+        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   if (!apiKey) {
     return (
@@ -80,27 +119,29 @@ export const GooglePlacesMap: React.FC<{className?: string}> = ({ className }) =
     );
   }
 
+  const markerPosition = selectedPlace?.geometry?.location;
+
   return (
     <div className={className}>
       <APIProvider
         apiKey={apiKey}
         solutionChannel="gmp_mcp_codeassist_v1_aistudio">
         <Map
-          mapId={'DEMO_MAP_ID'}
           defaultZoom={13}
           defaultCenter={{ lat: 26.5077, lng: 88.4477 }}
           gestureHandling={'greedy'}
           disableDefaultUI={false}
-          className="w-full h-full"
+          mapTypeId={'terrain'}
+          className="w-full h-full rounded-2xl overflow-hidden shadow-xs"
         >
-          <AdvancedMarker ref={markerRef} position={null} />
+          {markerPosition && <Marker position={markerPosition} />}
         </Map>
         <MapControl position={ControlPosition.TOP_CENTER}>
-          <div className="bg-white p-2 rounded-lg shadow-md m-2">
+          <div className="bg-white/90 backdrop-blur-md p-1.5 rounded-xl shadow-lg border border-gray-200 m-4">
             <PlaceSearch onPlaceSelect={setSelectedPlace} />
           </div>
         </MapControl>
-        <MapHandler place={selectedPlace} marker={marker} />
+        <MapHandler place={selectedPlace} />
       </APIProvider>
     </div>
   );

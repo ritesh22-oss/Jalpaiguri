@@ -110,7 +110,7 @@ export const ReportSuccessScreen: React.FC<ReportSuccessScreenProps> = ({
           type="button"
           id="btn-success-track"
           onClick={onTrackStatus}
-          className="w-full py-4 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] dark:hover:bg-blue-700 text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
+          className="w-full py-4 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700 text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
         >
           <FileText className="w-4 h-4" />
           <span>Track Status & Progress</span>
