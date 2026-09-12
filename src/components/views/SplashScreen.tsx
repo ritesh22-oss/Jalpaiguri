@@ -17,7 +17,7 @@ export const SplashScreen: React.FC = () => {
   return (
     <div
       onClick={handleScreenTap}
-      className="fixed inset-0 z-50 bg-[#e6f4fc] flex flex-col justify-center items-center select-none cursor-pointer max-w-md mx-auto overflow-hidden shadow-2xl relative"
+      className="fixed inset-0 z-50 bg-[#e6f4fc] flex flex-col justify-center items-center select-none cursor-pointer overflow-hidden"
     >
       <motion.img
         initial={{ opacity: 0, scale: 1.15 }}

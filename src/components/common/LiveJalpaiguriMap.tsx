@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { useLocation } from '../../context/LocationContext';
 import { useNav } from '../../context/NavigationContext';
-import { JALPAIGURI_SERVICE_REGION } from '../../data/jalpaiguriLocalities';
+import { JALPAIGURI_SERVICE_REGION, getClosestLocalityName } from '../../data/jalpaiguriLocalities';
 import apiClient from '../../services/apiClient';
 
 interface LiveJalpaiguriMapProps {
@@ -149,14 +149,27 @@ export const LiveJalpaiguriMap: React.FC<LiveJalpaiguriMapProps> = ({
         const { lat, lng } = e.latlng;
         try {
           const response = await apiClient.reverseGeocode(lat, lng);
-          const shortName = response.success ? response.name : 'Selected Location';
+          let shortName = response.success ? response.name : '';
+          let locality = response.success ? response.locality : '';
+          
+          // If API failed to give a good name or returned generic coords, use our local fallback
+          if (!shortName || shortName.includes('Location near')) {
+            const localFallback = getClosestLocalityName(lat, lng);
+            if (localFallback.isWithinRegion) {
+              shortName = localFallback.fullName;
+              locality = localFallback.locality;
+            } else {
+              shortName = shortName || `Area (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+              locality = locality || `Area near ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            }
+          }
           
           if (isFullscreenRef.current) {
             handleSetDestination(lat, lng, shortName);
           } else {
             setManualLocation({
               name: shortName,
-              locality: response.success ? response.locality : 'Selected Location',
+              locality: locality,
               lat,
               lng,
               city: response.success ? response.city : 'Jalpaiguri'
@@ -164,12 +177,18 @@ export const LiveJalpaiguriMap: React.FC<LiveJalpaiguriMapProps> = ({
             setActiveView('user');
           }
         } catch (err) {
+          const localFallback = getClosestLocalityName(lat, lng);
+          const fallbackName = localFallback.isWithinRegion 
+            ? localFallback.fullName 
+            : `Area (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+          const fallbackLocality = localFallback.isWithinRegion ? localFallback.locality : `Area near ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+
           if (isFullscreenRef.current) {
-            handleSetDestination(lat, lng, "Selected Location");
+            handleSetDestination(lat, lng, fallbackName);
           } else {
             setManualLocation({
-              name: "Selected Location",
-              locality: "Selected Location",
+              name: fallbackName,
+              locality: fallbackLocality,
               lat,
               lng
             });

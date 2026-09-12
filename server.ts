@@ -311,20 +311,22 @@ app.get('/api/location/reverse-geocode', async (req: Request, res: Response) => 
     });
   }
 
-  // Generic fallback using coordinates — NEVER "Kadamtala"
-  const genericLocality = `Location (${lat.toFixed(3)}°, ${lng.toFixed(3)}°)`;
+  // Generic fallback using coordinates — NEVER "Selected Location"
+  const coordsLabel = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  const genericName = `Location near ${coordsLabel}`;
+  
   return res.json({
     success: true,
     lat,
     lng,
-    name: genericLocality,
-    locality: genericLocality,
-    city: 'Detected City',
-    district: '',
-    state: '',
+    name: genericName,
+    locality: `Area ${coordsLabel}`,
+    city: 'Jalpaiguri Region',
+    district: 'Jalpaiguri',
+    state: 'West Bengal',
     country: 'India',
     pincode: '',
-    source: 'generic-coordinates'
+    source: 'coordinates-fallback'
   });
 });
 
