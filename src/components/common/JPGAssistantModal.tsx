@@ -224,12 +224,17 @@ export const JPGAssistantModal: React.FC = () => {
           modelUsed: res?.modelUsed
         }
       ]);
-    } catch (e) {
+    } catch (e: any) {
+      const serverErr = e?.message || '';
+      const displayMsg = serverErr 
+        ? `⚠️ Error: ${serverErr}`
+        : (lang === 'bn' ? 'দুঃখিত, সংযোগে সমস্যা হচ্ছে। পরে আবার চেষ্টা করুন।' : 'Sorry, I am having trouble connecting. Please try again later.');
+
       setChatHistory((prev) => [
         ...prev,
         {
           role: 'model',
-          text: lang === 'bn' ? 'দুঃখিত, সংযোগে সমস্যা হচ্ছে। পরে আবার চেষ্টা করুন।' : 'Sorry, I am having trouble connecting. Please try again later.'
+          text: displayMsg
         }
       ]);
     } finally {

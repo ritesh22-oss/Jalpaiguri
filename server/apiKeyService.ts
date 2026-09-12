@@ -37,7 +37,13 @@ class ApiKeyService {
    * Safely retrieve the Gemini API key from server environment
    */
   public getGeminiApiKey(): string | undefined {
-    return process.env.GEMINI_API_KEY?.trim() || undefined;
+    return (
+      process.env.GEMINI_API_KEY?.trim() ||
+      process.env.GOOGLE_API_KEY?.trim() ||
+      process.env.VITE_GEMINI_API_KEY?.trim() ||
+      process.env.AI_STUDIO_API_KEY?.trim() ||
+      undefined
+    );
   }
 
   /**
