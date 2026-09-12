@@ -19,6 +19,14 @@ const app = express();
 
 app.use(express.json({ limit: '10mb' }));
 
+// Vercel serverless path normalization middleware (fixes 404 when Vercel strips /api prefix)
+app.use((req: Request, res: Response, next: Function) => {
+  if (process.env.VERCEL && req.url && !req.url.startsWith('/api') && !req.url.startsWith('/assets') && req.url !== '/' && !req.url.includes('.')) {
+    req.url = '/api' + (req.url.startsWith('/') ? req.url : '/' + req.url);
+  }
+  next();
+});
+
 // Safe lazy initialization for Gemini AI via centralized apiKeyService
 function getGeminiClient(): GoogleGenAI | null {
   return apiKeyService.getGeminiClient();
@@ -510,16 +518,19 @@ app.post('/api/gemini/chat', async (req: Request, res: Response) => {
     selectedModel = 'gemini-3.1-flash-lite';
   }
 
-  if (!ai) {
-    console.error('[Gemini Chat] Error: GEMINI_API_KEY is missing.');
-    return res.status(500).json({
-      success: false,
-      error: 'GEMINI_API_KEY is missing from the Vercel server environment.',
-      code: 'GEMINI_API_KEY_MISSING'
-    });
-  }
-
   try {
+    if (!ai) {
+      console.warn('[Gemini Chat] GEMINI_API_KEY is missing. Using local Jalpaiguri civic knowledge fallback.');
+      const localReply = generateLocalFallback(message, role);
+      return res.json({
+        success: true,
+        reply: localReply,
+        groundingPlaces: [],
+        modelUsed: 'local-civic-fallback',
+        role
+      });
+    }
+
     let systemInstruction = ROLE_SYSTEM_INSTRUCTIONS[role] || ROLE_SYSTEM_INSTRUCTIONS.general;
     if (language === 'bn') {
       systemInstruction += '\n\nIMPORTANT: You MUST reply entirely in Bengali (বাংলা). Do not use English unless explicitly asked or referring to specific proper nouns.';
@@ -570,12 +581,15 @@ app.post('/api/gemini/chat', async (req: Request, res: Response) => {
     });
   } catch (err: any) {
     const errMessage = err?.message || String(err);
-    console.error(`[Gemini Chat] Gemini API error with model ${selectedModel}:`, errMessage);
+    console.error(`[Gemini Chat] Error encountered, falling back to local civic knowledge:`, errMessage);
 
-    return res.status(500).json({
-      success: false,
-      error: `Gemini API Error: ${errMessage}`,
-      code: 'GEMINI_API_ERROR'
+    const fallbackReply = generateLocalFallback(message, role);
+    return res.json({
+      success: true,
+      reply: fallbackReply,
+      groundingPlaces: [],
+      modelUsed: 'local-civic-fallback',
+      role
     });
   }
 });
