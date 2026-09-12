@@ -214,6 +214,14 @@ class ApiClient {
         } catch {
           // ignore non-json error responses
         }
+
+        console.error("MYJPG AI API ERROR", {
+          url: targetUrl,
+          status: response.status,
+          statusText: response.statusText,
+          body: errData
+        });
+
         const rawErr = errData?.error || errData?.message;
         const errorMsg = typeof rawErr === 'string'
           ? rawErr
