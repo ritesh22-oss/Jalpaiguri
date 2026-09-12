@@ -225,8 +225,12 @@ export const JPGAssistantModal: React.FC = () => {
         }
       ]);
     } catch (e: any) {
-      const serverErr = e?.message || '';
-      const displayMsg = serverErr 
+      const rawMsg = e?.message || e?.error || '';
+      const serverErr = typeof rawMsg === 'string' 
+        ? rawMsg 
+        : (typeof rawMsg === 'object' ? JSON.stringify(rawMsg) : String(rawMsg));
+
+      const displayMsg = serverErr && serverErr !== '[object Object]'
         ? `⚠️ Error: ${serverErr}`
         : (lang === 'bn' ? 'দুঃখিত, সংযোগে সমস্যা হচ্ছে। পরে আবার চেষ্টা করুন।' : 'Sorry, I am having trouble connecting. Please try again later.');
 
