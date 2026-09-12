@@ -214,8 +214,13 @@ class ApiClient {
         } catch {
           // ignore non-json error responses
         }
+        const rawErr = errData?.error || errData?.message;
+        const errorMsg = typeof rawErr === 'string'
+          ? rawErr
+          : (rawErr?.message || (typeof errData === 'string' ? errData : null) || `API request to ${endpoint} failed with status ${response.status}`);
+        
         throw new ApiClientError(
-          errData?.error || errData?.message || `API request to ${endpoint} failed with status ${response.status}`,
+          typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg),
           response.status,
           endpoint,
           errData
