@@ -24,7 +24,8 @@ import {
   Info,
   DollarSign,
   Briefcase,
-  AlertCircle
+  AlertCircle,
+  Camera
 } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -38,6 +39,7 @@ import {
   BankType
 } from '../../data/banksData';
 import { calculateHaversineDistance, formatDistanceString } from '../../data/jalpaiguriLocalities';
+import { UploadPlacePhotoModal } from '../common/UploadPlacePhotoModal';
 
 type TabType = 'BANKS' | 'ATMs' | 'ALL';
 type SubViewMode = 'list' | 'map';
@@ -54,6 +56,15 @@ export const BanksAtmsView: React.FC = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>('All');
   const [sortBy, setSortBy] = useState<SortOption>('nearest');
   const [selectedEntity, setSelectedEntity] = useState<BankEntity | null>(null);
+  const [uploadEntity, setUploadEntity] = useState<BankEntity | null>(null);
+  const [customThumbs, setCustomThumbs] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('jpg_custom_thumbnails') || '{}');
+      setCustomThumbs(stored);
+    } catch {}
+  }, []);
 
   // External Website Redirect Confirmation Modal State
   const [redirectModalUrl, setRedirectModalUrl] = useState<string | null>(null);
@@ -542,15 +553,23 @@ export const BanksAtmsView: React.FC = () => {
                     {/* Top Row: Bank Badge, Type & Verification */}
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <div
-                          className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
-                            isBank
-                              ? 'bg-blue-50 dark:bg-blue-950/80 text-[#007AFF] dark:text-blue-400 border-blue-100 dark:border-blue-900/40'
-                              : 'bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900/40'
-                          }`}
-                        >
-                          {isBank ? <Building2 className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
-                        </div>
+                        {customThumbs[item.id] ? (
+                          <img
+                            src={customThumbs[item.id]}
+                            alt={item.branchName}
+                            className="w-10 h-10 rounded-xl object-cover border border-emerald-500/30 shrink-0"
+                          />
+                        ) : (
+                          <div
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+                              isBank
+                                ? 'bg-blue-50 dark:bg-blue-950/80 text-[#007AFF] dark:text-blue-400 border-blue-100 dark:border-blue-900/40'
+                                : 'bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900/40'
+                            }`}
+                          >
+                            {isBank ? <Building2 className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
+                          </div>
+                        )}
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
                             <span className="text-[10px] font-black uppercase tracking-wider text-[#007AFF] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/70 px-2 py-0.2 rounded-md">
@@ -566,8 +585,15 @@ export const BanksAtmsView: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Distance Badge */}
-                      <div className="text-right shrink-0">
+                      {/* Distance Badge & Upload Action */}
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => setUploadEntity(item)}
+                          className="p-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors cursor-pointer"
+                          title="Upload branch or ATM photo"
+                        >
+                          <Camera className="w-3.5 h-3.5" />
+                        </button>
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/80 text-[#007AFF] dark:text-blue-300 text-xs font-black border border-blue-100 dark:border-blue-900/40">
                           <Navigation className="w-3 h-3" />
                           <span>{item.distanceText}</span>
@@ -770,6 +796,19 @@ export const BanksAtmsView: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {uploadEntity && (
+        <UploadPlacePhotoModal
+          placeId={uploadEntity.id}
+          placeName={`${uploadEntity.bankName} - ${uploadEntity.branchName}`}
+          category={uploadEntity.type === 'BANK' ? 'Financial - Bank' : 'Financial - ATM'}
+          isOpen={!!uploadEntity}
+          onClose={() => setUploadEntity(null)}
+          onUploaded={(url) => {
+            setCustomThumbs(prev => ({ ...prev, [uploadEntity.id]: url }));
+          }}
+        />
       )}
     </div>
   );

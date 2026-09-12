@@ -21,7 +21,8 @@ import {
   TrendingUp,
   Clock,
   LogOut,
-  Store
+  Store,
+  Camera
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useApp } from '../../context/AppContext';
@@ -229,6 +230,7 @@ export const AdminDashboardView: React.FC = () => {
 
   const sidebarLinks = [
     { id: 'Dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+    { id: 'Place Photos', label: 'Place Photos', icon: <Camera className="w-5 h-5" /> },
     { id: 'Users', label: 'Users', icon: <Users className="w-5 h-5" /> },
     { id: 'Workers', label: 'Workers', icon: <Wrench className="w-5 h-5" /> },
     { id: 'Shops', label: 'Shops & Merchants', icon: <Store className="w-5 h-5" /> },
@@ -502,7 +504,7 @@ export const AdminDashboardView: React.FC = () => {
                 <div className="overflow-x-auto">
                   {placePhotoSubmissions.length === 0 ? (
                     <div className="p-12 text-center text-gray-500 text-xs">
-                      No user photo submissions yet. Users can upload place photos from Explore or Education sections.
+                      No user photo submissions yet. Citizens can upload photos using gallery or camera across Explore Places, Education, Transport, Dining, Businesses, Banks/ATMs, Puja Pandals, and Emergency centers.
                     </div>
                   ) : (
                     <table className="w-full text-left text-xs">

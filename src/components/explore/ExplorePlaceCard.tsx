@@ -8,11 +8,13 @@ import {
   Copy,
   Check,
   ShieldCheck,
-  Clock
+  Clock,
+  Camera
 } from 'lucide-react';
 import { ExplorePlaceItem } from '../../types';
 import { resolvePlaceImage, ResolvedPlaceImage } from '../../utils/placesPhotoClient';
 import { getCategoryIllustrationUri } from '../../utils/placeCategoryIllustrations';
+import { UploadPlacePhotoModal } from '../common/UploadPlacePhotoModal';
 
 interface ExplorePlaceCardProps {
   place: ExplorePlaceItem;
@@ -27,6 +29,7 @@ export const ExplorePlaceCard: React.FC<ExplorePlaceCardProps> = ({
 }) => {
   const [resolvedImage, setResolvedImage] = useState<ResolvedPlaceImage | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isUploadOpen, setIsUploadOpen] = useState<boolean>(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -182,8 +185,38 @@ export const ExplorePlaceCard: React.FC<ExplorePlaceCardProps> = ({
             <Sparkles className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Ask AI</span>
           </button>
+
+          {/* Upload Place Photo Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsUploadOpen(true);
+            }}
+            className="bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/40 text-emerald-600 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900 px-2.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 transition-all active:scale-95"
+            title="Upload photo from camera or gallery"
+          >
+            <Camera className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Upload</span>
+          </button>
         </div>
       </div>
+
+      <UploadPlacePhotoModal
+        placeId={place.placeId}
+        placeName={place.name}
+        category={place.category}
+        isOpen={isUploadOpen}
+        onClose={() => setIsUploadOpen(false)}
+        onUploaded={(url) => {
+          setResolvedImage({
+            imageUrl: url,
+            sourceType: 'admin_approved',
+            badgeLabel: 'Community Photo',
+            attribution: 'Local Jalpaiguri Contributor',
+            isAiGenerated: false
+          });
+        }}
+      />
     </article>
   );
 };

@@ -21,12 +21,12 @@ import { ExplorePlaceItem } from '../types';
 import { getCategoryIllustrationUri } from './placeCategoryIllustrations';
 import { apiClient } from './apiClient';
 
-export type PlaceImageSourceType = 'google' | 'database' | 'gemini' | 'category_illustration';
+export type PlaceImageSourceType = 'google' | 'database' | 'gemini' | 'category_illustration' | 'admin_approved';
 
 export interface ResolvedPlaceImage {
   imageUrl: string;
   sourceType: PlaceImageSourceType;
-  badgeLabel: 'Google Photo' | 'Verified Photo' | 'AI Preview' | 'Local Illustration';
+  badgeLabel: 'Google Photo' | 'Verified Photo' | 'AI Preview' | 'Local Illustration' | 'Stock Photo' | 'Community Photo' | 'Verified Community Photo';
   attribution?: string;
   isAiGenerated: boolean;
 }
@@ -119,6 +119,7 @@ export async function fetchPlacePhoto(
   }
 }
 
+
 /**
  * Resolves the absolute best available image for any Explore Place
  * Guarantees that a high-resolution, thematic image is ALWAYS returned.
@@ -128,6 +129,20 @@ export async function resolvePlaceImage(
   maxWidth = 600,
   maxHeight = 400
 ): Promise<ResolvedPlaceImage> {
+  // Step 0: Priority to Administrator approved custom photo submission
+  try {
+    const customThumbs = JSON.parse(localStorage.getItem('jpg_custom_thumbnails') || '{}');
+    if (customThumbs[place.placeId]) {
+      return {
+        imageUrl: customThumbs[place.placeId],
+        sourceType: 'database',
+        badgeLabel: 'Verified Community Photo',
+        attribution: 'Jalpaiguri Citizen & Admin Verified',
+        isAiGenerated: false
+      };
+    }
+  } catch {}
+
   // Step 1: Attempt official Google Places photo
   try {
     const googleRes = await fetchPlacePhoto(place.placeId, place.photoResourceName, maxWidth, maxHeight);
