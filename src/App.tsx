@@ -89,6 +89,10 @@ import { OutsideAreaView } from './components/views/OutsideAreaView';
 import { LocationPermissionRequiredView } from './components/views/LocationPermissionRequiredView';
 import { SafetySosView } from './components/views/SafetySosView';
 import { SexualViolenceSupportView } from './components/views/SexualViolenceSupportView';
+import { EmergencyBloodFinder } from './components/views/EmergencyBloodFinder';
+import { CreateBloodRequestView } from './components/views/CreateBloodRequestView';
+import { DonorSettingsView } from './components/views/DonorSettingsView';
+import { DonorDetailsView } from './components/views/DonorDetailsView';
 import { ThemeProvider } from './context/ThemeContext';
 
 // Shop Marketplace & Merchant Platform
@@ -117,6 +121,8 @@ import { JPGLogo } from './components/common/JPGLogo';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { OfflineView } from './components/common/OfflineView';
 import { BeautifulLoader } from './components/common/BeautifulLoader';
+import { AppTour } from './components/common/AppTour';
+import { TourLanguageModal } from './components/common/TourLanguageModal';
 
 const AppContent: React.FC = () => {
   // 1. ALL HOOKS MUST BE AT THE VERY TOP, UNCONDITIONAL
@@ -232,23 +238,23 @@ const AppContent: React.FC = () => {
   // Location bypass
   if (serviceAreaStatus === 'outside' && !isExemptView) {
     return (
-      <ExpoDeviceShell>
+      <div className="w-full min-h-screen flex flex-col">
         <main className="flex-1 w-full">
           <OutsideAreaView onNavigate={navigate} />
         </main>
         <Toast />
-      </ExpoDeviceShell>
+      </div>
     );
   }
 
   if ((locationStatus === 'denied' || locationStatus === 'permission_denied') && !isExemptView) {
     return (
-      <ExpoDeviceShell>
+      <div className="w-full min-h-screen flex flex-col">
         <main className="flex-1 w-full">
           <LocationPermissionRequiredView onNavigate={navigate} />
         </main>
         <Toast />
-      </ExpoDeviceShell>
+      </div>
     );
   }
 
@@ -335,6 +341,14 @@ const AppContent: React.FC = () => {
       case 'blood-request':
       case 'blood-donors':
         return <BloodView />;
+      case 'emergency-blood-finder':
+        return <EmergencyBloodFinder />;
+      case 'create-blood-request':
+        return <CreateBloodRequestView />;
+      case 'donor-settings':
+        return <DonorSettingsView />;
+      case 'donor-details':
+        return <DonorDetailsView />;
       case 'jobs':
       case 'job-detail':
       case 'job-apply':
@@ -421,7 +435,7 @@ const AppContent: React.FC = () => {
   const isPostLogin = !['splash', 'onboarding', 'auth', 'phone-auth', 'otp', 'profile-setup', 'profile-onboarding'].includes(currentView);
 
   return (
-    <ExpoDeviceShell>
+    <div className="w-full min-h-screen min-h-[100dvh] bg-[#FAF8F5] dark:bg-[#020617] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col relative transition-colors">
       <AnimatePresence>
         {!isOnline && <OfflineView />}
       </AnimatePresence>
@@ -452,10 +466,12 @@ const AppContent: React.FC = () => {
           <LocationSelectorModal />
           <FiltersBottomSheet />
           <JPGAssistantModal />
+          <TourLanguageModal />
+          <AppTour />
         </>
       )}
       <Toast />
-    </ExpoDeviceShell>
+    </div>
   );
 };
 

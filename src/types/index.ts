@@ -19,6 +19,10 @@ export type ViewType =
   | 'blood'
   | 'blood-request'
   | 'blood-donors'
+  | 'emergency-blood-finder'
+  | 'donor-details'
+  | 'donor-settings'
+  | 'create-blood-request'
   | 'medical'
   | 'doctor-detail'
   | 'hospital-detail'
@@ -190,6 +194,9 @@ export interface UserProfile {
   isVolunteer?: boolean;
   isBloodDonor?: boolean;
   language: 'English' | 'বাংলা' | 'हिन्दी';
+  tourCompleted?: boolean;
+  tourLanguage?: 'English' | 'বাংলা';
+  tourVersion?: number;
   role?: 'citizen' | 'admin' | 'worker' | 'shop_owner';
   emailVerified?: boolean;
   authMethod?: 'google' | 'phone' | 'email';
@@ -408,28 +415,43 @@ export interface LocalAlert {
 
 export interface BloodDonor {
   id: string;
+  userId: string;
   name: string;
   bloodGroup: BloodGroup;
-  area: string;
-  distance: string;
-  availability: 'Available Now' | 'Available' | 'Unavailable';
+  age?: number;
+  gender?: string;
+  phone: string;
+  availability: 'Available Now' | 'Available Today' | 'Unavailable';
+  lastUpdated: string;
+  agreedToSearch: boolean;
+  approximateArea: string;
+  lat: number;
+  lng: number;
   lastDonation?: string;
   verified: boolean;
   donationsCount: number;
+  note?: string;
+  isVisible: boolean;
+  distanceKm?: number;
 }
 
 export interface BloodRequest {
   id: string;
+  userId: string;
   patientName: string;
   bloodGroup: BloodGroup;
-  hospital: string;
   units: number;
-  urgency: 'Immediate (Critical)' | 'Within 24 Hours' | 'Planned';
-  contactPerson: string;
-  phone: string;
-  location: string;
-  status: 'Urgent' | 'Assigned' | 'Fulfilled';
-  postedAt: string;
+  urgency: 'Emergency' | 'Urgent' | 'Normal';
+  hospitalName: string;
+  hospitalAddress: string;
+  lat: number;
+  lng: number;
+  contactName: string;
+  contactPhone: string;
+  requiredDate?: string;
+  note?: string;
+  status: 'Open' | 'Searching' | 'Fulfilled' | 'Cancelled';
+  createdAt: string;
 }
 
 export interface Doctor {

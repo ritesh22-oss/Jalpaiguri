@@ -247,7 +247,7 @@ export const ReportProblemView: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Hero Section */}
             <div className="text-center pt-2 pb-1 space-y-2">
-              <div className="w-12 h-12 rounded-2xl bg-[#E6F4EA] dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/40 text-[#007AFF] dark:text-blue-400 flex items-center justify-center mx-auto shadow-xs">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-800/40 text-[#007AFF] dark:text-blue-400 flex items-center justify-center mx-auto shadow-xs">
                 <Building2 className="w-6 h-6 stroke-[1.8]" />
               </div>
 

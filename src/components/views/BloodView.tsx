@@ -48,12 +48,17 @@ export const BloodView: React.FC = () => {
       return;
     }
     registerBloodDonor({
+      userId: user?.id || 'guest',
       name: fullName + ` (Anonymous ID #${Math.floor(10 + Math.random() * 89)})`,
       bloodGroup,
-      area,
-      distance: '1.2 km',
+      approximateArea: area,
+      phone,
       availability: 'Available Now',
-      lastDonation: 'None recorded'
+      lastUpdated: new Date().toISOString(),
+      agreedToSearch: true,
+      lat: 26.52,
+      lng: 88.72,
+      isVisible: true
     });
   };
 
@@ -64,14 +69,18 @@ export const BloodView: React.FC = () => {
       return;
     }
     submitBloodRequest({
+      userId: user?.id || 'guest',
       patientName,
       bloodGroup,
-      hospital: reqHospital,
+      hospitalName: reqHospital,
+      hospitalAddress: 'Local Hospital, Jalpaiguri',
       units: reqUnits,
-      urgency: reqUrgency,
-      contactPerson: user?.name || 'Attendant',
-      phone: phone || '+91 98320 00000',
-      location: area || 'Jalpaiguri Town'
+      urgency: 'Urgent',
+      contactName: user?.name || 'Attendant',
+      contactPhone: phone || '+91 98320 00000',
+      lat: 26.52,
+      lng: 88.72,
+      createdAt: new Date().toISOString()
     });
     setActiveSection('main');
   };
@@ -119,8 +128,8 @@ export const BloodView: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {/* 1. I Need Blood (Soft Pink Card) */}
           <div
-            onClick={() => setActiveSection(activeSection === 'request' ? 'main' : 'request')}
-            className="bg-[#FFEBEA] dark:bg-[#281517] border border-[#FFD2D0] dark:border-red-900/40 rounded-3xl p-5 text-center shadow-xs hover:border-[#D9383A] active:scale-98 transition-all cursor-pointer space-y-1.5"
+            onClick={() => navigate('emergency-blood-finder')}
+            className="bg-[#FFEBEA] dark:bg-[#281517] border border-[#FFD2D0] dark:border-red-900/40 rounded-3xl p-5 text-center shadow-xs hover:border-[#D9383A] active:scale-98 transition-all duration-300 cursor-pointer space-y-1.5"
           >
             <div className="w-10 h-10 rounded-2xl bg-white/70 dark:bg-red-900/40 text-[#D9383A] dark:text-red-400 flex items-center justify-center mx-auto">
               <Droplet className="w-6 h-6 fill-[#D9383A] dark:fill-red-400" />
@@ -135,11 +144,8 @@ export const BloodView: React.FC = () => {
 
           {/* 2. I Want to Donate (Soft Mint Card) */}
           <div
-            onClick={() => {
-              const el = document.getElementById('register-donor-form');
-              el?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            className="bg-[#DCEEE3] dark:bg-[#122A20] border border-[#C2E4D2] dark:border-blue-900/40 rounded-3xl p-5 text-center shadow-xs hover:border-[#007AFF] active:scale-98 transition-all cursor-pointer space-y-1.5"
+            onClick={() => navigate('profile')}
+            className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/40 rounded-3xl p-5 text-center shadow-xs hover:border-blue-500 hover:bg-blue-100/50 dark:hover:bg-blue-900/40 active:scale-98 transition-all duration-300 cursor-pointer space-y-1.5"
           >
             <div className="w-10 h-10 rounded-2xl bg-white/70 dark:bg-blue-900/40 text-[#007AFF] dark:text-[#38BDF8] flex items-center justify-center mx-auto">
               <HeartHandshake className="w-6 h-6 text-[#007AFF] dark:text-[#38BDF8]" />
@@ -148,14 +154,14 @@ export const BloodView: React.FC = () => {
               I Want to Donate
             </h3>
             <p className="text-xs font-semibold text-[#007AFF] dark:text-[#38BDF8]">
-              Respond to active requests
+              Manage donor profile
             </p>
           </div>
 
           {/* 3. Find Donors (Soft Neutral Warm Gray Card) */}
           <div
-            onClick={() => setActiveSection(activeSection === 'find-donors' ? 'main' : 'find-donors')}
-            className="bg-[#EFECE6] dark:bg-[#1C2822] border border-[#E0DCD3] dark:border-white/10 rounded-3xl p-5 text-center shadow-xs hover:border-[#11241C] active:scale-98 transition-all cursor-pointer space-y-1.5"
+            onClick={() => navigate('emergency-blood-finder')}
+            className="bg-[#EFECE6] dark:bg-[#1C2822] border border-[#E0DCD3] dark:border-white/10 rounded-3xl p-5 text-center shadow-xs hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/40 active:scale-98 transition-all duration-300 cursor-pointer space-y-1.5"
           >
             <div className="w-10 h-10 rounded-2xl bg-white/70 dark:bg-white/10 text-[#11241C] dark:text-white flex items-center justify-center mx-auto">
               <Search className="w-6 h-6 stroke-[2.5]" />
@@ -236,7 +242,7 @@ export const BloodView: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full py-3.5 bg-[#D9383A] text-white font-bold text-xs rounded-xl shadow-md hover:bg-[#B92628] active:scale-98 transition-all cursor-pointer"
+                className="w-full py-3.5 bg-[#D9383A] text-white font-bold text-xs rounded-xl shadow-md hover:bg-blue-600 transition-all duration-300 active:scale-98 cursor-pointer"
               >
                 Broadcast Urgent Blood Alert
               </button>
@@ -271,13 +277,13 @@ export const BloodView: React.FC = () => {
                   <span className="px-2.5 py-1 rounded-xl bg-[#FFEBEA] dark:bg-red-950/50 text-[#D9383A] dark:text-red-400 text-xs font-extrabold border border-transparent dark:border-red-900/40">
                     {req.bloodGroup} Needed ({req.units} Unit)
                   </span>
-                  <span className="text-[11px] text-[#55685F] dark:text-[#A2B3AA] font-medium">{req.postedAt}</span>
+                  <span className="text-[11px] text-[#55685F] dark:text-[#A2B3AA] font-medium">{new Date(req.createdAt).toLocaleDateString()}</span>
                 </div>
-                <h4 className="font-bold text-sm text-[#11241C] dark:text-white">{req.hospital}</h4>
+                <h4 className="font-bold text-sm text-[#11241C] dark:text-white">{req.hospitalName}</h4>
                 <p className="text-xs text-[#55685F] dark:text-[#A2B3AA]">Case: {req.patientName}</p>
                 <div className="pt-1 flex gap-2">
                   <button
-                    onClick={() => alert(`Contacting coordinator: ${req.phone}`)}
+                    onClick={() => alert(`Contacting coordinator: ${req.contactPhone}`)}
                     className="flex-1 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white text-xs font-bold shadow-xs cursor-pointer hover:bg-blue-700"
                   >
                     I Can Donate
@@ -339,7 +345,7 @@ export const BloodView: React.FC = () => {
                           <span className="text-xs font-bold text-[#11241C] dark:text-white">{donor.name}</span>
                         </div>
                         <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">
-                          {donor.area} • {donor.distance}
+                          {donor.approximateArea} • {donor.distanceKm ? `${donor.distanceKm.toFixed(1)} km` : 'Near you'}
                         </p>
                       </div>
                       <button

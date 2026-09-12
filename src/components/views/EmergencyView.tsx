@@ -302,7 +302,7 @@ export const EmergencyView: React.FC = () => {
               </div>
               <button
                 onClick={() => setUploadPlace({ id: 'hosp-jalpaiguri-district', name: 'Jalpaiguri District Hospital', category: 'Healthcare - Hospital' })}
-                className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 cursor-pointer transition-colors shrink-0"
+                className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 cursor-pointer transition-all duration-300 shrink-0"
                 title="Upload Photo"
               >
                 <Camera className="w-4 h-4" />
@@ -355,7 +355,7 @@ export const EmergencyView: React.FC = () => {
               </div>
               <button
                 onClick={() => setUploadPlace({ id: 'police-kotwali-ps', name: 'Kotwali Police Station', category: 'Safety - Police Station' })}
-                className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 cursor-pointer transition-colors shrink-0"
+                className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 cursor-pointer transition-all duration-300 shrink-0"
                 title="Upload Photo"
               >
                 <Camera className="w-4 h-4" />
@@ -408,7 +408,7 @@ export const EmergencyView: React.FC = () => {
               </div>
               <button
                 onClick={() => setUploadPlace({ id: 'fire-jalpaiguri-station', name: 'Jalpaiguri Fire Station', category: 'Safety - Fire Station' })}
-                className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 cursor-pointer transition-colors shrink-0"
+                className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 cursor-pointer transition-all duration-300 shrink-0"
                 title="Upload Photo"
               >
                 <Camera className="w-4 h-4" />

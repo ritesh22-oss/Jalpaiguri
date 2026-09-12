@@ -189,7 +189,51 @@ app.get('/api/location/reverse-geocode', async (req: Request, res: Response) => 
     return res.status(400).json({ error: 'Valid latitude and longitude are required.' });
   }
 
-  // 1. Try Nominatim (OpenStreetMap) with server-side custom User-Agent
+  // 1. Try Google Maps Reverse Geocoding first if key is available (High Accuracy)
+  const gApiKey = apiKeyService.getGoogleMapsApiKey();
+  if (gApiKey) {
+    try {
+      const gUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${gApiKey}`;
+      const gResp = await fetch(gUrl);
+      if (gResp.ok) {
+        const gData = await gResp.json();
+        if (gData.status === 'OK' && gData.results && gData.results.length > 0) {
+          const bestResult = gData.results[0];
+          const components = bestResult.address_components;
+          
+          const locality = components.find((c: any) => c.types.includes('sublocality') || c.types.includes('locality'))?.long_name || '';
+          const neighborhood = components.find((c: any) => c.types.includes('neighborhood'))?.long_name || '';
+          const road = components.find((c: any) => c.types.includes('route'))?.long_name || '';
+          const city = components.find((c: any) => c.types.includes('locality') || c.types.includes('administrative_area_level_2'))?.long_name || 'Jalpaiguri';
+          const district = components.find((c: any) => c.types.includes('administrative_area_level_2'))?.long_name || city;
+          const state = components.find((c: any) => c.types.includes('administrative_area_level_1'))?.long_name || 'West Bengal';
+          const pincode = components.find((c: any) => c.types.includes('postal_code'))?.long_name || '';
+          
+          // Construct a highly readable short name
+          const shortName = locality || neighborhood || road || city;
+          
+          return res.json({
+            success: true,
+            lat,
+            lng,
+            name: bestResult.formatted_address,
+            locality: shortName,
+            city,
+            district,
+            state,
+            country: 'India',
+            pincode,
+            road,
+            source: 'google-maps-geocoding'
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('[REVERSE GEOCODE] Google Maps lookup failed:', err);
+    }
+  }
+
+  // 2. Try Nominatim (OpenStreetMap) with server-side custom User-Agent (Fallback)
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 7000);

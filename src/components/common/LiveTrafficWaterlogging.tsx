@@ -37,58 +37,58 @@ const JALPAIGURI_BOUNDS = {
 
 // Google Maps Night Mode Style for high-contrast traffic overlay
 const DARK_MAP_STYLE: any[] = [
-  { elementType: 'geometry', stylers: [{ color: '#18241e' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#18241e' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#8fa89b' }] },
+  { elementType: 'geometry', stylers: [{ color: '#0f172a' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#0f172a' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#64748b' }] },
   {
     featureType: 'administrative.locality',
     elementType: 'labels.text.fill',
-    stylers: [{ color: '#c4d7cd' }]
+    stylers: [{ color: '#94a3b8' }]
   },
   {
     featureType: 'poi',
     elementType: 'labels.text.fill',
-    stylers: [{ color: '#7e968a' }]
+    stylers: [{ color: '#64748b' }]
   },
   {
     featureType: 'poi.park',
     elementType: 'geometry',
-    stylers: [{ color: '#1a3326' }]
+    stylers: [{ color: '#0b1224' }]
   },
   {
     featureType: 'poi.park',
     elementType: 'labels.text.fill',
-    stylers: [{ color: '#5b856e' }]
+    stylers: [{ color: '#334155' }]
   },
   {
     featureType: 'road',
     elementType: 'geometry',
-    stylers: [{ color: '#273830' }]
+    stylers: [{ color: '#1e293b' }]
   },
   {
     featureType: 'road',
     elementType: 'geometry.stroke',
-    stylers: [{ color: '#1c2822' }]
+    stylers: [{ color: '#0f172a' }]
   },
   {
     featureType: 'road.highway',
     elementType: 'geometry',
-    stylers: [{ color: '#334b3e' }]
+    stylers: [{ color: '#334155' }]
   },
   {
     featureType: 'road.highway',
     elementType: 'geometry.stroke',
-    stylers: [{ color: '#23342b' }]
+    stylers: [{ color: '#1e293b' }]
   },
   {
     featureType: 'water',
     elementType: 'geometry',
-    stylers: [{ color: '#0f293b' }]
+    stylers: [{ color: '#020617' }]
   },
   {
     featureType: 'water',
     elementType: 'labels.text.fill',
-    stylers: [{ color: '#4d758f' }]
+    stylers: [{ color: '#3b82f6' }]
   }
 ];
 
@@ -464,9 +464,9 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
   const formattedHeight = typeof height === 'number' ? `${height}px` : height;
 
   return (
-    <div className={`relative flex flex-col rounded-3xl overflow-hidden border border-[#E8E4DA] dark:border-white/10 bg-white dark:bg-[#16221D] shadow-xs transition-colors duration-200 ${className}`}>
+    <div className={`relative flex flex-col rounded-3xl overflow-hidden border border-[#E8E4DA] dark:border-white/10 bg-white dark:bg-[#1E293B] shadow-xs transition-colors duration-200 ${className}`}>
       {/* Top Component Bar: Live Status + Timestamp + Layer Switcher + Refresh */}
-      <div className="px-4 py-3 bg-white/95 dark:bg-[#16221D]/95 backdrop-blur-md border-b border-[#E8E4DA] dark:border-white/10 flex items-center justify-between z-20 gap-2">
+      <div className="px-4 py-3 bg-white/95 dark:bg-[#1E293B]/95 backdrop-blur-md border-b border-[#E8E4DA] dark:border-white/10 flex items-center justify-between z-20 gap-2">
         {/* 'Live' Status Indicator & Timestamp */}
         <div className="flex items-center gap-2.5">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 dark:bg-blue-400/15 border border-blue-500/30 text-blue-700 dark:text-blue-400 text-[10px] font-black uppercase tracking-wider">
@@ -477,8 +477,8 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
             <span>Live</span>
           </div>
 
-          <div className="flex items-center gap-1 text-[11px] font-semibold text-[#55685F] dark:text-[#9FB2A8]">
-            <Clock className="w-3 h-3 text-[#55685F] dark:text-[#9FB2A8]" />
+          <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+            <Clock className="w-3 h-3 text-slate-500 dark:text-slate-400" />
             <span>
               Updated {lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
             </span>
@@ -493,7 +493,7 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
             className={`px-2.5 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs ${
               isLayerMenuOpen
                 ? 'bg-[#007AFF] dark:bg-[#60A5FA] text-white dark:text-[#007AFF] border-transparent'
-                : 'bg-[#FAF8F5] dark:bg-[#0E1714] text-[#11241C] dark:text-white border-[#E8E4DA] dark:border-white/10 hover:bg-[#F2EFE9] dark:hover:bg-white/5'
+                : 'bg-[#FAF8F5] dark:bg-[#020617] text-[#0F172A] dark:text-white border-[#E8E4DA] dark:border-white/10 hover:bg-[#F2EFE9] dark:hover:bg-white/5'
             }`}
             title="Toggle map layers"
           >
@@ -506,7 +506,7 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
           <button
             onClick={handleManualRefresh}
             disabled={isRefreshing}
-            className="w-8 h-8 rounded-xl bg-[#FAF8F5] dark:bg-[#0E1714] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#55685F] dark:text-[#9FB2A8] hover:text-[#007AFF] dark:hover:text-white active:scale-95 transition-all cursor-pointer shadow-xs disabled:opacity-50"
+            className="w-8 h-8 rounded-xl bg-[#FAF8F5] dark:bg-[#020617] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-[#007AFF] dark:hover:text-white active:scale-95 transition-all cursor-pointer shadow-xs disabled:opacity-50"
             title="Refresh live road conditions"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-[#007AFF] dark:text-[#60A5FA]' : ''}`} />
@@ -516,10 +516,10 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
 
       {/* Layer Toggle Dropdown Drawer */}
       {isLayerMenuOpen && (
-        <div className="px-4 py-3 bg-[#FAF8F5] dark:bg-[#0E1714] border-b border-[#E8E4DA] dark:border-white/10 z-20 space-y-2.5 animate-in fade-in slide-in-from-top-2 duration-150">
-          <div className="flex items-center justify-between text-[11px] font-extrabold uppercase tracking-wider text-[#55685F] dark:text-[#9FB2A8]">
+        <div className="px-4 py-3 bg-[#FAF8F5] dark:bg-[#020617] border-b border-[#E8E4DA] dark:border-white/10 z-20 space-y-2.5 animate-in fade-in slide-in-from-top-2 duration-150">
+          <div className="flex items-center justify-between text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             <span>Active Map Layers</span>
-            <span className="text-[10px] lowercase text-[#8C9B93]">toggle real-time overlays</span>
+            <span className="text-[10px] lowercase text-slate-400">toggle real-time overlays</span>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
@@ -528,16 +528,16 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
               onClick={() => setLayers((prev) => ({ ...prev, traffic: !prev.traffic }))}
               className={`p-2.5 rounded-2xl border text-left flex items-start justify-between transition-all cursor-pointer ${
                 layers.traffic
-                  ? 'bg-white dark:bg-[#16221D] border-blue-500/50 shadow-xs'
+                  ? 'bg-white dark:bg-[#1E293B] border-blue-500/50 shadow-xs'
                   : 'bg-white/50 dark:bg-white/5 border-dashed border-[#E8E4DA] dark:border-white/10 opacity-70'
               }`}
             >
               <div className="space-y-0.5">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-[#11241C] dark:text-white">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[#0F172A] dark:text-white">
                   <Navigation className="w-3.5 h-3.5 text-[#007AFF] dark:text-[#60A5FA]" />
                   <span>Traffic Flow</span>
                 </div>
-                <p className="text-[10px] text-[#55685F] dark:text-[#9FB2A8]">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">
                   Google real-time speeds
                 </p>
               </div>
@@ -551,16 +551,16 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
               onClick={() => setLayers((prev) => ({ ...prev, waterlogging: !prev.waterlogging }))}
               className={`p-2.5 rounded-2xl border text-left flex items-start justify-between transition-all cursor-pointer ${
                 layers.waterlogging
-                  ? 'bg-white dark:bg-[#16221D] border-blue-500/50 shadow-xs'
+                  ? 'bg-white dark:bg-[#1E293B] border-blue-500/50 shadow-xs'
                   : 'bg-white/50 dark:bg-white/5 border-dashed border-[#E8E4DA] dark:border-white/10 opacity-70'
               }`}
             >
               <div className="space-y-0.5">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-[#11241C] dark:text-white">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[#0F172A] dark:text-white">
                   <Waves className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                   <span>Waterlogging</span>
                 </div>
-                <p className="text-[10px] text-[#55685F] dark:text-[#9FB2A8]">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">
                   Drainage telemetry
                 </p>
               </div>
@@ -574,16 +574,16 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
               onClick={() => setLayers((prev) => ({ ...prev, corridors: !prev.corridors }))}
               className={`p-2.5 rounded-2xl border text-left flex items-start justify-between transition-all cursor-pointer ${
                 layers.corridors
-                  ? 'bg-white dark:bg-[#16221D] border-[#007AFF]/40 dark:border-[#60A5FA]/40 shadow-xs'
+                  ? 'bg-white dark:bg-[#1E293B] border-[#007AFF]/40 dark:border-[#60A5FA]/40 shadow-xs'
                   : 'bg-white/50 dark:bg-white/5 border-dashed border-[#E8E4DA] dark:border-white/10 opacity-70'
               }`}
             >
               <div className="space-y-0.5">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-[#11241C] dark:text-white">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[#0F172A] dark:text-white">
                   <MapPin className="w-3.5 h-3.5 text-[#007AFF] dark:text-[#60A5FA]" />
                   <span>Corridors</span>
                 </div>
-                <p className="text-[10px] text-[#55685F] dark:text-[#9FB2A8]">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">
                   Artery hot spots
                 </p>
               </div>
@@ -597,16 +597,16 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
               onClick={() => setLayers((prev) => ({ ...prev, satellite: !prev.satellite }))}
               className={`p-2.5 rounded-2xl border text-left flex items-start justify-between transition-all cursor-pointer ${
                 layers.satellite
-                  ? 'bg-white dark:bg-[#16221D] border-amber-500/50 shadow-xs'
+                  ? 'bg-white dark:bg-[#1E293B] border-amber-500/50 shadow-xs'
                   : 'bg-white/50 dark:bg-white/5 border-dashed border-[#E8E4DA] dark:border-white/10 opacity-70'
               }`}
             >
               <div className="space-y-0.5">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-[#11241C] dark:text-white">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[#0F172A] dark:text-white">
                   <Layers className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                   <span>Satellite View</span>
                 </div>
-                <p className="text-[10px] text-[#55685F] dark:text-[#9FB2A8]">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">
                   Aerial terrain layer
                 </p>
               </div>
@@ -620,7 +620,7 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
 
       {/* Main Map Stage Container */}
       <div
-        className="relative w-full bg-[#E3EDF3] dark:bg-[#121A16] overflow-hidden"
+        className="relative w-full bg-slate-200 dark:bg-slate-900 overflow-hidden"
         style={{ height: formattedHeight }}
       >
         {/* Google Maps Container */}
@@ -643,12 +643,12 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
 
         {/* Map Loading State Overlay */}
         {mapEngineStatus === 'loading' && (
-          <div className="absolute inset-0 bg-[#FAF8F5]/85 dark:bg-[#0E1714]/85 backdrop-blur-xs flex flex-col items-center justify-center gap-2 z-10">
+          <div className="absolute inset-0 bg-[#FAF8F5]/85 dark:bg-[#020617]/85 backdrop-blur-xs flex flex-col items-center justify-center gap-2 z-10">
             <RefreshCw className="w-6 h-6 text-[#007AFF] dark:text-[#60A5FA] animate-spin" />
-            <p className="text-xs font-extrabold text-[#11241C] dark:text-white">
+            <p className="text-xs font-extrabold text-[#0F172A] dark:text-white">
               Connecting to Google Maps Traffic Layer...
             </p>
-            <p className="text-[11px] font-semibold text-[#55685F] dark:text-[#9FB2A8]">
+            <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
               Loading live transit conditions in Jalpaiguri
             </p>
           </div>
@@ -656,16 +656,16 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
 
         {/* Map Load Error State / Fallback Notice */}
         {mapEngineStatus === 'error' && (
-          <div className="absolute inset-x-3 top-3 bg-white/95 dark:bg-[#0E1714]/95 backdrop-blur-md p-3 rounded-2xl flex items-center justify-between shadow-lg border border-[#E8E4DA] dark:border-white/10 z-20">
+          <div className="absolute inset-x-3 top-3 bg-white/95 dark:bg-[#020617]/95 backdrop-blur-md p-3 rounded-2xl flex items-center justify-between shadow-lg border border-[#E8E4DA] dark:border-white/10 z-20">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">
+                <h3 className="text-xs font-extrabold text-[#0F172A] dark:text-white">
                   Live Traffic Offline
                 </h3>
-                <p className="text-[10px] font-semibold text-[#55685F] dark:text-[#9FB2A8]">
+                <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
                   Showing standard map. Configure GOOGLE_MAPS_API_KEY.
                 </p>
               </div>
@@ -684,7 +684,7 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
           {/* Recenter Button */}
           <button
             onClick={handleRecenterTown}
-            className="px-3 py-1.5 rounded-xl bg-white/95 dark:bg-[#16221D]/95 backdrop-blur-md border border-[#E8E4DA] dark:border-white/10 text-[#11241C] dark:text-white text-xs font-bold shadow-md flex items-center gap-1.5 hover:bg-white active:scale-95 transition-all cursor-pointer"
+            className="px-3 py-1.5 rounded-xl bg-white/95 dark:bg-[#1E293B]/95 backdrop-blur-md border border-[#E8E4DA] dark:border-white/10 text-[#0F172A] dark:text-white text-xs font-bold shadow-md flex items-center gap-1.5 hover:bg-white active:scale-95 transition-all cursor-pointer"
             title="Recenter Jalpaiguri Town"
           >
             <Compass className="w-3.5 h-3.5 text-[#007AFF] dark:text-[#60A5FA]" />
@@ -695,9 +695,9 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
         {/* Active Layer Tag Badge */}
         <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
           {layers.traffic && (
-            <div className="px-2.5 py-1 rounded-xl bg-white/95 dark:bg-[#16221D]/95 backdrop-blur-md border border-[#E8E4DA] dark:border-white/10 shadow-md flex items-center gap-1.5">
+            <div className="px-2.5 py-1 rounded-xl bg-white/95 dark:bg-[#1E293B]/95 backdrop-blur-md border border-[#E8E4DA] dark:border-white/10 shadow-md flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-              <span className="text-[10px] font-extrabold text-[#11241C] dark:text-white">
+              <span className="text-[10px] font-extrabold text-[#0F172A] dark:text-white">
                 Traffic Active
               </span>
             </div>
@@ -707,24 +707,24 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
 
       {/* Traffic Flow Legend Bar */}
       {layers.traffic && (
-        <div className="px-4 py-2 bg-white dark:bg-[#16221D] border-t border-[#E8E4DA] dark:border-white/10 flex items-center justify-between text-[10px] font-bold">
-          <span className="text-[#55685F] dark:text-[#9FB2A8]">Google Traffic Flow:</span>
+        <div className="px-4 py-2 bg-white dark:bg-[#1E293B] border-t border-[#E8E4DA] dark:border-white/10 flex items-center justify-between text-[10px] font-bold">
+          <span className="text-slate-500 dark:text-slate-400">Google Traffic Flow:</span>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
               <span className="w-2.5 h-1.5 rounded-full bg-[#10B981]"></span>
-              <span className="text-[#55685F] dark:text-[#9FB2A8]">Normal</span>
+              <span className="text-slate-500 dark:text-slate-400">Normal</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="w-2.5 h-1.5 rounded-full bg-[#F59E0B]"></span>
-              <span className="text-[#55685F] dark:text-[#9FB2A8]">Medium</span>
+              <span className="text-slate-500 dark:text-slate-400">Medium</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="w-2.5 h-1.5 rounded-full bg-[#EF4444]"></span>
-              <span className="text-[#55685F] dark:text-[#9FB2A8]">Slow</span>
+              <span className="text-slate-500 dark:text-slate-400">Slow</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="w-2.5 h-1.5 rounded-full bg-[#7F1D1D]"></span>
-              <span className="text-[#55685F] dark:text-[#9FB2A8]">Heavy</span>
+              <span className="text-slate-500 dark:text-slate-400">Heavy</span>
             </div>
           </div>
         </div>
@@ -732,12 +732,12 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
 
       {/* Quick Corridor Shortcuts */}
       {showCorridorShortcuts && (
-        <div className="px-4 py-2.5 bg-[#FAF8F5] dark:bg-[#0E1714] border-t border-[#E8E4DA] dark:border-white/10">
+        <div className="px-4 py-2.5 bg-[#FAF8F5] dark:bg-[#020617] border-t border-[#E8E4DA] dark:border-white/10">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#55685F] dark:text-[#9FB2A8]">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Jalpaiguri Corridors
             </span>
-            <span className="text-[10px] text-[#8C9B93]">Tap to inspect</span>
+            <span className="text-[10px] text-slate-400">Tap to inspect</span>
           </div>
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
             {JALPAIGURI_CORRIDORS.map((c) => {
@@ -749,7 +749,7 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
                   className={`px-2.5 py-1 rounded-xl text-[11px] font-bold whitespace-nowrap transition-all cursor-pointer ${
                     isActive
                       ? 'bg-[#007AFF] dark:bg-[#60A5FA] text-white dark:text-[#007AFF] shadow-xs'
-                      : 'bg-white dark:bg-[#16221D] text-[#11241C] dark:text-[#E8F0EC] border border-[#E8E4DA] dark:border-white/10 hover:bg-[#FAF8F5] dark:hover:bg-white/5'
+                      : 'bg-white dark:bg-[#1E293B] text-[#0F172A] dark:text-[#E2E8F0] border border-[#E8E4DA] dark:border-white/10 hover:bg-[#FAF8F5] dark:hover:bg-white/5'
                   }`}
                 >
                   {c.shortName}
@@ -762,9 +762,9 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
 
       {/* Telemetry Status Card (Waterlogging Real-Data Disclosure) */}
       {showTelemetryCard && layers.waterlogging && (
-        <div className="p-3.5 bg-white dark:bg-[#16221D] border-t border-[#E8E4DA] dark:border-white/10 space-y-2">
+        <div className="p-3.5 bg-white dark:bg-[#1E293B] border-t border-[#E8E4DA] dark:border-white/10 space-y-2">
           {isTelemetryLoading ? (
-            <div className="flex items-center gap-2 text-xs font-semibold text-[#55685F] dark:text-[#9FB2A8]">
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
               <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#007AFF] dark:text-[#60A5FA]" />
               <span>Querying Jalpaiguri telemetry feeds...</span>
             </div>
@@ -772,9 +772,9 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
             <div className="space-y-1">
               <div className="flex items-center justify-between text-xs font-bold text-[#007AFF] dark:text-[#60A5FA]">
                 <span>{waterloggingData.source || 'Municipal Telemetry'}</span>
-                <span className="text-[10px] text-[#8C9B93] font-normal">{waterloggingData.lastUpdated}</span>
+                <span className="text-[10px] text-slate-400 font-normal">{waterloggingData.lastUpdated}</span>
               </div>
-              <p className="text-[11px] text-[#55685F] dark:text-[#9FB2A8]">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 {waterloggingData.attribution}
               </p>
             </div>
@@ -785,10 +785,10 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
                   <Info className="w-4 h-4" />
                 </div>
                 <div className="space-y-0.5">
-                  <h4 className="text-xs font-extrabold text-[#11241C] dark:text-white">
+                  <h4 className="text-xs font-extrabold text-[#0F172A] dark:text-white">
                     Live waterlogging data is currently unavailable.
                   </h4>
-                  <p className="text-[10px] leading-relaxed text-[#55685F] dark:text-[#9FB2A8]">
+                  <p className="text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
                     No official municipal sensor feeds are currently configured for Jalpaiguri. In accordance with strict civic data integrity standards, synthetic or simulated waterlogging markers are never displayed.
                   </p>
                 </div>
@@ -796,10 +796,10 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
 
               {/* Observed Real-time Rainfall from Open-Meteo */}
               {waterloggingData?.liveWeatherObservation && (
-                <div className="p-2 rounded-xl bg-[#FAF8F5] dark:bg-[#0E1714] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-between">
+                <div className="p-2 rounded-xl bg-[#FAF8F5] dark:bg-[#020617] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <CloudRain className="w-3.5 h-3.5 text-[#007AFF] dark:text-[#60A5FA]" />
-                    <span className="text-[11px] font-bold text-[#11241C] dark:text-white">
+                    <span className="text-[11px] font-bold text-[#0F172A] dark:text-white">
                       Observed Precipitation
                     </span>
                   </div>
@@ -810,7 +810,7 @@ export const LiveTrafficWaterlogging: React.FC<LiveTrafficWaterloggingProps> = (
               )}
 
               <div className="flex items-center justify-between pt-1 border-t border-[#F0ECE1] dark:border-white/5">
-                <span className="text-[10px] text-[#55685F] dark:text-[#9FB2A8]">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">
                   Witnessing water congestion?
                 </span>
                 <button

@@ -95,6 +95,34 @@ service cloud.firestore {
              data.price is number;
     }
 
+    function isValidBloodDonor(data) {
+      return data.keys().hasAll(['userId', 'name', 'bloodGroup', 'phone', 'availability', 'agreedToSearch', 'lat', 'lng', 'isVisible', 'lastUpdated']) &&
+             data.keys().size() <= 20 &&
+             data.userId == request.auth.uid &&
+             data.name is string && data.name.size() <= 100 &&
+             data.bloodGroup in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', "I don't know"] &&
+             data.phone is string && data.phone.size() <= 20 &&
+             data.availability in ['Available Now', 'Available Today', 'Unavailable'] &&
+             data.agreedToSearch is bool &&
+             data.lat is number && data.lng is number &&
+             data.isVisible is bool &&
+             data.lastUpdated is string;
+    }
+
+    function isValidBloodRequest(data) {
+      return data.keys().hasAll(['userId', 'patientName', 'bloodGroup', 'units', 'urgency', 'hospitalName', 'contactPhone', 'status', 'createdAt']) &&
+             data.keys().size() <= 20 &&
+             data.userId == request.auth.uid &&
+             data.patientName is string && data.patientName.size() <= 100 &&
+             data.bloodGroup in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', "I don't know"] &&
+             data.units is number &&
+             data.urgency in ['Emergency', 'Urgent', 'Normal'] &&
+             data.hospitalName is string && data.hospitalName.size() <= 200 &&
+             data.contactPhone is string && data.contactPhone.size() <= 20 &&
+             data.status in ['Open', 'Searching', 'Fulfilled', 'Cancelled'] &&
+             data.createdAt is string;
+    }
+
     // --- COLLECTION RULES ---
 
     match /users/{userId} {
@@ -149,9 +177,9 @@ service cloud.firestore {
     }
 
     match /blood_donors/{donorId} {
-      allow read: if true;
-      allow create: if isSignedIn() && incoming().userId == request.auth.uid;
-      allow update: if isOwner(existing().userId) || isAdmin();
+      allow read: if isSignedIn() && (isOwner(existing().userId) || isAdmin() || (existing().isVisible == true && existing().agreedToSearch == true));
+      allow create: if isSignedIn() && isValidBloodDonor(incoming());
+      allow update: if (isOwner(existing().userId) || isAdmin()) && isValidBloodDonor(incoming());
       allow delete: if isOwner(existing().userId) || isAdmin();
     }
 
@@ -162,11 +190,11 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    match /blood_requests/{id} {
-      allow read: if true;
-      allow create: if isSignedIn();
-      allow update: if isSignedIn();
-      allow delete: if isAdmin();
+    match /blood_requests/{requestId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidBloodRequest(incoming());
+      allow update: if (isOwner(existing().userId) || isAdmin()) && isValidBloodRequest(incoming());
+      allow delete: if isOwner(existing().userId) || isAdmin();
     }
 
     match /jobs/{id} {

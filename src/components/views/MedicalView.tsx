@@ -148,7 +148,7 @@ export const MedicalView: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white truncate">{doc.name}</h3>
-                          <span className="text-[11px] font-bold text-[#007AFF] dark:text-[#38BDF8] bg-[#E6F4EA] dark:bg-[#1C4532] px-2 py-0.5 rounded-full">
+                          <span className="text-[11px] font-bold text-[#007AFF] dark:text-blue-300 bg-blue-50 dark:bg-blue-900/40 px-2 py-0.5 rounded-full">
                             ★ {doc.rating}
                           </span>
                         </div>

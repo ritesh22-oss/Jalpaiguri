@@ -729,7 +729,7 @@ export const AdminDashboardView: React.FC = () => {
                                     {sub.status !== 'approved' && (
                                       <button
                                         onClick={() => approvePlacePhotoSubmission(sub.id)}
-                                        className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs cursor-pointer transition-all active:scale-95"
+                                        className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] shadow-xs cursor-pointer transition-all duration-300 active:scale-95"
                                       >
                                         Set as Thumbnail
                                       </button>

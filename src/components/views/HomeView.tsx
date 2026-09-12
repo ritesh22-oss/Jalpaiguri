@@ -161,7 +161,7 @@ export const HomeView: React.FC = () => {
               <button
                 id="home-profile-btn"
                 onClick={() => navigate('profile')}
-                className="w-9 h-9 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-xs cursor-pointer hover:ring-2 hover:ring-blue-300 overflow-hidden"
+                className="w-9 h-9 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-xs cursor-pointer hover:ring-4 hover:ring-blue-300/50 hover:scale-105 active:scale-95 overflow-hidden transition-all duration-300 ease-out"
                 title="View Profile"
               >
                 {firebaseUser?.photoURL ? (
@@ -179,7 +179,7 @@ export const HomeView: React.FC = () => {
               <button
                 id="home-signin-btn"
                 onClick={() => navigate('auth')}
-                className="text-xs font-extrabold text-white bg-[#007AFF] dark:bg-blue-600 px-3.5 py-1.5 rounded-full shadow-xs hover:bg-blue-700 cursor-pointer"
+                className="text-xs font-extrabold text-white bg-[#007AFF] dark:bg-blue-600 px-3.5 py-1.5 rounded-full shadow-xs hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all duration-300 ease-out cursor-pointer"
               >
                 {isBengali ? 'সাইন ইন' : 'Sign In'}
               </button>
@@ -199,7 +199,7 @@ export const HomeView: React.FC = () => {
                 <div
                   id="home-locality-btn"
                   onClick={() => setIsLocationSelectorOpen(true)}
-                  className="flex items-center gap-1 text-xs font-bold text-[#007AFF] dark:text-blue-400 cursor-pointer hover:underline"
+                  className="flex items-center gap-1 text-xs font-bold text-[#007AFF] dark:text-blue-400 cursor-pointer hover:underline hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
                 >
                   <MapPin className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate max-w-[150px]">{tLocality(location.name || `${location.locality}, ${location.city || ''}`)}</span>
@@ -208,7 +208,7 @@ export const HomeView: React.FC = () => {
                   id="home-gps-detect-btn"
                   onClick={handleUseCurrentLocation}
                   disabled={isDetectingLocation}
-                  className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 text-[10px] font-bold cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors border border-blue-200/60 dark:border-blue-800/40"
+                  className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 text-[10px] font-bold cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900 hover:scale-105 active:scale-95 transition-all duration-300 border border-blue-200/60 dark:border-blue-800/40"
                   title="Use GPS to detect location"
                 >
                   {isDetectingLocation ? (
@@ -231,7 +231,7 @@ export const HomeView: React.FC = () => {
           <div
             onClick={() => navigate('nearby')}
             id="home-search-bar"
-            className="w-full bg-[#F8FAFC] dark:bg-[#1A2634] border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-xs cursor-pointer hover:border-[#007AFF] dark:hover:border-blue-500 transition-all"
+            className="w-full bg-[#F8FAFC] dark:bg-[#1A2634] border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-xs cursor-pointer hover:border-[#007AFF] dark:hover:border-blue-500 hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 ease-out"
           >
             <Search className="w-4 h-4 text-gray-400 dark:text-gray-500" />
             <span className="text-xs font-medium text-gray-600 dark:text-gray-300 flex-1">
@@ -266,7 +266,7 @@ export const HomeView: React.FC = () => {
               setIsAssistantOpen(true);
             }
           }}
-          className="w-full bg-gradient-to-r from-blue-50/90 via-white to-blue-50/60 dark:from-[#0B1224] dark:via-[#0F172A] dark:to-[#0B1224] border border-blue-200/80 dark:border-blue-800/60 rounded-2xl p-3 sm:p-3.5 shadow-xs hover:border-[#007AFF] dark:hover:border-blue-500 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-between gap-3 group"
+          className="w-full bg-gradient-to-r from-blue-50/90 via-white to-blue-50/60 dark:from-[#0B1224] dark:via-[#0F172A] dark:to-[#0B1224] border border-blue-200/80 dark:border-blue-800/60 rounded-2xl p-3 sm:p-3.5 shadow-xs hover:border-[#007AFF] dark:hover:border-blue-500 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 ease-out cursor-pointer flex items-center justify-between gap-3 group"
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="w-9 h-9 rounded-xl bg-[#007AFF] text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
@@ -289,7 +289,7 @@ export const HomeView: React.FC = () => {
         </div>
 
         {/* JALPAIGURI LOCAL MARKETPLACE & SHOPS COMPACT SHOWCASE CARD */}
-        <div className="bg-white dark:bg-[#0B1224] border border-blue-100 dark:border-blue-900/50 rounded-2xl p-3.5 shadow-2xs hover:border-blue-300 dark:hover:border-blue-700 transition-all space-y-2.5">
+        <div className="bg-white dark:bg-[#0B1224] border border-blue-100 dark:border-blue-900/50 rounded-2xl p-3.5 shadow-2xs hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md hover:scale-[1.01] transition-all duration-300 ease-out space-y-2.5">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-900/40">
@@ -321,7 +321,7 @@ export const HomeView: React.FC = () => {
             <button
               id="btn-home-browse-shops"
               onClick={() => navigate('shop-marketplace')}
-              className="py-1.5 px-2.5 rounded-xl bg-[#007AFF] text-white font-bold text-[11px] flex items-center justify-center gap-1 shadow-2xs hover:bg-blue-600 active:scale-98 transition-all cursor-pointer"
+              className="py-1.5 px-2.5 rounded-xl bg-[#007AFF] text-white font-bold text-[11px] flex items-center justify-center gap-1 shadow-2xs hover:bg-blue-600 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
             >
               <Store className="w-3.5 h-3.5" />
               <span>{isBengali ? 'দোকান ব্রাউজ' : 'Browse Shops'}</span>
@@ -329,7 +329,7 @@ export const HomeView: React.FC = () => {
             <button
               id="btn-home-smart-search"
               onClick={() => navigate('smart-shopping-search')}
-              className="py-1.5 px-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-[#007AFF] dark:text-blue-300 font-bold text-[11px] flex items-center justify-center gap-1 border border-blue-200/60 dark:border-blue-800/40 hover:bg-blue-100/60 active:scale-98 transition-all cursor-pointer"
+              className="py-1.5 px-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-[#007AFF] dark:text-blue-300 font-bold text-[11px] flex items-center justify-center gap-1 border border-blue-200/60 dark:border-blue-800/40 hover:bg-blue-100/60 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
             >
               <PackageSearch className="w-3.5 h-3.5" />
               <span>{isBengali ? 'পণ্য খুঁজুন' : 'Find Any Item'}</span>
@@ -357,20 +357,22 @@ export const HomeView: React.FC = () => {
 
 
         {/* DURGA PUJA PANDALS SECTION: Completely replaces the old Nearby For You section */}
-        <HomePujaPandalsSection
-          pandals={pujaPandals}
-          userLocation={location}
-          onSelectPandal={(pandal) => {
-            setSelectedPandal(pandal);
-            setIsPandalDetailsOpen(true);
-          }}
-          onNavigateToAll={() => navigate('puja-pandals')}
-        />
+        <div id="home-discovery">
+          <HomePujaPandalsSection
+            pandals={pujaPandals}
+            userLocation={location}
+            onSelectPandal={(pandal) => {
+              setSelectedPandal(pandal);
+              setIsPandalDetailsOpen(true);
+            }}
+            onNavigateToAll={() => navigate('puja-pandals')}
+          />
+        </div>
 
         {/* 12 Quick Services Icon Grid */}
-        <div>
+        <div id="home-city-services">
           <div className="flex items-center justify-between mb-3 px-1">
-            <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white tracking-tight">
+            <h3 className="text-sm font-extrabold text-[#0F172A] dark:text-white tracking-tight">
               {isBengali ? 'শহরের পরিষেবা' : 'City Services'}
             </h3>
             <button
@@ -393,14 +395,14 @@ export const HomeView: React.FC = () => {
                     navigate(srv.view);
                   }
                 }}
-                className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-2.5 flex flex-col items-center justify-center text-center shadow-xs hover:border-[#007AFF] dark:hover:border-blue-500 hover:shadow-sm active:scale-95 transition-all cursor-pointer group"
+                className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-2.5 flex flex-col items-center justify-center text-center shadow-xs hover:border-[#007AFF] dark:hover:border-blue-500 hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-300 ease-out cursor-pointer group"
               >
                 <div
                   className={`w-11 h-11 rounded-xl ${srv.bg} dark:bg-blue-900/30 border border-transparent dark:border-blue-800/50 flex items-center justify-center mb-1.5 transition-transform group-hover:scale-105`}
                 >
                   {srv.icon}
                 </div>
-                <span className="text-[11px] font-bold text-[#11241C] dark:text-white leading-tight line-clamp-1">
+                <span className="text-[11px] font-bold text-[#0F172A] dark:text-white leading-tight line-clamp-1">
                   {srv.label}
                 </span>
               </button>
@@ -413,7 +415,7 @@ export const HomeView: React.FC = () => {
           <div className="flex items-center justify-between mb-3 px-1">
             <div className="flex items-center gap-1.5">
               <Landmark className="w-4 h-4 text-[#007AFF] dark:text-[#38BDF8]" />
-              <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white tracking-tight">
+              <h3 className="text-sm font-extrabold text-[#0F172A] dark:text-white tracking-tight">
                 {isBengali ? 'জনপ্রিয় সরকারি পরিষেবা' : 'Popular Government Services'}
               </h3>
             </div>
@@ -430,7 +432,7 @@ export const HomeView: React.FC = () => {
           <div className="grid grid-cols-2 gap-2.5">
             <div
               onClick={() => navigate('government')}
-              className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-3.5 shadow-2xs hover:border-[#007AFF] dark:hover:border-blue-500 hover:shadow-xs active:scale-98 transition-all cursor-pointer flex flex-col justify-between"
+              className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-3.5 shadow-2xs hover:border-[#007AFF] dark:hover:border-blue-500 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 ease-out cursor-pointer flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between gap-1 mb-2">
@@ -439,10 +441,10 @@ export const HomeView: React.FC = () => {
                   </span>
                   <BadgeCheck className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
                 </div>
-                <h4 className="font-extrabold text-xs text-[#11241C] dark:text-white leading-snug">
+                <h4 className="font-extrabold text-xs text-[#0F172A] dark:text-white leading-snug">
                   {isBengali ? 'সম্পত্তি কর ও মিউটেশন' : 'Property Tax & Mutation'}
                 </h4>
-                <p className="text-[10px] text-[#55685F] dark:text-[#A2B3AA] line-clamp-2 mt-1 font-medium">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-1 font-medium">
                   {isBengali ? 'হোল্ডিং ট্যাক্স ও রসিদের জন্য জলপাইগুড়ি পুরসভার পোর্টাল' : 'Jalpaiguri Municipality portal for ward holding tax & receipts'}
                 </p>
               </div>
@@ -455,7 +457,7 @@ export const HomeView: React.FC = () => {
 
             <div
               onClick={() => navigate('government')}
-              className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-3.5 shadow-2xs hover:border-[#007AFF] dark:hover:border-blue-500 hover:shadow-xs active:scale-98 transition-all cursor-pointer flex flex-col justify-between"
+              className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-2xl p-3.5 shadow-2xs hover:border-[#007AFF] dark:hover:border-blue-500 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 ease-out cursor-pointer flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between gap-1 mb-2">
@@ -464,10 +466,10 @@ export const HomeView: React.FC = () => {
                   </span>
                   <BadgeCheck className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
                 </div>
-                <h4 className="font-extrabold text-xs text-[#11241C] dark:text-white leading-snug">
+                <h4 className="font-extrabold text-xs text-[#0F172A] dark:text-white leading-snug">
                   {isBengali ? 'জন্ম ও মৃত্যু শংসাপত্র' : 'Birth & Death Certificates'}
                 </h4>
-                <p className="text-[10px] text-[#55685F] dark:text-[#A2B3AA] line-clamp-2 mt-1 font-medium">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-1 font-medium">
                   {isBengali ? 'জন্ম-মৃত্যু তথ্য পশ্চিমবঙ্গ ডিজিটাল নাগরিক শংসাপত্র' : 'Janma-Mrityu Tathya WB verified digital civic certificates'}
                 </p>
               </div>
@@ -482,7 +484,7 @@ export const HomeView: React.FC = () => {
           <div className="mt-2.5">
             <button
               onClick={() => navigate('government')}
-              className="w-full py-2.5 rounded-2xl bg-[#FAF8F5] dark:bg-[#0F172A] border border-[#D2CEBE] dark:border-white/10 text-[#007AFF] dark:text-[#38BDF8] font-extrabold text-xs hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+              className="w-full py-2.5 rounded-2xl bg-[#FAF8F5] dark:bg-[#0F172A] border border-[#D2CEBE] dark:border-white/10 text-[#007AFF] dark:text-[#38BDF8] font-extrabold text-xs hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
             >
               <Landmark className="w-3.5 h-3.5 text-[#007AFF] dark:text-[#38BDF8]" />
               <span>{isBengali ? 'সকল সরকারি পরিষেবা দেখুন' : 'View All Government Services'}</span>
@@ -492,9 +494,9 @@ export const HomeView: React.FC = () => {
         </div>
 
         {/* Small Live Map of Jalpaiguri According to User Location */}
-        <div>
+        <div id="home-live-map">
           <div className="flex items-center justify-between mb-2.5 px-1">
-            <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white tracking-tight flex items-center gap-1.5">
+            <h3 className="text-sm font-extrabold text-[#0F172A] dark:text-white tracking-tight flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-[#007AFF] dark:text-[#38BDF8]" />
               <span>{isBengali ? 'লাইভ অবস্থান ও মানচিত্র' : 'Live Location & Civic Map'}</span>
             </h3>
@@ -518,7 +520,7 @@ export const HomeView: React.FC = () => {
         <div>
           <div className="flex items-center justify-between mb-3 px-1">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-extrabold text-[#11241C] dark:text-white tracking-tight flex items-center gap-1.5">
+              <h3 className="text-sm font-extrabold text-[#0F172A] dark:text-white tracking-tight flex items-center gap-1.5">
                 <Navigation className="w-4 h-4 text-[#007AFF] dark:text-[#38BDF8]" />
                 <span>{isBengali ? 'লাইভ ট্রাফিক ও জলজট' : 'Live Traffic & Waterlogging'}</span>
               </h3>
@@ -538,20 +540,20 @@ export const HomeView: React.FC = () => {
 
           <div
             onClick={() => navigate('alerts')}
-            className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs hover:border-[#007AFF] dark:hover:border-blue-500 transition-all cursor-pointer group space-y-2.5"
+            className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs hover:border-[#007AFF] dark:hover:border-blue-500 hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 ease-out cursor-pointer group space-y-2.5"
           >
             <div className="flex items-center justify-between text-xs font-bold">
               <span className="text-[#007AFF] dark:text-[#60A5FA] bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 rounded-full">
                 {isBengali ? 'গুগল ট্রাফিক লেয়ার' : 'Google Traffic Layer'}
               </span>
-              <span className="text-[11px] text-[#8C9B93] dark:text-[#73857C] font-medium flex items-center gap-1">
+              <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium flex items-center gap-1">
                 <span>{isBengali ? 'রিয়েল-টাইম গতি' : 'Real-time Speeds'}</span>
               </span>
             </div>
-            <h4 className="font-extrabold text-sm text-[#11241C] dark:text-white group-hover:text-[#007AFF] dark:group-hover:text-[#38BDF8] transition-colors">
+            <h4 className="font-extrabold text-sm text-[#0F172A] dark:text-white group-hover:text-[#007AFF] dark:group-hover:text-[#38BDF8] transition-colors">
               {isBengali ? 'নজরদারিকৃত ট্রানজিট ও নিকাশী পথ' : 'Monitored Transit Corridors & Drainage'}
             </h4>
-            <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] leading-relaxed">
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
               {isBengali
                 ? 'এনএইচ-২৭ তিস্তা সেতু, দিনবাজার, কদমতলা ও মোহিতনগরে রিয়েল-টাইম ট্রাফিক ও পুরসভার জলজটের তথ্য।'
                 : 'Real-time Google Maps traffic on NH-27 Teesta Bridge, Dinbazar, Kadamtala & Mohitnagar. Verified municipal flood & waterlogging telemetry.'}

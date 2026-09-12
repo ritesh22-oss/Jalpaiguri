@@ -142,7 +142,7 @@ export const EducationInstitutionModal: React.FC<EducationInstitutionModalProps>
             {institution.phone && (
               <a 
                 href={`tel:${institution.phone}`}
-                className="flex items-center gap-3 p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-semibold text-sm hover:bg-emerald-100 transition-colors"
+                className="flex items-center gap-3 p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-semibold text-sm hover:bg-blue-100 transition-all duration-300"
               >
                 <Phone className="w-4 h-4" />
                 <span>{institution.phone}</span>

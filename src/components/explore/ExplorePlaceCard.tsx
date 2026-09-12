@@ -192,7 +192,7 @@ export const ExplorePlaceCard: React.FC<ExplorePlaceCardProps> = ({
               e.stopPropagation();
               setIsUploadOpen(true);
             }}
-            className="bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/40 text-emerald-600 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900 px-2.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 transition-all active:scale-95"
+            className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800/40 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900 px-2.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 transition-all duration-300 active:scale-95"
             title="Upload photo from camera or gallery"
           >
             <Camera className="w-3.5 h-3.5" />

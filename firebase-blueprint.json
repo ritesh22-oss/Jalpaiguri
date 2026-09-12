@@ -287,7 +287,7 @@
     },
     "BloodDonor": {
       "title": "Blood Donor",
-      "description": "User registered as blood donor",
+      "description": "User registered as an emergency blood donor",
       "type": "object",
       "properties": {
         "id": {
@@ -302,14 +302,38 @@
         "bloodGroup": {
           "type": "string"
         },
-        "area": {
+        "age": {
+          "type": "number"
+        },
+        "gender": {
           "type": "string"
         },
         "phone": {
           "type": "string"
         },
         "availability": {
+          "type": "string",
+          "enum": [
+            "Available Now",
+            "Available Today",
+            "Unavailable"
+          ]
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "agreedToSearch": {
+          "type": "boolean"
+        },
+        "approximateArea": {
           "type": "string"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
         },
         "verified": {
           "type": "boolean"
@@ -319,15 +343,103 @@
         },
         "lastDonation": {
           "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "isVisible": {
+          "type": "boolean"
         }
       },
       "required": [
         "userId",
         "name",
         "bloodGroup",
-        "area",
         "phone",
-        "availability"
+        "availability",
+        "agreedToSearch",
+        "lat",
+        "lng",
+        "isVisible",
+        "lastUpdated"
+      ]
+    },
+    "BloodRequest": {
+      "title": "Blood Request",
+      "description": "Active blood request created by a user",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "patientName": {
+          "type": "string"
+        },
+        "bloodGroup": {
+          "type": "string"
+        },
+        "units": {
+          "type": "number"
+        },
+        "urgency": {
+          "type": "string",
+          "enum": [
+            "Emergency",
+            "Urgent",
+            "Normal"
+          ]
+        },
+        "hospitalName": {
+          "type": "string"
+        },
+        "hospitalAddress": {
+          "type": "string"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        },
+        "contactName": {
+          "type": "string"
+        },
+        "contactPhone": {
+          "type": "string"
+        },
+        "requiredDate": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Open",
+            "Searching",
+            "Fulfilled",
+            "Cancelled"
+          ]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "patientName",
+        "bloodGroup",
+        "units",
+        "urgency",
+        "hospitalName",
+        "contactPhone",
+        "status",
+        "createdAt"
       ]
     },
     "LocalAlert": {
@@ -600,6 +712,10 @@
     "blood_donors/{donorId}": {
       "schema": "BloodDonor",
       "description": "Registered blood donors"
+    },
+    "blood_requests/{requestId}": {
+      "schema": "BloodRequest",
+      "description": "Active blood requests"
     },
     "local_alerts/{alertId}": {
       "schema": "LocalAlert",

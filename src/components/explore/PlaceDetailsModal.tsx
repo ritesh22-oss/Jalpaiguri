@@ -396,7 +396,7 @@ export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
 
           <button
             onClick={() => setIsUploadModalOpen(true)}
-            className="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300 hover:bg-emerald-100 border border-emerald-200 dark:border-emerald-800/40 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-98 cursor-pointer"
+            className="bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-300 hover:bg-blue-100 border border-blue-200 dark:border-blue-800/40 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all duration-300 active:scale-98 cursor-pointer"
           >
             <Camera className="w-4 h-4" />
             <span>Upload Photo</span>

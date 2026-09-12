@@ -853,6 +853,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       language: user?.language || 'English',
       isBloodDonor: data.isBloodDonor ?? user?.isBloodDonor ?? true,
       isVolunteer: data.isVolunteer ?? user?.isVolunteer ?? false,
+      tourCompleted: data.tourCompleted ?? user?.tourCompleted,
+      tourLanguage: data.tourLanguage ?? user?.tourLanguage,
+      tourVersion: data.tourVersion ?? user?.tourVersion,
       createdAt: user?.createdAt || new Date().toISOString()
     };
 
