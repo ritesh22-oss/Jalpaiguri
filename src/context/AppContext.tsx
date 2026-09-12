@@ -60,6 +60,10 @@ interface AppContextType {
   shops: Shop[];
   restaurants: Restaurant[];
   pujaPandals: DurgaPandalItem[];
+  vehicles: any[];
+  animals: any[];
+  transports: any[];
+  govServices: any[];
   savedPandalIds: string[];
   recentlyViewedPandalIds: string[];
   addPujaPandal: (pandalData: Omit<DurgaPandalItem, 'id' | 'createdAt' | 'verificationStatus'>) => Promise<DurgaPandalItem>;
@@ -138,6 +142,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [shops, setShops] = useState<Shop[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [vehicles, setVehicles] = useState<any[]>([]);
+  const [animals, setAnimals] = useState<any[]>([]);
+  const [transports, setTransports] = useState<any[]>([]);
+  const [govServices, setGovServices] = useState<any[]>([]);
   const [pujaPandals, setPujaPandals] = useState<DurgaPandalItem[]>(INITIAL_DURGA_PUJA_PANDALS);
 
   const { language, setLanguage: setGlobalLanguage } = useLanguage();
@@ -292,6 +300,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           { name: 'admin_verifications', setter: setAdminVerificationQueue },
           { name: 'shops', setter: setShops },
           { name: 'restaurants', setter: setRestaurants },
+          { name: 'vehicles', setter: setVehicles },
+          { name: 'animals', setter: setAnimals },
+          { name: 'transports', setter: setTransports },
+          { name: 'gov_services', setter: setGovServices },
           { name: 'doctors', setter: setDoctors },
           { name: 'hospitals', setter: setHospitals },
           { name: 'place_photos', setter: (data: PlacePhotoSubmission[]) => {
@@ -330,17 +342,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
         ];
 
+        const handleFirestoreError = (error: any, operation: string, path: string) => {
+          const errInfo = {
+            error: error instanceof Error ? error.message : String(error),
+            operationType: operation,
+            path: path,
+            authInfo: {
+              userId: auth.currentUser?.uid,
+              email: auth.currentUser?.email,
+              emailVerified: auth.currentUser?.emailVerified,
+            }
+          };
+          console.error('[Firestore Error Callback]', JSON.stringify(errInfo));
+        };
+
         collections.forEach(({ name, setter }) => {
           unsubscribers.push(
-            onSnapshot(collection(db, name), (snap) => {
-              const loaded: any[] = [];
-              snap.forEach((d) => loaded.push({ ...d.data(), id: d.id }));
-              // For alerts, set the selected one if not set
-              if (name === 'local_alerts' && loaded.length > 0) {
-                setSelectedAlertId(prev => prev || loaded[0].id);
+            onSnapshot(
+              collection(db, name),
+              (snap) => {
+                const loaded: any[] = [];
+                snap.forEach((d) => loaded.push({ ...d.data(), id: d.id }));
+                // For alerts, set the selected one if not set
+                if (name === 'local_alerts' && loaded.length > 0) {
+                  setSelectedAlertId(prev => prev || loaded[0].id);
+                }
+                setter(loaded);
+              },
+              (error) => {
+                handleFirestoreError(error, 'list', name);
               }
-              setter(loaded);
-            })
+            )
           );
         });
       } catch (err) {
@@ -929,6 +961,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         refreshData,
         shops,
         restaurants,
+        vehicles,
+        animals,
+        transports,
+        govServices,
         pujaPandals,
         savedPandalIds,
         recentlyViewedPandalIds,

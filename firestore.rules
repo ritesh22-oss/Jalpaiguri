@@ -18,7 +18,8 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn() && (
         request.auth.token.email == 'riteshganguly0911@gmail.com' ||
-        request.auth.token.email == 'riteshganguly0911@gamil.com'
+        request.auth.token.email == 'riteshganguly0911@gamil.com' ||
+        request.auth.token.email == 'r36728659@gmail.com'
       );
     }
 
@@ -248,6 +249,31 @@ service cloud.firestore {
       allow read: if true;
       allow create, update: if isAdmin();
       allow delete: if isAdmin();
+    }
+
+    match /vehicles/{id} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    match /animals/{id} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    match /transports/{id} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    match /gov_services/{id} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    match /education/{id} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn();
     }
   }
 }

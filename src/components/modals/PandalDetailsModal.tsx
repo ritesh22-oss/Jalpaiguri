@@ -28,6 +28,7 @@ import { DurgaPandalItem, UserLocation, PandalReview } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
 import { calculateHaversineDistance } from '../../utils/serviceArea';
+import { getAdminPlaceThumbnails } from '../../utils/placesPhotoClient';
 
 interface PandalDetailsModalProps {
   pandal: DurgaPandalItem | null;
@@ -89,7 +90,9 @@ export const PandalDetailsModal: React.FC<PandalDetailsModalProps> = ({
   );
   const formattedDistance = distKm < 1 ? `${Math.round(distKm * 1000)} m` : `${distKm.toFixed(1)} km`;
 
-  const photos = pandal.photos && pandal.photos.length > 0 ? pandal.photos : [pandal.primaryPhoto];
+  const adminPhotos = getAdminPlaceThumbnails(pandal.id);
+  const basePhotos = pandal.photos && pandal.photos.length > 0 ? pandal.photos : [pandal.primaryPhoto];
+  const photos = Array.from(new Set([...adminPhotos, ...basePhotos])).filter(Boolean);
 
   const handleGetDirections = () => {
     // Open Google Maps using real current user location as origin and pandal coordinates as destination

@@ -238,3 +238,44 @@ export async function resolvePlaceImage(
     isAiGenerated: false
   };
 }
+
+export function getAdminPlaceThumbnails(placeId: string): string[] {
+  try {
+    const raw = localStorage.getItem(`jpg_admin_thumbnails_${placeId}`);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.slice(0, 4);
+    }
+  } catch {}
+  return [];
+}
+
+export function setAdminPlaceThumbnails(placeId: string, photos: string[]): void {
+  try {
+    localStorage.setItem(`jpg_admin_thumbnails_${placeId}`, JSON.stringify(photos.slice(0, 4)));
+    window.dispatchEvent(new Event('jpg_thumbnails_updated'));
+  } catch {}
+}
+
+export function getUserPlacePhotos(placeId: string): string[] {
+  try {
+    const raw = localStorage.getItem(`jpg_user_place_photos_${placeId}`);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch {}
+  return [];
+}
+
+export function addUserPlacePhoto(placeId: string, photoUrl: string): void {
+  try {
+    const existing = getUserPlacePhotos(placeId);
+    if (!existing.includes(photoUrl)) {
+      const updated = [photoUrl, ...existing];
+      localStorage.setItem(`jpg_user_place_photos_${placeId}`, JSON.stringify(updated));
+      window.dispatchEvent(new Event('jpg_thumbnails_updated'));
+    }
+  } catch {}
+}
+

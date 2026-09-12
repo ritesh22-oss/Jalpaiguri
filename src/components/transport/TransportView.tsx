@@ -5,11 +5,14 @@ import {
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useApp } from '../../context/AppContext';
 import { BUS_ROUTES, TRAIN_SERVICES, CORRIDORS } from '../../data/transportData';
 import { UploadPlacePhotoModal } from '../common/UploadPlacePhotoModal';
+import { getAdminPlaceThumbnails } from '../../utils/placesPhotoClient';
 
 export const TransportView: React.FC = () => {
   const { goBack } = useNav();
+  const { transports } = useApp();
   const { isBengali } = useLanguage();
   const [activeTab, setActiveTab] = useState<'ALL' | 'BUSES' | 'MINI' | 'TRAINS'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,20 +28,26 @@ export const TransportView: React.FC = () => {
     } catch {}
   }, []);
 
+  const dbBuses = useMemo(() => transports.filter(t => t.type !== 'Train'), [transports]);
+  const dbTrains = useMemo(() => transports.filter(t => t.type === 'Train'), [transports]);
+
+  const busesToRender = useMemo(() => dbBuses.length > 0 ? dbBuses : BUS_ROUTES, [dbBuses]);
+  const trainsToRender = useMemo(() => dbTrains.length > 0 ? dbTrains : TRAIN_SERVICES, [dbTrains]);
+
   const destinations = useMemo(() => {
-    const all = [...BUS_ROUTES.map(r => r.destination), ...TRAIN_SERVICES.map(t => t.destination)];
+    const all = [...busesToRender.map(r => r.destination), ...trainsToRender.map(t => t.destination)];
     return ['ALL', ...Array.from(new Set(all))];
-  }, []);
+  }, [busesToRender, trainsToRender]);
 
   const stations = useMemo(() => {
-    const all = TRAIN_SERVICES.map(t => t.stationCode);
+    const all = trainsToRender.map(t => t.stationCode || t.stationName);
     return ['ALL', ...Array.from(new Set(all))];
-  }, []);
+  }, [trainsToRender]);
 
   const transportData = useMemo(() => {
-    let allBuses = BUS_ROUTES.filter(r => r.operator !== 'Mini Bus' && r.operator !== 'Toto/Auto/Bus');
-    let miniBuses = BUS_ROUTES.filter(r => r.operator === 'Mini Bus' || r.operator === 'Toto/Auto/Bus');
-    let trains = TRAIN_SERVICES;
+    let allBuses = busesToRender.filter(r => r.operator !== 'Mini Bus' && r.operator !== 'Toto/Auto/Bus' && r.type !== 'Mini Bus' && r.type !== 'Toto / Auto');
+    let miniBuses = busesToRender.filter(r => r.operator === 'Mini Bus' || r.operator === 'Toto/Auto/Bus' || r.type === 'Mini Bus' || r.type === 'Toto / Auto');
+    let trains = trainsToRender;
 
     let data: any[] = [];
     if (activeTab === 'ALL' || activeTab === 'BUSES') data = [...data, ...allBuses];
@@ -62,7 +71,7 @@ export const TransportView: React.FC = () => {
       );
     }
     return data;
-  }, [activeTab, searchQuery, filter]);
+  }, [activeTab, searchQuery, filter, busesToRender, trainsToRender]);
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] text-[#11241C] dark:text-white pb-24 transition-colors">
@@ -112,16 +121,18 @@ export const TransportView: React.FC = () => {
           <h2 className="text-sm font-black mb-3">Transport Results</h2>
           <div className="space-y-3">
             {transportData.map((item, idx) => {
-              const thumbUrl = customThumbs[item.id];
+              const approvedThumbs = getAdminPlaceThumbnails(item.id);
+              const activeThumb = approvedThumbs.length > 0 ? approvedThumbs[0] : customThumbs[item.id];
               return (
                 <div key={idx} className="bg-white dark:bg-[#111B2E] p-4 rounded-2xl border border-gray-100 dark:border-blue-900/30 shadow-sm transition cursor-pointer space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3">
-                      {thumbUrl ? (
+                      {activeThumb ? (
                         <img 
-                          src={thumbUrl} 
+                          src={activeThumb} 
                           alt={item.routeName || item.trainName} 
                           className="w-12 h-12 rounded-xl object-cover border border-emerald-500/30 shrink-0" 
+                          referrerPolicy="no-referrer"
                         />
                       ) : (
                         <div className={`p-2 rounded-xl ${item.trainNumber ? 'bg-indigo-50 text-indigo-600 dark:bg-blue-950/40 dark:text-blue-300' : 'bg-blue-50 text-[#007AFF] dark:bg-blue-950/40 dark:text-blue-300'}`}>
@@ -165,6 +176,24 @@ export const TransportView: React.FC = () => {
                         </>
                     )}
                   </div>
+
+                  {/* Approved Community Gallery */}
+                  {approvedThumbs.length > 0 && (
+                    <div className="space-y-1 pt-1.5 border-t border-gray-100 dark:border-white/5">
+                      <span className="text-[9px] uppercase font-black tracking-wider text-gray-400">Verified Photos ({approvedThumbs.length})</span>
+                      <div className="flex gap-2 overflow-x-auto no-scrollbar py-0.5">
+                        {approvedThumbs.map((url, uidx) => (
+                          <img
+                            key={uidx}
+                            src={url}
+                            alt={`Verified transport photo ${uidx + 1}`}
+                            className="w-14 h-14 rounded-lg object-cover border border-gray-200 dark:border-white/10 shrink-0 cursor-pointer"
+                            referrerPolicy="no-referrer"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}

@@ -40,6 +40,7 @@ import {
 } from '../../data/banksData';
 import { calculateHaversineDistance, formatDistanceString } from '../../data/jalpaiguriLocalities';
 import { UploadPlacePhotoModal } from '../common/UploadPlacePhotoModal';
+import { getAdminPlaceThumbnails } from '../../utils/placesPhotoClient';
 
 type TabType = 'BANKS' | 'ATMs' | 'ALL';
 type SubViewMode = 'list' | 'map';
@@ -553,23 +554,31 @@ export const BanksAtmsView: React.FC = () => {
                     {/* Top Row: Bank Badge, Type & Verification */}
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        {customThumbs[item.id] ? (
-                          <img
-                            src={customThumbs[item.id]}
-                            alt={item.branchName}
-                            className="w-10 h-10 rounded-xl object-cover border border-emerald-500/30 shrink-0"
-                          />
-                        ) : (
-                          <div
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
-                              isBank
-                                ? 'bg-blue-50 dark:bg-blue-950/80 text-[#007AFF] dark:text-blue-400 border-blue-100 dark:border-blue-900/40'
-                                : 'bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900/40'
-                            }`}
-                          >
-                            {isBank ? <Building2 className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
-                          </div>
-                        )}
+                        {(() => {
+                          const approvedThumbs = getAdminPlaceThumbnails(item.id);
+                          const activeThumb = approvedThumbs.length > 0 ? approvedThumbs[0] : customThumbs[item.id];
+                          if (activeThumb) {
+                            return (
+                              <img
+                                src={activeThumb}
+                                alt={item.branchName}
+                                className="w-10 h-10 rounded-xl object-cover border border-emerald-500/30 shrink-0"
+                                referrerPolicy="no-referrer"
+                              />
+                            );
+                          }
+                          return (
+                            <div
+                              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+                                isBank
+                                  ? 'bg-blue-50 dark:bg-blue-950/80 text-[#007AFF] dark:text-blue-400 border-blue-100 dark:border-blue-900/40'
+                                  : 'bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900/40'
+                              }`}
+                            >
+                              {isBank ? <Building2 className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
+                            </div>
+                          );
+                        })()}
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
                             <span className="text-[10px] font-black uppercase tracking-wider text-[#007AFF] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/70 px-2 py-0.2 rounded-md">
@@ -627,6 +636,30 @@ export const BanksAtmsView: React.FC = () => {
                         )}
                       </div>
                     </div>
+
+                    {/* Approved Community Gallery */}
+                    {(() => {
+                      const approvedThumbs = getAdminPlaceThumbnails(item.id);
+                      if (approvedThumbs.length > 0) {
+                        return (
+                          <div className="space-y-1 pt-1.5 border-t border-gray-100 dark:border-white/5">
+                            <span className="text-[9px] uppercase font-black tracking-wider text-gray-400">Verified Photos ({approvedThumbs.length})</span>
+                            <div className="flex gap-2 overflow-x-auto no-scrollbar py-0.5">
+                              {approvedThumbs.map((url, uidx) => (
+                                <img
+                                  key={uidx}
+                                  src={url}
+                                  alt="curated thumb"
+                                  className="w-12 h-12 rounded-xl object-cover border border-[#E8E4DA] dark:border-white/10 shrink-0"
+                                  referrerPolicy="no-referrer"
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
 
                     {/* Technical Codes: IFSC, MICR, Branch Code (if available) */}
                     {(item.ifsc || item.branchCode) && (

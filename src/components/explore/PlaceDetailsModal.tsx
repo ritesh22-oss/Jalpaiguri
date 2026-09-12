@@ -17,7 +17,7 @@ import {
   Camera
 } from 'lucide-react';
 import { ExplorePlaceItem } from '../../types';
-import { resolvePlaceImage, ResolvedPlaceImage } from '../../utils/placesPhotoClient';
+import { resolvePlaceImage, ResolvedPlaceImage, getAdminPlaceThumbnails, getUserPlacePhotos } from '../../utils/placesPhotoClient';
 import { getCategoryIllustrationUri } from '../../utils/placeCategoryIllustrations';
 import { UploadPlacePhotoModal } from '../common/UploadPlacePhotoModal';
 
@@ -38,10 +38,31 @@ export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
   const [sharedToast, setSharedToast] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
+  const [adminThumbnails, setAdminThumbnails] = useState<string[]>([]);
+  const [userPhotos, setUserPhotos] = useState<string[]>([]);
+  const [activeHeroUrl, setActiveHeroUrl] = useState<string | null>(null);
+
   useEffect(() => {
     if (!place) return;
     let isMounted = true;
     setLoadingPhoto(true);
+
+    const loadThumbnails = () => {
+      const thumbs = getAdminPlaceThumbnails(place.placeId);
+      const uPhotos = getUserPlacePhotos(place.placeId);
+      if (isMounted) {
+        setAdminThumbnails(thumbs);
+        setUserPhotos(uPhotos);
+        if (thumbs.length > 0) {
+          setActiveHeroUrl(thumbs[0]);
+        } else {
+          setActiveHeroUrl(null);
+        }
+      }
+    };
+
+    loadThumbnails();
+    window.addEventListener('jpg_thumbnails_updated', loadThumbnails);
 
     resolvePlaceImage(place, 800, 500)
       .then((res) => {
@@ -64,10 +85,19 @@ export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
 
     return () => {
       isMounted = false;
+      window.removeEventListener('jpg_thumbnails_updated', loadThumbnails);
     };
   }, [place]);
 
   if (!place) return null;
+
+  const allAvailablePhotos = [
+    ...(adminThumbnails.length > 0 ? adminThumbnails : []),
+    ...(resolvedImage?.imageUrl ? [resolvedImage.imageUrl] : [getCategoryIllustrationUri(place.category)]),
+    ...userPhotos
+  ];
+  const uniquePhotos = Array.from(new Set(allAvailablePhotos));
+  const currentHero = activeHeroUrl || uniquePhotos[0] || resolvedImage?.imageUrl || getCategoryIllustrationUri(place.category);
 
   const handleCopyPlaceId = () => {
     navigator.clipboard.writeText(place.placeId);
@@ -110,7 +140,7 @@ export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
           ) : (
             <div className="relative w-full h-full">
               <img
-                src={resolvedImage?.imageUrl || getCategoryIllustrationUri(place.category)}
+                src={currentHero}
                 alt={place.name}
                 loading="lazy"
                 referrerPolicy="no-referrer"
@@ -175,6 +205,39 @@ export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
               {place.name}
             </h2>
           </div>
+
+          {/* Admin Thumbnails & User Photos Gallery Strip (Up to 4+ photos) */}
+          {uniquePhotos.length > 0 && (
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                  <Camera className="w-3.5 h-3.5 text-[#007AFF]" />
+                  Place Photos & Admin Thumbnails ({uniquePhotos.length})
+                </span>
+                <span className="text-[10px] text-gray-500 dark:text-gray-400">Click to preview</span>
+              </div>
+              <div className="flex items-center gap-2 overflow-x-auto pb-1.5">
+                {uniquePhotos.map((photoUrl, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveHeroUrl(photoUrl)}
+                    className={`relative w-16 h-16 rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
+                      currentHero === photoUrl
+                        ? 'border-[#007AFF] ring-2 ring-[#007AFF]/30 scale-105'
+                        : 'border-transparent opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <img
+                      src={photoUrl}
+                      alt={`Thumbnail ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Place ID Badge with Copy */}
           <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-3 flex items-center justify-between gap-2">

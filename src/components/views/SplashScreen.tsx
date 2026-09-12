@@ -8,13 +8,7 @@ export const SplashScreen: React.FC = () => {
   useEffect(() => {
     // Mark splash as shown in this session to avoid loops on reloads/redirects
     sessionStorage.setItem('jpg_splash_shown', 'true');
-
-    const timer = setTimeout(() => {
-      replaceView('onboarding');
-    }, 2500);
-
-    return () => clearTimeout(timer);
-  }, [replaceView]);
+  }, []);
 
   const handleScreenTap = () => {
     replaceView('onboarding');

@@ -48,6 +48,7 @@ export const MerchantDashboardView: React.FC = () => {
 
   // Edit Shop Profile State (for Complete Later)
   const [editPhotoUrl, setEditPhotoUrl] = useState('');
+  const [editPhotos, setEditPhotos] = useState<string[]>([]);
   const [editDescription, setEditDescription] = useState('');
   const [editOpenTime, setEditOpenTime] = useState('08:00 AM');
   const [editCloseTime, setEditCloseTime] = useState('09:30 PM');
@@ -63,6 +64,7 @@ export const MerchantDashboardView: React.FC = () => {
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [profileSaveSuccess, setProfileSaveSuccess] = useState(false);
   const [isGeneratingAiBio, setIsGeneratingAiBio] = useState(false);
+  const [newPhotoInput, setNewPhotoInput] = useState('');
 
   // New product form modal
   const [showAddProductModal, setShowAddProductModal] = useState(false);
@@ -118,6 +120,7 @@ export const MerchantDashboardView: React.FC = () => {
         setShop(targetShop);
         // Initialize profile edit states
         setEditPhotoUrl(targetShop.photoUrl || '');
+        setEditPhotos(targetShop.photos || (targetShop.photoUrl ? [targetShop.photoUrl] : []));
         setEditDescription(targetShop.description || '');
         setEditOpenTime(targetShop.openingHours?.open || '08:00 AM');
         setEditCloseTime(targetShop.openingHours?.close || '09:30 PM');
@@ -350,8 +353,10 @@ export const MerchantDashboardView: React.FC = () => {
     setProfileSaveSuccess(false);
 
     try {
+      const finalPhotoUrl = editPhotos[0] || editPhotoUrl || shop.photoUrl || '';
       const updatePayload = {
-        photoUrl: editPhotoUrl.trim() || shop.photoUrl,
+        photoUrl: finalPhotoUrl,
+        photos: editPhotos,
         description: editDescription.trim(),
         openingHours: {
           open: editOpenTime || '08:00 AM',
@@ -878,37 +883,131 @@ export const MerchantDashboardView: React.FC = () => {
               )}
             </div>
 
-            {/* Photos & Storefront Image */}
-            <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3">
+            {/* Photos & Storefront Image Gallery */}
+            <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-4">
               <div className="flex items-center gap-2">
                 <Camera className="w-4 h-4 text-[#007AFF] dark:text-blue-400" />
                 <h4 className="text-xs font-black text-[#11241C] dark:text-white">
-                  Storefront Photo (দোকানের ছবি)
+                  Store Photo Gallery (সর্বোচ্চ ৪টি ছবি ও প্রাধান্য নির্ধারণ)
                 </h4>
               </div>
 
-              {editPhotoUrl && (
-                <div className="relative rounded-2xl overflow-hidden h-32 border border-gray-200 dark:border-white/10">
-                  <img
-                    src={editPhotoUrl}
-                    alt={shop.name}
-                    className="w-full h-full object-cover"
-                  />
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-normal">
+                Add up to 4 photos of your shop/cafe. The first photo will be your main thumbnail in search results. You can prioritize them below.
+              </p>
+
+              {/* Photos List */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {editPhotos.map((url, index) => (
+                  <div
+                    key={index}
+                    className="border border-gray-100 dark:border-white/5 rounded-2xl p-2.5 bg-[#FAF8F5] dark:bg-black/10 flex flex-col gap-2 relative"
+                  >
+                    <div className="relative h-24 rounded-xl overflow-hidden bg-gray-200 dark:bg-black/20">
+                      <img
+                        src={url}
+                        alt={`Shop Photo ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                      <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-[#007AFF] text-white text-[9px] font-black uppercase tracking-wider">
+                        {index === 0 ? '1st (Thumbnail)' : index === 1 ? '2nd Photo' : index === 2 ? '3rd Photo' : '4th Photo'}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1 items-center justify-between mt-1">
+                      {/* Move & Prioritize actions */}
+                      <div className="flex gap-1">
+                        {index > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = [...editPhotos];
+                              // Move to first (thumbnail)
+                              const [item] = updated.splice(index, 1);
+                              updated.unshift(item);
+                              setEditPhotos(updated);
+                            }}
+                            className="px-2 py-1 bg-white dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 border border-[#E8E4DA] dark:border-white/10 rounded-lg text-[9px] font-bold text-blue-600 dark:text-blue-400 cursor-pointer"
+                          >
+                            Set Thumbnail
+                          </button>
+                        )}
+                        {index !== 1 && editPhotos.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = [...editPhotos];
+                              const [item] = updated.splice(index, 1);
+                              // Insert at index 1 (second photo)
+                              updated.splice(1, 0, item);
+                              setEditPhotos(updated);
+                            }}
+                            className="px-2 py-1 bg-white dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 border border-[#E8E4DA] dark:border-white/10 rounded-lg text-[9px] font-bold text-gray-700 dark:text-gray-300 cursor-pointer"
+                          >
+                            Set 2nd
+                          </button>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = editPhotos.filter((_, i) => i !== index);
+                          setEditPhotos(updated);
+                        }}
+                        className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg cursor-pointer"
+                        title="Remove Photo"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                {editPhotos.length === 0 && (
+                  <div className="col-span-full border border-dashed border-gray-300 dark:border-white/10 rounded-2xl p-6 text-center text-xs text-gray-500">
+                    No gallery photos added. Paste a photo URL below to start!
+                  </div>
+                )}
+              </div>
+
+              {/* Add New Photo Input */}
+              {editPhotos.length < 4 ? (
+                <div className="flex items-end gap-2 pt-2 border-t border-[#F0ECE1] dark:border-white/5">
+                  <div className="flex-1">
+                    <label className="block text-[10px] font-extrabold text-gray-500 dark:text-gray-400 uppercase mb-1">
+                      Paste Photo URL
+                    </label>
+                    <input
+                      type="url"
+                      value={newPhotoInput}
+                      onChange={(e) => setNewPhotoInput(e.target.value)}
+                      placeholder="e.g. https://images.unsplash.com/photo-..."
+                      className="w-full px-3 py-2 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl text-xs font-semibold text-[#11241C] dark:text-white focus:outline-none"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!newPhotoInput.trim()) return;
+                      if (!newPhotoInput.startsWith('http')) {
+                        alert('Please enter a valid HTTP/HTTPS image URL');
+                        return;
+                      }
+                      setEditPhotos([...editPhotos, newPhotoInput.trim()]);
+                      setNewPhotoInput('');
+                    }}
+                    className="px-4 py-2 bg-[#007AFF] hover:bg-blue-600 text-white rounded-xl text-xs font-bold cursor-pointer transition-colors shrink-0 h-[38px] flex items-center justify-center"
+                  >
+                    Add Photo
+                  </button>
+                </div>
+              ) : (
+                <div className="p-2.5 bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-900/40 rounded-xl text-[10px] font-bold text-yellow-800 dark:text-yellow-400">
+                  Maximum limit of 4 photos reached. Remove an existing photo to add a new one.
                 </div>
               )}
-
-              <div>
-                <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-300 mb-1">
-                  Photo URL
-                </label>
-                <input
-                  type="url"
-                  value={editPhotoUrl}
-                  onChange={(e) => setEditPhotoUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full px-3 py-2 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl text-xs font-semibold text-[#11241C] dark:text-white focus:outline-none"
-                />
-              </div>
             </div>
 
             {/* Description & AI Auto-Write */}

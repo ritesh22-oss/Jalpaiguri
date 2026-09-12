@@ -106,6 +106,7 @@ interface AuthContextType {
   firebaseUser: FirebaseUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isRedirectPending: boolean;
   isProfileComplete: boolean;
   confirmationResult: ConfirmationResult | null;
   setConfirmationResult: (cr: ConfirmationResult | null) => void;
@@ -136,22 +137,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
-  const [user, setUser] = useState<UserProfile | null>(() => {
-    try {
-      const saved = localStorage.getItem('jpg_user_profile');
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (e) {
-      console.warn('Error reading saved user profile:', e);
-    }
-    return null;
-  });
-
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isProfileComplete, setIsProfileComplete] = useState<boolean>(() => {
-    return Boolean(user?.name && user?.location);
+  const [isRedirectPending, setIsRedirectPending] = useState<boolean>(() => {
+    return localStorage.getItem('jpg_redirect_auth_pending') === 'true';
   });
+  const [isProfileComplete, setIsProfileComplete] = useState<boolean>(false);
 
   const [pendingPhone, setPendingPhone] = useState<string>('');
   const [activeOtp, setActiveOtp] = useState<string | null>(null);
@@ -234,16 +225,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // We only clear the pending flag AFTER result is processed
           // This prevents the UI from flipping back to the splash screen too early
           localStorage.removeItem('jpg_redirect_auth_pending');
+          setIsRedirectPending(false);
           redirectChecked = true;
           finishInitialization();
         })
         .catch((err) => {
-          console.error('[FIREBASE AUTH] Redirect result error:', {
-            code: err.code,
-            message: err.message,
-            customData: err.customData
-          });
+          console.error('[FIREBASE AUTH] Redirect result error:', err);
           localStorage.removeItem('jpg_redirect_auth_pending');
+          setIsRedirectPending(false);
           redirectChecked = true;
           finishInitialization();
         });
@@ -329,6 +318,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (method === 'redirect') {
         localStorage.setItem('jpg_redirect_auth_pending', 'true');
+        setIsRedirectPending(true);
         if (options?.asAdmin) {
           try {
             sessionStorage.setItem('jpg_auth_as_admin', 'true');
@@ -972,6 +962,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         firebaseUser,
         isAuthenticated: Boolean(user || firebaseUser),
         isLoading,
+        isRedirectPending,
         isProfileComplete,
         confirmationResult,
         setConfirmationResult,
