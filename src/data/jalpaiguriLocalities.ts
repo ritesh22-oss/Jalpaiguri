@@ -175,6 +175,56 @@ export const JALPAIGURI_LOCALITIES: LocalityInfo[] = [
     lng: 88.7320,
     popularLandmarks: ['Town Railway Station', 'Railway Colony', 'Auto Stand'],
     type: 'transport'
+  },
+  {
+    id: 'deshbandhu-para',
+    name: 'Deshbandhu Para',
+    shortName: 'Deshbandhu Para',
+    pincode: '735101',
+    lat: 26.5255,
+    lng: 88.7320,
+    popularLandmarks: ['Deshbandhu District Library', 'Neta Ji Subhash Statue'],
+    type: 'residential'
+  },
+  {
+    id: 'babupara',
+    name: 'Babupara',
+    shortName: 'Babupara',
+    pincode: '735101',
+    lat: 26.5160,
+    lng: 88.7280,
+    popularLandmarks: ['Babupara Field', 'Shiva Mandir'],
+    type: 'residential'
+  },
+  {
+    id: 'shantipara',
+    name: 'Shantipara',
+    shortName: 'Shantipara',
+    pincode: '735101',
+    lat: 26.5295,
+    lng: 88.7345,
+    popularLandmarks: ['Shantipara More', 'Karala River View'],
+    type: 'residential'
+  },
+  {
+    id: 'goshala',
+    name: 'Goshala More',
+    shortName: 'Goshala',
+    pincode: '735102',
+    lat: 26.5480,
+    lng: 88.7250,
+    popularLandmarks: ['Goshala Temple', 'Siliguri Road Crossing'],
+    type: 'commercial'
+  },
+  {
+    id: 'raninagar',
+    name: 'Raninagar',
+    shortName: 'Raninagar',
+    pincode: '735133',
+    lat: 26.5580,
+    lng: 88.7050,
+    popularLandmarks: ['Raninagar Industrial Estate', 'BSF Camp'],
+    type: 'civic'
   }
 ];
 
