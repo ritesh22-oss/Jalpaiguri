@@ -44,7 +44,7 @@ export const BottomNav: React.FC = () => {
         <button
           id="nav-home"
           onClick={() => navigate('home')}
-          className="flex flex-col items-center justify-center py-1 px-2 min-w-[56px] transition-all cursor-pointer group hover:scale-105 active:scale-95"
+          className="flex flex-col items-center justify-center py-1 px-2 min-w-[56px] transition-all duration-300 cursor-pointer group hover:scale-110 active:scale-90"
           title="Home"
         >
           <div className={`p-1 rounded-xl transition-colors ${isHomeActive ? 'text-[#007AFF] dark:text-[#38BDF8]' : 'text-[#64748B] dark:text-gray-400 group-hover:text-gray-900'}`}>
@@ -59,7 +59,7 @@ export const BottomNav: React.FC = () => {
         <button
           id="nav-shops"
           onClick={() => navigate('shop-marketplace')}
-          className="flex flex-col items-center justify-center py-1 px-2 min-w-[56px] transition-all cursor-pointer group hover:scale-105 active:scale-95"
+          className="flex flex-col items-center justify-center py-1 px-2 min-w-[56px] transition-all duration-300 cursor-pointer group hover:scale-110 active:scale-90"
           title="Shops"
         >
           <div className={`p-1 rounded-xl transition-colors ${isShopActive ? 'text-[#007AFF] dark:text-[#38BDF8]' : 'text-[#64748B] dark:text-gray-400 group-hover:text-gray-900'}`}>
@@ -74,12 +74,12 @@ export const BottomNav: React.FC = () => {
         <button
           id="nav-blood"
           onClick={() => navigate('blood')}
-          className="flex flex-col items-center justify-center py-0.5 px-1 min-w-[56px] transition-all -mt-4 cursor-pointer group"
+          className="flex flex-col items-center justify-center py-0.5 px-1 min-w-[56px] transition-all duration-300 -mt-4 cursor-pointer group hover:scale-110 active:scale-90"
           title="Blood Donation & Donors"
         >
           <div className="relative">
             <div
-              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all group-active:scale-95 border-2 ${
+              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 border-2 ${
                 isBloodActive
                   ? 'bg-rose-200 dark:bg-rose-900/90 text-red-600 dark:text-red-400 ring-4 ring-rose-300/70 dark:ring-rose-800/60 border-red-500 dark:border-red-400 shadow-lg shadow-rose-500/30'
                   : 'bg-rose-100/90 dark:bg-rose-950/80 text-red-600 dark:text-rose-400 border-rose-200 dark:border-rose-800/80 hover:bg-rose-200/90 dark:hover:bg-rose-900/80 shadow-md shadow-rose-500/15'
@@ -106,7 +106,7 @@ export const BottomNav: React.FC = () => {
         <button
           id="nav-discover"
           onClick={() => navigate('discover')}
-          className="flex flex-col items-center justify-center py-1 px-2 min-w-[56px] transition-all cursor-pointer group hover:scale-105 active:scale-95"
+          className="flex flex-col items-center justify-center py-1 px-2 min-w-[56px] transition-all duration-300 cursor-pointer group hover:scale-110 active:scale-90"
           title="Discover"
         >
           <div className={`p-1 rounded-xl transition-colors ${isDiscoverActive ? 'text-[#007AFF] dark:text-[#38BDF8]' : 'text-[#64748B] dark:text-gray-400 group-hover:text-gray-900'}`}>
@@ -121,7 +121,7 @@ export const BottomNav: React.FC = () => {
         <button
           id="nav-profile"
           onClick={() => navigate('profile')}
-          className="flex flex-col items-center justify-center py-1 px-2 min-w-[56px] transition-all cursor-pointer group hover:scale-105 active:scale-95"
+          className="flex flex-col items-center justify-center py-1 px-2 min-w-[56px] transition-all duration-300 cursor-pointer group hover:scale-110 active:scale-90"
           title="Profile"
         >
           <div className={`p-1 rounded-xl transition-colors ${isProfileActive ? 'text-[#007AFF] dark:text-[#38BDF8]' : 'text-[#64748B] dark:text-gray-400 group-hover:text-gray-900'}`}>

@@ -153,7 +153,7 @@ export const UploadPlacePhotoModal: React.FC<UploadPlacePhotoModalProps> = ({
         {/* Header */}
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-blue-100 dark:bg-blue-950/60 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
               <Camera className="w-5 h-5" />
             </div>
             <div>
@@ -171,8 +171,8 @@ export const UploadPlacePhotoModal: React.FC<UploadPlacePhotoModalProps> = ({
 
         {success ? (
           <div className="py-8 text-center space-y-3">
-            <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 flex items-center justify-center mx-auto">
-              <CheckCircle2 className="w-10 h-10 text-emerald-600 dark:text-emerald-400 animate-bounce" />
+            <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-950/60 flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-10 h-10 text-blue-600 dark:text-blue-400 animate-bounce" />
             </div>
             <h4 className="text-base font-extrabold text-gray-900 dark:text-white">Photo Sent to Admin Review!</h4>
             <p className="text-xs text-gray-600 dark:text-gray-300 max-w-xs mx-auto leading-relaxed">
@@ -192,7 +192,7 @@ export const UploadPlacePhotoModal: React.FC<UploadPlacePhotoModalProps> = ({
                     : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
                 }`}
               >
-                <ImageIcon className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <ImageIcon className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 <span>Gallery & Camera</span>
               </button>
               <button
@@ -230,7 +230,7 @@ export const UploadPlacePhotoModal: React.FC<UploadPlacePhotoModalProps> = ({
             {activeMode === 'upload' ? (
               <div className="space-y-3">
                 {previewImage ? (
-                  <div className="relative rounded-2xl overflow-hidden border-2 border-emerald-500/40 aspect-video bg-black/5 flex items-center justify-center group">
+                  <div className="relative rounded-2xl overflow-hidden border-2 border-blue-500/40 aspect-video bg-black/5 flex items-center justify-center group">
                     <img 
                       src={previewImage} 
                       alt="Upload Preview" 
@@ -261,9 +261,9 @@ export const UploadPlacePhotoModal: React.FC<UploadPlacePhotoModalProps> = ({
                     <button
                       type="button"
                       onClick={() => galleryInputRef.current?.click()}
-                      className="p-5 border-2 border-dashed border-gray-300 dark:border-white/20 hover:border-emerald-500 dark:hover:border-emerald-400 rounded-2xl flex flex-col items-center justify-center gap-2 bg-gray-50/50 dark:bg-white/5 transition-all hover:bg-emerald-50/30 active:scale-98 cursor-pointer"
+                      className="p-5 border-2 border-dashed border-gray-300 dark:border-white/20 hover:border-blue-500 dark:hover:border-blue-400 rounded-2xl flex flex-col items-center justify-center gap-2 bg-gray-50/50 dark:bg-white/5 transition-all duration-300 hover:bg-blue-50/30 active:scale-98 cursor-pointer"
                     >
-                      <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                         <ImageIcon className="w-5 h-5" />
                       </div>
                       <span className="text-xs font-bold text-gray-900 dark:text-white">Choose from Gallery</span>
@@ -273,7 +273,7 @@ export const UploadPlacePhotoModal: React.FC<UploadPlacePhotoModalProps> = ({
                     <button
                       type="button"
                       onClick={() => cameraInputRef.current?.click()}
-                      className="p-5 border-2 border-dashed border-gray-300 dark:border-white/20 hover:border-emerald-500 dark:hover:border-emerald-400 rounded-2xl flex flex-col items-center justify-center gap-2 bg-gray-50/50 dark:bg-white/5 transition-all hover:bg-emerald-50/30 active:scale-98 cursor-pointer"
+                      className="p-5 border-2 border-dashed border-gray-300 dark:border-white/20 hover:border-blue-500 dark:hover:border-blue-400 rounded-2xl flex flex-col items-center justify-center gap-2 bg-gray-50/50 dark:bg-white/5 transition-all duration-300 hover:bg-blue-50/30 active:scale-98 cursor-pointer"
                     >
                       <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                         <Camera className="w-5 h-5" />
@@ -297,7 +297,7 @@ export const UploadPlacePhotoModal: React.FC<UploadPlacePhotoModalProps> = ({
                     setPreviewImage(e.target.value);
                   }}
                   placeholder="https://example.com/jalpaiguri-landmark.jpg"
-                  className="w-full px-3.5 py-2.5 text-xs bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-emerald-500 dark:text-white"
+                  className="w-full px-3.5 py-2.5 text-xs bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-blue-500 dark:text-white"
                 />
                 {photoUrl && (
                   <div className="mt-2.5 rounded-xl overflow-hidden border border-gray-200 dark:border-white/10 aspect-video bg-black/5 flex items-center justify-center">
@@ -335,8 +335,8 @@ export const UploadPlacePhotoModal: React.FC<UploadPlacePhotoModalProps> = ({
             )}
 
             {/* Admin Notice */}
-            <div className="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-2xl flex items-start gap-2.5 text-emerald-800 dark:text-emerald-300 text-xs border border-emerald-200/50 dark:border-emerald-800/30">
-              <Sparkles className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
+            <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-2xl flex items-start gap-2.5 text-blue-800 dark:text-blue-300 text-xs border border-blue-200/50 dark:border-blue-800/30">
+              <Sparkles className="w-4 h-4 shrink-0 mt-0.5 text-blue-600 dark:text-blue-400" />
               <span>
                 Photos are moderated in the <strong>Municipal Admin Panel</strong>. Once reviewed by the administrator (<code>riteshganguly0911@gmail.com</code>), the selected best photo becomes the primary place thumbnail.
               </span>
@@ -354,7 +354,7 @@ export const UploadPlacePhotoModal: React.FC<UploadPlacePhotoModalProps> = ({
               <button
                 type="submit"
                 disabled={isSubmitting || !photoUrl}
-                className="flex-1 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl flex items-center justify-center gap-1.5 disabled:opacity-50 transition-all active:scale-98 shadow-md cursor-pointer"
+                className="flex-1 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl flex items-center justify-center gap-1.5 disabled:opacity-50 transition-all duration-300 active:scale-98 shadow-md cursor-pointer"
               >
                 <Upload className="w-4 h-4" />
                 <span>{isSubmitting ? 'Uploading...' : 'Submit Photo'}</span>

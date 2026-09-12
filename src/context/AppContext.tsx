@@ -33,7 +33,9 @@ import {
   increment,
   addDoc,
   getDocs,
-  deleteDoc
+  deleteDoc,
+  query,
+  where
 } from 'firebase/firestore';
 import confetti from 'canvas-confetti';
 import { useLanguage } from './LanguageContext';
@@ -291,7 +293,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           { name: 'workers', setter: setWorkers },
           { name: 'civic_reports', setter: setCivicReports },
           { name: 'local_alerts', setter: setLocalAlerts },
-          { name: 'blood_donors', setter: setBloodDonors },
+          { 
+            name: 'blood_donors', 
+            setter: setBloodDonors,
+            query: query(collection(db, 'blood_donors'), where('isVisible', '==', true), where('agreedToSearch', '==', true))
+          },
           { name: 'blood_requests', setter: setBloodRequests },
           { name: 'jobs', setter: setJobs },
           { name: 'rentals', setter: setRentals },
@@ -356,10 +362,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           console.error('[Firestore Error Callback]', JSON.stringify(errInfo));
         };
 
-        collections.forEach(({ name, setter }) => {
+        collections.forEach(({ name, setter, query: customQuery }) => {
+          const target = customQuery || collection(db, name);
           unsubscribers.push(
             onSnapshot(
-              collection(db, name),
+              target,
               (snap) => {
                 const loaded: any[] = [];
                 snap.forEach((d) => loaded.push({ ...d.data(), id: d.id }));
@@ -370,6 +377,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 setter(loaded);
               },
               (error) => {
+                // Ignore permission errors for non-logged in users on protected collections
+                if (error.code === 'permission-denied') {
+                  console.warn(`[Firestore] Permission denied for ${name}. This is expected if not logged in or restricted.`);
+                  return;
+                }
                 handleFirestoreError(error, 'list', name);
               }
             )
@@ -797,12 +809,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const submitBloodRequest = async (reqData: Omit<BloodRequest, 'id' | 'status' | 'postedAt'>): Promise<BloodRequest> => {
+  const submitBloodRequest = async (reqData: Omit<BloodRequest, 'id' | 'status' | 'createdAt'>): Promise<BloodRequest> => {
     const newReq: BloodRequest = {
       ...reqData,
       id: 'br-' + Date.now(),
-      status: 'Urgent',
-      postedAt: 'Just now'
+      status: 'Open',
+      createdAt: new Date().toISOString()
     };
 
     if (isFirebaseConfigured && db) {

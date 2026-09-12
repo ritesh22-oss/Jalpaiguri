@@ -85,7 +85,7 @@ export const ProfileSetupView: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-white dark:bg-[#0F1A15] text-[#11241C] dark:text-white flex flex-col justify-between p-5 select-none relative transition-colors">
+    <div className="w-full min-h-screen bg-white dark:bg-[#0F172A] text-[#11241C] dark:text-white flex flex-col justify-between p-5 select-none relative transition-colors">
       <div className="w-full max-w-xl mx-auto flex-1 flex flex-col justify-between">
       {/* Top Header Bar with Back button, Title & Language Switcher */}
       <div className="w-full flex items-center justify-between pt-2 pb-2">
@@ -132,7 +132,7 @@ export const ProfileSetupView: React.FC = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={isBengali ? 'যেমন: প্রিয় শর্মা' : 'e.g., Priya Sharma'}
-              className="w-full bg-white dark:bg-[#17231E] border border-gray-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[#2F74E9] focus:ring-1 focus:ring-[#2F74E9] transition-all shadow-2xs"
+              className="w-full bg-white dark:bg-[#1E293B] border border-gray-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[#2F74E9] focus:ring-1 focus:ring-[#2F74E9] transition-all shadow-2xs"
             />
           </div>
 
@@ -157,7 +157,7 @@ export const ProfileSetupView: React.FC = () => {
               </button>
             </div>
 
-            <div className="bg-[#F8FAFC] dark:bg-[#17231E] border border-gray-200 dark:border-white/10 rounded-xl p-3 space-y-2 transition-colors">
+            <div className="bg-[#F8FAFC] dark:bg-[#1E293B] border border-gray-200 dark:border-white/10 rounded-xl p-3 space-y-2 transition-colors">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-start gap-2 min-w-0">
                   <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
@@ -210,7 +210,7 @@ export const ProfileSetupView: React.FC = () => {
                 value={age}
                 onChange={(e) => setAge(e.target.value === '' ? '' : parseInt(e.target.value) || 18)}
                 placeholder={isBengali ? 'যেমন: ২৮' : 'e.g., 28'}
-                className="w-full bg-white dark:bg-[#17231E] border border-gray-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[#2F74E9] focus:ring-1 focus:ring-[#2F74E9] transition-all shadow-2xs pr-9"
+                className="w-full bg-white dark:bg-[#1E293B] border border-gray-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[#2F74E9] focus:ring-1 focus:ring-[#2F74E9] transition-all shadow-2xs pr-9"
               />
               <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex flex-col items-center select-none">
                 <button
@@ -241,14 +241,14 @@ export const ProfileSetupView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsGenderDropdownOpen(!isGenderDropdownOpen)}
-                className="w-full bg-white dark:bg-[#17231E] border border-gray-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white flex items-center justify-between shadow-2xs hover:border-gray-400 dark:hover:border-white/20 focus:outline-none focus:border-[#2F74E9] transition-all cursor-pointer"
+                className="w-full bg-white dark:bg-[#1E293B] border border-gray-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white flex items-center justify-between shadow-2xs hover:border-gray-400 dark:hover:border-white/20 focus:outline-none focus:border-[#2F74E9] transition-all cursor-pointer"
               >
                 <span>{getGenderLabel(gender)}</span>
                 <ChevronDown className="w-4 h-4 text-gray-500 stroke-[2]" />
               </button>
 
               {isGenderDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#17231E] border border-gray-200 dark:border-white/10 rounded-xl shadow-lg z-30 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#1E293B] border border-gray-200 dark:border-white/10 rounded-xl shadow-lg z-30 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
                   {genderOptions.map((g) => (
                     <button
                       key={g}
@@ -270,7 +270,7 @@ export const ProfileSetupView: React.FC = () => {
             </div>
 
             {/* Segmented Pill Selector */}
-            <div className="bg-[#ECEEF2] dark:bg-[#121E19] p-1 rounded-xl flex items-center gap-1 shadow-inner transition-colors">
+            <div className="bg-[#ECEEF2] dark:bg-[#0F172A] p-1 rounded-xl flex items-center gap-1 shadow-inner transition-colors">
               {genderOptions.map((g) => {
                 const isSelected = gender === g;
                 return (
@@ -299,7 +299,7 @@ export const ProfileSetupView: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsBloodGroupOpen(!isBloodGroupOpen)}
-              className="w-full bg-white dark:bg-[#17231E] border border-gray-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white flex items-center justify-between shadow-2xs hover:border-gray-400 dark:hover:border-white/20 focus:outline-none focus:border-[#2F74E9] transition-all cursor-pointer"
+              className="w-full bg-white dark:bg-[#1E293B] border border-gray-300 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 dark:text-white flex items-center justify-between shadow-2xs hover:border-gray-400 dark:hover:border-white/20 focus:outline-none focus:border-[#2F74E9] transition-all cursor-pointer"
             >
               <span>{bloodGroup}</span>
               <ChevronDown className="w-4 h-4 text-gray-500 stroke-[2]" />
@@ -307,7 +307,7 @@ export const ProfileSetupView: React.FC = () => {
 
             {/* Dropdown Menu for Blood Groups */}
             {isBloodGroupOpen && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#17231E] border border-gray-200 dark:border-white/10 rounded-xl shadow-lg z-30 p-2 grid grid-cols-4 gap-1.5 animate-in fade-in zoom-in-95 duration-150">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#1E293B] border border-gray-200 dark:border-white/10 rounded-xl shadow-lg z-30 p-2 grid grid-cols-4 gap-1.5 animate-in fade-in zoom-in-95 duration-150">
                 {bloodGroups.map((bg) => (
                   <button
                     key={bg}
@@ -319,7 +319,7 @@ export const ProfileSetupView: React.FC = () => {
                     className={`py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                       bloodGroup === bg
                         ? 'bg-[#2F74E9] text-white shadow-xs'
-                        : 'bg-gray-50 dark:bg-[#121E19] text-gray-700 dark:text-[#A2B3AA] hover:bg-gray-100 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10'
+                        : 'bg-gray-50 dark:bg-[#0F172A] text-gray-700 dark:text-[#A2B3AA] hover:bg-gray-100 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10'
                     }`}
                   >
                     {bg}

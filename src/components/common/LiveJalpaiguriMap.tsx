@@ -153,13 +153,13 @@ export const LiveJalpaiguriMap: React.FC<LiveJalpaiguriMapProps> = ({
           let locality = response.success ? response.locality : '';
           
           // If API failed to give a good name or returned generic coords, use our local fallback
-          if (!shortName || shortName.includes('Location near')) {
+          if (!shortName || shortName.includes('Location near') || shortName.includes('Detected Location')) {
             const localFallback = getClosestLocalityName(lat, lng);
             if (localFallback.isWithinRegion) {
               shortName = localFallback.fullName;
               locality = localFallback.locality;
             } else {
-              shortName = shortName || `Area (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+              shortName = response.success ? response.name : `Area at ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
               locality = locality || `Area near ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
             }
           }
@@ -180,7 +180,7 @@ export const LiveJalpaiguriMap: React.FC<LiveJalpaiguriMapProps> = ({
           const localFallback = getClosestLocalityName(lat, lng);
           const fallbackName = localFallback.isWithinRegion 
             ? localFallback.fullName 
-            : `Area (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+            : `Area at ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
           const fallbackLocality = localFallback.isWithinRegion ? localFallback.locality : `Area near ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 
           if (isFullscreenRef.current) {

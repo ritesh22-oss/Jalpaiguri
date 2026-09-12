@@ -201,16 +201,16 @@ export const DiscoverView: React.FC = () => {
   }, [searchQuery, directoryCategories]);
 
   return (
-    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#020617] text-[#11241C] dark:text-[#E8F0EC] pb-28 select-none transition-colors duration-200">
+    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#020617] text-[#0F172A] dark:text-[#E2E8F0] pb-28 select-none transition-colors duration-200">
       {/* Header */}
       <header className="w-full sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#020617]/95 backdrop-blur-md border-b border-[#E8E4DA] dark:border-white/10">
         <div className="max-w-5xl mx-auto px-5 pt-6 pb-3 space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-[#11241C] dark:text-white">
+            <h1 className="text-2xl font-extrabold tracking-tight text-[#0F172A] dark:text-white">
               {isBengali ? 'অন্বেষণ' : 'Discover'}
             </h1>
-            <p className="text-[11px] font-semibold text-[#55685F] dark:text-[#9FB2A8]">
+            <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
               {isBengali ? 'জলপাইগুড়ির নাগরিক ও স্থানীয় পরিমণ্ডল' : 'Jalpaiguri civic & local ecosystem'}
             </p>
           </div>
@@ -218,7 +218,7 @@ export const DiscoverView: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate('home')}
-              className="w-8 h-8 rounded-full bg-white dark:bg-[#16221D] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#007AFF] dark:text-blue-400 shadow-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 active:scale-95 transition-all cursor-pointer"
+              className="w-8 h-8 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#007AFF] dark:text-blue-400 shadow-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:scale-110 active:scale-90 transition-all duration-300 cursor-pointer"
               aria-label="Home"
               title="Return to Dashboard"
             >
@@ -228,7 +228,7 @@ export const DiscoverView: React.FC = () => {
             {/* Language Switcher */}
             <button
               onClick={toggleLanguage}
-              className="h-8 px-2.5 rounded-full bg-white dark:bg-[#16221D] border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#007AFF] dark:text-[#60A5FA] flex items-center gap-1 shadow-xs cursor-pointer active:scale-95 transition-all"
+              className="h-8 px-2.5 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#007AFF] dark:text-[#60A5FA] flex items-center gap-1 shadow-xs cursor-pointer hover:scale-105 active:scale-95 transition-all duration-300"
               title={isBengali ? 'Switch to English' : 'বাংলায় দেখুন'}
             >
               <Globe className="w-3.5 h-3.5" />
@@ -238,7 +238,7 @@ export const DiscoverView: React.FC = () => {
             {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
-              className="w-8 h-8 rounded-xl bg-white dark:bg-[#16221D] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#55685F] dark:text-[#9FB2A8] shadow-xs hover:bg-[#F2EFE9] dark:hover:bg-white/5 transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 shadow-xs hover:bg-[#F2EFE9] dark:hover:bg-white/5 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
               title="Toggle Light/Dark Theme"
             >
               {isDarkMode ? (
@@ -251,7 +251,7 @@ export const DiscoverView: React.FC = () => {
             {/* AI Assistant Button */}
             <button
               onClick={() => setIsAssistantOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EFF6FF] dark:bg-[#172554] text-[#007AFF] dark:text-[#60A5FA] text-xs font-bold shadow-xs cursor-pointer active:scale-95 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EFF6FF] dark:bg-[#172554] text-[#007AFF] dark:text-[#60A5FA] text-xs font-bold shadow-xs cursor-pointer hover:scale-105 active:scale-95 transition-all duration-300"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>JPG AI</span>
@@ -260,19 +260,19 @@ export const DiscoverView: React.FC = () => {
         </div>
 
         {/* Search input */}
-        <div className="w-full bg-white dark:bg-[#16221D] border border-[#D2CEBE] dark:border-white/10 rounded-2xl px-3.5 py-3 flex items-center gap-2.5 shadow-xs focus-within:border-[#007AFF] dark:focus-within:border-[#60A5FA] transition-all">
-          <Search className="w-4 h-4 text-[#55685F] dark:text-[#9FB2A8]" />
+        <div className="w-full bg-white dark:bg-[#1E293B] border border-[#D2CEBE] dark:border-white/10 rounded-2xl px-3.5 py-3 flex items-center gap-2.5 shadow-xs focus-within:border-[#007AFF] dark:focus-within:border-[#60A5FA] transition-all">
+          <Search className="w-4 h-4 text-slate-400 dark:text-slate-500" />
           <input
             type="text"
             placeholder={isBengali ? 'ট্রাফিক, সেবা, ডাক্তার, চাকরি, ওয়ার্ড খুঁজুন...' : 'Search traffic, services, doctors, jobs, wards...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full text-xs font-semibold text-[#11241C] dark:text-white placeholder:text-[#8C9B93] dark:placeholder:text-[#64748B] focus:outline-none bg-transparent"
+            className="w-full text-xs font-semibold text-[#0F172A] dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none bg-transparent"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="text-[#8C9B93] hover:text-[#11241C] dark:hover:text-white"
+              className="text-slate-400 hover:text-[#0F172A] dark:hover:text-white"
             >
               ×
             </button>
@@ -285,7 +285,7 @@ export const DiscoverView: React.FC = () => {
         {/* Featured Live Traffic & Waterlogging Card */}
         <div
           onClick={() => navigate('alerts')}
-          className="p-4 rounded-3xl bg-gradient-to-br from-[#007AFF] to-[#0056b3] dark:from-[#1e3a8a] dark:to-[#0f172a] text-white shadow-md border border-[#007AFF]/20 dark:border-white/10 space-y-3 cursor-pointer group active:scale-[0.99] transition-all"
+          className="p-4 rounded-3xl bg-gradient-to-br from-[#007AFF] to-[#0056b3] dark:from-[#1e3a8a] dark:to-[#0f172a] text-white shadow-md border border-[#007AFF]/20 dark:border-white/10 space-y-3 cursor-pointer group hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 ease-out"
         >
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-400/20 text-blue-300 text-[10px] font-extrabold tracking-wide uppercase border border-blue-400/30">
@@ -329,7 +329,7 @@ export const DiscoverView: React.FC = () => {
         {/* Directory Categorized Sections */}
         {filteredCategories.map((sec, idx) => (
           <div key={idx} className="space-y-2.5">
-            <h2 className="text-xs font-extrabold text-[#55685F] dark:text-[#9FB2A8] uppercase tracking-wider px-1">
+            <h2 className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">
               {sec.title}
             </h2>
             <div className="bg-white dark:bg-[#0B1224] rounded-3xl border border-[#E8E4DA] dark:border-white/10 divide-y divide-[#F0ECE1] dark:divide-white/5 shadow-xs overflow-hidden">
@@ -339,22 +339,22 @@ export const DiscoverView: React.FC = () => {
                    <div
                     key={i}
                     onClick={() => navigate(item.view)}
-                    className="p-3.5 flex items-center justify-between hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all cursor-pointer group active:bg-blue-100 dark:active:bg-blue-900/40"
+                    className="p-3.5 flex items-center justify-between hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-300 ease-out cursor-pointer group active:bg-blue-100 dark:active:bg-blue-900/40"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-2xl bg-blue-50 dark:bg-blue-900/40 text-[#007AFF] dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-blue-100 dark:group-hover:bg-blue-800/60 transition-all">
                         <IconComponent className="w-4 h-4" />
                       </div>
                       <div>
-                        <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white group-hover:text-[#007AFF] dark:group-hover:text-blue-400 transition-colors">
+                        <h3 className="text-xs font-extrabold text-[#0F172A] dark:text-white group-hover:text-[#007AFF] dark:group-hover:text-blue-400 transition-colors">
                           {item.name}
                         </h3>
-                        <span className="text-[11px] font-semibold text-[#55685F] dark:text-[#9FB2A8] group-hover:text-blue-600/70 dark:group-hover:text-blue-300/70 transition-colors">
+                        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 group-hover:text-blue-600/70 dark:group-hover:text-blue-300/70 transition-colors">
                           {item.count}
                         </span>
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-[#8C9B93] group-hover:text-[#007AFF] dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-[#007AFF] dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
                   </div>
                 );
               })}

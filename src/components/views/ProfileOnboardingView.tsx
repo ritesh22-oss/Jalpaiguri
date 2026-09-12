@@ -106,7 +106,7 @@ export const ProfileOnboardingView: React.FC = () => {
         {/* Step 1: Name */}
         {step === 1 && (
           <div className="space-y-4 animate-in fade-in duration-200">
-            <div className="w-12 h-12 rounded-2xl bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-400 flex items-center justify-center font-bold text-xl shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-400 flex items-center justify-center font-bold text-xl shadow-xs">
               <User className="w-6 h-6" />
             </div>
             <h2 className="text-2xl font-extrabold text-[#11241C] dark:text-white tracking-tight">
@@ -202,7 +202,7 @@ export const ProfileOnboardingView: React.FC = () => {
                   onClick={() => setGender(opt.id)}
                   className={`p-4 rounded-3xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between gap-3 ${
                     gender === opt.id
-                      ? 'bg-[#E6F4EA] dark:bg-blue-950/60 border-[#007AFF] dark:border-blue-400 text-[#007AFF] dark:text-blue-300 shadow-sm ring-1 ring-[#007AFF] dark:ring-blue-400'
+                      ? 'bg-blue-50 dark:bg-blue-950/60 border-[#007AFF] dark:border-blue-400 text-[#007AFF] dark:text-blue-300 shadow-sm ring-1 ring-[#007AFF] dark:ring-blue-400'
                       : 'bg-white dark:bg-[#17231E] border-[#D2CEBE] dark:border-white/10 text-[#11241C] dark:text-white hover:bg-[#FAF8F5] dark:hover:bg-white/5'
                   }`}
                 >
@@ -271,7 +271,7 @@ export const ProfileOnboardingView: React.FC = () => {
 
             <div className="bg-white dark:bg-[#17231E] border-2 border-[#D2CEBE] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3 transition-colors">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-400 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-400 flex items-center justify-center shrink-0">
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div className="flex-1">

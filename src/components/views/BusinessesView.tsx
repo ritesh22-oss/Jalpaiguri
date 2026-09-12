@@ -95,7 +95,7 @@ export const BusinessesView: React.FC = () => {
                   <div className="pt-2 border-t border-[#F0ECE1] dark:border-white/10 flex items-center justify-between">
                     <button
                       onClick={() => setUploadShop(b)}
-                      className="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center gap-1.5 cursor-pointer hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors"
+                      className="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-bold text-xs flex items-center gap-1.5 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-all duration-300"
                       title="Upload photo from camera or gallery"
                     >
                       <Camera className="w-3.5 h-3.5" />

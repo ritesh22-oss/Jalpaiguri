@@ -266,7 +266,7 @@ export const PujaPandalsView: React.FC<PujaPandalsViewProps> = ({
                           e.stopPropagation();
                           setUploadPandal(pandal);
                         }}
-                        className="p-1.5 rounded-full bg-black/60 text-white hover:bg-emerald-600 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-full bg-black/60 text-white hover:bg-blue-600 transition-all duration-300 cursor-pointer"
                         title={isBengali ? 'ছবি আপলোড করুন' : 'Upload photo'}
                       >
                         <Camera className="w-3.5 h-3.5" />
