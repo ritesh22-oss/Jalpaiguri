@@ -12,11 +12,13 @@ import {
   Bookmark,
   BookmarkCheck,
   Star,
-  Sparkles
+  Sparkles,
+  Home
 } from 'lucide-react';
 import { DurgaPandalItem, UserLocation } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { useApp } from '../../context/AppContext';
+import { useNav } from '../../context/NavigationContext';
 import { calculateHaversineDistance } from '../../utils/serviceArea';
 import { PandalDetailsModal } from '../modals/PandalDetailsModal';
 import { AddPandalModal } from '../modals/AddPandalModal';
@@ -39,6 +41,7 @@ export const PujaPandalsView: React.FC<PujaPandalsViewProps> = ({
 }) => {
   const { isBengali } = useLanguage();
   const { toggleSavePandal, isPandalSaved, savedPandalIds } = useApp();
+  const { navigate } = useNav();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -115,12 +118,21 @@ export const PujaPandalsView: React.FC<PujaPandalsViewProps> = ({
         <div className="absolute right-0 top-0 translate-x-4 -translate-y-4 w-40 h-40 bg-white/10 rounded-full blur-xl pointer-events-none" />
         
         <div className="flex items-center justify-between relative z-10">
-          <button
-            onClick={onBack}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onBack}
+              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => navigate('home')}
+              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+              title="Home"
+            >
+              <Home className="w-5 h-5" />
+            </button>
+          </div>
 
           <button
             onClick={() => setIsAddModalOpen(true)}
@@ -133,12 +145,12 @@ export const PujaPandalsView: React.FC<PujaPandalsViewProps> = ({
 
         <div className="space-y-1 relative z-10">
           <h1 className="text-xl sm:text-2xl font-black text-white">
-            {isBengali ? 'জলপাইগুড়ি দুর্গোৎসব মণ্ডপ ডিরেক্টরি' : 'Jalpaiguri Durga Puja Pandals'}
+            {isBengali ? 'JPG দুর্গোৎসব মণ্ডপ ডিরেক্টরি' : 'JPG Durga Puja Pandals'}
           </h1>
           <p className="text-xs text-blue-100 font-medium">
             {isBengali
               ? 'আপনার বর্তমান জিপিএস অবস্থান অনুযায়ী নিখুঁত দূরত্ব ও দিকনির্দেশসহ সেরা পূজা মণ্ডপসমূহ'
-              : 'Discover verified pandals across Jalpaiguri with real GPS distance & Google Maps route.'}
+              : 'Discover verified pandals across JPG with real GPS distance & Google Maps route.'}
           </p>
         </div>
 

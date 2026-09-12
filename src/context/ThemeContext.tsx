@@ -12,7 +12,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Default is bright (light) mode unless user explicitly chose dark
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     try {
-      const saved = localStorage.getItem('jpg_theme_mode');
+      const saved = localStorage.getItem('jpg_theme_preference');
       return saved === 'dark'; // false by default
     } catch {
       return false;
@@ -21,7 +21,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     try {
-      localStorage.setItem('jpg_theme_mode', isDarkMode ? 'dark' : 'light');
+      localStorage.setItem('jpg_theme_preference', isDarkMode ? 'dark' : 'light');
       if (isDarkMode) {
         document.documentElement.classList.add('dark');
       } else {

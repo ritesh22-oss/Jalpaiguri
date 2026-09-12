@@ -134,7 +134,7 @@ export const ReportDescriptionSection: React.FC<ReportDescriptionSectionProps> =
             className="self-end sm:self-auto px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-800/40 text-[#007AFF] dark:text-blue-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40"
           >
             <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-            <span>Enhance with Jalpaigi AI</span>
+            <span>Enhance with JPG AI</span>
           </button>
         </div>
 

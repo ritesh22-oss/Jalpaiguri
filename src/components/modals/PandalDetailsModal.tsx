@@ -203,8 +203,8 @@ export const PandalDetailsModal: React.FC<PandalDetailsModalProps> = ({
                 {pandal.category}
               </span>
               {pandal.verificationStatus === 'verified' && (
-                <span className="bg-emerald-600/90 backdrop-blur-md text-white text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">
-                  <ShieldCheck className="w-3 h-3 text-emerald-200" />
+                <span className="bg-blue-600/90 backdrop-blur-md text-white text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">
+                  <ShieldCheck className="w-3 h-3 text-blue-200" />
                   <span>{isBengali ? 'যাচাইকৃত মণ্ডপ' : 'Verified Official'}</span>
                 </span>
               )}
@@ -384,9 +384,9 @@ export const PandalDetailsModal: React.FC<PandalDetailsModalProps> = ({
 
           {/* Organizer Contact Info if available */}
           {pandal.organizerContact?.phone && (
-            <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-2xl border border-emerald-200/60 dark:border-emerald-900/40 text-xs">
+            <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-950/30 p-3 rounded-2xl border border-blue-200/60 dark:border-blue-900/40 text-xs">
               <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <Phone className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
                 <div>
                   <span className="font-bold text-gray-800 dark:text-gray-200">
                     {pandal.organizerContact.name || (isBengali ? 'আয়োজক হেল্পলাইন' : 'Organizer Helpline')}
@@ -396,7 +396,7 @@ export const PandalDetailsModal: React.FC<PandalDetailsModalProps> = ({
               </div>
               <a
                 href={`tel:${pandal.organizerContact.phone}`}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl transition-colors text-xs"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-xl transition-colors text-xs"
               >
                 {isBengali ? 'কল করুন' : 'Call'}
               </a>
@@ -512,7 +512,7 @@ export const PandalDetailsModal: React.FC<PandalDetailsModalProps> = ({
           {/* Verification Badge footer */}
           <div className="flex items-center justify-between p-3 rounded-2xl bg-gray-100 dark:bg-gray-800/80 text-xs text-gray-600 dark:text-gray-300">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
               <span className="truncate">
                 {isBengali
                   ? `যাচাইকারী: ${pandal.verifiedBy || 'জলপাইগুড়ি পৌরসভা ও MYJPG মণ্ডপ সেল'}`

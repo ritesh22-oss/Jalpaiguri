@@ -2,7 +2,7 @@ import React from 'react';
 import { ShieldAlert, Lock, Loader2, ArrowLeft } from 'lucide-react';
 import { useAdminGuard } from '../../hooks/useAdminGuard';
 import { useNav } from '../../context/NavigationContext';
-import { JalpaiguriLogo } from './JalpaiguriLogo';
+import { JPGLogo } from './JPGLogo';
 
 interface AdminRouteGuardProps {
   children: React.ReactNode;
@@ -51,7 +51,7 @@ export const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({ children, fall
     <div className="min-h-screen bg-[#007AFF] text-white flex flex-col items-center justify-center p-6 select-none animate-in fade-in duration-200">
       <div className="max-w-md w-full bg-[#042A1F] border border-[#0F5A43] rounded-3xl p-6 md:p-8 shadow-2xl flex flex-col items-center text-center">
         <div className="mb-4">
-          <JalpaiguriLogo size="sm" showText={true} textColor="text-white" />
+          <JPGLogo size="sm" showText={true} textColor="text-white" />
         </div>
 
         <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4 shadow-inner">

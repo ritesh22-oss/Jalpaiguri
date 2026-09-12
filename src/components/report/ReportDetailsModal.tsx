@@ -238,7 +238,7 @@ export const ReportDetailsModal: React.FC<ReportDetailsModalProps> = ({
             </p>
             {report.aiAssisted && (
               <span className="inline-block mt-1 text-[10px] font-semibold text-blue-700 dark:text-blue-400">
-                ✨ Enhanced with Jalpaigi AI
+                ✨ Enhanced with JPG AI
               </span>
             )}
           </div>
@@ -336,7 +336,7 @@ export const ReportDetailsModal: React.FC<ReportDetailsModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-3 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-bold transition-colors text-center cursor-pointer"
+            className="flex-1 py-3 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors text-center cursor-pointer"
           >
             Close Details
           </button>

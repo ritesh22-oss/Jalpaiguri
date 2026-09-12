@@ -51,7 +51,7 @@ const CONTEXT_SUGGESTIONS = {
   }
 };
 
-export const JalpaigiAssistantModal: React.FC = () => {
+export const JPGAssistantModal: React.FC = () => {
   const { isAssistantOpen, setIsAssistantOpen, navigate } = useNav();
   const { location } = useLocation();
 
@@ -153,8 +153,8 @@ export const JalpaigiAssistantModal: React.FC = () => {
   const [chatHistory, setChatHistory] = useState<AssistantMsg[]>(() => {
     const lang = localStorage.getItem('jpg_ai_language') || 'en';
     const text = lang === 'bn' 
-      ? 'নমস্কার! আমি আপনার **Jalpaigi AI Assistant**। আমি আপনাকে কীভাবে সাহায্য করতে পারি?'
-      : 'Nomoshkar! I am your **Jalpaigi AI Assistant**. How can I help you today?';
+      ? 'নমস্কার! আমি আপনার **JPG AI Assistant**। আমি আপনাকে কীভাবে সাহায্য করতে পারি?'
+      : 'Nomoshkar! I am your **JPG AI Assistant**. How can I help you today?';
     return [{ role: 'model', text, groundingPlaces: [] }];
   });
 
@@ -245,18 +245,18 @@ export const JalpaigiAssistantModal: React.FC = () => {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="w-full max-w-lg bg-white dark:bg-[#11241C] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col h-[90vh] max-h-[750px] overflow-hidden"
+        className="w-full max-w-lg bg-white dark:bg-[#020617] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col h-[90vh] max-h-[750px] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* New Header Structure */}
         <div className="flex items-center p-4 border-b border-[#E8E4DA] dark:border-white/10">
           <img src={logo} alt="MYJPG Logo" className="w-8 h-8 mr-3 rounded-lg" />
           <div className="flex-1">
-            <h3 className="font-bold text-base text-[#11241C] dark:text-white">Jalpaiguri AI Assistant</h3>
+            <h3 className="font-bold text-base text-[#11241C] dark:text-white">JPG AI Assistant</h3>
             <p className="text-xs text-[#55685F] dark:text-[#A2B3AA]">Civic intelligence • বাংলা & English</p>
           </div>
           
-          <div className="flex items-center gap-1 bg-gray-100 dark:bg-[#1C2C24] p-1 rounded-full text-[10px] font-bold">
+          <div className="flex items-center gap-1 bg-gray-100 dark:bg-blue-900/30 p-1 rounded-full text-[10px] font-bold">
             <button onClick={() => setLang('bn')} className={`px-2 py-1 rounded-full ${lang === 'bn' ? 'bg-white dark:bg-blue-900 shadow-sm text-blue-600' : 'text-gray-500'}`}>বাংলা</button>
             <button onClick={() => setLang('en')} className={`px-2 py-1 rounded-full ${lang === 'en' ? 'bg-white dark:bg-blue-900 shadow-sm text-blue-600' : 'text-gray-500'}`}>English</button>
           </div>
@@ -269,7 +269,7 @@ export const JalpaigiAssistantModal: React.FC = () => {
         </div>
 
         {/* Chat Body */}
-        <div className="flex-1 overflow-y-auto px-4 pb-20 space-y-6 bg-white dark:bg-[#11241C]">
+        <div className="flex-1 overflow-y-auto px-4 pb-20 space-y-6 bg-white dark:bg-[#020617]">
           {chatHistory.length <= 1 ? (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -281,13 +281,13 @@ export const JalpaigiAssistantModal: React.FC = () => {
               </div>
               <div className="space-y-2">
                 <h2 className="text-xl font-bold text-[#11241C] dark:text-white">
-                  {lang === 'bn' ? 'নমস্কার! আমি Jalpaiguri AI Assistant। জলপাইগুড়ি সম্পর্কে যেকোনো তথ্য খুঁজে পেতে আমি আপনাকে সাহায্য করতে পারি।' : 'How can I help you?'}
+                  {lang === 'bn' ? 'নমস্কার! আমি JPG AI Assistant। জলপাইগুড়ি সম্পর্কে যেকোনো তথ্য খুঁজে পেতে আমি আপনাকে সাহায্য করতে পারি।' : 'How can I help you?'}
                 </h2>
                 <p className="text-sm text-[#55685F] dark:text-[#A2B3AA] max-w-xs">{lang === 'bn' ? 'আপনি কী জানতে চান?' : 'Ask about Jalpaiguri services, education, transport, jobs, healthcare and more.'}</p>
               </div>
               <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
                 {quickChips.map((chip, i) => (
-                  <button key={i} onClick={() => handleSend(chip.query)} className="px-4 py-2 bg-[#FAF8F5] dark:bg-[#1C2C24] border border-[#E8E4DA] dark:border-white/5 rounded-xl text-xs font-semibold text-[#11241C] dark:text-white hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors">
+                  <button key={i} onClick={() => handleSend(chip.query)} className="px-4 py-2 bg-[#FAF8F5] dark:bg-blue-900/20 border border-[#E8E4DA] dark:border-white/5 rounded-xl text-xs font-semibold text-[#11241C] dark:text-white hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors">
                     {chip.label}
                   </button>
                 ))}
@@ -306,7 +306,7 @@ export const JalpaigiAssistantModal: React.FC = () => {
                   className={`max-w-[85%] rounded-2xl p-4 text-sm leading-relaxed shadow-sm ${
                     msg.role === 'user'
                       ? 'bg-[#007AFF] text-white rounded-br-none'
-                      : 'bg-gray-100 dark:bg-[#1C2C24] text-[#11241C] dark:text-white rounded-bl-none border border-gray-200 dark:border-white/5'
+                      : 'bg-gray-100 dark:bg-blue-900/20 text-[#11241C] dark:text-white rounded-bl-none border border-gray-200 dark:border-white/5'
                   }`}
                 >
                   <ReactMarkdown>{msg.text}</ReactMarkdown>
@@ -320,7 +320,7 @@ export const JalpaigiAssistantModal: React.FC = () => {
                   >
                     <p className="w-full text-[10px] text-gray-500 mb-1">{lang === 'bn' ? 'আপনি আরও খুঁজতে পারেন' : 'You may also want to find'}</p>
                     {getSuggestions(msg.text).map((s, idx) => (
-                      <button key={idx} onClick={() => handleSend(s)} className="px-3 py-1.5 bg-white dark:bg-[#1C2C24] border border-gray-200 dark:border-white/10 rounded-full text-[11px] font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 shadow-sm transition-all hover:scale-105 active:scale-95">
+                      <button key={idx} onClick={() => handleSend(s)} className="px-3 py-1.5 bg-white dark:bg-blue-900/20 border border-gray-200 dark:border-white/10 rounded-full text-[11px] font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 shadow-sm transition-all hover:scale-105 active:scale-95">
                         {s}
                       </button>
                     ))}
@@ -331,10 +331,10 @@ export const JalpaigiAssistantModal: React.FC = () => {
           )}
           {loading && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3 justify-start items-center">
-               <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#1C2C24] flex items-center justify-center border border-gray-200 dark:border-white/5">
+               <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-blue-900/20 flex items-center justify-center border border-gray-200 dark:border-white/5">
                   <Sparkles className="w-4 h-4 text-[#007AFF]" />
                </div>
-               <div className="bg-gray-100 dark:bg-[#1C2C24] rounded-2xl px-4 py-2 flex items-center shadow-sm border border-gray-200 dark:border-white/5 text-xs text-gray-500">
+               <div className="bg-gray-100 dark:bg-blue-900/20 rounded-2xl px-4 py-2 flex items-center shadow-sm border border-gray-200 dark:border-white/5 text-xs text-gray-500">
                  Fetching results...
                </div>
             </motion.div>
@@ -343,8 +343,8 @@ export const JalpaigiAssistantModal: React.FC = () => {
         </div>
 
         {/* Input Bar */}
-        <div className="absolute bottom-0 left-0 right-0 p-2 bg-white/80 dark:bg-[#11241C]/80 backdrop-blur-sm border-t border-[#E8E4DA] dark:border-white/10">
-          <div className="relative flex items-center gap-1 bg-gray-100 dark:bg-[#1C2C24] rounded-full p-1 border border-gray-200 dark:border-white/10 focus-within:border-[#007AFF]">
+        <div className="absolute bottom-0 left-0 right-0 p-2 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-sm border-t border-[#E8E4DA] dark:border-white/10">
+          <div className="relative flex items-center gap-1 bg-gray-100 dark:bg-blue-900/20 rounded-full p-1 border border-gray-200 dark:border-white/10 focus-within:border-[#007AFF]">
             <button 
               onClick={isRecording ? stopRecording : startRecording}
               className={`p-2 transition-colors relative flex items-center justify-center ${isRecording ? 'text-red-500' : 'text-[#55685F] dark:text-[#A2B3AA] hover:text-[#007AFF]'}`}

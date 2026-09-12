@@ -131,7 +131,7 @@ export const FiltersBottomSheet: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsFilterOpen(false)}
-            className="flex-1 py-3.5 px-4 rounded-xl bg-[#007AFF] font-bold text-sm text-white hover:bg-[#084D3A] active:scale-98 transition-all shadow-md cursor-pointer text-center"
+            className="flex-1 py-3.5 px-4 rounded-xl bg-[#007AFF] font-bold text-sm text-white hover:bg-blue-700 active:scale-98 transition-all shadow-md cursor-pointer text-center"
           >
             Apply Filters
           </button>

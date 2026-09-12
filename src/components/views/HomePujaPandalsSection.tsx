@@ -134,8 +134,8 @@ export const HomePujaPandalsSection: React.FC<HomePujaPandalsSectionProps> = ({
                       <span className="truncate max-w-[140px]">{pandal.locality}</span>
                     </div>
                     {pandal.verificationStatus === 'verified' && (
-                      <span className="flex items-center gap-1 bg-emerald-600/90 backdrop-blur-xs text-white text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">
-                        <ShieldCheck className="w-3 h-3 text-emerald-200" />
+                      <span className="flex items-center gap-1 bg-blue-600/90 backdrop-blur-xs text-white text-[10px] font-black px-2 py-0.5 rounded-md shadow-xs">
+                        <ShieldCheck className="w-3 h-3 text-blue-200" />
                         <span>Verified</span>
                       </span>
                     )}

@@ -35,7 +35,7 @@ import {
 import { useNav } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
-import { JalpaiguriLogo } from '../common/JalpaiguriLogo';
+import { JPGLogo } from '../common/JPGLogo';
 import { useLocation } from '../../context/LocationContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { LiveJalpaiguriMap } from '../common/LiveJalpaiguriMap';
@@ -123,7 +123,7 @@ export const HomeView: React.FC = () => {
 
   const quickServices = [
     { id: 'srv-transport', label: isBengali ? 'পরিবহন' : 'Transport', icon: <Bus className="w-5 h-5 text-blue-600 dark:text-blue-300" />, view: 'transport' as const, cat: 'Services' as NearbyCategoryType, bg: 'bg-blue-50 dark:bg-blue-900/30' },
-    { id: 'srv-courier', label: isBengali ? 'কুরিয়ার' : 'Courier', icon: <Package className="w-5 h-5 text-emerald-600 dark:text-emerald-300" />, view: 'courier' as const, cat: 'Services' as NearbyCategoryType, bg: 'bg-emerald-50 dark:bg-emerald-950/40' },
+    { id: 'srv-courier', label: isBengali ? 'কুরিয়ার' : 'Courier', icon: <Package className="w-5 h-5 text-blue-600 dark:text-blue-300" />, view: 'courier' as const, cat: 'Services' as NearbyCategoryType, bg: 'bg-blue-50 dark:bg-blue-900/30' },
     { id: 'srv-education', label: isBengali ? 'শিক্ষা' : 'Education', icon: <GraduationCap className="w-5 h-5 text-indigo-600 dark:text-indigo-300" />, view: 'education' as const, cat: 'Services' as NearbyCategoryType, bg: 'bg-indigo-50 dark:bg-indigo-950/40' },
     { id: 'srv-workers', label: isBengali ? 'কর্মী' : 'Workers', icon: <Wrench className="w-5 h-5 text-blue-600 dark:text-blue-300" />, view: 'nearby' as const, cat: 'Workers' as NearbyCategoryType, bg: 'bg-blue-50 dark:bg-blue-900/30' },
     { id: 'srv-medical', label: isBengali ? 'চিকিৎসা' : 'Medical', icon: <Stethoscope className="w-5 h-5 text-blue-700 dark:text-blue-200" />, view: 'nearby' as const, cat: 'Medical' as NearbyCategoryType, bg: 'bg-blue-100/50 dark:bg-blue-900/40' },
@@ -141,9 +141,9 @@ export const HomeView: React.FC = () => {
   ];
 
   return (
-    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 select-none transition-colors">
+    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#020617] pb-28 select-none transition-colors">
       {/* Top Header */}
-      <div className="w-full bg-white dark:bg-[#121E2C] border-b border-gray-100 dark:border-white/10 sticky top-0 z-20 shadow-xs transition-colors">
+      <div className="w-full bg-white dark:bg-[#0B1224] border-b border-gray-100 dark:border-white/10 sticky top-0 z-20 shadow-xs transition-colors">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3.5 pb-4 space-y-3">
         {/* Topmost Row: App Logo at most top left corner */}
         <div className="flex items-center justify-between">
@@ -153,7 +153,7 @@ export const HomeView: React.FC = () => {
             className="flex items-center cursor-pointer select-none group"
             title="MYJPG - Jalpaiguri Connect"
           >
-            <JalpaiguriLogo size="sm" showText={true} />
+            <JPGLogo size="sm" showText={true} />
           </div>
 
           <div className="flex items-center gap-2">
@@ -253,20 +253,20 @@ export const HomeView: React.FC = () => {
     </div>
 
       <div className="max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
-        {/* Jalpaiguri AI Assistant Compact Search/Chat Input Box */}
+        {/* JPG AI Assistant Compact Search/Chat Input Box */}
         <div
           id="home-ai-assistant-box"
           onClick={() => setIsAssistantOpen(true)}
           role="button"
           tabIndex={0}
-          aria-label="Open Jalpaiguri AI Assistant"
+          aria-label="Open JPG AI Assistant"
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               setIsAssistantOpen(true);
             }
           }}
-          className="w-full bg-gradient-to-r from-blue-50/90 via-white to-blue-50/60 dark:from-[#121E2C] dark:via-[#1A2838] dark:to-[#121E2C] border border-blue-200/80 dark:border-blue-800/60 rounded-2xl p-3 sm:p-3.5 shadow-xs hover:border-[#007AFF] dark:hover:border-blue-500 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-between gap-3 group"
+          className="w-full bg-gradient-to-r from-blue-50/90 via-white to-blue-50/60 dark:from-[#0B1224] dark:via-[#0F172A] dark:to-[#0B1224] border border-blue-200/80 dark:border-blue-800/60 rounded-2xl p-3 sm:p-3.5 shadow-xs hover:border-[#007AFF] dark:hover:border-blue-500 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-between gap-3 group"
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="w-9 h-9 rounded-xl bg-[#007AFF] text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
@@ -275,7 +275,7 @@ export const HomeView: React.FC = () => {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#007AFF] dark:text-blue-400 bg-blue-100/80 dark:bg-blue-900/50 px-2 py-0.2 rounded-full">
-                  {isBengali ? 'জলপাইগুড়ি এআই' : 'Jalpaiguri AI'}
+                  {isBengali ? 'জেপিজি এআই' : 'JPG AI'}
                 </span>
               </div>
               <p className="text-xs font-semibold text-gray-700 dark:text-gray-200 truncate mt-0.5">
@@ -289,7 +289,7 @@ export const HomeView: React.FC = () => {
         </div>
 
         {/* JALPAIGURI LOCAL MARKETPLACE & SHOPS COMPACT SHOWCASE CARD */}
-        <div className="bg-white dark:bg-[#121E2C] border border-blue-100 dark:border-blue-900/50 rounded-2xl p-3.5 shadow-2xs hover:border-blue-300 dark:hover:border-blue-700 transition-all space-y-2.5">
+        <div className="bg-white dark:bg-[#0B1224] border border-blue-100 dark:border-blue-900/50 rounded-2xl p-3.5 shadow-2xs hover:border-blue-300 dark:hover:border-blue-700 transition-all space-y-2.5">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-900/40">
@@ -434,7 +434,7 @@ export const HomeView: React.FC = () => {
             >
               <div>
                 <div className="flex items-center justify-between gap-1 mb-2">
-                  <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-[#38BDF8] uppercase tracking-wider">
+                  <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-[#007AFF] dark:text-[#38BDF8] uppercase tracking-wider">
                     {isBengali ? 'অনলাইন পেমেন্ট' : 'Pay Online'}
                   </span>
                   <BadgeCheck className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
@@ -482,7 +482,7 @@ export const HomeView: React.FC = () => {
           <div className="mt-2.5">
             <button
               onClick={() => navigate('government')}
-              className="w-full py-2.5 rounded-2xl bg-[#FAF8F5] dark:bg-[#0F172A] border border-[#D2CEBE] dark:border-white/10 text-[#007AFF] dark:text-[#38BDF8] font-extrabold text-xs hover:bg-[#E6F4EA] dark:hover:bg-[#1F312A] transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+              className="w-full py-2.5 rounded-2xl bg-[#FAF8F5] dark:bg-[#0F172A] border border-[#D2CEBE] dark:border-white/10 text-[#007AFF] dark:text-[#38BDF8] font-extrabold text-xs hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
             >
               <Landmark className="w-3.5 h-3.5 text-[#007AFF] dark:text-[#38BDF8]" />
               <span>{isBengali ? 'সকল সরকারি পরিষেবা দেখুন' : 'View All Government Services'}</span>
@@ -541,7 +541,7 @@ export const HomeView: React.FC = () => {
             className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs hover:border-[#007AFF] dark:hover:border-blue-500 transition-all cursor-pointer group space-y-2.5"
           >
             <div className="flex items-center justify-between text-xs font-bold">
-              <span className="text-[#007AFF] dark:text-[#60A5FA] bg-[#E6F4EA] dark:bg-blue-950/60 px-2.5 py-0.5 rounded-full">
+              <span className="text-[#007AFF] dark:text-[#60A5FA] bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 rounded-full">
                 {isBengali ? 'গুগল ট্রাফিক লেয়ার' : 'Google Traffic Layer'}
               </span>
               <span className="text-[11px] text-[#8C9B93] dark:text-[#73857C] font-medium flex items-center gap-1">

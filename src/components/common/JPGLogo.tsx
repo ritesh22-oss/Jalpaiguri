@@ -10,7 +10,7 @@ interface LogoProps {
   outline?: boolean;
 }
 
-export const JalpaiguriLogo: React.FC<LogoProps> = ({
+export const JPGLogo: React.FC<LogoProps> = ({
   className = '',
   size = 'md',
   showText = true,

@@ -35,8 +35,12 @@ import {
   RefreshCw,
   Database,
   Store,
-  ShoppingBag, MessageSquare
+  ShoppingBag,
+  MessageSquare,
+  Smartphone,
+  QrCode
 } from 'lucide-react';
+import { useExpo } from '../../context/ExpoContext';
 import { useAuth } from '../../context/AuthContext';
 import { useNav } from '../../context/NavigationContext';
 import { useApp } from '../../context/AppContext';
@@ -78,6 +82,7 @@ export const ProfileView: React.FC = () => {
 
   const isOfficialAdmin = isAuthorizedAdminEmail(user?.email || firebaseUser?.email);
   const { isDarkMode, toggleTheme } = useTheme();
+  const { setQrModalOpen, setDevMenuOpen, triggerHaptic } = useExpo();
 
   // Edit Profile Modal state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -571,6 +576,62 @@ export const ProfileView: React.FC = () => {
           </div>
         </div>
 
+        {/* Section: Mobile & Android Bundle (Expo SDK) */}
+        <div className="mb-2 pl-2 flex items-center justify-between">
+          <h2 className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            {isBengali ? 'মোবাইল ও অ্যান্ড্রয়েড অ্যাপ বান্ডেল (Expo SDK)' : 'Android & Expo Mobile SDK'}
+          </h2>
+          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
+            v1.0.0 • com.jalpaiguri.connect
+          </span>
+        </div>
+        <div className="bg-white dark:bg-[#0F172A] rounded-3xl border border-[#E8E4DA] dark:border-white/10 shadow-xs divide-y divide-[#F0ECE1] dark:divide-white/10 overflow-hidden transition-colors mb-6">
+          <div
+            onClick={() => {
+              setQrModalOpen(true);
+              triggerHaptic('medium');
+            }}
+            className="p-4 flex items-center justify-between hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] cursor-pointer transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                <QrCode className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">
+                  {isBengali ? 'মোবাইলে টেস্ট করুন (Expo Go QR Code)' : 'Open in Expo Go (Mobile QR Code)'}
+                </h3>
+                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">
+                  {isBengali ? 'অ্যান্ড্রয়েড ক্যামেরা বা Expo Go দিয়ে স্ক্যান করে মোবাইল অ্যাপ চালান' : 'Scan with Android camera or Expo Go app'}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
+          </div>
+          <div
+            onClick={() => {
+              setDevMenuOpen(true);
+              triggerHaptic('medium');
+            }}
+            className="p-4 flex items-center justify-between hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] cursor-pointer transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                <Smartphone className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">
+                  {isBengali ? 'Expo কনসোল ও অ্যান্ড্রয়েড প্যাকেজ ইনফো' : 'Expo Console & Android Bundle Info'}
+                </h3>
+                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">
+                  {isBengali ? 'Package: com.jalpaiguri.connect • পুশ অ্যালার্ট ও ডেভেলপার মেনু' : 'Package: com.jalpaiguri.connect • Push alerts & dev tools'}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
+          </div>
+        </div>
+
         {/* Language Selection */}
         <div className="bg-white dark:bg-[#0F172A] rounded-3xl p-4 border border-[#E8E4DA] dark:border-white/10 shadow-xs flex items-center justify-between transition-colors">
           <div className="flex items-center gap-3">
@@ -628,7 +689,7 @@ export const ProfileView: React.FC = () => {
         ) : (
           <button
             onClick={() => navigate('auth')}
-            className="w-full py-3.5 bg-[#2563EB] dark:bg-blue-600 text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-md hover:bg-[#084D3A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
+            className="w-full py-3.5 bg-[#2563EB] dark:bg-blue-600 text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-md hover:bg-blue-700 active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
           >
             <LogIn className="w-4 h-4" />
             <span>{isBengali ? 'লগইন / সাইন আপ পেজ খুলুন' : 'Open Sign In / Sign Up Page'}</span>
@@ -814,7 +875,7 @@ export const ProfileView: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 text-xs font-extrabold text-white rounded-2xl bg-[#2563EB] dark:bg-blue-600 hover:bg-[#084D3A] shadow-md cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all transition-all"
+                  className="flex-1 py-3 text-xs font-extrabold text-white rounded-2xl bg-[#2563EB] dark:bg-blue-600 hover:bg-blue-700 shadow-md cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all transition-all"
                 >
                   {isBengali ? 'পরিবর্তন সংরক্ষণ করুন' : 'Save Profile Changes'}
                 </button>

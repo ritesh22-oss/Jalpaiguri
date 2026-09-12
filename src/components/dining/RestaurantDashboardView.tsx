@@ -594,7 +594,7 @@ export const RestaurantDashboardView: React.FC = () => {
 
           <button
             onClick={() => setShowAiImportModal(true)}
-            className="px-3 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white text-xs font-black shadow-xs hover:bg-[#084D3A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shrink-0 cursor-pointer"
+            className="px-3 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 text-white text-xs font-black shadow-xs hover:bg-blue-700 active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shrink-0 cursor-pointer"
           >
             Import with AI
           </button>
@@ -1049,7 +1049,7 @@ export const RestaurantDashboardView: React.FC = () => {
             <button
               type="submit"
               disabled={isSavingProfile}
-              className="w-full py-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all"
+              className="w-full py-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all"
             >
               {isSavingProfile ? (
                 <>

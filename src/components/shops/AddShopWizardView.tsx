@@ -21,7 +21,8 @@ import {
   Save,
   RotateCcw,
   ExternalLink,
-  ShieldCheck
+  ShieldCheck,
+  Home
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
@@ -445,16 +446,24 @@ export const AddShopWizardView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 max-w-md mx-auto select-none transition-colors relative">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#020617] pb-28 max-w-md mx-auto select-none transition-colors relative">
       {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#0B132B]/95 backdrop-blur-md px-4 py-3 border-b border-[#E8E4DA]/60 dark:border-white/10 transition-colors">
+      <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#020617]/95 backdrop-blur-md px-4 py-3 border-b border-[#E8E4DA]/60 dark:border-white/10 transition-colors">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <button
               onClick={goBack}
-              className="w-10 h-10 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
+              className="w-10 h-10 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#11241C] dark:text-white shadow-xs hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
             >
               <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
+            </button>
+            <button
+              onClick={() => navigate('home')}
+              className="w-10 h-10 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#007AFF] dark:text-blue-400 shadow-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 active:scale-95 transition-all cursor-pointer"
+              aria-label="Home"
+              title="Return to Dashboard"
+            >
+              <Home className="w-5 h-5 stroke-[2.5]" />
             </button>
             <div>
               <h1 className="text-base font-black text-[#11241C] dark:text-white leading-tight">
@@ -471,7 +480,7 @@ export const AddShopWizardView: React.FC = () => {
           <div className="flex items-center gap-1.5">
             <button
               onClick={handleSaveDraft}
-              className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 text-[11px] font-bold text-[#55685F] dark:text-[#A2B3AA] hover:text-[#11241C] dark:hover:text-white flex items-center gap-1 shadow-2xs active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
+              className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 text-[11px] font-bold text-[#55685F] dark:text-[#A2B3AA] hover:text-[#11241C] dark:hover:text-white flex items-center gap-1 shadow-2xs active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
               title="Save draft to complete later"
             >
               <Save className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
@@ -504,7 +513,7 @@ export const AddShopWizardView: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex items-center gap-1 text-[10px] font-black text-[#007AFF] dark:text-blue-400 bg-[#E6F4EA] dark:bg-blue-950/60 px-2 py-0.5 rounded-full border border-blue-200/50 dark:border-blue-800/40">
+          <div className="flex items-center gap-1 text-[10px] font-black text-[#007AFF] dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full border border-blue-200/50 dark:border-blue-800/40">
             <span>{language === 'bn' ? 'প্রোফাইল' : 'Profile'}: {completeness}%</span>
           </div>
         </div>
@@ -564,7 +573,7 @@ export const AddShopWizardView: React.FC = () => {
 
         {/* QUICK REGISTRATION SHORTCUT: Shown if Step 1-3 essentials are already filled */}
         {areEssentialsFilled && step < 4 && (
-          <div className="p-3 bg-[#E6F4EA] dark:bg-blue-950/40 border border-blue-300/60 dark:border-blue-800/40 rounded-2xl flex items-center justify-between gap-2 shadow-2xs">
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-300/60 dark:border-blue-800/40 rounded-2xl flex items-center justify-between gap-2 shadow-2xs">
             <div>
               <p className="text-xs font-black text-[#007AFF] dark:text-blue-300">
                 {language === 'bn' ? 'মূল তথ্য দেওয়া সম্পন্ন!' : 'Essential Info Completed!'}
@@ -578,7 +587,7 @@ export const AddShopWizardView: React.FC = () => {
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="px-3.5 py-2 bg-[#007AFF] dark:bg-blue-600 text-white rounded-xl text-xs font-black shrink-0 hover:bg-[#084D3A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-xs cursor-pointer flex items-center gap-1"
+              className="px-3.5 py-2 bg-[#007AFF] dark:bg-blue-600 text-white rounded-xl text-xs font-black shrink-0 hover:bg-blue-700 active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-xs cursor-pointer flex items-center gap-1"
             >
               {isSubmitting ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -594,10 +603,10 @@ export const AddShopWizardView: React.FC = () => {
         {/* STEP 1: OWNER INFORMATION (ESSENTIAL) */}
         {/* ========================================================== */}
         {step === 1 && (
-          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 flex items-center justify-center font-black text-xs">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-[#007AFF] dark:text-blue-300 flex items-center justify-center font-black text-xs">
                   1
                 </div>
                 <div>
@@ -684,10 +693,10 @@ export const AddShopWizardView: React.FC = () => {
         {/* STEP 2: SHOP IDENTITY & CATEGORY (ESSENTIAL) */}
         {/* ========================================================== */}
         {step === 2 && (
-          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 flex items-center justify-center font-black text-xs">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-[#007AFF] dark:text-blue-300 flex items-center justify-center font-black text-xs">
                   2
                 </div>
                 <div>
@@ -775,10 +784,10 @@ export const AddShopWizardView: React.FC = () => {
         {/* STEP 3: LOCATION & ADDRESS (ESSENTIAL) */}
         {/* ========================================================== */}
         {step === 3 && (
-          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 flex items-center justify-center font-black text-xs">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-[#007AFF] dark:text-blue-300 flex items-center justify-center font-black text-xs">
                   3
                 </div>
                 <div>
@@ -864,7 +873,7 @@ export const AddShopWizardView: React.FC = () => {
         {/* STEP 4: TIMINGS & DELIVERY (OPTIONAL - CAN COMPLETE LATER) */}
         {/* ========================================================== */}
         {step === 4 && (
-          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center font-black text-xs">
@@ -883,7 +892,7 @@ export const AddShopWizardView: React.FC = () => {
               {/* Skip for now button */}
               <button
                 onClick={() => setStep(5)}
-                className="text-[11px] font-extrabold text-[#007AFF] dark:text-blue-400 bg-[#E6F4EA] dark:bg-blue-950/60 px-2.5 py-1 rounded-lg hover:underline cursor-pointer"
+                className="text-[11px] font-extrabold text-[#007AFF] dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1 rounded-lg hover:underline cursor-pointer"
               >
                 {language === 'bn' ? 'পরে করব / Skip' : 'Skip for now'}
               </button>
@@ -951,7 +960,7 @@ export const AddShopWizardView: React.FC = () => {
                         type="text"
                         value={deliveryRadiusKm}
                         onChange={(e) => setDeliveryRadiusKm(e.target.value)}
-                        className="w-full px-2.5 py-1.5 bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-lg font-bold"
+                        className="w-full px-2.5 py-1.5 bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-lg font-bold"
                       />
                     </div>
                     <div>
@@ -960,7 +969,7 @@ export const AddShopWizardView: React.FC = () => {
                         type="text"
                         value={minOrderAmount}
                         onChange={(e) => setMinOrderAmount(e.target.value)}
-                        className="w-full px-2.5 py-1.5 bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-lg font-bold"
+                        className="w-full px-2.5 py-1.5 bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-lg font-bold"
                       />
                     </div>
                   </div>
@@ -987,7 +996,7 @@ export const AddShopWizardView: React.FC = () => {
         {/* STEP 5: PHOTO & AI BIO (OPTIONAL - CAN COMPLETE LATER) */}
         {/* ========================================================== */}
         {step === 5 && (
-          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
+          <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 flex items-center justify-center font-black text-xs">
@@ -1007,7 +1016,7 @@ export const AddShopWizardView: React.FC = () => {
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="text-[11px] font-extrabold text-[#007AFF] dark:text-blue-400 bg-[#E6F4EA] dark:bg-blue-950/60 px-2.5 py-1 rounded-lg hover:underline cursor-pointer"
+                className="text-[11px] font-extrabold text-[#007AFF] dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1 rounded-lg hover:underline cursor-pointer"
               >
                 {language === 'bn' ? 'পরে ছবি দেব / Skip' : 'Skip photo for now'}
               </button>
@@ -1047,7 +1056,7 @@ export const AddShopWizardView: React.FC = () => {
                     type="button"
                     onClick={handleGenerateAiDescription}
                     disabled={isGeneratingDescription}
-                    className="text-[11px] font-bold text-blue-800 dark:text-blue-300 bg-[#E6F4EA] dark:bg-blue-950/70 hover:bg-[#D5EADB] px-2 py-0.5 rounded-lg border border-blue-300/50 flex items-center gap-1 cursor-pointer transition-colors"
+                    className="text-[11px] font-bold text-blue-800 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/70 hover:bg-[#D5EADB] px-2 py-0.5 rounded-lg border border-blue-300/50 flex items-center gap-1 cursor-pointer transition-colors"
                   >
                     {isGeneratingDescription ? (
                       <>
@@ -1071,7 +1080,7 @@ export const AddShopWizardView: React.FC = () => {
                 />
               </div>
 
-              <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/40 rounded-2xl text-[11px] font-semibold text-blue-800 dark:text-blue-300">
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-800/40 rounded-2xl text-[11px] font-semibold text-blue-800 dark:text-blue-300">
                 ✓ By registering, you confirm that your shop operates in Jalpaiguri District and serves local customers.
               </div>
             </div>
@@ -1083,7 +1092,7 @@ export const AddShopWizardView: React.FC = () => {
           {step > 1 ? (
             <button
               onClick={() => setStep((prev) => prev - 1)}
-              className="py-3 px-4 rounded-2xl bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#11241C] dark:text-white flex items-center gap-1 hover:bg-gray-50 active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
+              className="py-3 px-4 rounded-2xl bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#11241C] dark:text-white flex items-center gap-1 hover:bg-gray-50 active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>{language === 'bn' ? 'পূর্ববর্তী' : 'Back'}</span>
@@ -1105,7 +1114,7 @@ export const AddShopWizardView: React.FC = () => {
               )}
               <button
                 onClick={handleNext}
-                className="py-3 px-6 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-xs"
+                className="py-3 px-6 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-xs"
               >
                 <span>{language === 'bn' ? 'পরবর্তী ধাপ' : 'Continue'}</span>
                 <ChevronRight className="w-4 h-4" />
@@ -1115,7 +1124,7 @@ export const AddShopWizardView: React.FC = () => {
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="py-3 px-6 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-md ml-auto disabled:opacity-50"
+              className="py-3 px-6 rounded-2xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-md ml-auto disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
@@ -1136,7 +1145,7 @@ export const AddShopWizardView: React.FC = () => {
       {/* SUCCESS COMPLETION MODAL */}
       {createdShopResult && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 animate-scale-up text-center">
+          <div className="bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 animate-scale-up text-center">
             <div className="w-16 h-16 rounded-3xl bg-blue-50 text-[#007AFF] flex items-center justify-center mx-auto shadow-sm">
               <Sparkles className="w-8 h-8" />
             </div>

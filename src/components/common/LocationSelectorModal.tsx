@@ -191,7 +191,7 @@ export const LocationSelectorModal: React.FC = () => {
               <button
                 onClick={handleUseCurrentLocation}
                 disabled={isDetecting}
-                className="w-full bg-[#007AFF] text-white hover:bg-[#084D3A] active:scale-[0.99] transition-all py-3 px-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-75"
+                className="w-full bg-[#007AFF] text-white hover:bg-blue-700 active:scale-[0.99] transition-all py-3 px-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-75"
               >
                 {isDetecting ? (
                   <>

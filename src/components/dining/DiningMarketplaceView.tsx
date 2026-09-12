@@ -218,7 +218,7 @@ export const DiningMarketplaceView: React.FC = () => {
             <button
               id="btn-header-add-restaurant"
               onClick={() => navigate('add-restaurant')}
-              className="px-3 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1 shadow-xs active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-black flex items-center gap-1 shadow-xs active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
               title="Register Your Restaurant"
             >
               <Plus className="w-4 h-4" />
@@ -491,7 +491,7 @@ export const DiningMarketplaceView: React.FC = () => {
               </button>
               <button
                 onClick={() => navigate('add-restaurant')}
-                className="px-4 py-2.5 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1.5 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-xs"
+                className="px-4 py-2.5 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-black flex items-center gap-1.5 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all shadow-xs"
               >
                 <Plus className="w-4 h-4" />
                 <span>{language === 'bn' ? '+ আপনার দোকান যোগ করুন' : '+ I Own a Café/Restaurant'}</span>
@@ -649,7 +649,7 @@ export const DiningMarketplaceView: React.FC = () => {
 
                       <button
                         onClick={() => navigate('restaurant-detail', { restaurantId: restaurant.id })}
-                        className="px-3 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all"
+                        className="px-3 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-black flex items-center gap-1 cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all"
                       >
                         <span>{language === 'bn' ? 'পণ্য দেখুন' : 'View Restaurant'}</span>
                         <ChevronRight className="w-3.5 h-3.5" />
@@ -667,7 +667,7 @@ export const DiningMarketplaceView: React.FC = () => {
       <button
         id="btn-floating-add-restaurant"
         onClick={() => navigate('add-restaurant')}
-        className="fixed bottom-20 right-4 z-40 sm:bottom-6 sm:right-6 bg-[#007AFF] hover:bg-[#084D3A] dark:bg-blue-600 dark:hover:bg-blue-700 text-white px-4 py-3 rounded-full shadow-xl hover:shadow-2xl flex items-center gap-2 font-black text-xs cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all group border-2 border-white/20 backdrop-blur-xs"
+        className="fixed bottom-20 right-4 z-40 sm:bottom-6 sm:right-6 bg-[#007AFF] hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white px-4 py-3 rounded-full shadow-xl hover:shadow-2xl flex items-center gap-2 font-black text-xs cursor-pointer active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all group border-2 border-white/20 backdrop-blur-xs"
         title="Register Your Restaurant on MYJPG"
       >
         <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">

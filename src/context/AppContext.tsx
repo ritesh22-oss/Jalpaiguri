@@ -19,7 +19,8 @@ import {
   Restaurant,
   DurgaPandalItem,
   PandalReport,
-  PandalReview
+  PandalReview,
+  PlacePhotoSubmission
 } from '../types';
 import { INITIAL_DURGA_PUJA_PANDALS } from '../data/durgaPujaPandals';
 import { db, isFirebaseConfigured, apiFetch, auth } from '../lib/firebase';
@@ -96,6 +97,10 @@ interface AppContextType {
   // Admin functions
   adminVerificationQueue: { id: string; name: string; profession: string; date: string; status: 'Pending' | 'Approved' | 'Review' }[];
   approveWorkerVerification: (id: string) => Promise<void>;
+  placePhotoSubmissions: PlacePhotoSubmission[];
+  submitPlacePhoto: (data: Omit<PlacePhotoSubmission, 'id' | 'timestamp' | 'status'>) => Promise<void>;
+  approvePlacePhotoSubmission: (id: string) => Promise<void>;
+  rejectPlacePhotoSubmission: (id: string) => Promise<void>;
   isRealtimeConnected: boolean;
   refreshData: () => Promise<void>;
 }
@@ -178,6 +183,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [adminVerificationQueue, setAdminVerificationQueue] = useState<{ id: string; name: string; profession: string; date: string; status: 'Pending' | 'Approved' | 'Review' }[]>([]);
+
+  const [placePhotoSubmissions, setPlacePhotoSubmissions] = useState<PlacePhotoSubmission[]>(() => {
+    try {
+      const s = localStorage.getItem('jpg_place_photo_submissions');
+      return s ? JSON.parse(s) : [];
+    } catch { return []; }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('jpg_place_photo_submissions', JSON.stringify(placePhotoSubmissions));
+  }, [placePhotoSubmissions]);
+
+  const submitPlacePhoto = async (data: Omit<PlacePhotoSubmission, 'id' | 'timestamp' | 'status'>) => {
+    const newSub: PlacePhotoSubmission = {
+      ...data,
+      id: 'photo-sub-' + Date.now(),
+      timestamp: new Date().toISOString(),
+      status: 'pending'
+    };
+    setPlacePhotoSubmissions(prev => [newSub, ...prev]);
+    showToast('Photo uploaded successfully! Sent to admin panel for review.', 'success');
+  };
+
+  const approvePlacePhotoSubmission = async (id: string) => {
+    setPlacePhotoSubmissions(prev => prev.map(sub => {
+      if (sub.id === id) {
+        try {
+          const customThumbs = JSON.parse(localStorage.getItem('jpg_custom_thumbnails') || '{}');
+          customThumbs[sub.placeId] = sub.imageUrl;
+          localStorage.setItem('jpg_custom_thumbnails', JSON.stringify(customThumbs));
+        } catch {}
+        return { ...sub, status: 'approved' };
+      }
+      return sub;
+    }));
+    showToast('Photo approved and set as live thumbnail for place!', 'success');
+  };
+
+  const rejectPlacePhotoSubmission = async (id: string) => {
+    setPlacePhotoSubmissions(prev => prev.map(sub => sub.id === id ? { ...sub, status: 'rejected' } : sub));
+    showToast('Photo submission rejected.', 'info');
+  };
 
   // Sync some metadata to local storage (only non-sensitive UI states)
   useEffect(() => { localStorage.setItem('jpg_saved', JSON.stringify(savedItemIds)); }, [savedItemIds]);
@@ -818,6 +865,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setLanguage,
         adminVerificationQueue,
         approveWorkerVerification,
+        placePhotoSubmissions,
+        submitPlacePhoto,
+        approvePlacePhotoSubmission,
+        rejectPlacePhotoSubmission,
         isRealtimeConnected,
         refreshData,
         shops,

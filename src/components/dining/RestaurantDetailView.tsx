@@ -340,7 +340,7 @@ export const RestaurantDetailView: React.FC = () => {
               const q = encodeURIComponent(`${restaurant.name}, ${restaurant.locality}, Jalpaiguri, West Bengal`);
               window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank');
             }}
-            className="py-3 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-700 text-white font-bold text-xs flex flex-col items-center justify-center gap-1 hover:bg-[#084D3A] active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer shadow-xs"
+            className="py-3 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-700 text-white font-bold text-xs flex flex-col items-center justify-center gap-1 hover:bg-blue-700 active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer shadow-xs"
           >
             <MapPin className="w-4 h-4" />
             <span>{language === 'bn' ? 'লোকেশন' : 'Directions'}</span>
@@ -493,7 +493,7 @@ export const RestaurantDetailView: React.FC = () => {
 
                       <button
                         onClick={() => handleMenuItemOrder(menuItem)}
-                        className="w-full py-1.5 px-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-[11px] font-bold flex items-center justify-center gap-1 shadow-2xs active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
+                        className="w-full py-1.5 px-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold flex items-center justify-center gap-1 shadow-2xs active:scale-95 active:bg-[#38BDF8] active:border-[#38BDF8] transition-all cursor-pointer"
                       >
                         <MessageSquare className="w-3 h-3" />
                         <span>{language === 'bn' ? 'অর্ডার করুন' : 'Order'}</span>
@@ -687,7 +687,7 @@ export const RestaurantDetailView: React.FC = () => {
                 navigator.clipboard.writeText(upi);
                 alert('UPI ID copied to clipboard!');
               }}
-              className="w-full py-2.5 rounded-xl bg-[#007AFF] text-white text-xs font-bold hover:bg-[#084D3A] transition-colors cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-[#007AFF] text-white text-xs font-bold hover:bg-blue-700 transition-colors cursor-pointer"
             >
               Copy UPI ID
             </button>

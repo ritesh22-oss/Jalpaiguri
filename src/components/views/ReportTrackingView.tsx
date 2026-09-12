@@ -218,7 +218,7 @@ export const ReportTrackingView: React.FC = () => {
 
           <button
             onClick={() => navigate('home')}
-            className="w-full py-3.5 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs shadow-xs hover:bg-[#084D3A] cursor-pointer"
+            className="w-full py-3.5 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs shadow-xs hover:bg-blue-700 cursor-pointer"
           >
             Return to Dashboard
           </button>

@@ -95,7 +95,7 @@ export const RentalsView: React.FC = () => {
 
         <button
           onClick={() => setIsPostModalOpen(true)}
-          className="px-3 py-2 rounded-full bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-bold flex items-center gap-1 shadow-xs active:scale-95 transition-all cursor-pointer"
+          className="px-3 py-2 rounded-full bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1 shadow-xs active:scale-95 transition-all cursor-pointer"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Post Listing</span>
@@ -184,7 +184,7 @@ export const RentalsView: React.FC = () => {
                   <span className="text-xs font-bold text-[#55685F] dark:text-[#A2B3AA]">Deposit: {p.deposit}</span>
                   <button
                     onClick={() => window.location.href = `tel:${p.contact.replace(/\s+/g, '')}`}
-                    className="px-4 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                    className="px-4 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
                   >
                     <Phone className="w-3.5 h-3.5" />
                     <span>Contact Owner</span>
@@ -300,7 +300,7 @@ export const RentalsView: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-sm shadow-md hover:bg-[#084D3A] active:scale-98 transition-all cursor-pointer"
+                className="w-full py-3.5 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-sm shadow-md hover:bg-blue-700 active:scale-98 transition-all cursor-pointer"
               >
                 Publish Listing
               </button>

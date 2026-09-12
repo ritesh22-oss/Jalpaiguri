@@ -13,11 +13,13 @@ import {
   Check,
   CameraOff,
   Compass,
-  Share2
+  Share2,
+  Camera
 } from 'lucide-react';
 import { ExplorePlaceItem } from '../../types';
 import { resolvePlaceImage, ResolvedPlaceImage } from '../../utils/placesPhotoClient';
 import { getCategoryIllustrationUri } from '../../utils/placeCategoryIllustrations';
+import { UploadPlacePhotoModal } from '../common/UploadPlacePhotoModal';
 
 interface PlaceDetailsModalProps {
   place: ExplorePlaceItem | null;
@@ -34,6 +36,7 @@ export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
   const [loadingPhoto, setLoadingPhoto] = useState<boolean>(true);
   const [copiedId, setCopiedId] = useState(false);
   const [sharedToast, setSharedToast] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   useEffect(() => {
     if (!place) return;
@@ -50,8 +53,8 @@ export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
         setResolvedImage({
           imageUrl: getCategoryIllustrationUri(place.category),
           sourceType: 'category_illustration',
-          badgeLabel: 'Local Illustration',
-          attribution: 'Jalpaiguri Municipal Heritage Series',
+          badgeLabel: 'Stock Photo',
+          attribution: 'Unsplash Photorealistic Collection',
           isAiGenerated: false
         });
       })
@@ -115,33 +118,14 @@ export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
                   setResolvedImage({
                     imageUrl: getCategoryIllustrationUri(place.category),
                     sourceType: 'category_illustration',
-                    badgeLabel: 'Local Illustration',
-                    attribution: 'Jalpaiguri Municipal Heritage Series',
+                    badgeLabel: 'Stock Photo',
+                    attribution: 'Unsplash Photorealistic Collection',
                     isAiGenerated: false
                   });
                 }}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/20" />
-              <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs text-white/95">
-                <span className="truncate max-w-[280px]">
-                  {resolvedImage?.attribution || 'Jalpaiguri Landmark'}
-                </span>
-                <span
-                  className={`px-2 py-0.5 rounded text-[10px] font-bold shadow-xs backdrop-blur-md ${
-                    resolvedImage?.sourceType === 'google'
-                      ? 'bg-[#007AFF]/90 text-white'
-                      : resolvedImage?.sourceType === 'database'
-                      ? 'bg-[#0F766E]/90 text-white'
-                      : resolvedImage?.sourceType === 'gemini'
-                      ? 'bg-indigo-600/95 text-white flex items-center gap-1'
-                      : 'bg-amber-900/90 text-amber-100'
-                  }`}
-                >
-                  {resolvedImage?.isAiGenerated && <Sparkles className="w-3 h-3" />}
-                  {resolvedImage?.badgeLabel || 'Local Illustration'}
-                </span>
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
             </div>
           )}
 
@@ -346,8 +330,24 @@ export const PlaceDetailsModal: React.FC<PlaceDetailsModalProps> = ({
             <Sparkles className="w-4 h-4" />
             <span>Ask AI</span>
           </button>
+
+          <button
+            onClick={() => setIsUploadModalOpen(true)}
+            className="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300 hover:bg-emerald-100 border border-emerald-200 dark:border-emerald-800/40 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-98 cursor-pointer"
+          >
+            <Camera className="w-4 h-4" />
+            <span>Upload Photo</span>
+          </button>
         </div>
       </div>
+
+      <UploadPlacePhotoModal
+        placeId={place.placeId}
+        placeName={place.name}
+        category={place.category}
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+      />
     </div>
   );
 };

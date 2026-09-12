@@ -116,7 +116,7 @@ export const JobsView: React.FC = () => {
                         className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                           isApplied
                             ? 'bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 border border-transparent dark:border-blue-800/40'
-                            : 'bg-[#007AFF] dark:bg-blue-600 text-white hover:bg-[#084D3A] shadow-xs'
+                            : 'bg-[#007AFF] dark:bg-blue-600 text-white hover:bg-blue-700 shadow-xs'
                         }`}
                       >
                         {isApplied ? 'Applied ✓' : 'Apply Now'}

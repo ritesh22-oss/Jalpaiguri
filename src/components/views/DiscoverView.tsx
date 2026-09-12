@@ -216,6 +216,15 @@ export const DiscoverView: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('home')}
+              className="w-8 h-8 rounded-full bg-white dark:bg-[#16221D] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#007AFF] dark:text-blue-400 shadow-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 active:scale-95 transition-all cursor-pointer"
+              aria-label="Home"
+              title="Return to Dashboard"
+            >
+              <HomeIcon className="w-4 h-4 stroke-[2.5]" />
+            </button>
+
             {/* Language Switcher */}
             <button
               onClick={toggleLanguage}
@@ -245,7 +254,7 @@ export const DiscoverView: React.FC = () => {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EFF6FF] dark:bg-[#172554] text-[#007AFF] dark:text-[#60A5FA] text-xs font-bold shadow-xs cursor-pointer active:scale-95 transition-all"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>AI Jalpaigi</span>
+              <span>JPG AI</span>
             </button>
           </div>
         </div>

@@ -42,6 +42,7 @@ const MEMORY_CACHE = new Map<string, CachedPhotoData>();
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const LOCAL_STORAGE_PREFIX = 'jpg_place_photo_';
 const AI_IMAGE_STORAGE_PREFIX = 'jpg_place_ai_img_';
+let clientAiQuotaExhaustedUntil = 0;
 
 function getStorageCache(key: string): CachedPhotoData | null {
   try {
@@ -171,6 +172,17 @@ export async function resolvePlaceImage(
       }
     }
 
+    if (Date.now() < clientAiQuotaExhaustedUntil) {
+      // Quota is temporarily exhausted; skip request and proceed to architectural illustration fallback immediately
+      return {
+        imageUrl: getCategoryIllustrationUri(place.category),
+        sourceType: 'category_illustration',
+        badgeLabel: 'Local Illustration',
+        attribution: 'Jalpaiguri Municipal Heritage Illustration',
+        isAiGenerated: false
+      };
+    }
+
     const aiData = await apiClient.generatePlaceImage({
       placeId: place.placeId,
       name: place.name,
@@ -192,8 +204,12 @@ export async function resolvePlaceImage(
         attribution: aiData.attribution || 'AI-generated Preview (Gemini)',
         isAiGenerated: true
       };
+    } else {
+      // If server returned quota or null, avoid hammering API for 10 minutes
+      clientAiQuotaExhaustedUntil = Date.now() + 10 * 60 * 1000;
     }
   } catch {
+    clientAiQuotaExhaustedUntil = Date.now() + 10 * 60 * 1000;
     // Proceed to Tier 4
   }
 

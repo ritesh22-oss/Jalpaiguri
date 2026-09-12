@@ -365,7 +365,7 @@ export const NearbyView: React.FC = () => {
 
                   <button
                     onClick={() => handleAction(item)}
-                    className="bg-[#007AFF] dark:bg-blue-600 text-white hover:bg-[#084D3A] active:scale-95 transition-all px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1 shadow-xs cursor-pointer"
+                    className="bg-[#007AFF] dark:bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition-all px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1 shadow-xs cursor-pointer"
                   >
                     <span>{item.primaryActionLabel}</span>
                     <ChevronRight className="w-3.5 h-3.5" />
@@ -510,7 +510,7 @@ export const NearbyView: React.FC = () => {
                   </span>
                   <button
                     onClick={() => handleAction(selectedMarkerItem)}
-                    className="bg-[#007AFF] dark:bg-blue-600 text-white hover:bg-[#084D3A] px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1 shadow-xs cursor-pointer"
+                    className="bg-[#007AFF] dark:bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1 shadow-xs cursor-pointer"
                   >
                     <span>{selectedMarkerItem.primaryActionLabel}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -539,7 +539,7 @@ export const NearbyView: React.FC = () => {
             <div className="flex flex-col gap-2 pt-2 max-w-xs mx-auto">
               <button
                 onClick={() => setDistanceFilter('Any distance')}
-                className="w-full bg-[#007AFF] dark:bg-blue-600 text-white py-2.5 rounded-xl text-xs font-extrabold shadow-xs hover:bg-[#084D3A] cursor-pointer"
+                className="w-full bg-[#007AFF] dark:bg-blue-600 text-white py-2.5 rounded-xl text-xs font-extrabold shadow-xs hover:bg-blue-700 cursor-pointer"
               >
                 Expand Search to Any Distance
               </button>

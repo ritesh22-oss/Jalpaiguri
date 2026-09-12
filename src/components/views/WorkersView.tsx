@@ -110,7 +110,7 @@ export const WorkersView: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate('offer-services')}
-            className="px-3 py-2 rounded-full bg-[#007AFF] dark:bg-blue-600 hover:bg-[#084D3A] text-white text-xs font-bold flex items-center gap-1 shadow-xs active:scale-95 transition-all cursor-pointer"
+            className="px-3 py-2 rounded-full bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1 shadow-xs active:scale-95 transition-all cursor-pointer"
             title="Add your work & profile"
           >
             <Plus className="w-3.5 h-3.5" />
@@ -298,11 +298,11 @@ export const WorkersView: React.FC = () => {
                     <span>Message</span>
                   </button>
 
-                  {/* Request Button (dark green #007AFF) */}
+                  {/* Request Button (dark blue #007AFF) */}
                   <button
                     type="button"
                     onClick={(e) => handleRequest(worker, e)}
-                    className="py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-[#084D3A] active:scale-95 transition-all shadow-xs cursor-pointer"
+                    className="py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-blue-700 active:scale-95 transition-all shadow-xs cursor-pointer"
                   >
                     <Wrench className="w-3.5 h-3.5" />
                     <span>Request</span>

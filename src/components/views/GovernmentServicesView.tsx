@@ -747,7 +747,7 @@ export const GovernmentServicesView: React.FC = () => {
                     <span className="text-[10px] opacity-60">Verified {sch.lastVerified}</span>
                     <button
                       onClick={() => handleOpenExternal(sch.officialUrl, sch.name)}
-                      className="px-3.5 py-1.5 bg-[#007AFF] hover:bg-[#084D3A] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer"
+                      className="px-3.5 py-1.5 bg-[#007AFF] hover:bg-blue-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer"
                     >
                       <span>Apply on Official Portal</span>
                       <ExternalLink className="w-3 h-3" />
@@ -815,7 +815,7 @@ export const GovernmentServicesView: React.FC = () => {
                     {alert.officialNoticeUrl && (
                       <button
                         onClick={() => handleOpenExternal(alert.officialNoticeUrl!, alert.title)}
-                        className="px-3 py-1.5 bg-[#007AFF] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 hover:bg-[#084D3A] cursor-pointer shadow-xs"
+                        className="px-3 py-1.5 bg-[#007AFF] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 hover:bg-blue-700 cursor-pointer shadow-xs"
                       >
                         <span>Open Official Notice</span>
                         <ExternalLink className="w-3 h-3" />
@@ -846,7 +846,7 @@ export const GovernmentServicesView: React.FC = () => {
               </div>
               <button
                 onClick={() => setIsAddAppModalOpen(true)}
-                className="px-3 py-1.5 bg-[#007AFF] text-white font-bold text-xs rounded-xl flex items-center gap-1 shadow-xs cursor-pointer hover:bg-[#084D3A]"
+                className="px-3 py-1.5 bg-[#007AFF] text-white font-bold text-xs rounded-xl flex items-center gap-1 shadow-xs cursor-pointer hover:bg-blue-700"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Save App</span>
@@ -915,7 +915,7 @@ export const GovernmentServicesView: React.FC = () => {
                             app.serviceName
                           )
                         }
-                        className="px-3 py-1.5 rounded-xl bg-[#007AFF] text-white font-bold text-xs flex items-center gap-1.5 shadow-xs hover:bg-[#084D3A] cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-[#007AFF] text-white font-bold text-xs flex items-center gap-1.5 shadow-xs hover:bg-blue-700 cursor-pointer"
                       >
                         <span>Track on Official Portal</span>
                         <ExternalLink className="w-3 h-3" />
@@ -1014,7 +1014,7 @@ export const GovernmentServicesView: React.FC = () => {
               </button>
               <button
                 onClick={confirmRedirect}
-                className="flex-1 py-2.5 bg-[#007AFF] hover:bg-[#084D3A] text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                className="flex-1 py-2.5 bg-[#007AFF] hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <span>Continue</span>
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -1082,7 +1082,7 @@ export const GovernmentServicesView: React.FC = () => {
                 setChecklistModalData(null);
                 handleOpenExternal(srv.applyUrl || srv.officialUrl, srv.name);
               }}
-              className="w-full py-2.5 bg-[#007AFF] hover:bg-[#084D3A] text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full py-2.5 bg-[#007AFF] hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span>Proceed to Official Portal</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -1302,7 +1302,7 @@ export const GovernmentServicesView: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 bg-[#007AFF] text-white font-bold text-xs rounded-xl shadow-xs hover:bg-[#084D3A] cursor-pointer"
+                  className="flex-1 py-2.5 bg-[#007AFF] text-white font-bold text-xs rounded-xl shadow-xs hover:bg-blue-700 cursor-pointer"
                 >
                   Save Record
                 </button>

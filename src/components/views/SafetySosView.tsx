@@ -403,7 +403,7 @@ export const SafetySosView: React.FC<SafetySosViewProps> = ({ onBack, onNavigate
             <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3 transition-colors">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-2xl bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-[#38BDF8] flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#007AFF] dark:text-[#38BDF8] flex items-center justify-center shrink-0">
                     <Smartphone className="w-5 h-5" />
                   </div>
                   <div>
@@ -476,7 +476,7 @@ export const SafetySosView: React.FC<SafetySosViewProps> = ({ onBack, onNavigate
 
                     <button
                       onClick={() => simulateShake()}
-                      className="ml-auto px-3 py-1.5 rounded-xl bg-white dark:bg-[#1C2C24] border border-[#D2CEBE] dark:border-white/10 text-xs font-bold text-[#007AFF] dark:text-blue-300 hover:bg-[#E6F4EA] dark:hover:bg-[#233A2F] active:scale-95 transition-all cursor-pointer flex items-center gap-1"
+                      className="ml-auto px-3 py-1.5 rounded-xl bg-white dark:bg-[#1C2C24] border border-[#D2CEBE] dark:border-white/10 text-xs font-bold text-[#007AFF] dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-[#233A2F] active:scale-95 transition-all cursor-pointer flex items-center gap-1"
                       title="Test motion detection logic without moving phone"
                     >
                       <span>Simulate Shake</span>
@@ -581,7 +581,7 @@ export const SafetySosView: React.FC<SafetySosViewProps> = ({ onBack, onNavigate
               </div>
               <button
                 onClick={() => setIsAddContactModalOpen(true)}
-                className="px-3 py-1.5 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center gap-1 hover:bg-[#084D3A] cursor-pointer"
+                className="px-3 py-1.5 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center gap-1 hover:bg-blue-700 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add</span>
@@ -604,7 +604,7 @@ export const SafetySosView: React.FC<SafetySosViewProps> = ({ onBack, onNavigate
                         <h4 className="font-extrabold text-sm text-[#11241C] dark:text-white">
                           {c.name}
                         </h4>
-                        <span className="text-[10px] font-bold text-[#007AFF] dark:text-[#38BDF8] bg-[#E6F4EA] dark:bg-blue-950/60 px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] font-bold text-[#007AFF] dark:text-[#38BDF8] bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-full">
                           {c.relationship}
                         </span>
                       </div>
@@ -740,7 +740,7 @@ export const SafetySosView: React.FC<SafetySosViewProps> = ({ onBack, onNavigate
                   <div>
                     <h4 className="font-extrabold text-sm text-[#11241C] dark:text-white flex items-center gap-1.5">
                       <span>Nearby Safety Network</span>
-                      <span className="text-[10px] font-black uppercase text-[#007AFF] dark:text-[#38BDF8] bg-[#E6F4EA] dark:bg-blue-950/60 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-black uppercase text-[#007AFF] dark:text-[#38BDF8] bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-full">
                         Opt-In
                       </span>
                     </h4>
@@ -803,7 +803,7 @@ export const SafetySosView: React.FC<SafetySosViewProps> = ({ onBack, onNavigate
               <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white">
                 Nearby Community Alerts ({nearbyAlerts.length})
               </h3>
-              <span className="text-[11px] text-[#007AFF] dark:text-[#38BDF8] font-bold bg-[#E6F4EA] dark:bg-blue-950/60 px-2 py-0.5 rounded-full">
+              <span className="text-[11px] text-[#007AFF] dark:text-[#38BDF8] font-bold bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-full">
                 Within {safetySettings.nearbyAlertRadiusKm}km
               </span>
             </div>
@@ -977,7 +977,7 @@ export const SafetySosView: React.FC<SafetySosViewProps> = ({ onBack, onNavigate
                 </button>
                 <button
                   type="submit"
-                  className="w-1/2 py-2.5 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold hover:bg-[#084D3A]"
+                  className="w-1/2 py-2.5 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold hover:bg-blue-700"
                 >
                   Save Contact
                 </button>
@@ -1011,7 +1011,7 @@ export const SafetySosView: React.FC<SafetySosViewProps> = ({ onBack, onNavigate
                   key={reason}
                   className={`flex items-center gap-2.5 p-3 rounded-2xl border cursor-pointer transition-colors ${
                     cancellationReason === reason
-                      ? 'border-[#007AFF] dark:border-blue-500 bg-[#E6F4EA] dark:bg-blue-950/60'
+                      ? 'border-[#007AFF] dark:border-blue-500 bg-blue-50 dark:bg-blue-950/60'
                       : 'border-[#E8E4DA] dark:border-white/10'
                   }`}
                 >

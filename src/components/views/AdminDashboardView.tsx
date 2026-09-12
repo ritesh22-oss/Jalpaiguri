@@ -26,13 +26,13 @@ import {
 import { useNav } from '../../context/NavigationContext';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
-import { JalpaiguriLogo } from '../common/JalpaiguriLogo';
+import { JPGLogo } from '../common/JPGLogo';
 import { useAdminGuard } from '../../hooks/useAdminGuard';
 
 export const AdminDashboardView: React.FC = () => {
   const { navigate, goBack } = useNav();
   const { user, firebaseUser } = useAuth();
-  const { adminVerificationQueue, approveWorkerVerification, civicReports, localAlerts, workers } = useApp();
+  const { adminVerificationQueue, approveWorkerVerification, placePhotoSubmissions, approvePlacePhotoSubmission, rejectPlacePhotoSubmission } = useApp();
   const {
     isAuthorized,
     isLoading: authLoading,
@@ -45,7 +45,7 @@ export const AdminDashboardView: React.FC = () => {
     clearError
   } = useAdminGuard();
 
-  const [activeTab, setActiveTab] = useState<'Dashboard' | 'Users' | 'Workers' | 'Shops' | 'Doctors' | 'Reports' | 'Alerts' | 'Analytics' | 'Settings'>('Dashboard');
+  const [activeTab, setActiveTab] = useState<'Dashboard' | 'Users' | 'Workers' | 'Shops' | 'Place Photos' | 'Doctors' | 'Reports' | 'Alerts' | 'Analytics' | 'Settings'>('Dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [localError, setLocalError] = useState('');
   const [isProcessingAction, setIsProcessingAction] = useState(false);
@@ -246,7 +246,7 @@ export const AdminDashboardView: React.FC = () => {
           {/* Logo */}
           <div className="flex items-center justify-between pb-6 pt-2 px-2 border-b border-[#F0ECE1]">
             <div className="flex items-center gap-2.5">
-              <JalpaiguriLogo size="sm" showText={false} />
+              <JPGLogo size="sm" showText={false} />
               <span className="font-extrabold text-base text-[#11241C] tracking-tight">
                 MYJPG
               </span>
@@ -406,7 +406,7 @@ export const AdminDashboardView: React.FC = () => {
                   <button
                     onClick={() => setActiveTab('Dashboard')}
                     className={`text-xs font-black px-3 py-1.5 rounded-xl cursor-pointer transition-colors ${
-                      activeTab !== 'Shops' ? 'bg-[#007AFF] text-white' : 'bg-gray-100 text-gray-700'
+                      activeTab === 'Dashboard' ? 'bg-[#007AFF] text-white' : 'bg-gray-100 text-gray-700'
                     }`}
                   >
                     Workers Queue ({adminVerificationQueue.length})
@@ -418,6 +418,14 @@ export const AdminDashboardView: React.FC = () => {
                     }`}
                   >
                     Shops Moderation ({adminShops.length})
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('Place Photos')}
+                    className={`text-xs font-black px-3 py-1.5 rounded-xl cursor-pointer transition-colors ${
+                      activeTab === 'Place Photos' ? 'bg-[#007AFF] text-white' : 'bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    Place Photos ({placePhotoSubmissions.length})
                   </button>
                 </div>
 
@@ -470,7 +478,7 @@ export const AdminDashboardView: React.FC = () => {
                                 <button
                                   onClick={() => handleApproveShop(shop.id)}
                                   disabled={isProcessingAction}
-                                  className="px-2.5 py-1 rounded-lg bg-[#007AFF] text-white font-bold text-[11px] hover:bg-[#084D3A] cursor-pointer transition-colors disabled:opacity-50"
+                                  className="px-2.5 py-1 rounded-lg bg-[#007AFF] text-white font-bold text-[11px] hover:bg-blue-700 cursor-pointer transition-colors disabled:opacity-50"
                                 >
                                   Verify
                                 </button>
@@ -489,6 +497,76 @@ export const AdminDashboardView: React.FC = () => {
                       ))}
                     </tbody>
                   </table>
+                </div>
+              ) : activeTab === 'Place Photos' ? (
+                <div className="overflow-x-auto">
+                  {placePhotoSubmissions.length === 0 ? (
+                    <div className="p-12 text-center text-gray-500 text-xs">
+                      No user photo submissions yet. Users can upload place photos from Explore or Education sections.
+                    </div>
+                  ) : (
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-[#FAF8F5] border-b border-[#F0ECE1] text-[#55685F] font-bold">
+                        <tr>
+                          <th className="py-3 px-4">Photo Preview</th>
+                          <th className="py-3 px-4">Place Name & Category</th>
+                          <th className="py-3 px-4">Uploader</th>
+                          <th className="py-3 px-4">Status</th>
+                          <th className="py-3 px-4 text-right">Admin Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#F0ECE1]">
+                        {placePhotoSubmissions.map((sub) => (
+                          <tr key={sub.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
+                            <td className="py-3.5 px-4">
+                              <img src={sub.imageUrl} alt={sub.placeName} className="w-16 h-12 object-cover rounded-xl shadow-xs border border-gray-200" />
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <div>
+                                <span className="font-bold text-[#11241C] block">{sub.placeName}</span>
+                                <span className="text-[10px] text-gray-500">{sub.category}</span>
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <span className="font-semibold text-gray-800 block">{sub.uploaderName}</span>
+                              <span className="text-[10px] text-gray-500">{sub.uploaderEmail}</span>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                                sub.status === 'approved'
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : sub.status === 'rejected'
+                                  ? 'bg-rose-100 text-rose-800'
+                                  : 'bg-amber-100 text-amber-800'
+                              }`}>
+                                <span>{sub.status.toUpperCase()}</span>
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-4 text-right">
+                              <div className="inline-flex items-center gap-1.5">
+                                {sub.status !== 'approved' && (
+                                  <button
+                                    onClick={() => approvePlacePhotoSubmission(sub.id)}
+                                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs cursor-pointer transition-all active:scale-95"
+                                  >
+                                    Set as Thumbnail
+                                  </button>
+                                )}
+                                {sub.status !== 'rejected' && (
+                                  <button
+                                    onClick={() => rejectPlacePhotoSubmission(sub.id)}
+                                    className="px-2.5 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[11px] cursor-pointer transition-all"
+                                  >
+                                    Reject
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -538,7 +616,7 @@ export const AdminDashboardView: React.FC = () => {
                                 <button
                                   onClick={() => handleApproveWorker(item.id)}
                                   disabled={isProcessingAction}
-                                  className="px-2.5 py-1 rounded-lg bg-[#007AFF] text-white font-bold text-[11px] hover:bg-[#084D3A] cursor-pointer transition-colors disabled:opacity-50"
+                                  className="px-2.5 py-1 rounded-lg bg-[#007AFF] text-white font-bold text-[11px] hover:bg-blue-700 cursor-pointer transition-colors disabled:opacity-50"
                                 >
                                   Approve
                                 </button>
