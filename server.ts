@@ -529,26 +529,10 @@ app.post('/api/gemini/chat', async (req: Request, res: Response) => {
 
     const formattedContents = formatGeminiHistory(history, message);
 
-    // Intelligent Tool Activation Logic
-    const isLocalIntent = /where|near|location|address|hospital|clinic|pharmacy|doctor|hotel|restaurant|market|station|road|park|directions|route|stand|bazar|dighi|kadamtala|hakimpara|jalpaiguri|electrician|plumber|worker|shop|business|blood|emergency/i.test(message);
-    const hasMapsKey = apiKeyService.hasGoogleMapsKey();
-
     const config: any = {
       systemInstruction: systemInstruction,
       temperature: 0.7
     };
-
-    if (isLocalIntent && hasMapsKey) {
-      config.tools = [{ googleMaps: {} }];
-      config.toolConfig = {
-        retrievalConfig: {
-          latLng: {
-            latitude: Number(userLocation.latitude) || 26.5414,
-            longitude: Number(userLocation.longitude) || 88.7196
-          }
-        }
-      };
-    }
 
     console.log(`[Gemini Chat] Gemini request started using model: ${selectedModel}`);
     const response = await ai.models.generateContent({
