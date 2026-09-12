@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useApp } from '../../context/AppContext';
 import {
   GovernmentService,
   GovtServiceCategory,
@@ -48,6 +49,63 @@ import {
 export const GovernmentServicesView: React.FC = () => {
   const { goBack, navigate } = useNav();
   const { isDarkMode } = useTheme();
+  const { govServices } = useApp();
+
+  // Dynamic lists with safe fallbacks
+  const dbServices = useMemo(() => {
+    return govServices.filter(s => s.category !== 'GOVERNMENT SCHEMES');
+  }, [govServices]);
+
+  const dbSchemes = useMemo(() => {
+    return govServices.filter(s => s.category === 'GOVERNMENT SCHEMES');
+  }, [govServices]);
+
+  const servicesToRender = useMemo(() => {
+    if (dbServices.length > 0) {
+      return dbServices.map(s => ({
+        id: s.id,
+        name: s.name,
+        category: s.category || 'MAIN PORTALS',
+        shortDesc: s.shortDesc || s.description || '',
+        department: s.department || 'Government Department',
+        authority: s.authority || 'Government of West Bengal',
+        officialUrl: s.portalUrl || s.officialUrl || 'https://wb.gov.in',
+        applyUrl: s.applyUrl || s.portalUrl || '',
+        statusUrl: s.statusUrl || '',
+        requirements: s.requirements ? (Array.isArray(s.requirements) ? s.requirements : String(s.requirements).split(',').map((x: string) => x.trim())) : [],
+        lastVerified: s.lastVerified || new Date().toISOString().split('T')[0],
+        icon: s.icon || 'Building2',
+        hasDirectApply: !!s.portalUrl,
+        hasStatusTrack: false
+      }));
+    }
+    return VERIFIED_GOVERNMENT_SERVICES;
+  }, [dbServices]);
+
+  const schemesToRender = useMemo(() => {
+    if (dbSchemes.length > 0) {
+      return dbSchemes.map(s => ({
+        id: s.id,
+        name: s.name,
+        bengaliName: s.bengaliName || '',
+        department: s.department || 'Government Department',
+        authority: s.authority || 'Government of West Bengal',
+        whoItIsFor: s.requirements ? (Array.isArray(s.requirements) ? s.requirements.join(', ') : s.requirements) : 'General Citizens',
+        targetCategory: (s.targetCategory || 'General') as any,
+        minAge: s.minAge || undefined,
+        maxAge: s.maxAge || undefined,
+        incomeLimit: s.incomeLimit || undefined,
+        benefits: s.shortDesc || s.description || '',
+        basicEligibility: s.requirements ? (Array.isArray(s.requirements) ? s.requirements : String(s.requirements).split(',').map((x: string) => x.trim())) : [],
+        requiredDocuments: s.requirements ? (Array.isArray(s.requirements) ? s.requirements : String(s.requirements).split(',').map((x: string) => x.trim())) : [],
+        applicationMethod: s.stepsToApply ? (Array.isArray(s.stepsToApply) ? s.stepsToApply.join(' -> ') : s.stepsToApply) : 'Register online',
+        officialUrl: s.portalUrl || 'https://wb.gov.in',
+        applyUrl: s.portalUrl || '',
+        lastVerified: s.lastVerified || new Date().toISOString().split('T')[0]
+      }));
+    }
+    return VERIFIED_SCHEMES_CATALOG;
+  }, [dbSchemes]);
 
   // Navigation tab within hub: 'services' | 'schemes' | 'alerts' | 'tracking'
   const [activeTab, setActiveTab] = useState<'services' | 'schemes' | 'alerts' | 'tracking'>('services');
@@ -159,7 +217,7 @@ export const GovernmentServicesView: React.FC = () => {
 
   // Filtered Services
   const filteredServices = useMemo(() => {
-    return VERIFIED_GOVERNMENT_SERVICES.filter((srv) => {
+    return servicesToRender.filter((srv) => {
       if (selectedCategory !== 'ALL' && srv.category !== selectedCategory) {
         return false;
       }
@@ -173,11 +231,11 @@ export const GovernmentServicesView: React.FC = () => {
 
       return inName || inDesc || inDept || inReqs;
     });
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, servicesToRender]);
 
   // Filtered Schemes
   const filteredSchemes = useMemo(() => {
-    return VERIFIED_SCHEMES_CATALOG.filter((scheme) => {
+    return schemesToRender.filter((scheme) => {
       if (schemeCategoryFilter !== 'All' && scheme.targetCategory !== schemeCategoryFilter) {
         return false;
       }
@@ -191,7 +249,7 @@ export const GovernmentServicesView: React.FC = () => {
         scheme.benefits.toLowerCase().includes(q)
       );
     });
-  }, [schemeCategoryFilter, schemeSearchQuery]);
+  }, [schemeCategoryFilter, schemeSearchQuery, schemesToRender]);
 
   // Trigger External Link Confirmation
   const handleOpenExternal = (url: string, serviceName: string) => {

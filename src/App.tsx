@@ -121,25 +121,46 @@ import { BeautifulLoader } from './components/common/BeautifulLoader';
 const AppContent: React.FC = () => {
   // 1. ALL HOOKS MUST BE AT THE VERY TOP, UNCONDITIONAL
   const { currentView, replaceView, navigate, goBack } = useNav();
-  const { user, isAuthenticated, isProfileComplete, isLoading } = useAuth();
+  const { user, firebaseUser, isAuthenticated, isProfileComplete, isLoading, isRedirectPending } = useAuth();
   const { isWithinServiceRegion, serviceAreaStatus, status: locationStatus, location } = useLocation();
   const { pujaPandals, addPujaPandal, reportPandalInfo } = useApp();
   const { isBengali } = useLanguage();
   const { isOnline } = useOnlineStatus();
 
-  // Effects
+  // 1. Initial Routing Effect (From Splash)
   React.useEffect(() => {
-    if (!isLoading && isAuthenticated && !isProfileComplete) {
-      if (
-        currentView === 'auth' ||
-        currentView === 'phone-auth' ||
-        currentView === 'onboarding'
-      ) {
-        replaceView('profile-setup');
+    // We only take action if we are NOT loading AND we are currently on the splash screen
+    if (!isLoading && currentView === 'splash') {
+      console.log('[STARTUP FLOW] Initialization complete. Determining destination...');
+      
+      if (isAuthenticated) {
+        if (isProfileComplete) {
+          console.log('[STARTUP FLOW] Authenticated & Profile Complete -> Home');
+          const isAdminLogin = localStorage.getItem('jpg_admin_login_detected') === 'true';
+          if (isAdminLogin && user?.role === 'admin') {
+            localStorage.removeItem('jpg_admin_login_detected');
+            replaceView('admin-dashboard');
+          } else {
+            replaceView('home');
+          }
+        } else {
+          console.log('[STARTUP FLOW] Authenticated but Profile Incomplete -> Profile Setup');
+          replaceView('profile-setup');
+        }
+      } else {
+        const hasOnboarded = localStorage.getItem('jpg_has_onboarded') === 'true';
+        if (hasOnboarded) {
+          console.log('[STARTUP FLOW] Not Authenticated (Onboarded) -> Auth');
+          replaceView('auth');
+        } else {
+          console.log('[STARTUP FLOW] Not Authenticated (New User) -> Onboarding');
+          replaceView('onboarding');
+        }
       }
     }
-  }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView]);
+  }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView, user?.role]);
 
+  // 2. Auth Guard Effects (Prevent access to auth screens if already logged in)
   React.useEffect(() => {
     if (!isLoading && isAuthenticated && isProfileComplete) {
       if (
@@ -148,19 +169,26 @@ const AppContent: React.FC = () => {
         currentView === 'otp' ||
         currentView === 'onboarding'
       ) {
-        const isAdminLogin = localStorage.getItem('jpg_admin_login_detected') === 'true';
-        if (isAdminLogin && user?.role === 'admin') {
-          localStorage.removeItem('jpg_admin_login_detected');
-          replaceView('admin-dashboard');
-        } else {
-          replaceView('home');
-        }
+        console.log('[AUTH GUARD] User already authenticated, redirecting to home');
+        replaceView('home');
       }
     }
   }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView]);
 
-  // 2. DERIVED STATE (No hooks here)
-  const isRedirectPending = localStorage.getItem('jpg_redirect_auth_pending') === 'true';
+  // 3. Profile Setup Guard
+  React.useEffect(() => {
+    if (!isLoading && isAuthenticated && !isProfileComplete) {
+      if (
+        currentView === 'home' ||
+        currentView === 'nearby' ||
+        currentView === 'discover' ||
+        currentView === 'profile'
+      ) {
+        console.log('[AUTH GUARD] Profile incomplete, redirecting to profile setup');
+        replaceView('profile-setup');
+      }
+    }
+  }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView]);
   
   const hideBottomNavViews = [
     'splash',

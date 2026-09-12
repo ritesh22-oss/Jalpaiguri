@@ -569,6 +569,8 @@ export interface ExplorePlaceItem {
   features?: string[];
   distanceKm?: number;
   distanceText?: string;
+  thumbnailPhotos?: string[];
+  userUploadedPhotos?: string[];
 }
 
 export type ShopCategory =
@@ -649,6 +651,7 @@ export interface Shop {
   logoUrl?: string;
   isVerified: boolean;
   status: 'pending' | 'verified' | 'rejected' | 'suspended';
+  photos?: string[];
   featured?: boolean;
   isFeatured?: boolean;
   isOpen: boolean;
@@ -747,6 +750,7 @@ export interface Restaurant {
   menuPhotoUrl?: string;
   isVerified: boolean;
   status: 'pending' | 'verified' | 'rejected' | 'suspended';
+  photos?: string[];
   featured?: boolean;
   isFeatured?: boolean;
   isOpen: boolean;

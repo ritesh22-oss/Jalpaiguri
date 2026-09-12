@@ -539,6 +539,25 @@ export const RestaurantDetailView: React.FC = () => {
               </p>
             </div>
 
+            {restaurant.photos && restaurant.photos.length > 0 && (
+              <div className="pt-3 border-t border-[#F0ECE1] dark:border-white/10 space-y-2">
+                <h4 className="font-extrabold text-xs text-[#11241C] dark:text-white">
+                  {language === 'bn' ? 'গ্যালারি' : 'Gallery & Atmosphere'}
+                </h4>
+                <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+                  {restaurant.photos.map((url, uidx) => (
+                    <img
+                      key={uidx}
+                      src={url}
+                      alt={`${restaurant.name} Gallery`}
+                      className="w-24 h-24 rounded-2xl object-cover border border-[#E8E4DA] dark:border-white/10 shrink-0 cursor-pointer"
+                      referrerPolicy="no-referrer"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="pt-3 border-t border-[#F0ECE1] dark:border-white/10 space-y-2">
               <h4 className="font-extrabold text-xs text-[#11241C] dark:text-white">
                 {language === 'bn' ? 'ডেলিভারি সংক্রান্ত তথ্য' : 'Delivery Details'}

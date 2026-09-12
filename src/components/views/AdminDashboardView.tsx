@@ -28,12 +28,17 @@ import { useNav } from '../../context/NavigationContext';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { JPGLogo } from '../common/JPGLogo';
+import { db } from '../../lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { useAdminGuard } from '../../hooks/useAdminGuard';
+import { JALPAIGURI_EXPLORE_PLACES } from '../../data/jalpaiguriPlaces';
+import { getAdminPlaceThumbnails, setAdminPlaceThumbnails } from '../../utils/placesPhotoClient';
+import { CMSManager } from '../admin/CMSManager';
 
 export const AdminDashboardView: React.FC = () => {
   const { navigate, goBack } = useNav();
   const { user, firebaseUser } = useAuth();
-  const { adminVerificationQueue, approveWorkerVerification, placePhotoSubmissions, approvePlacePhotoSubmission, rejectPlacePhotoSubmission } = useApp();
+  const { shops, civicReports, localAlerts, doctors, adminVerificationQueue, approveWorkerVerification, placePhotoSubmissions, approvePlacePhotoSubmission, rejectPlacePhotoSubmission } = useApp();
   const {
     isAuthorized,
     isLoading: authLoading,
@@ -46,12 +51,28 @@ export const AdminDashboardView: React.FC = () => {
     clearError
   } = useAdminGuard();
 
-  const [activeTab, setActiveTab] = useState<'Dashboard' | 'Users' | 'Workers' | 'Shops' | 'Place Photos' | 'Doctors' | 'Reports' | 'Alerts' | 'Analytics' | 'Settings'>('Dashboard');
+  const [activeTab, setActiveTab] = useState<'Dashboard' | 'CMS' | 'Users' | 'Workers' | 'Shops' | 'Place Photos' | 'Place Thumbnails' | 'Doctors' | 'Reports' | 'Alerts' | 'Analytics' | 'Settings'>('Dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [localError, setLocalError] = useState('');
   const [isProcessingAction, setIsProcessingAction] = useState(false);
   const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
   const [adminShops, setAdminShops] = useState<any[]>([]);
+
+  const [selectedPlaceIdForThumbs, setSelectedPlaceIdForThumbs] = useState<string>(JALPAIGURI_EXPLORE_PLACES[0]?.placeId || '');
+  const [thumbUrlInput, setThumbUrlInput] = useState('');
+
+  const [adminUsers, setAdminUsers] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    if (isAuthorized && db) {
+      const unsub = onSnapshot(collection(db, 'users'), (snap) => {
+        setAdminUsers(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      }, (err) => {
+        console.error("Error fetching users for admin:", err);
+      });
+      return () => unsub();
+    }
+  }, [isAuthorized]);
 
   // Load shops for moderation
   const loadShops = async () => {
@@ -230,11 +251,13 @@ export const AdminDashboardView: React.FC = () => {
 
   const sidebarLinks = [
     { id: 'Dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+    { id: 'CMS', label: 'Content Manager (CMS)', icon: <FileSpreadsheet className="w-5 h-5 text-blue-600" /> },
     { id: 'Place Photos', label: 'Place Photos', icon: <Camera className="w-5 h-5" /> },
+    { id: 'Place Thumbnails', label: 'Place Thumbnails', icon: <Camera className="w-5 h-5" /> },
     { id: 'Users', label: 'Users', icon: <Users className="w-5 h-5" /> },
-    { id: 'Workers', label: 'Workers', icon: <Wrench className="w-5 h-5" /> },
-    { id: 'Shops', label: 'Shops & Merchants', icon: <Store className="w-5 h-5" /> },
-    { id: 'Doctors', label: 'Doctors', icon: <PlusSquare className="w-5 h-5" /> },
+    { id: 'Workers', label: 'Workers Queue', icon: <Wrench className="w-5 h-5" /> },
+    { id: 'Shops', label: 'Shops Queue', icon: <Store className="w-5 h-5" /> },
+    { id: 'Doctors', label: 'Doctors Queue', icon: <PlusSquare className="w-5 h-5" /> },
     { id: 'Reports', label: 'Reports', icon: <FileSpreadsheet className="w-5 h-5" /> },
     { id: 'Alerts', label: 'Alerts', icon: <AlertTriangle className="w-5 h-5" /> },
     { id: 'Analytics', label: 'Analytics', icon: <BarChart3 className="w-5 h-5" /> }
@@ -389,327 +412,487 @@ export const AdminDashboardView: React.FC = () => {
 
         {/* Dashboard Body Content matching Screenshot 5 */}
         <div className="p-6 space-y-6 max-w-6xl">
-          {/* Header Title */}
-          <div>
-            <h1 className="text-2xl font-extrabold text-[#11241C] tracking-tight">
-              Admin Dashboard
-            </h1>
-            <p className="text-xs font-semibold text-[#55685F] mt-0.5">
-              Overview and recent pending tasks.
-            </p>
-          </div>
-
-          {/* Main Grid: Verification Queue (Left) & Metric Cards (Right) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Verification Queue Table (2 Columns wide) */}
-            <div className="lg:col-span-2 bg-white rounded-3xl border border-[#E8E4DA] shadow-xs overflow-hidden">
-              <div className="p-5 border-b border-[#F0ECE1] flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setActiveTab('Dashboard')}
-                    className={`text-xs font-black px-3 py-1.5 rounded-xl cursor-pointer transition-colors ${
-                      activeTab === 'Dashboard' ? 'bg-[#007AFF] text-white' : 'bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    Workers Queue ({adminVerificationQueue.length})
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('Shops')}
-                    className={`text-xs font-black px-3 py-1.5 rounded-xl cursor-pointer transition-colors ${
-                      activeTab === 'Shops' ? 'bg-[#007AFF] text-white' : 'bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    Shops Moderation ({adminShops.length})
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('Place Photos')}
-                    className={`text-xs font-black px-3 py-1.5 rounded-xl cursor-pointer transition-colors ${
-                      activeTab === 'Place Photos' ? 'bg-[#007AFF] text-white' : 'bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    Place Photos ({placePhotoSubmissions.length})
-                  </button>
-                </div>
-
-                <span className="text-[11px] font-bold text-gray-400">
-                  Municipal Verification Console
-                </span>
+          {activeTab === 'CMS' ? (
+            <CMSManager />
+          ) : (
+            <>
+              {/* Header Title */}
+              <div>
+                <h1 className="text-2xl font-extrabold text-[#11241C] tracking-tight">
+                  Admin Dashboard
+                </h1>
+                <p className="text-xs font-semibold text-[#55685F] mt-0.5">
+                  Overview and recent pending tasks.
+                </p>
               </div>
 
-              {activeTab === 'Shops' ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-[#FAF8F5] border-b border-[#F0ECE1] text-[#55685F] font-bold">
-                      <tr>
-                        <th className="py-3 px-4">Shop Name</th>
-                        <th className="py-3 px-4">Category & Locality</th>
-                        <th className="py-3 px-4">Contact</th>
-                        <th className="py-3 px-4">Status</th>
-                        <th className="py-3 px-4 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#F0ECE1]">
-                      {adminShops.map((shop) => (
-                        <tr key={shop.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
-                          <td className="py-3.5 px-4">
-                            <div>
-                              <span className="font-bold text-[#11241C] block">{shop.name}</span>
-                              <span className="text-[10px] text-gray-500">Owner: {shop.ownerName}</span>
-                            </div>
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <span className="font-semibold text-gray-700 block">{shop.category}</span>
-                            <span className="text-[10px] text-[#55685F]">{shop.locality} (PIN: {shop.pincode})</span>
-                          </td>
-                          <td className="py-3.5 px-4 font-mono text-[11px] text-gray-600">
-                            {shop.phone || shop.ownerPhone}
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                              shop.isVerified
-                                ? 'bg-[#E6F4EA] text-[#007AFF]'
-                                : 'bg-amber-100 text-amber-800'
-                            }`}>
-                              <span className={`w-1.5 h-1.5 rounded-full ${shop.isVerified ? 'bg-[#007AFF]' : 'bg-amber-600'}`}></span>
-                              <span>{shop.isVerified ? 'Verified' : 'Pending'}</span>
-                            </span>
-                          </td>
-                          <td className="py-3.5 px-4 text-right">
-                            <div className="inline-flex items-center gap-1.5">
-                              {!shop.isVerified ? (
+              {/* Main Grid: Verification Queue (Left) & Metric Cards (Right) */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Verification Queue Table (2 Columns wide) */}
+                <div className="lg:col-span-2 bg-white rounded-3xl border border-[#E8E4DA] shadow-xs overflow-hidden">
+                  <div className="p-5 border-b border-[#F0ECE1] flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setActiveTab('Dashboard')}
+                        className={`text-xs font-black px-3 py-1.5 rounded-xl cursor-pointer transition-colors ${
+                          activeTab === 'Dashboard' ? 'bg-[#007AFF] text-white' : 'bg-gray-100 text-gray-700'
+                        }`}
+                      >
+                        Workers Queue ({adminVerificationQueue.length})
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('Shops')}
+                        className={`text-xs font-black px-3 py-1.5 rounded-xl cursor-pointer transition-colors ${
+                          activeTab === 'Shops' ? 'bg-[#007AFF] text-white' : 'bg-gray-100 text-gray-700'
+                        }`}
+                      >
+                        Shops Moderation ({adminShops.length})
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('Place Photos')}
+                        className={`text-xs font-black px-3 py-1.5 rounded-xl cursor-pointer transition-colors ${
+                          activeTab === 'Place Photos' ? 'bg-[#007AFF] text-white' : 'bg-gray-100 text-gray-700'
+                        }`}
+                      >
+                        Place Photos ({placePhotoSubmissions.length})
+                      </button>
+                    </div>
+
+                    <span className="text-[11px] font-bold text-gray-400">
+                      Municipal Verification Console
+                    </span>
+                  </div>
+
+                  {activeTab === 'Shops' ? (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-[#FAF8F5] border-b border-[#F0ECE1] text-[#55685F] font-bold">
+                          <tr>
+                            <th className="py-3 px-4">Shop Name</th>
+                            <th className="py-3 px-4">Category & Locality</th>
+                            <th className="py-3 px-4">Contact</th>
+                            <th className="py-3 px-4">Status</th>
+                            <th className="py-3 px-4 text-right">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#F0ECE1]">
+                          {adminShops.map((shop) => (
+                            <tr key={shop.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
+                              <td className="py-3.5 px-4">
+                                <div>
+                                  <span className="font-bold text-[#11241C] block">{shop.name}</span>
+                                  <span className="text-[10px] text-gray-500">Owner: {shop.ownerName}</span>
+                                </div>
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <span className="font-semibold text-gray-700 block">{shop.category}</span>
+                                <span className="text-[10px] text-[#55685F]">{shop.locality} (PIN: {shop.pincode})</span>
+                              </td>
+                              <td className="py-3.5 px-4 font-mono text-[11px] text-gray-600">
+                                {shop.phone || shop.ownerPhone}
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                                  shop.isVerified
+                                    ? 'bg-[#E6F4EA] text-[#007AFF]'
+                                    : 'bg-amber-100 text-amber-800'
+                                }`}>
+                                  <span className={`w-1.5 h-1.5 rounded-full ${shop.isVerified ? 'bg-[#007AFF]' : 'bg-amber-600'}`}></span>
+                                  <span>{shop.isVerified ? 'Verified' : 'Pending'}</span>
+                                </span>
+                              </td>
+                              <td className="py-3.5 px-4 text-right">
+                                <div className="inline-flex items-center gap-1.5">
+                                  {!shop.isVerified ? (
+                                    <button
+                                      onClick={() => handleApproveShop(shop.id)}
+                                      disabled={isProcessingAction}
+                                      className="px-2.5 py-1 rounded-lg bg-[#007AFF] text-white font-bold text-[11px] hover:bg-blue-700 cursor-pointer transition-colors disabled:opacity-50"
+                                    >
+                                      Verify
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={() => handleRejectShop(shop.id)}
+                                      disabled={isProcessingAction}
+                                      className="px-2.5 py-1 rounded-lg bg-rose-100 text-rose-800 font-bold text-[11px] hover:bg-rose-200 cursor-pointer transition-colors disabled:opacity-50"
+                                    >
+                                      Revoke
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : activeTab === 'Place Thumbnails' ? (
+                    <div className="p-6 space-y-6">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                          <h3 className="text-base font-extrabold text-[#11241C]">Place Thumbnail & Photo Gallery Manager</h3>
+                          <p className="text-xs text-[#55685F]">Manage up to 4 thumbnail photos per place. Admin can add, replace, or remove thumbnails instantly.</p>
+                        </div>
+                      </div>
+
+                      {/* Place Selector & Thumbnails Editor */}
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Place List Sidebar */}
+                        <div className="bg-white rounded-2xl border border-[#E8E4DA] p-4 shadow-xs max-h-[600px] overflow-y-auto space-y-2">
+                          <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Select Place</h4>
+                          {JALPAIGURI_EXPLORE_PLACES
+                            .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase()))
+                            .map(place => {
+                              const thumbs = getAdminPlaceThumbnails(place.placeId);
+                              const isSelected = selectedPlaceIdForThumbs === place.placeId;
+                              return (
                                 <button
-                                  onClick={() => handleApproveShop(shop.id)}
-                                  disabled={isProcessingAction}
-                                  className="px-2.5 py-1 rounded-lg bg-[#007AFF] text-white font-bold text-[11px] hover:bg-blue-700 cursor-pointer transition-colors disabled:opacity-50"
+                                  key={place.id}
+                                  onClick={() => setSelectedPlaceIdForThumbs(place.placeId)}
+                                  className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                                    isSelected
+                                      ? 'bg-blue-50 border-[#007AFF] text-[#007AFF]'
+                                      : 'bg-[#FAF8F5] border-[#E8E4DA] text-gray-800 hover:bg-gray-100'
+                                  }`}
                                 >
-                                  Verify
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-xs font-extrabold truncate">{place.name}</p>
+                                    <p className="text-[10px] text-gray-500">{place.category} • {thumbs.length}/4 thumbs</p>
+                                  </div>
+                                  {thumbs.length > 0 && (
+                                    <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 text-[10px] font-bold flex items-center justify-center shrink-0">
+                                      {thumbs.length}
+                                    </span>
+                                  )}
                                 </button>
-                              ) : (
-                                <button
-                                  onClick={() => handleRejectShop(shop.id)}
-                                  disabled={isProcessingAction}
-                                  className="px-2.5 py-1 rounded-lg bg-rose-100 text-rose-800 font-bold text-[11px] hover:bg-rose-200 cursor-pointer transition-colors disabled:opacity-50"
-                                >
-                                  Revoke
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : activeTab === 'Place Photos' ? (
-                <div className="overflow-x-auto">
-                  {placePhotoSubmissions.length === 0 ? (
-                    <div className="p-12 text-center text-gray-500 text-xs">
-                      No user photo submissions yet. Citizens can upload photos using gallery or camera across Explore Places, Education, Transport, Dining, Businesses, Banks/ATMs, Puja Pandals, and Emergency centers.
+                              );
+                            })}
+                        </div>
+
+                        {/* Active Place Thumbnails Editor Panel */}
+                        <div className="lg:col-span-2 bg-white rounded-2xl border border-[#E8E4DA] p-6 shadow-xs space-y-6">
+                          {(() => {
+                            const activePlace = JALPAIGURI_EXPLORE_PLACES.find(p => p.placeId === selectedPlaceIdForThumbs) || JALPAIGURI_EXPLORE_PLACES[0];
+                            if (!activePlace) return <div>Select a place</div>;
+                            const currentThumbs = getAdminPlaceThumbnails(activePlace.placeId);
+
+                            const handleAddThumb = () => {
+                              if (!thumbUrlInput.trim()) return;
+                              if (currentThumbs.length >= 4) {
+                                alert('Maximum 4 thumbnail photos allowed per place.');
+                                return;
+                              }
+                              const updated = [...currentThumbs, thumbUrlInput.trim()];
+                              setAdminPlaceThumbnails(activePlace.placeId, updated);
+                              setThumbUrlInput('');
+                            };
+
+                            const handleRemoveThumb = (index: number) => {
+                              const updated = currentThumbs.filter((_, idx) => idx !== index);
+                              setAdminPlaceThumbnails(activePlace.placeId, updated);
+                            };
+
+                            const handleReplaceThumb = (index: number) => {
+                              const newUrl = prompt('Enter replacement photo URL:', currentThumbs[index]);
+                              if (newUrl && newUrl.trim()) {
+                                const updated = [...currentThumbs];
+                                updated[index] = newUrl.trim();
+                                setAdminPlaceThumbnails(activePlace.placeId, updated);
+                              }
+                            };
+
+                            return (
+                              <div className="space-y-6">
+                                <div className="flex items-start justify-between border-b border-[#F0ECE1] pb-4">
+                                  <div>
+                                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-[#007AFF]">{activePlace.category}</span>
+                                    <h3 className="text-lg font-extrabold text-[#11241C] mt-1">{activePlace.name}</h3>
+                                    <p className="text-xs text-gray-500">{activePlace.formattedAddress}</p>
+                                  </div>
+                                </div>
+
+                                {/* 4 Thumbnails Grid */}
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-between">
+                                    <label className="text-xs font-bold text-gray-700">Admin Curated Thumbnails ({currentThumbs.length}/4)</label>
+                                    <span className="text-[10px] text-gray-500">Users can scroll and click these 4 photos</span>
+                                  </div>
+                                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    {[0, 1, 2, 3].map((slotIdx) => {
+                                      const photoUrl = currentThumbs[slotIdx];
+                                      return (
+                                        <div key={slotIdx} className="relative aspect-square rounded-2xl border-2 border-dashed border-gray-200 dark:border-white/10 bg-[#FAF8F5] overflow-hidden flex flex-col items-center justify-center group">
+                                          {photoUrl ? (
+                                            <>
+                                              <img src={photoUrl} alt={`Thumb ${slotIdx + 1}`} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-2">
+                                                <button
+                                                  onClick={() => handleReplaceThumb(slotIdx)}
+                                                  className="w-full py-1 rounded bg-[#007AFF] text-white text-[10px] font-bold hover:bg-blue-700 cursor-pointer"
+                                                >
+                                                  Replace
+                                                </button>
+                                                <button
+                                                  onClick={() => handleRemoveThumb(slotIdx)}
+                                                  className="w-full py-1 rounded bg-rose-600 text-white text-[10px] font-bold hover:bg-rose-700 cursor-pointer"
+                                                >
+                                                  Remove
+                                                </button>
+                                              </div>
+                                            </>
+                                          ) : (
+                                            <div className="flex flex-col items-center justify-center p-2 text-center text-gray-400">
+                                              <Camera className="w-6 h-6 mb-1 text-gray-300" />
+                                              <span className="text-[10px]">Slot {slotIdx + 1} Empty</span>
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+
+                                {/* Add Thumbnail Input */}
+                                {currentThumbs.length < 4 && (
+                                  <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E8E4DA] space-y-3">
+                                    <h5 className="text-xs font-bold text-gray-800">Add New Thumbnail Photo URL</h5>
+                                    <div className="flex gap-2">
+                                      <input
+                                        type="url"
+                                        value={thumbUrlInput}
+                                        onChange={(e) => setThumbUrlInput(e.target.value)}
+                                        placeholder="https://example.com/photo.jpg or Unsplash URL"
+                                        className="flex-1 px-3.5 py-2 rounded-xl bg-white border border-[#D2CEBE] text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#007AFF]"
+                                      />
+                                      <button
+                                        onClick={handleAddThumb}
+                                        className="px-4 py-2 rounded-xl bg-[#007AFF] text-white text-xs font-bold hover:bg-blue-700 cursor-pointer shadow-xs"
+                                      >
+                                        Add Thumbnail
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  ) : activeTab === 'Place Photos' ? (
+                    <div className="overflow-x-auto">
+                      {placePhotoSubmissions.length === 0 ? (
+                        <div className="p-12 text-center text-gray-500 text-xs">
+                          No user photo submissions yet. Citizens can upload photos using gallery or camera across Explore Places, Education, Transport, Dining, Businesses, Banks/ATMs, Puja Pandals, and Emergency centers.
+                        </div>
+                      ) : (
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-[#FAF8F5] border-b border-[#F0ECE1] text-[#55685F] font-bold">
+                            <tr>
+                              <th className="py-3 px-4">Photo Preview</th>
+                              <th className="py-3 px-4">Place Name & Category</th>
+                              <th className="py-3 px-4">Uploader</th>
+                              <th className="py-3 px-4">Status</th>
+                              <th className="py-3 px-4 text-right">Admin Action</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-[#F0ECE1]">
+                            {placePhotoSubmissions.map((sub) => (
+                              <tr key={sub.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
+                                <td className="py-3.5 px-4">
+                                  <img src={sub.imageUrl} alt={sub.placeName} className="w-16 h-12 object-cover rounded-xl shadow-xs border border-gray-200" />
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  <div>
+                                    <span className="font-bold text-[#11241C] block">{sub.placeName}</span>
+                                    <span className="text-[10px] text-gray-500">{sub.category}</span>
+                                  </div>
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  <span className="font-semibold text-gray-800 block">{sub.uploaderName}</span>
+                                  <span className="text-[10px] text-gray-500">{sub.uploaderEmail}</span>
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                                    sub.status === 'approved'
+                                      ? 'bg-emerald-100 text-emerald-800'
+                                      : sub.status === 'rejected'
+                                      ? 'bg-rose-100 text-rose-800'
+                                      : 'bg-amber-100 text-amber-800'
+                                  }`}>
+                                    <span>{sub.status.toUpperCase()}</span>
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-4 text-right">
+                                  <div className="inline-flex items-center gap-1.5">
+                                    {sub.status !== 'approved' && (
+                                      <button
+                                        onClick={() => approvePlacePhotoSubmission(sub.id)}
+                                        className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs cursor-pointer transition-all active:scale-95"
+                                      >
+                                        Set as Thumbnail
+                                      </button>
+                                    )}
+                                    {sub.status !== 'rejected' && (
+                                      <button
+                                        onClick={() => rejectPlacePhotoSubmission(sub.id)}
+                                        className="px-2.5 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[11px] cursor-pointer transition-all"
+                                      >
+                                        Reject
+                                      </button>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
                     </div>
                   ) : (
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-[#FAF8F5] border-b border-[#F0ECE1] text-[#55685F] font-bold">
-                        <tr>
-                          <th className="py-3 px-4">Photo Preview</th>
-                          <th className="py-3 px-4">Place Name & Category</th>
-                          <th className="py-3 px-4">Uploader</th>
-                          <th className="py-3 px-4">Status</th>
-                          <th className="py-3 px-4 text-right">Admin Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[#F0ECE1]">
-                        {placePhotoSubmissions.map((sub) => (
-                          <tr key={sub.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
-                            <td className="py-3.5 px-4">
-                              <img src={sub.imageUrl} alt={sub.placeName} className="w-16 h-12 object-cover rounded-xl shadow-xs border border-gray-200" />
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <div>
-                                <span className="font-bold text-[#11241C] block">{sub.placeName}</span>
-                                <span className="text-[10px] text-gray-500">{sub.category}</span>
-                              </div>
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <span className="font-semibold text-gray-800 block">{sub.uploaderName}</span>
-                              <span className="text-[10px] text-gray-500">{sub.uploaderEmail}</span>
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                                sub.status === 'approved'
-                                  ? 'bg-emerald-100 text-emerald-800'
-                                  : sub.status === 'rejected'
-                                  ? 'bg-rose-100 text-rose-800'
-                                  : 'bg-amber-100 text-amber-800'
-                              }`}>
-                                <span>{sub.status.toUpperCase()}</span>
-                              </span>
-                            </td>
-                            <td className="py-3.5 px-4 text-right">
-                              <div className="inline-flex items-center gap-1.5">
-                                {sub.status !== 'approved' && (
-                                  <button
-                                    onClick={() => approvePlacePhotoSubmission(sub.id)}
-                                    className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs cursor-pointer transition-all active:scale-95"
-                                  >
-                                    Set as Thumbnail
-                                  </button>
-                                )}
-                                {sub.status !== 'rejected' && (
-                                  <button
-                                    onClick={() => rejectPlacePhotoSubmission(sub.id)}
-                                    className="px-2.5 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[11px] cursor-pointer transition-all"
-                                  >
-                                    Reject
-                                  </button>
-                                )}
-                              </div>
-                            </td>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-[#FAF8F5] border-b border-[#F0ECE1] text-[#55685F] font-bold">
+                          <tr>
+                            <th className="py-3 px-4">Provider Name</th>
+                            <th className="py-3 px-4">Profession</th>
+                            <th className="py-3 px-4">Submission Date</th>
+                            <th className="py-3 px-4">Status</th>
+                            <th className="py-3 px-4 text-right">Actions</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y divide-[#F0ECE1]">
+                          {adminVerificationQueue.map((item) => {
+                            const initials = item.name.split(' ').map(n => n[0]).join('');
+                            return (
+                              <tr key={item.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
+                                <td className="py-3.5 px-4">
+                                  <div className="flex items-center gap-2.5">
+                                    <div className="w-7 h-7 rounded-full bg-[#E2E8F0] text-[#334155] font-extrabold text-[10px] flex items-center justify-center">
+                                      {initials}
+                                    </div>
+                                    <span className="font-bold text-[#11241C]">{item.name}</span>
+                                  </div>
+                                </td>
+                                <td className="py-3.5 px-4 text-[#55685F] font-semibold">{item.profession}</td>
+                                <td className="py-3.5 px-4 text-[#55685F] font-medium">{item.date}</td>
+                                <td className="py-3.5 px-4">
+                                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                                    item.status === 'Approved'
+                                      ? 'bg-[#E6F4EA] text-[#007AFF]'
+                                      : 'bg-[#EFECE6] text-[#55685F]'
+                                  }`}>
+                                    <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'Approved' ? 'bg-[#007AFF]' : 'bg-[#73827B]'}`}></span>
+                                    <span>{item.status}</span>
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-4 text-right">
+                                  <div className="inline-flex items-center gap-1.5">
+                                    <button
+                                      onClick={() => alert(`Reviewing documents for ${item.name}`)}
+                                      className="px-2.5 py-1 rounded-lg bg-[#C8EADB] text-[#007AFF] font-bold text-[11px] hover:bg-[#B5E2CE] cursor-pointer"
+                                    >
+                                      Review
+                                    </button>
+                                    <button
+                                      onClick={() => handleApproveWorker(item.id)}
+                                      disabled={isProcessingAction}
+                                      className="px-2.5 py-1 rounded-lg bg-[#007AFF] text-white font-bold text-[11px] hover:bg-blue-700 cursor-pointer transition-colors disabled:opacity-50"
+                                    >
+                                      Approve
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   )}
                 </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-[#FAF8F5] border-b border-[#F0ECE1] text-[#55685F] font-bold">
-                      <tr>
-                        <th className="py-3 px-4">Provider Name</th>
-                        <th className="py-3 px-4">Profession</th>
-                        <th className="py-3 px-4">Submission Date</th>
-                        <th className="py-3 px-4">Status</th>
-                        <th className="py-3 px-4 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#F0ECE1]">
-                      {adminVerificationQueue.map((item) => {
-                        const initials = item.name.split(' ').map(n => n[0]).join('');
-                        return (
-                          <tr key={item.id} className="hover:bg-[#FAF8F5]/80 transition-colors">
-                            <td className="py-3.5 px-4">
-                              <div className="flex items-center gap-2.5">
-                                <div className="w-7 h-7 rounded-full bg-[#E2E8F0] text-[#334155] font-extrabold text-[10px] flex items-center justify-center">
-                                  {initials}
-                                </div>
-                                <span className="font-bold text-[#11241C]">{item.name}</span>
-                              </div>
-                            </td>
-                            <td className="py-3.5 px-4 text-[#55685F] font-semibold">{item.profession}</td>
-                            <td className="py-3.5 px-4 text-[#55685F] font-medium">{item.date}</td>
-                            <td className="py-3.5 px-4">
-                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                                item.status === 'Approved'
-                                  ? 'bg-[#E6F4EA] text-[#007AFF]'
-                                  : 'bg-[#EFECE6] text-[#55685F]'
-                              }`}>
-                                <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'Approved' ? 'bg-[#007AFF]' : 'bg-[#73827B]'}`}></span>
-                                <span>{item.status}</span>
-                              </span>
-                            </td>
-                            <td className="py-3.5 px-4 text-right">
-                              <div className="inline-flex items-center gap-1.5">
-                                <button
-                                  onClick={() => alert(`Reviewing documents for ${item.name}`)}
-                                  className="px-2.5 py-1 rounded-lg bg-[#C8EADB] text-[#007AFF] font-bold text-[11px] hover:bg-[#B5E2CE] cursor-pointer"
-                                >
-                                  Review
-                                </button>
-                                <button
-                                  onClick={() => handleApproveWorker(item.id)}
-                                  disabled={isProcessingAction}
-                                  className="px-2.5 py-1 rounded-lg bg-[#007AFF] text-white font-bold text-[11px] hover:bg-blue-700 cursor-pointer transition-colors disabled:opacity-50"
-                                >
-                                  Approve
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
 
-            {/* Right Metric Cards */}
-            <div className="space-y-4">
-              {/* Card 0: Local Shops Registered */}
-              <div className="bg-white rounded-3xl p-5 border border-[#E8E4DA] shadow-xs flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#E6F4EA] text-[#007AFF] flex items-center justify-center shadow-xs shrink-0">
-                  <Store className="w-6 h-6" />
-                </div>
-                <div>
-                  <span className="text-xs font-semibold text-[#55685F] block">
-                    Registered Shops
-                  </span>
-                  <h3 className="text-xl font-extrabold text-[#11241C] tracking-tight">
-                    {adminShops.length}
-                  </h3>
-                  <span className="text-[11px] font-bold text-[#007AFF] flex items-center gap-1 mt-0.5">
-                    <TrendingUp className="w-3.5 h-3.5" />
-                    <span>{adminShops.filter(s => s.isVerified).length} verified merchants</span>
-                  </span>
-                </div>
-              </div>
-              {/* Card 1: Total Active Users */}
-              <div className="bg-white rounded-3xl p-5 border border-[#E8E4DA] shadow-xs flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#007AFF] text-white flex items-center justify-center shadow-xs shrink-0">
-                  <Users className="w-6 h-6" />
-                </div>
-                <div>
-                  <span className="text-xs font-semibold text-[#55685F] block">
-                    Total Active Users
-                  </span>
-                  <h3 className="text-xl font-extrabold text-[#11241C] tracking-tight">
-                    12,450
-                  </h3>
-                  <span className="text-[11px] font-bold text-[#007AFF] flex items-center gap-1 mt-0.5">
-                    <TrendingUp className="w-3.5 h-3.5" />
-                    <span>+5.2% this week</span>
-                  </span>
-                </div>
-              </div>
+                {/* Right Metric Cards */}
+                <div className="space-y-4">
+                  {/* Card 0: Local Shops Registered */}
+                  <div className="bg-white rounded-3xl p-5 border border-[#E8E4DA] shadow-xs flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-[#E6F4EA] text-[#007AFF] flex items-center justify-center shadow-xs shrink-0">
+                      <Store className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold text-[#55685F] block">
+                        Registered Shops
+                      </span>
+                      <h3 className="text-xl font-extrabold text-[#11241C] tracking-tight">
+                        {adminShops.length}
+                      </h3>
+                      <span className="text-[11px] font-bold text-[#007AFF] flex items-center gap-1 mt-0.5">
+                        <TrendingUp className="w-3.5 h-3.5" />
+                        <span>{adminShops.filter(s => s.isVerified).length} verified merchants</span>
+                      </span>
+                    </div>
+                  </div>
+                  {/* Card 1: Total Active Users */}
+                  <div className="bg-white rounded-3xl p-5 border border-[#E8E4DA] shadow-xs flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-[#007AFF] text-white flex items-center justify-center shadow-xs shrink-0">
+                      <Users className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold text-[#55685F] block">
+                        Total Active Users
+                      </span>
+                      <h3 className="text-xl font-extrabold text-[#11241C] tracking-tight">
+                        {adminUsers.length}
+                      </h3>
+                      <span className="text-[11px] font-bold text-[#007AFF] flex items-center gap-1 mt-0.5">
+                        <TrendingUp className="w-3.5 h-3.5" />
+                        <span>Registered in Firebase</span>
+                      </span>
+                    </div>
+                  </div>
 
-              {/* Card 2: Pending Civic Reports */}
-              <div className="bg-white rounded-3xl p-5 border border-[#E8E4DA] shadow-xs flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#E2EAE6] text-[#007AFF] flex items-center justify-center shrink-0">
-                  <AlertTriangle className="w-6 h-6 text-[#007AFF]" />
-                </div>
-                <div>
-                  <span className="text-xs font-semibold text-[#55685F] block">
-                    Pending Civic Reports
-                  </span>
-                  <h3 className="text-xl font-extrabold text-[#11241C] tracking-tight">
-                    42
-                  </h3>
-                  <span className="text-[11px] font-medium text-[#55685F]">
-                    Requires attention
-                  </span>
-                </div>
-              </div>
+                  {/* Card 2: Pending Civic Reports */}
+                  <div className="bg-white rounded-3xl p-5 border border-[#E8E4DA] shadow-xs flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-[#E2EAE6] text-[#007AFF] flex items-center justify-center shrink-0">
+                      <AlertTriangle className="w-6 h-6 text-[#007AFF]" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold text-[#55685F] block">
+                        Pending Civic Reports
+                      </span>
+                      <h3 className="text-xl font-extrabold text-[#11241C] tracking-tight">
+                        {civicReports.filter(r => r.status !== 'Resolved' && r.status !== 'Closed').length}
+                      </h3>
+                      <span className="text-[11px] font-medium text-[#55685F]">
+                        Requires municipal attention
+                      </span>
+                    </div>
+                  </div>
 
-              {/* Card 3: Recent Emergencies */}
-              <div className="bg-white rounded-3xl p-5 border border-[#E8E4DA] shadow-xs flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#FFEBEA] text-[#D9383A] flex items-center justify-center shrink-0">
-                  <span className="text-2xl font-black leading-none">*</span>
-                </div>
-                <div>
-                  <span className="text-xs font-semibold text-[#55685F] block">
-                    Recent Emergencies
-                  </span>
-                  <h3 className="text-xl font-extrabold text-[#11241C] tracking-tight">
-                    3
-                  </h3>
-                  <span className="text-[11px] font-medium text-[#D9383A]">
-                    In the last 24 hours
-                  </span>
+                  {/* Card 3: Recent Emergencies */}
+                  <div className="bg-white rounded-3xl p-5 border border-[#E8E4DA] shadow-xs flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-[#FFEBEA] text-[#D9383A] flex items-center justify-center shrink-0">
+                      <span className="text-2xl font-black leading-none">*</span>
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold text-[#55685F] block">
+                        Emergency Reports
+                      </span>
+                      <h3 className="text-xl font-extrabold text-[#11241C] tracking-tight">
+                        {civicReports.filter(r => r.category?.toLowerCase().includes('emergency') || r.category?.toLowerCase().includes('safety')).length}
+                      </h3>
+                      <span className="text-[11px] font-medium text-[#D9383A]">
+                        Live SOS / Safety incidents
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
+
       </main>
     </div>
   );

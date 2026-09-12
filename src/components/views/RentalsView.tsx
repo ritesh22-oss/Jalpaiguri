@@ -11,12 +11,15 @@ import {
   CheckCircle2,
   X,
   Building,
-  Tag
+  Tag,
+  Camera
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useApp } from '../../context/AppContext';
 import { RentalProperty } from '../../types';
 import { EmptyState } from '../common/EmptyState';
+import { UploadPlacePhotoModal } from '../common/UploadPlacePhotoModal';
+import { getAdminPlaceThumbnails } from '../../utils/placesPhotoClient';
 
 export const RentalsView: React.FC = () => {
   const { goBack } = useNav();
@@ -25,6 +28,7 @@ export const RentalsView: React.FC = () => {
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<string>('All');
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [uploadEntity, setUploadEntity] = useState<any | null>(null);
 
   // New property form state
   const [title, setTitle] = useState('');
@@ -154,44 +158,86 @@ export const RentalsView: React.FC = () => {
             />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-              {filteredRentals.map((p) => (
-              <div
-                key={p.id}
-                className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-2.5 hover:border-[#007AFF] dark:hover:border-blue-500 transition-all"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-400 border border-transparent dark:border-blue-800/40 px-2 py-0.5 rounded-md inline-block mb-1">
-                      {p.type}
-                    </span>
-                    <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white leading-snug">{p.title}</h3>
-                  </div>
-                  <span className="font-extrabold text-sm text-[#007AFF] dark:text-blue-300 bg-[#E6F4EA] dark:bg-blue-950/60 border border-transparent dark:border-blue-800/40 px-2.5 py-1 rounded-xl shrink-0">
-                    {p.rent}
-                  </span>
-                </div>
+              {filteredRentals.map((p) => {
+                const approvedThumbs = getAdminPlaceThumbnails(p.id);
+                const activeImage = approvedThumbs.length > 0 ? approvedThumbs[0] : (p.imageUrl || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&auto=format&fit=crop&q=80');
 
-                <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] flex items-center gap-1 font-medium">
-                  <MapPin className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400 shrink-0" />
-                  <span>{p.area}</span>
-                </p>
-
-                {p.description && (
-                  <p className="text-xs text-[#73827B] dark:text-[#A2B3AA] line-clamp-2">{p.description}</p>
-                )}
-
-                <div className="pt-2 border-t border-[#F0ECE1] dark:border-white/10 flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#55685F] dark:text-[#A2B3AA]">Deposit: {p.deposit}</span>
-                  <button
-                    onClick={() => window.location.href = `tel:${p.contact.replace(/\s+/g, '')}`}
-                    className="px-4 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                return (
+                  <div
+                    key={p.id}
+                    className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-2.5 hover:border-[#007AFF] dark:hover:border-blue-500 transition-all flex flex-col justify-between"
                   >
-                    <Phone className="w-3.5 h-3.5" />
-                    <span>Contact Owner</span>
-                  </button>
-                </div>
-              </div>
-            ))}
+                    <div className="space-y-2.5">
+                      {/* Image preview of the property */}
+                      <div className="relative w-full h-32 rounded-2xl overflow-hidden border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-black/10 shrink-0">
+                        <img 
+                          src={activeImage} 
+                          alt={p.title} 
+                          className="w-full h-full object-cover" 
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+
+                      {/* Approved Gallery Thumbnails */}
+                      {approvedThumbs.length > 0 && (
+                        <div className="flex gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                          {approvedThumbs.map((url, uidx) => (
+                            <img
+                              key={uidx}
+                              src={url}
+                              alt="Property Curated"
+                              className="w-12 h-12 rounded-xl object-cover border border-[#E8E4DA] dark:border-white/10 shrink-0 cursor-pointer"
+                              referrerPolicy="no-referrer"
+                            />
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <span className="text-[10px] font-bold uppercase tracking-wider bg-[#E6F4EA] dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-400 border border-transparent dark:border-blue-800/40 px-2 py-0.5 rounded-md inline-block mb-1">
+                            {p.type}
+                          </span>
+                          <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white leading-snug">{p.title}</h3>
+                        </div>
+                        <span className="font-extrabold text-sm text-[#007AFF] dark:text-blue-300 bg-[#E6F4EA] dark:bg-blue-950/60 border border-transparent dark:border-blue-800/40 px-2.5 py-1 rounded-xl shrink-0">
+                          {p.rent}
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-[#55685F] dark:text-[#A2B3AA] flex items-center gap-1 font-medium">
+                        <MapPin className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400 shrink-0" />
+                        <span>{p.area}</span>
+                      </p>
+
+                      {p.description && (
+                        <p className="text-xs text-[#73827B] dark:text-[#A2B3AA] line-clamp-2 leading-relaxed">{p.description}</p>
+                      )}
+
+                      <div className="flex justify-start">
+                        <button
+                          onClick={() => setUploadEntity(p)}
+                          className="px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-white/10 text-gray-500 hover:text-[#007AFF] dark:text-gray-400 dark:hover:text-[#38BDF8] text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-all bg-gray-50 dark:bg-white/5 active:scale-95"
+                        >
+                          <Camera className="w-3.5 h-3.5" />
+                          <span>Contribute Photo</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="pt-2.5 border-t border-[#F0ECE1] dark:border-white/10 flex items-center justify-between">
+                      <span className="text-xs font-bold text-[#55685F] dark:text-[#A2B3AA]">Deposit: {p.deposit}</span>
+                      <button
+                        onClick={() => window.location.href = `tel:${p.contact.replace(/\s+/g, '')}`}
+                        className="px-4 py-2 rounded-xl bg-[#007AFF] dark:bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                      >
+                        <Phone className="w-3.5 h-3.5" />
+                        <span>Contact Owner</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -307,6 +353,16 @@ export const RentalsView: React.FC = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {uploadEntity && (
+        <UploadPlacePhotoModal
+          placeId={uploadEntity.id}
+          placeName={uploadEntity.title}
+          category="Rentals"
+          isOpen={!!uploadEntity}
+          onClose={() => setUploadEntity(null)}
+        />
       )}
     </div>
   );

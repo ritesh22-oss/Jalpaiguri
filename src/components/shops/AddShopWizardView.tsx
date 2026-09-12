@@ -22,7 +22,8 @@ import {
   RotateCcw,
   ExternalLink,
   ShieldCheck,
-  Home
+  Home,
+  Trash2
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
@@ -151,6 +152,8 @@ export const AddShopWizardView: React.FC = () => {
   const [upiId, setUpiId] = useState('');
 
   const [photoUrl, setPhotoUrl] = useState('');
+  const [shopPhotos, setShopPhotos] = useState<string[]>([]);
+  const [newPhotoUrlInput, setNewPhotoUrlInput] = useState('');
   const [description, setDescription] = useState('');
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 
@@ -200,6 +203,7 @@ export const AddShopWizardView: React.FC = () => {
         if (data.minOrderAmount) setMinOrderAmount(data.minOrderAmount);
         if (data.upiId) setUpiId(data.upiId);
         if (data.photoUrl) setPhotoUrl(data.photoUrl);
+        if (data.shopPhotos) setShopPhotos(data.shopPhotos);
         if (data.description) setDescription(data.description);
         if (data.step) setStep(Math.min(data.step, totalSteps));
       }
@@ -240,6 +244,7 @@ export const AddShopWizardView: React.FC = () => {
         minOrderAmount,
         upiId,
         photoUrl,
+        shopPhotos,
         description,
         step,
         savedAt: new Date().toISOString()
@@ -381,7 +386,7 @@ export const AddShopWizardView: React.FC = () => {
     try {
       // Find category default photo if user didn't provide one
       const catConfig = CATEGORIES.find((c) => c.key === category);
-      const safePhoto = photoUrl.trim() || catConfig?.defaultPhoto || 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=800&auto=format&fit=crop&q=80';
+      const safePhoto = shopPhotos[0] || photoUrl.trim() || catConfig?.defaultPhoto || 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=800&auto=format&fit=crop&q=80';
 
       const payload = {
         name: shopName.trim(),
@@ -411,6 +416,7 @@ export const AddShopWizardView: React.FC = () => {
         paymentMethods: ['Cash', 'UPI'],
         upiId: upiId.trim() || undefined,
         photoUrl: safePhoto,
+        photos: shopPhotos.length > 0 ? shopPhotos : [safePhoto],
         rating: 5.0,
         reviewCount: 1,
         isVerified: false,
@@ -1022,26 +1028,125 @@ export const AddShopWizardView: React.FC = () => {
               </button>
             </div>
 
-            <div className="space-y-3 text-xs">
+            <div className="space-y-4 text-xs">
               {/* Photo Upload / URL */}
               <div>
-                <label className="block font-bold text-[#11241C] dark:text-white mb-1">
-                  Storefront Photo (দোকানের সামনের ছবি)
+                <label className="block font-bold text-[#11241C] dark:text-white mb-2">
+                  {language === 'bn' ? 'দোকানের ছবিসমূহ (সর্বোচ্চ ৪টি)' : 'Shop Photos (Max 4 photos)'}
                 </label>
-                <input
-                  type="url"
-                  value={photoUrl}
-                  onChange={(e) => setPhotoUrl(e.target.value)}
-                  placeholder="https://images.unsplash.com/... or paste image URL"
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
-                />
 
-                <div className="mt-2 p-2.5 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-200/60 dark:border-white/10 flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400">
+                {/* Grid of added photos */}
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  {shopPhotos.map((url, idx) => (
+                    <div key={idx} className="relative group border border-gray-200 dark:border-white/10 rounded-2xl p-2 bg-[#FAF8F5] dark:bg-white/5 flex flex-col gap-2">
+                      <div className="relative h-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-black/20">
+                        <img 
+                          src={url} 
+                          alt={`Shop Pano ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                        <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded-md bg-[#007AFF] text-white text-[8px] font-black uppercase tracking-wider">
+                          {idx === 0 
+                            ? (language === 'bn' ? '১ম (থাম্বনেইল)' : '1st (Thumbnail)') 
+                            : idx === 1 
+                            ? (language === 'bn' ? '২য় ছবি' : '2nd Photo') 
+                            : idx === 2 
+                            ? (language === 'bn' ? '৩য় ছবি' : '3rd Photo') 
+                            : (language === 'bn' ? '৪র্থ ছবি' : '4th Photo')}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-1">
+                        <div className="flex gap-1">
+                          {idx > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = [...shopPhotos];
+                                const [item] = updated.splice(idx, 1);
+                                updated.unshift(item);
+                                setShopPhotos(updated);
+                              }}
+                              className="px-1.5 py-1 bg-white dark:bg-white/10 hover:bg-gray-100 border border-gray-200 dark:border-white/10 rounded-lg text-[9px] font-bold text-blue-600 dark:text-blue-400 cursor-pointer"
+                              title="Make this the primary storefront cover photo"
+                            >
+                              Set Main
+                            </button>
+                          )}
+                          {idx !== 1 && shopPhotos.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = [...shopPhotos];
+                                const [item] = updated.splice(idx, 1);
+                                updated.splice(1, 0, item);
+                                setShopPhotos(updated);
+                              }}
+                              className="px-1.5 py-1 bg-white dark:bg-white/10 hover:bg-gray-100 border border-gray-200 dark:border-white/10 rounded-lg text-[9px] font-bold text-gray-700 dark:text-gray-300 cursor-pointer"
+                            >
+                              Set 2nd
+                            </button>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShopPhotos(prev => prev.filter((_, i) => i !== idx));
+                          }}
+                          className="p-1 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg cursor-pointer"
+                          title="Remove Photo"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {shopPhotos.length === 0 && (
+                    <div className="col-span-2 border border-dashed border-gray-300 dark:border-white/10 rounded-2xl p-5 text-center text-[11px] text-gray-500 dark:text-gray-400">
+                      {language === 'bn' ? 'কোনো ছবি যুক্ত করা হয়নি।' : 'No photos added yet.'}
+                    </div>
+                  )}
+                </div>
+
+                {/* Add new photo input */}
+                {shopPhotos.length < 4 ? (
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      value={newPhotoUrlInput}
+                      onChange={(e) => setNewPhotoUrlInput(e.target.value)}
+                      placeholder={language === 'bn' ? 'ছবির লিঙ্ক পেস্ট করুন...' : 'Paste image URL (Unsplash or web link)...'}
+                      className="flex-1 px-3 py-2 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newPhotoUrlInput.trim()) return;
+                        if (!newPhotoUrlInput.startsWith('http')) {
+                          alert(language === 'bn' ? 'দয়া করে একটি সঠিক ছবির লিঙ্ক প্রদান করুন' : 'Please provide a valid HTTP/HTTPS image URL');
+                          return;
+                        }
+                        setShopPhotos(prev => [...prev, newPhotoUrlInput.trim()]);
+                        setNewPhotoUrlInput('');
+                      }}
+                      className="px-3 py-2 bg-[#007AFF] hover:bg-blue-600 text-white font-extrabold rounded-xl text-xs transition cursor-pointer"
+                    >
+                      {language === 'bn' ? 'যোগ করুন' : 'Add Photo'}
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-[10px] text-amber-600 font-bold">
+                    ✓ Maximum 4 photos added. Remove one if you want to change them.
+                  </p>
+                )}
+
+                <div className="mt-2.5 p-2 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-200/60 dark:border-white/10 flex items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400">
                   <Camera className="w-4 h-4 text-blue-600 shrink-0" />
                   <span>
                     {language === 'bn'
-                      ? 'দোকানের ছবি পরে আপনার মার্চেন্ট ড্যাশবোর্ড থেকেও যুক্ত করতে পারবেন।'
-                      : 'Your shop can be registered without a photo. You can add one later from My Shop.'}
+                      ? 'দোকানের ছবি আপনি আপনার মার্চেন্ট ড্যাশবোর্ড থেকেও যেকোনো সময় সাজাতে ও পরিবর্তন করতে পারবেন।'
+                      : 'You can prioritize your photo gallery order anytime from your Merchant Dashboard.'}
                   </span>
                 </div>
               </div>
