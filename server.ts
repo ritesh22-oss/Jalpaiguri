@@ -462,6 +462,22 @@ function generateLocalFallback(query: string, role: string): string {
   return `Nomoshkar! I am **JPG AI**, your local assistant for Jalpaiguri, West Bengal. I can help you with verified electricians & plumbers, blood donor requests, Sadar Hospital emergency contacts, municipal ward grievances, and local Dooars travel advice. How can I assist you right now?`;
 }
 
+// Health Check Endpoint
+app.get('/api/health', (req: Request, res: Response) => {
+  res.json({
+    status: 'ok',
+    geminiConfigured: apiKeyService.hasGeminiKey(),
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/gemini/health', (req: Request, res: Response) => {
+  res.json({
+    status: 'ok',
+    geminiConfigured: apiKeyService.hasGeminiKey()
+  });
+});
+
 // Unified Multi-Turn Chat with Gemini & Intent-Based Grounding
 app.post('/api/gemini/chat', async (req: Request, res: Response) => {
   const {
@@ -469,11 +485,16 @@ app.post('/api/gemini/chat', async (req: Request, res: Response) => {
     history = [],
     role = 'general',
     modelType = 'general',
-    userLocation = { latitude: 26.5414, longitude: 88.7196 }
+    userLocation = { latitude: 26.5414, longitude: 88.7196 },
+    language = 'en'
   } = req.body;
 
+  console.log(`[Gemini Chat] Received request. Endpoint: /api/gemini/chat. Language: ${language}`);
+  const hasKey = apiKeyService.hasGeminiKey();
+  console.log(`[Gemini Chat] GEMINI_API_KEY configured: ${hasKey}`);
+
   if (!message || typeof message !== 'string') {
-    return res.status(400).json({ error: 'A valid message string is required.' });
+    return res.status(400).json({ success: false, error: 'A valid message string is required.', code: 'INVALID_REQUEST' });
   }
 
   const ai = getGeminiClient();
@@ -490,17 +511,22 @@ app.post('/api/gemini/chat', async (req: Request, res: Response) => {
   }
 
   if (!ai) {
-    const fallbackReply = generateLocalFallback(message, role);
-    return res.json({
-      reply: fallbackReply,
-      groundingPlaces: [],
-      modelUsed: 'local-civic-engine',
-      role
+    console.error('[Gemini Chat] Error: GEMINI_API_KEY is missing.');
+    return res.status(500).json({
+      success: false,
+      error: 'GEMINI_API_KEY is missing from the Vercel server environment.',
+      code: 'GEMINI_API_KEY_MISSING'
     });
   }
 
   try {
-    const systemInstruction = ROLE_SYSTEM_INSTRUCTIONS[role] || ROLE_SYSTEM_INSTRUCTIONS.general;
+    let systemInstruction = ROLE_SYSTEM_INSTRUCTIONS[role] || ROLE_SYSTEM_INSTRUCTIONS.general;
+    if (language === 'bn') {
+      systemInstruction += '\n\nIMPORTANT: You MUST reply entirely in Bengali (বাংলা). Do not use English unless explicitly asked or referring to specific proper nouns.';
+    } else {
+      systemInstruction += '\n\nIMPORTANT: You MUST reply entirely in English.';
+    }
+
     const formattedContents = formatGeminiHistory(history, message);
 
     // Intelligent Tool Activation Logic
@@ -524,11 +550,13 @@ app.post('/api/gemini/chat', async (req: Request, res: Response) => {
       };
     }
 
+    console.log(`[Gemini Chat] Gemini request started using model: ${selectedModel}`);
     const response = await ai.models.generateContent({
       model: selectedModel,
       contents: formattedContents,
       config: config
     });
+    console.log(`[Gemini Chat] Gemini response received.`);
 
     const replyText = response.text || generateLocalFallback(message, role);
 
@@ -550,45 +578,20 @@ app.post('/api/gemini/chat', async (req: Request, res: Response) => {
     }
 
     return res.json({
+      success: true,
       reply: replyText,
       groundingPlaces,
       modelUsed: selectedModel,
       role
     });
   } catch (err: any) {
-    console.error(`Gemini chat error with model ${selectedModel}:`, err?.message || err);
+    const errMessage = err?.message || String(err);
+    console.error(`[Gemini Chat] Gemini API error with model ${selectedModel}:`, errMessage);
 
-    // Graceful fallback to fast tier if pro or general model encountered an issue
-    if (selectedModel !== 'gemini-3.1-flash-lite') {
-      try {
-        const fallbackContents = formatGeminiHistory(history, message);
-        const fallbackResp = await ai.models.generateContent({
-          model: 'gemini-3.1-flash-lite',
-          contents: fallbackContents,
-          config: {
-            systemInstruction: ROLE_SYSTEM_INSTRUCTIONS[role] || ROLE_SYSTEM_INSTRUCTIONS.general
-          }
-        });
-
-        if (fallbackResp.text) {
-          return res.json({
-            reply: fallbackResp.text,
-            groundingPlaces: [],
-            modelUsed: 'gemini-3.1-flash-lite',
-            role
-          });
-        }
-      } catch (fallbackErr: any) {
-        console.error('Fallback model also failed:', fallbackErr?.message || fallbackErr);
-      }
-    }
-
-    const intelligentReply = generateLocalFallback(message, role);
-    return res.json({
-      reply: intelligentReply,
-      groundingPlaces: [],
-      modelUsed: 'local-civic-engine',
-      role
+    return res.status(500).json({
+      success: false,
+      error: `Gemini API Error: ${errMessage}`,
+      code: 'GEMINI_API_ERROR'
     });
   }
 });

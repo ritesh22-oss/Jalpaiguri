@@ -50,6 +50,7 @@ export interface GeminiChatRequest {
   modelType?: 'complex' | 'general' | 'fast' | 'pro' | 'lite';
   useMaps?: boolean;
   userLocation?: { latitude: number; longitude: number };
+  language?: 'en' | 'bn';
 }
 
 export interface GroundingPlace {
