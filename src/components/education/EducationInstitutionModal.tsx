@@ -1,0 +1,178 @@
+import React from 'react';
+import { EducationalInstitution } from '../../types';
+import { X, MapPin, Phone, Globe, Award, BookOpen, Clock, ShieldCheck, ExternalLink } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
+
+interface EducationInstitutionModalProps {
+  institution: EducationalInstitution | null;
+  onClose: () => void;
+}
+
+export const EducationInstitutionModal: React.FC<EducationInstitutionModalProps> = ({
+  institution,
+  onClose
+}) => {
+  const { isBengali } = useLanguage();
+
+  if (!institution) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div 
+        className="bg-white dark:bg-[#17231E] rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100 dark:border-white/10"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header with Photo / Banner */}
+        <div className="relative h-44 bg-gradient-to-r from-emerald-700 to-teal-800 rounded-t-3xl p-6 flex flex-col justify-end text-white overflow-hidden">
+          {institution.photos && institution.photos.length > 0 && (
+            <img 
+              src={institution.photos[0]} 
+              alt={institution.name}
+              className="absolute inset-0 w-full h-full object-cover opacity-35"
+              referrerPolicy="no-referrer"
+            />
+          )}
+          <button 
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          
+          <div className="relative z-10">
+            <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold uppercase tracking-wider mb-2">
+              {institution.category}
+            </span>
+            <h3 className="text-xl font-black leading-tight flex items-center gap-1.5">
+              {isBengali && institution.nameBn ? institution.nameBn : institution.name}
+              {institution.isVerified && (
+                <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 inline" />
+              )}
+            </h3>
+            <p className="text-xs text-white/80 flex items-center gap-1 mt-1">
+              <MapPin className="w-3.5 h-3.5" />
+              {institution.locality}, Jalpaiguri
+            </p>
+          </div>
+        </div>
+
+        {/* Content Body */}
+        <div className="p-6 space-y-6">
+          {/* Overview */}
+          {institution.overview && (
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
+                {isBengali ? 'বিবরণ' : 'Overview'}
+              </h4>
+              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                {institution.overview}
+              </p>
+            </div>
+          )}
+
+          {/* Quick Details Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            {institution.establishedYear && (
+              <div className="bg-gray-50 dark:bg-white/5 p-3 rounded-2xl">
+                <span className="text-[11px] text-gray-500 block">{isBengali ? 'প্রতিষ্ঠা সাল' : 'Established'}</span>
+                <span className="text-sm font-bold text-gray-900 dark:text-white">{institution.establishedYear}</span>
+              </div>
+            )}
+            {institution.board && (
+              <div className="bg-gray-50 dark:bg-white/5 p-3 rounded-2xl">
+                <span className="text-[11px] text-gray-500 block">{isBengali ? 'বোর্ড / অধিভুক্তি' : 'Board'}</span>
+                <span className="text-sm font-bold text-gray-900 dark:text-white">{institution.board}</span>
+              </div>
+            )}
+            {institution.classes && (
+              <div className="bg-gray-50 dark:bg-white/5 p-3 rounded-2xl">
+                <span className="text-[11px] text-gray-500 block">{isBengali ? 'শ্রেণীসমূহ' : 'Classes'}</span>
+                <span className="text-sm font-bold text-gray-900 dark:text-white">{institution.classes}</span>
+              </div>
+            )}
+            {institution.medium && (
+              <div className="bg-gray-50 dark:bg-white/5 p-3 rounded-2xl">
+                <span className="text-[11px] text-gray-500 block">{isBengali ? 'মাধ্যম' : 'Medium'}</span>
+                <span className="text-sm font-bold text-gray-900 dark:text-white">{institution.medium}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Contact Details */}
+          <div className="space-y-2 border-t border-gray-100 dark:border-white/10 pt-4">
+            {institution.phone && (
+              <a 
+                href={`tel:${institution.phone}`}
+                className="flex items-center gap-3 p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-semibold text-sm hover:bg-emerald-100 transition-colors"
+              >
+                <Phone className="w-4 h-4" />
+                <span>{institution.phone}</span>
+              </a>
+            )}
+            {institution.websiteUrl && (
+              <a 
+                href={institution.websiteUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-between p-3 rounded-2xl bg-gray-50 dark:bg-white/5 text-gray-700 dark:text-gray-300 font-medium text-sm hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Globe className="w-4 h-4 text-gray-400" />
+                  <span className="truncate">{institution.websiteUrl.replace(/^https?:\/\//, '')}</span>
+                </div>
+                <ExternalLink className="w-4 h-4 text-gray-400 shrink-0" />
+              </a>
+            )}
+          </div>
+
+          {/* Facilities */}
+          {institution.facilities && institution.facilities.length > 0 && (
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">
+                {isBengali ? 'সুযোগ সুবিধা' : 'Facilities'}
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {institution.facilities.map((fac, idx) => (
+                  <span 
+                    key={idx}
+                    className="px-3 py-1 bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-xs rounded-full font-medium"
+                  >
+                    {fac}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Courses List */}
+          {institution.courses && institution.courses.length > 0 && (
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3 flex items-center gap-1.5">
+                <BookOpen className="w-4 h-4 text-emerald-600" />
+                {isBengali ? 'পাঠ্যক্রম ও কোর্স' : 'Offered Courses'}
+              </h4>
+              <div className="space-y-2">
+                {institution.courses.map((course) => (
+                  <div 
+                    key={course.id}
+                    className="p-3 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 flex justify-between items-center"
+                  >
+                    <div>
+                      <h5 className="text-sm font-bold text-gray-900 dark:text-white">{course.name}</h5>
+                      <p className="text-xs text-gray-500">{course.duration}</p>
+                    </div>
+                    {course.fees && (
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                        {course.fees}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
