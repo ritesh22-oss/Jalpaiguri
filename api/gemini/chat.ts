@@ -55,7 +55,7 @@ export default async function handler(req: any, res: any) {
     }
 
     const ai = new GoogleGenAI({ apiKey });
-    const modelName = 'gemini-2.5-flash';
+    const modelName = 'gemini-3.1-flash-lite';
 
     const systemInstruction = language === 'bn'
       ? 'আপনি জলপাইগুড়ি (Jalpaiguri) পৌরসভা এবং জেলার জন্য একটি অফিসিয়াল এআই সহকারী (JPG AI Assistant)। স্থানীয় নাগরিক সহায়তা, ডাক্তার, ব্লাড ব্যাঙ্ক, প্রশাসন, পর্যটন (রাজবাড়ি দিঘী, গোরুমারা) এবং সাধারণ প্রশ্নে সহায়তা করুন। সর্বদা বাংলায় উত্তর দিন।'
