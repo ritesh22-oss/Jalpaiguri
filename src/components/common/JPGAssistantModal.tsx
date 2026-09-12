@@ -202,14 +202,13 @@ export const JPGAssistantModal: React.FC = () => {
         text: m.text
       }));
 
-      const finalQuery = lang === 'bn' ? `${query} (Reply in Bengali)` : query;
-
       const res = await apiClient.geminiChat({
-        message: finalQuery,
+        message: query,
         history: historyPayload,
         role: 'general',
         modelType: 'general',
         useMaps: true,
+        language: lang,
         userLocation: {
           latitude: location.lat || 26.5414,
           longitude: location.lng || 88.7196
