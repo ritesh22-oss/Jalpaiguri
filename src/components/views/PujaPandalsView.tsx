@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Search,
   MapPin,
@@ -13,7 +13,8 @@ import {
   BookmarkCheck,
   Star,
   Sparkles,
-  Home
+  Home,
+  Camera
 } from 'lucide-react';
 import { DurgaPandalItem, UserLocation } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
@@ -23,6 +24,7 @@ import { calculateHaversineDistance } from '../../utils/serviceArea';
 import { PandalDetailsModal } from '../modals/PandalDetailsModal';
 import { AddPandalModal } from '../modals/AddPandalModal';
 import { ReportPandalModal } from '../modals/ReportPandalModal';
+import { UploadPlacePhotoModal } from '../common/UploadPlacePhotoModal';
 
 interface PujaPandalsViewProps {
   pandals: DurgaPandalItem[];
@@ -54,6 +56,15 @@ export const PujaPandalsView: React.FC<PujaPandalsViewProps> = ({
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [reportingPandal, setReportingPandal] = useState<DurgaPandalItem | null>(null);
+  const [uploadPandal, setUploadPandal] = useState<DurgaPandalItem | null>(null);
+  const [customThumbs, setCustomThumbs] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('jpg_custom_thumbnails') || '{}');
+      setCustomThumbs(stored);
+    } catch {}
+  }, []);
 
   // Categories
   const categories = ['All', 'Saved Pandals', 'Theme Pandal', 'Traditional Sabaki', 'Eco-Friendly', 'Lighting & Illumination', 'Heritage'];
@@ -239,7 +250,7 @@ export const PujaPandalsView: React.FC<PujaPandalsViewProps> = ({
                   {/* Image */}
                   <div className="relative w-full sm:w-44 h-44 shrink-0 bg-gray-900">
                     <img
-                      src={pandal.primaryPhoto}
+                      src={customThumbs[pandal.id] || pandal.primaryPhoto}
                       alt={pandal.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -250,6 +261,17 @@ export const PujaPandalsView: React.FC<PujaPandalsViewProps> = ({
                     </div>
 
                     <div className="absolute top-2 right-2 flex items-center gap-1.5">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setUploadPandal(pandal);
+                        }}
+                        className="p-1.5 rounded-full bg-black/60 text-white hover:bg-emerald-600 transition-colors cursor-pointer"
+                        title={isBengali ? 'ছবি আপলোড করুন' : 'Upload photo'}
+                      >
+                        <Camera className="w-3.5 h-3.5" />
+                      </button>
+
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -401,6 +423,19 @@ export const PujaPandalsView: React.FC<PujaPandalsViewProps> = ({
         onClose={() => setIsReportModalOpen(false)}
         onSubmitReport={onReportPandal}
       />
+
+      {uploadPandal && (
+        <UploadPlacePhotoModal
+          placeId={uploadPandal.id}
+          placeName={uploadPandal.name}
+          category={`Puja Pandal - ${uploadPandal.category}`}
+          isOpen={!!uploadPandal}
+          onClose={() => setUploadPandal(null)}
+          onUploaded={(url) => {
+            setCustomThumbs(prev => ({ ...prev, [uploadPandal.id]: url }));
+          }}
+        />
+      )}
     </div>
   );
 };

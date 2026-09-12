@@ -5,8 +5,9 @@ import { EducationCategoryCard } from './EducationCategoryCard';
 import { EducationInstitutionModal } from './EducationInstitutionModal';
 import { EDUCATIONAL_INSTITUTIONS } from '../../data/educationData';
 import { EducationalInstitution } from '../../types';
-import { GraduationCap, ShieldCheck, Bookmark, AlertCircle, BookOpen, Search, Calendar, ChevronRight } from 'lucide-react';
+import { GraduationCap, ShieldCheck, Bookmark, AlertCircle, BookOpen, Search, Calendar, ChevronRight, Camera } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { UploadPlacePhotoModal } from '../common/UploadPlacePhotoModal';
 
 export const EducationView: React.FC = () => {
   const { isBengali } = useLanguage();
@@ -14,6 +15,7 @@ export const EducationView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'institutions' | 'notices' | 'register' | 'courses'>('institutions');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedInstitution, setSelectedInstitution] = useState<EducationalInstitution | null>(null);
+  const [uploadInstitution, setUploadInstitution] = useState<EducationalInstitution | null>(null);
 
   const filteredInstitutions = useMemo(() => {
     return EDUCATIONAL_INSTITUTIONS.filter(inst => {
@@ -87,7 +89,7 @@ export const EducationView: React.FC = () => {
                       onClick={() => setSelectedInstitution(inst)}
                       className="bg-white dark:bg-[#17231E] p-4 rounded-2xl border border-gray-200 dark:border-white/10 shadow-xs hover:border-blue-500 dark:hover:border-blue-400 transition-all cursor-pointer group"
                     >
-                         <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className="p-2.5 rounded-xl bg-blue-50 text-[#007AFF] dark:bg-blue-950/40 group-hover:bg-blue-500 group-hover:text-white transition-colors">
                                 <GraduationCap className="w-5 h-5" />
@@ -100,7 +102,20 @@ export const EducationView: React.FC = () => {
                                 <p className="text-[11px] text-gray-500 font-semibold">{inst.category} • {inst.locality} • {inst.address}</p>
                               </div>
                             </div>
-                            <ChevronRight className="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform" />
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setUploadInstitution(inst);
+                                }}
+                                className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors cursor-pointer"
+                                title="Upload Photo"
+                              >
+                                <Camera className="w-4 h-4" />
+                              </button>
+                              <ChevronRight className="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform" />
+                            </div>
                           </div>
                     </div>
                 ))}
@@ -156,6 +171,16 @@ export const EducationView: React.FC = () => {
         institution={selectedInstitution}
         onClose={() => setSelectedInstitution(null)}
       />
+
+      {uploadInstitution && (
+        <UploadPlacePhotoModal
+          placeId={uploadInstitution.id}
+          placeName={uploadInstitution.name}
+          category={`Education - ${uploadInstitution.category}`}
+          isOpen={!!uploadInstitution}
+          onClose={() => setUploadInstitution(null)}
+        />
+      )}
     </div>
   );
 };

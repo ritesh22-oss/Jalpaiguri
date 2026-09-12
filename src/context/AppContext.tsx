@@ -203,12 +203,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       status: 'pending'
     };
     setPlacePhotoSubmissions(prev => [newSub, ...prev]);
+
+    // Save to Firestore place_photos
+    if (isFirebaseConfigured && db) {
+      try {
+        await setDoc(doc(db, 'place_photos', newSub.id), newSub);
+      } catch (e) {
+        console.warn('Failed to sync photo to Firestore place_photos:', e);
+      }
+    }
+
     showToast('Photo uploaded successfully! Sent to admin panel for review.', 'success');
   };
 
   const approvePlacePhotoSubmission = async (id: string) => {
+    let targetSub: PlacePhotoSubmission | undefined;
     setPlacePhotoSubmissions(prev => prev.map(sub => {
       if (sub.id === id) {
+        targetSub = sub;
         try {
           const customThumbs = JSON.parse(localStorage.getItem('jpg_custom_thumbnails') || '{}');
           customThumbs[sub.placeId] = sub.imageUrl;
@@ -218,11 +230,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return sub;
     }));
+
+    if (targetSub) {
+      if (isFirebaseConfigured && db) {
+        try {
+          await updateDoc(doc(db, 'place_photos', id), { status: 'approved' });
+          await setDoc(doc(db, 'place_thumbnails', targetSub.placeId), {
+            imageUrl: targetSub.imageUrl,
+            placeId: targetSub.placeId,
+            placeName: targetSub.placeName,
+            approvedAt: new Date().toISOString()
+          });
+        } catch (e) {
+          console.warn('Failed to sync approval to Firestore:', e);
+        }
+      }
+    }
+
     showToast('Photo approved and set as live thumbnail for place!', 'success');
   };
 
   const rejectPlacePhotoSubmission = async (id: string) => {
     setPlacePhotoSubmissions(prev => prev.map(sub => sub.id === id ? { ...sub, status: 'rejected' } : sub));
+    if (isFirebaseConfigured && db) {
+      try {
+        await updateDoc(doc(db, 'place_photos', id), { status: 'rejected' });
+      } catch (e) {
+        console.warn('Failed to sync rejection to Firestore:', e);
+      }
+    }
     showToast('Photo submission rejected.', 'info');
   };
 
@@ -258,6 +294,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           { name: 'restaurants', setter: setRestaurants },
           { name: 'doctors', setter: setDoctors },
           { name: 'hospitals', setter: setHospitals },
+          { name: 'place_photos', setter: (data: PlacePhotoSubmission[]) => {
+              if (data && data.length > 0) {
+                setPlacePhotoSubmissions(data);
+              }
+            }
+          },
+          { name: 'place_thumbnails', setter: (data: any[]) => {
+              if (data && data.length > 0) {
+                try {
+                  const thumbs = JSON.parse(localStorage.getItem('jpg_custom_thumbnails') || '{}');
+                  data.forEach((item) => {
+                    if (item.placeId && item.imageUrl) {
+                      thumbs[item.placeId] = item.imageUrl;
+                    }
+                  });
+                  localStorage.setItem('jpg_custom_thumbnails', JSON.stringify(thumbs));
+                } catch {}
+              }
+            }
+          },
           { name: 'puja_pandals', setter: (data: DurgaPandalItem[]) => {
               if (data && data.length > 0) {
                 // Merge verified initial pandals with any custom Firestore pandals

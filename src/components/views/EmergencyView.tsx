@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft,
   AlertTriangle,
@@ -14,17 +14,28 @@ import {
   Phone,
   Compass,
   MapPin,
-  Globe
+  Globe,
+  Camera
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { JPGLogo } from '../common/JPGLogo';
+import { UploadPlacePhotoModal } from '../common/UploadPlacePhotoModal';
 
 export const EmergencyView: React.FC = () => {
   const { goBack, navigate } = useNav();
   const { user } = useAuth();
   const { isBengali, toggleLanguage, formatNumber } = useLanguage();
+  const [uploadPlace, setUploadPlace] = useState<{ id: string; name: string; category: string } | null>(null);
+  const [customThumbs, setCustomThumbs] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('jpg_custom_thumbnails') || '{}');
+      setCustomThumbs(stored);
+    } catch {}
+  }, []);
 
   const emergencyTiles = [
     {
@@ -260,25 +271,42 @@ export const EmergencyView: React.FC = () => {
 
           {/* Service Card 1: Jalpaiguri District Hospital */}
           <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3.5 transition-colors">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#FFEBEA] dark:bg-red-950/50 text-[#D9383A] dark:text-red-400 flex items-center justify-center shrink-0 border border-transparent dark:border-red-900/40">
-                <PlusSquare className="w-5 h-5" />
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                {customThumbs['hosp-jalpaiguri-district'] ? (
+                  <img
+                    src={customThumbs['hosp-jalpaiguri-district']}
+                    alt="Jalpaiguri District Hospital"
+                    className="w-12 h-12 rounded-2xl object-cover border border-emerald-500/30 shrink-0"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-2xl bg-[#FFEBEA] dark:bg-red-950/50 text-[#D9383A] dark:text-red-400 flex items-center justify-center shrink-0 border border-transparent dark:border-red-900/40">
+                    <PlusSquare className="w-5 h-5" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white">
+                    {isBengali ? 'জলপাইগুড়ি জেলা হাসপাতাল' : 'Jalpaiguri District Hospital'}
+                  </h3>
+                  <p className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA] mt-0.5 flex items-center gap-2">
+                    <span className="flex items-center gap-0.5">
+                      <MapPin className="w-3 h-3 text-[#55685F] dark:text-[#A2B3AA]" />
+                      <span>{isBengali ? `${formatNumber('2.4')} কিমি দূরে` : '2.4 km away'}</span>
+                    </span>
+                    <span>•</span>
+                    <span className="text-[#007AFF] dark:text-blue-400 font-bold">
+                      {isBengali ? '২৪/৭ খোলা' : 'Open 24/7'}
+                    </span>
+                  </p>
+                </div>
               </div>
-              <div className="flex-1">
-                <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white">
-                  {isBengali ? 'জলপাইগুড়ি জেলা হাসপাতাল' : 'Jalpaiguri District Hospital'}
-                </h3>
-                <p className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA] mt-0.5 flex items-center gap-2">
-                  <span className="flex items-center gap-0.5">
-                    <MapPin className="w-3 h-3 text-[#55685F] dark:text-[#A2B3AA]" />
-                    <span>{isBengali ? `${formatNumber('2.4')} কিমি দূরে` : '2.4 km away'}</span>
-                  </span>
-                  <span>•</span>
-                  <span className="text-[#007AFF] dark:text-blue-400 font-bold">
-                    {isBengali ? '২৪/৭ খোলা' : 'Open 24/7'}
-                  </span>
-                </p>
-              </div>
+              <button
+                onClick={() => setUploadPlace({ id: 'hosp-jalpaiguri-district', name: 'Jalpaiguri District Hospital', category: 'Healthcare - Hospital' })}
+                className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 cursor-pointer transition-colors shrink-0"
+                title="Upload Photo"
+              >
+                <Camera className="w-4 h-4" />
+              </button>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5">
@@ -302,19 +330,36 @@ export const EmergencyView: React.FC = () => {
 
           {/* Service Card 2: Kotwali Police Station */}
           <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3.5 transition-colors">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#EBF2FC] dark:bg-blue-950/50 text-[#0056b3] dark:text-sky-400 flex items-center justify-center shrink-0 border border-transparent dark:border-blue-900/40">
-                <Shield className="w-5 h-5" />
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                {customThumbs['police-kotwali-ps'] ? (
+                  <img
+                    src={customThumbs['police-kotwali-ps']}
+                    alt="Kotwali Police Station"
+                    className="w-12 h-12 rounded-2xl object-cover border border-emerald-500/30 shrink-0"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-2xl bg-[#EBF2FC] dark:bg-blue-950/50 text-[#0056b3] dark:text-sky-400 flex items-center justify-center shrink-0 border border-transparent dark:border-blue-900/40">
+                    <Shield className="w-5 h-5" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white">
+                    {isBengali ? 'কোতোয়ালি থানা' : 'Kotwali Police Station'}
+                  </h3>
+                  <p className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA] mt-0.5 flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-[#55685F] dark:text-[#A2B3AA]" />
+                    <span>{isBengali ? `${formatNumber('3.1')} কিমি দূরে` : '3.1 km away'}</span>
+                  </p>
+                </div>
               </div>
-              <div className="flex-1">
-                <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white">
-                  {isBengali ? 'কোতোয়ালি থানা' : 'Kotwali Police Station'}
-                </h3>
-                <p className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA] mt-0.5 flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-[#55685F] dark:text-[#A2B3AA]" />
-                  <span>{isBengali ? `${formatNumber('3.1')} কিমি দূরে` : '3.1 km away'}</span>
-                </p>
-              </div>
+              <button
+                onClick={() => setUploadPlace({ id: 'police-kotwali-ps', name: 'Kotwali Police Station', category: 'Safety - Police Station' })}
+                className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 cursor-pointer transition-colors shrink-0"
+                title="Upload Photo"
+              >
+                <Camera className="w-4 h-4" />
+              </button>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5">
@@ -338,19 +383,36 @@ export const EmergencyView: React.FC = () => {
 
           {/* Service Card 3: Jalpaiguri Fire Station */}
           <div className="bg-white dark:bg-[#17231E] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-4 shadow-xs space-y-3.5 transition-colors">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#FEE2E2] dark:bg-red-950/50 text-[#DC2626] dark:text-red-400 flex items-center justify-center shrink-0 border border-transparent dark:border-red-900/40">
-                <Flame className="w-5 h-5" />
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                {customThumbs['fire-jalpaiguri-station'] ? (
+                  <img
+                    src={customThumbs['fire-jalpaiguri-station']}
+                    alt="Jalpaiguri Fire Station"
+                    className="w-12 h-12 rounded-2xl object-cover border border-emerald-500/30 shrink-0"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-2xl bg-[#FEE2E2] dark:bg-red-950/50 text-[#DC2626] dark:text-red-400 flex items-center justify-center shrink-0 border border-transparent dark:border-red-900/40">
+                    <Flame className="w-5 h-5" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white">
+                    {isBengali ? 'জলপাইগুড়ি দমকল কেন্দ্র' : 'Jalpaiguri Fire Station'}
+                  </h3>
+                  <p className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA] mt-0.5 flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-[#55685F] dark:text-[#A2B3AA]" />
+                    <span>{isBengali ? `${formatNumber('4.5')} কিমি দূরে` : '4.5 km away'}</span>
+                  </p>
+                </div>
               </div>
-              <div className="flex-1">
-                <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white">
-                  {isBengali ? 'জলপাইগুড়ি দমকল কেন্দ্র' : 'Jalpaiguri Fire Station'}
-                </h3>
-                <p className="text-xs font-semibold text-[#55685F] dark:text-[#A2B3AA] mt-0.5 flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-[#55685F] dark:text-[#A2B3AA]" />
-                  <span>{isBengali ? `${formatNumber('4.5')} কিমি দূরে` : '4.5 km away'}</span>
-                </p>
-              </div>
+              <button
+                onClick={() => setUploadPlace({ id: 'fire-jalpaiguri-station', name: 'Jalpaiguri Fire Station', category: 'Safety - Fire Station' })}
+                className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 cursor-pointer transition-colors shrink-0"
+                title="Upload Photo"
+              >
+                <Camera className="w-4 h-4" />
+              </button>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5">
@@ -373,6 +435,19 @@ export const EmergencyView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {uploadPlace && (
+        <UploadPlacePhotoModal
+          placeId={uploadPlace.id}
+          placeName={uploadPlace.name}
+          category={uploadPlace.category}
+          isOpen={!!uploadPlace}
+          onClose={() => setUploadPlace(null)}
+          onUploaded={(url) => {
+            setCustomThumbs(prev => ({ ...prev, [uploadPlace.id]: url }));
+          }}
+        />
+      )}
     </div>
   );
 };

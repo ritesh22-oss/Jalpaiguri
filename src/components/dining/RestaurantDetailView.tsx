@@ -20,12 +20,14 @@ import {
   CreditCard,
   Search,
   Check,
-  X
+  X,
+  Camera
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { Restaurant, MenuItem } from '../../types';
 import { FALLBACK_JALPAIGURI_RESTAURANTS } from '../../data/jalpaiguriRestaurantsFallback';
+import { UploadPlacePhotoModal } from '../common/UploadPlacePhotoModal';
 
 export const RestaurantDetailView: React.FC = () => {
   const { navParams, goBack, navigate } = useNav();
@@ -42,6 +44,15 @@ export const RestaurantDetailView: React.FC = () => {
   const [menuItemSearch, setMenuItemSearch] = useState('');
   const [selectedMenuItemCategory, setSelectedMenuItemCategory] = useState<string>('All');
   const [showUpiModal, setShowUpiModal] = useState(false);
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+  const [customPhoto, setCustomPhoto] = useState<string | null>(() => {
+    try {
+      const thumbs = JSON.parse(localStorage.getItem('jpg_custom_thumbnails') || '{}');
+      return thumbs[restaurantId] || null;
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
     const fetchRestaurantAndMenuItems = async () => {
@@ -201,13 +212,23 @@ export const RestaurantDetailView: React.FC = () => {
       )}
 
       {/* Hero Banner Image */}
-      <div className="relative h-52 w-full bg-gray-200 dark:bg-gray-800">
+      <div className="relative h-56 w-full bg-gray-200 dark:bg-gray-800">
         <img
-          src={restaurant.photoUrl || 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=800&auto=format&fit=crop&q=80'}
+          src={customPhoto || restaurant.photoUrl || 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=800&auto=format&fit=crop&q=80'}
           alt={restaurant.name}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+
+        {/* Upload Photo Button in Banner */}
+        <button
+          onClick={() => setIsPhotoModalOpen(true)}
+          className="absolute top-4 right-4 px-3 py-1.5 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full text-white text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer border border-white/20 z-10"
+          title="Upload restaurant photo"
+        >
+          <Camera className="w-3.5 h-3.5 text-emerald-400" />
+          <span>Upload Photo</span>
+        </button>
 
         <div className="absolute bottom-4 left-4 right-4 text-white">
           <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -694,6 +715,15 @@ export const RestaurantDetailView: React.FC = () => {
           </div>
         </div>
       )}
+
+      <UploadPlacePhotoModal
+        placeId={restaurant.id}
+        placeName={restaurant.name}
+        category={`Dining - ${restaurant.category}`}
+        isOpen={isPhotoModalOpen}
+        onClose={() => setIsPhotoModalOpen(false)}
+        onUploaded={(url) => setCustomPhoto(url)}
+      />
     </div>
   );
 };

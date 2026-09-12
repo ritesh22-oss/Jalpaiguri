@@ -1,11 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Bus, Train, Search, MapPin, Clock, ArrowRightLeft, 
-  Filter, ChevronRight, Bookmark, RefreshCw, AlertCircle, CheckCircle2, Compass, X
+  Filter, ChevronRight, Bookmark, RefreshCw, AlertCircle, CheckCircle2, Compass, X, Camera
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { BUS_ROUTES, TRAIN_SERVICES, CORRIDORS } from '../../data/transportData';
+import { UploadPlacePhotoModal } from '../common/UploadPlacePhotoModal';
 
 export const TransportView: React.FC = () => {
   const { goBack } = useNav();
@@ -14,6 +15,15 @@ export const TransportView: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [filter, setFilter] = useState({ destination: 'ALL', station: 'ALL' });
+  const [uploadItem, setUploadItem] = useState<any | null>(null);
+  const [customThumbs, setCustomThumbs] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('jpg_custom_thumbnails') || '{}');
+      setCustomThumbs(stored);
+    } catch {}
+  }, []);
 
   const destinations = useMemo(() => {
     const all = [...BUS_ROUTES.map(r => r.destination), ...TRAIN_SERVICES.map(t => t.destination)];
@@ -101,38 +111,63 @@ export const TransportView: React.FC = () => {
         <section>
           <h2 className="text-sm font-black mb-3">Transport Results</h2>
           <div className="space-y-3">
-            {transportData.map((item, idx) => (
-              <div key={idx} className="bg-white dark:bg-[#111B2E] p-4 rounded-2xl border border-gray-100 dark:border-blue-900/30 shadow-sm transition cursor-pointer space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className={`p-2 rounded-xl ${item.trainNumber ? 'bg-indigo-50 text-indigo-600 dark:bg-blue-950/40 dark:text-blue-300' : 'bg-blue-50 text-[#007AFF] dark:bg-blue-950/40 dark:text-blue-300'}`}>
-                    {item.trainNumber ? <Train className="w-5 h-5" /> : <Bus className="w-5 h-5" />}
+            {transportData.map((item, idx) => {
+              const thumbUrl = customThumbs[item.id];
+              return (
+                <div key={idx} className="bg-white dark:bg-[#111B2E] p-4 rounded-2xl border border-gray-100 dark:border-blue-900/30 shadow-sm transition cursor-pointer space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      {thumbUrl ? (
+                        <img 
+                          src={thumbUrl} 
+                          alt={item.routeName || item.trainName} 
+                          className="w-12 h-12 rounded-xl object-cover border border-emerald-500/30 shrink-0" 
+                        />
+                      ) : (
+                        <div className={`p-2 rounded-xl ${item.trainNumber ? 'bg-indigo-50 text-indigo-600 dark:bg-blue-950/40 dark:text-blue-300' : 'bg-blue-50 text-[#007AFF] dark:bg-blue-950/40 dark:text-blue-300'}`}>
+                          {item.trainNumber ? <Train className="w-5 h-5" /> : <Bus className="w-5 h-5" />}
+                        </div>
+                      )}
+                      <div>
+                        <h3 className="text-sm font-extrabold text-gray-900 dark:text-white">{item.routeName || item.trainName}</h3>
+                        <p className="text-[11px] text-gray-500 dark:text-blue-200 font-semibold">{item.operator || item.stationName || 'Indian Railways'}</p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setUploadItem(item);
+                      }}
+                      className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors cursor-pointer shrink-0"
+                      title="Upload photo from camera or gallery"
+                    >
+                      <Camera className="w-4 h-4" />
+                    </button>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-extrabold text-gray-900 dark:text-white">{item.routeName || item.trainName}</h3>
-                    <p className="text-[11px] text-gray-500 dark:text-blue-200 font-semibold">{item.operator || item.stationName || 'Indian Railways'}</p>
+                  
+                  {/* Unified info grid */}
+                  <div className="grid grid-cols-2 gap-2 text-[11px] text-gray-500 bg-gray-50 dark:bg-blue-950/20 p-2 rounded-xl">
+                    {item.trainNumber ? (
+                        <>
+                          <p>Arrives: <span className="font-bold text-gray-900 dark:text-white">{item.arrivalTime}</span></p>
+                          <p>Departs: <span className="font-bold text-gray-900 dark:text-white">{item.departureTime}</span></p>
+                          <p>Halt: <span className="font-bold text-gray-900 dark:text-white">{item.haltMinutes} min</span></p>
+                          <p>Code: <span className="font-bold text-gray-900 dark:text-white">{item.stationCode}</span></p>
+                        </>
+                    ) : (
+                        <>
+                          <p>Dep: <span className="font-bold text-gray-900 dark:text-white">{item.departureTime}</span></p>
+                          <p>Arr: <span className="font-bold text-gray-900 dark:text-white">{item.arrivalTime}</span></p>
+                          <p>Fare: <span className="font-bold text-blue-600 dark:text-blue-300">{item.fare || 'N/A'}</span></p>
+                          <p>Operates: <span className="font-bold text-gray-900 dark:text-white">{item.operatingDays?.join(', ')}</span></p>
+                        </>
+                    )}
                   </div>
                 </div>
-                
-                {/* Unified info grid */}
-                <div className="grid grid-cols-2 gap-2 text-[11px] text-gray-500 bg-gray-50 dark:bg-blue-950/20 p-2 rounded-xl">
-                  {item.trainNumber ? (
-                      <>
-                        <p>Arrives: <span className="font-bold text-gray-900 dark:text-white">{item.arrivalTime}</span></p>
-                        <p>Departs: <span className="font-bold text-gray-900 dark:text-white">{item.departureTime}</span></p>
-                        <p>Halt: <span className="font-bold text-gray-900 dark:text-white">{item.haltMinutes} min</span></p>
-                        <p>Code: <span className="font-bold text-gray-900 dark:text-white">{item.stationCode}</span></p>
-                      </>
-                  ) : (
-                      <>
-                        <p>Dep: <span className="font-bold text-gray-900 dark:text-white">{item.departureTime}</span></p>
-                        <p>Arr: <span className="font-bold text-gray-900 dark:text-white">{item.arrivalTime}</span></p>
-                        <p>Fare: <span className="font-bold text-blue-600 dark:text-blue-300">{item.fare || 'N/A'}</span></p>
-                        <p>Operates: <span className="font-bold text-gray-900 dark:text-white">{item.operatingDays?.join(', ')}</span></p>
-                      </>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       </div>
@@ -177,6 +212,19 @@ export const TransportView: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {uploadItem && (
+        <UploadPlacePhotoModal
+          placeId={uploadItem.id}
+          placeName={uploadItem.routeName || uploadItem.trainName || 'Transport Route'}
+          category={uploadItem.trainNumber ? 'Transport - Railways' : 'Transport - Buses'}
+          isOpen={!!uploadItem}
+          onClose={() => setUploadItem(null)}
+          onUploaded={(url) => {
+            setCustomThumbs(prev => ({ ...prev, [uploadItem.id]: url }));
+          }}
+        />
       )}
     </div>
   );

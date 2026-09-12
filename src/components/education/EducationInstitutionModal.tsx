@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { EducationalInstitution } from '../../types';
-import { X, MapPin, Phone, Globe, Award, BookOpen, Clock, ShieldCheck, ExternalLink } from 'lucide-react';
+import { X, MapPin, Phone, Globe, Award, BookOpen, Clock, ShieldCheck, ExternalLink, Camera } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { UploadPlacePhotoModal } from '../common/UploadPlacePhotoModal';
 
 interface EducationInstitutionModalProps {
   institution: EducationalInstitution | null;
@@ -13,48 +14,86 @@ export const EducationInstitutionModal: React.FC<EducationInstitutionModalProps>
   onClose
 }) => {
   const { isBengali } = useLanguage();
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [displayPhoto, setDisplayPhoto] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!institution) {
+      setDisplayPhoto(null);
+      return;
+    }
+    // Check if admin approved a custom thumbnail for this institution
+    try {
+      const customThumbs = JSON.parse(localStorage.getItem('jpg_custom_thumbnails') || '{}');
+      if (customThumbs[institution.id]) {
+        setDisplayPhoto(customThumbs[institution.id]);
+        return;
+      }
+    } catch {}
+
+    if (institution.photos && institution.photos.length > 0) {
+      setDisplayPhoto(institution.photos[0]);
+    } else {
+      setDisplayPhoto(null);
+    }
+  }, [institution]);
 
   if (!institution) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div 
-        className="bg-white dark:bg-[#17231E] rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100 dark:border-white/10"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header with Photo / Banner */}
-        <div className="relative h-44 bg-gradient-to-r from-emerald-700 to-teal-800 rounded-t-3xl p-6 flex flex-col justify-end text-white overflow-hidden">
-          {institution.photos && institution.photos.length > 0 && (
-            <img 
-              src={institution.photos[0]} 
-              alt={institution.name}
-              className="absolute inset-0 w-full h-full object-cover opacity-35"
-              referrerPolicy="no-referrer"
-            />
-          )}
-          <button 
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-          
-          <div className="relative z-10">
-            <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold uppercase tracking-wider mb-2">
-              {institution.category}
-            </span>
-            <h3 className="text-xl font-black leading-tight flex items-center gap-1.5">
-              {isBengali && institution.nameBn ? institution.nameBn : institution.name}
-              {institution.isVerified && (
-                <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 inline" />
-              )}
-            </h3>
-            <p className="text-xs text-white/80 flex items-center gap-1 mt-1">
-              <MapPin className="w-3.5 h-3.5" />
-              {institution.locality}, Jalpaiguri
-            </p>
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+        <div 
+          className="bg-white dark:bg-[#17231E] rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100 dark:border-white/10"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header with Photo / Banner */}
+          <div className="relative h-48 bg-gradient-to-r from-emerald-700 to-teal-800 rounded-t-3xl p-6 flex flex-col justify-end text-white overflow-hidden">
+            {displayPhoto ? (
+              <img 
+                src={displayPhoto} 
+                alt={institution.name}
+                className="absolute inset-0 w-full h-full object-cover opacity-60"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-700 to-indigo-900 opacity-60" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <button
+                onClick={() => setIsUploadModalOpen(true)}
+                className="px-3 py-1.5 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full text-white text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer border border-white/20"
+                title="Upload photo from camera or gallery"
+              >
+                <Camera className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Upload Photo</span>
+              </button>
+              <button 
+                onClick={onClose}
+                className="p-2 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full text-white transition-colors cursor-pointer border border-white/20"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div className="relative z-10">
+              <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold uppercase tracking-wider mb-2">
+                {institution.category}
+              </span>
+              <h3 className="text-xl font-black leading-tight flex items-center gap-1.5">
+                {isBengali && institution.nameBn ? institution.nameBn : institution.name}
+                {institution.isVerified && (
+                  <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 inline" />
+                )}
+              </h3>
+              <p className="text-xs text-white/80 flex items-center gap-1 mt-1">
+                <MapPin className="w-3.5 h-3.5" />
+                {institution.locality}, Jalpaiguri
+              </p>
+            </div>
           </div>
-        </div>
 
         {/* Content Body */}
         <div className="p-6 space-y-6">
@@ -174,5 +213,15 @@ export const EducationInstitutionModal: React.FC<EducationInstitutionModalProps>
         </div>
       </div>
     </div>
+
+    <UploadPlacePhotoModal
+      placeId={institution.id}
+      placeName={institution.name}
+      category={`Education - ${institution.category}`}
+      isOpen={isUploadModalOpen}
+      onClose={() => setIsUploadModalOpen(false)}
+      onUploaded={(url) => setDisplayPhoto(url)}
+    />
+  </>
   );
 };
