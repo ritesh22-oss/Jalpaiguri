@@ -459,7 +459,7 @@ const AppContent: React.FC = () => {
   const isPostLogin = !['splash', 'onboarding', 'auth', 'phone-auth', 'otp', 'profile-setup', 'profile-onboarding'].includes(currentView);
 
   return (
-    <div className="w-full h-screen h-[100dvh] bg-[#FAF8F5] dark:bg-[#020617] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col relative transition-colors overflow-x-hidden overflow-y-auto">
+    <div id="app-root-scroll" className="w-full h-screen h-[100dvh] bg-[#FAF8F5] dark:bg-[#020617] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col relative transition-colors overflow-x-hidden overflow-y-auto">
       <AnimatePresence>
         {!isOnline && <OfflineView />}
       </AnimatePresence>
