@@ -1,123 +1,359 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Search,
   Sparkles,
+  Wrench,
+  Stethoscope,
+  Droplet,
+  Briefcase,
+  Car,
   Home as HomeIcon,
+  Store,
+  Landmark,
+  AlertTriangle,
+  ChevronRight,
+  TrendingUp,
+  MapPin,
   Sun,
   Moon,
-  Globe,
+  Navigation,
+  Waves,
+  ShieldCheck,
+  PhoneCall,
+  Pill,
   ArrowRight,
-  ChevronRight,
-  Map as MapIcon,
-  List
+  Globe,
+  ShoppingBag,
+  PackageSearch
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { searchMyJpgDirectory, SearchResult } from '../../services/SearchService';
 
 export const DiscoverView: React.FC = () => {
   const { navigate, setIsAssistantOpen } = useNav();
   const { isDarkMode, toggleTheme } = useTheme();
   const { isBengali, toggleLanguage } = useLanguage();
-  const appData = useApp();
-  
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [radius, setRadius] = useState<number>(5);
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
-  const categories = ['All', 'Schools', 'Colleges', 'Cafes', 'Restaurants', 'Hospitals', 'Pharmacies', 'Shops', 'Parks', 'Blood', 'Doctors', 'Workers'];
-
-  // Combined search results
-  const filteredResults = useMemo(() => {
-    let results: SearchResult[] = [];
-    
-    // Directory Search (MYJPG)
-    const directoryResults = searchMyJpgDirectory(searchQuery, appData);
-    results = [...results, ...directoryResults];
-
-    // TODO: Google Places Search Integration
-    
-    // Filter by Category
-    if (selectedCategory !== 'All') {
-      results = results.filter(r => r.category === selectedCategory);
+  const directoryCategories = useMemo(() => [
+    {
+      title: isBengali ? 'উৎসব ও নাগরিক পরিষেবা' : 'Festivals & Civic Services',
+      items: [
+        {
+          name: isBengali ? 'স্থান অন্বেষণ ও মানচিত্র' : 'Explore Places & Map Grounding',
+          count: isBengali ? 'ক্লিনিক, দোকান ও দর্শনীয় স্থান' : 'Clinics, stores & tourist spots',
+          view: 'maps-explorer' as const,
+          icon: MapPin,
+          isHighlight: true
+        },
+        {
+          name: isBengali ? 'লাইভ ট্রাফিক ও জলজট' : 'Live Traffic & Waterlogging',
+          count: isBengali ? 'রিয়েল-টাইম রাস্তার যান চলাচল' : 'Real-time road flow',
+          view: 'alerts' as const,
+          icon: Navigation,
+          isHighlight: true
+        },
+        {
+          name: isBengali ? 'নাগরিক সমস্যা জানান' : 'Report Civic Issue',
+          count: isBengali ? 'সরাসরি ওয়ার্ড পরিদর্শককে' : 'Direct to ward inspector',
+          view: 'report-problem' as const,
+          icon: AlertTriangle
+        },
+        {
+          name: isBengali ? 'পৌরসভা ও সরকারি প্রকল্প' : 'Municipal Schemes',
+          count: isBengali ? '১২টি সরকারি কর্মসূচি' : '12 government programs',
+          view: 'government' as const,
+          icon: Landmark
+        },
+        {
+          name: isBengali ? 'হারানো ও প্রাপ্তি সামগ্রী' : 'Lost & Found Items',
+          count: isBengali ? 'কমিউনিটির হারানো জিনিসপত্র' : 'Community lost items',
+          view: 'lost-found' as const,
+          icon: MapPin
+        }
+      ]
+    },
+    {
+      title: isBengali ? 'হোম ও কারিগরি সেবা' : 'Home & Technical Services',
+      items: [
+        {
+          name: isBengali ? 'ইলেকট্রিশিয়ান' : 'Electricians',
+          count: isBengali ? 'শহরে ১৪ জন যাচাইকৃত' : '14 verified in town',
+          view: 'workers' as const,
+          icon: Wrench
+        },
+        {
+          name: isBengali ? 'প্লাম্বার' : 'Plumbers',
+          count: isBengali ? 'শহরে ৯ জন যাচাইকৃত' : '9 verified in town',
+          view: 'workers' as const,
+          icon: Wrench
+        },
+        {
+          name: isBengali ? 'ছুতোর ও আসবাবপত্র মিস্ত্রি' : 'Carpenters & Furniture',
+          count: isBengali ? 'আজ ৭ জন উপলব্ধ' : '7 available today',
+          view: 'workers' as const,
+          icon: Wrench
+        },
+        {
+          name: isBengali ? 'রংমিস্ত্রি ও রাজমিস্ত্রি' : 'Painters & Masonry',
+          count: isBengali ? 'আজ ১১ জন উপলব্ধ' : '11 available today',
+          view: 'workers' as const,
+          icon: Wrench
+        }
+      ]
+    },
+    {
+      title: isBengali ? 'জরুরি ও স্বাস্থ্যসেবা' : 'Emergency & Healthcare',
+      items: [
+        {
+          name: isBengali ? 'বিশেষজ্ঞ চিকিৎসক' : 'Specialist Doctors',
+          count: isBengali ? '১৮ জন নিবন্ধিত ডাক্তার' : '18 registered clinicians',
+          view: 'medical' as const,
+          icon: Stethoscope
+        },
+        {
+          name: isBengali ? 'ব্লাড ব্যাংক ও রক্তদাতা' : 'Blood Bank & Donors',
+          count: isBengali ? '৪৮ জন সক্রিয় রক্তদাতা' : '48 active donors',
+          view: 'blood' as const,
+          icon: Droplet
+        },
+        {
+          name: isBengali ? '২৪x৭ জরুরি ফার্মেসি' : '24x7 Emergency Pharmacies',
+          count: isBengali ? 'শহরে ৬টি খোলা' : '6 open in town',
+          view: 'medical' as const,
+          icon: Pill
+        },
+        {
+          name: isBengali ? 'অ্যাম্বুলেন্স ও হাসপাতাল ডেস্ক' : 'Ambulance & Hospital Desk',
+          count: isBengali ? 'তাৎক্ষণিক সেবা' : 'Instant dispatch',
+          view: 'medical' as const,
+          icon: PhoneCall
+        }
+      ]
+    },
+    {
+      title: isBengali ? 'জীবিকা ও ব্যবসা-বাণিজ্য' : 'Livelihood & Commerce',
+      items: [
+        {
+          name: isBengali ? 'জলপাইগুড়ি স্থানীয় বাজার ও দোকান' : 'Local Marketplace & Shops',
+          count: isBengali ? '৩৪টি নিবন্ধিত দোকান ও পণ্য' : '34 verified shops & items',
+          view: 'shop-marketplace' as const,
+          icon: ShoppingBag
+        },
+        {
+          name: isBengali ? 'স্মার্ট পণ্য সন্ধান (কোথায় পাওয়া যাবে)' : 'Smart Product Finder',
+          count: isBengali ? 'পণ্যের দাম ও প্রাপ্যতা' : 'Live price & store locator',
+          view: 'smart-shopping-search' as const,
+          icon: PackageSearch
+        },
+        {
+          name: isBengali ? 'দোকানদার প্ল্যাটফর্ম ও মার্চেন্ট হাব' : 'Shop Owner & Merchant Hub',
+          count: isBengali ? 'দোকান পরিচালনা ও নতুন দোকান যোগ' : 'Manage catalog or add shop',
+          view: 'merchant-dashboard' as const,
+          icon: Store
+        },
+        {
+          name: isBengali ? 'স্থানীয় চাকরি ও নিয়োগ' : 'Local Jobs & Vacancies',
+          count: isBengali ? '১৫টি পদ খালি' : '15 open listings',
+          view: 'jobs' as const,
+          icon: Briefcase
+        },
+        {
+          name: isBengali ? 'অটো / টোটো পরিষেবা' : 'Auto / Toto Services',
+          count: isBengali ? 'স্টেশন ও দিনবাজার রুট' : 'Station & Dinbazar routes',
+          view: 'vehicle' as const,
+          icon: Car
+        },
+        {
+          name: isBengali ? 'বাড়ি ও রুম ভাড়া' : 'House Rentals & Stays',
+          count: isBengali ? '১২টি যাচাইকৃত বাসা' : '12 verified rentals',
+          view: 'rentals' as const,
+          icon: HomeIcon
+        }
+      ]
     }
-    
-    return results;
-  }, [searchQuery, selectedCategory, appData]);
+  ], [isBengali]);
+
+  // Filter sections and items based on search query
+  const filteredCategories = useMemo(() => {
+    if (!searchQuery.trim()) return directoryCategories;
+    const query = searchQuery.toLowerCase().trim();
+    return directoryCategories
+      .map((sec) => ({
+        ...sec,
+        items: sec.items.filter(
+          (item) =>
+            item.name.toLowerCase().includes(query) ||
+            item.count.toLowerCase().includes(query) ||
+            sec.title.toLowerCase().includes(query)
+        )
+      }))
+      .filter((sec) => sec.items.length > 0);
+  }, [searchQuery, directoryCategories]);
 
   return (
     <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#020617] text-[#0F172A] dark:text-[#E2E8F0] pb-28 select-none transition-colors duration-200">
       {/* Header */}
       <header className="w-full sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#020617]/95 backdrop-blur-md border-b border-[#E8E4DA] dark:border-white/10">
         <div className="max-w-5xl mx-auto px-5 pt-6 pb-3 space-y-3">
-          <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between">
+          <div>
             <h1 className="text-2xl font-extrabold tracking-tight text-[#0F172A] dark:text-white">
               {isBengali ? 'অন্বেষণ' : 'Discover'}
             </h1>
-            {/* Theme & Language Toggles */}
-            <div className="flex gap-2">
-                <button onClick={toggleLanguage} className="p-2 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#007AFF]">{isBengali ? 'বাংলা' : 'EN'}</button>
-                <button onClick={toggleTheme} className="p-2 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 text-slate-500">{isDarkMode ? <Sun className="w-4 h-4"/> : <Moon className="w-4 h-4"/>}</button>
-            </div>
+            <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+              {isBengali ? 'জলপাইগুড়ির নাগরিক ও স্থানীয় পরিমণ্ডল' : 'Jalpaiguri civic & local ecosystem'}
+            </p>
           </div>
 
-          {/* New Intelligent Search Bar */}
-          <div className="w-full bg-white dark:bg-[#1E293B] border border-[#D2CEBE] dark:border-white/10 rounded-2xl px-3.5 py-3 flex items-center gap-2.5 shadow-xs focus-within:border-[#007AFF] transition-all">
-            <Search className="w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder={isBengali ? 'স্থান, স্কুল, ক্যাফে খুঁজুন...' : 'Search places, schools, colleges, cafes...'}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full text-xs font-semibold text-[#0F172A] dark:text-white bg-transparent focus:outline-none"
-            />
-          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('home')}
+              className="w-8 h-8 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#007AFF] dark:text-blue-400 shadow-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:scale-110 active:scale-90 transition-all duration-300 cursor-pointer"
+              aria-label="Home"
+              title="Return to Dashboard"
+            >
+              <HomeIcon className="w-4 h-4 stroke-[2.5]" />
+            </button>
 
-          {/* Category Chips */}
-          <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-            {categories.map(cat => (
-                <button 
-                  key={cat} 
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap ${selectedCategory === cat ? 'bg-[#007AFF] text-white' : 'bg-white dark:bg-[#1E293B] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'}`}
-                >
-                    {cat}
-                </button>
-            ))}
+            {/* Language Switcher */}
+            <button
+              onClick={toggleLanguage}
+              className="h-8 px-2.5 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#007AFF] dark:text-[#60A5FA] flex items-center gap-1 shadow-xs cursor-pointer hover:scale-105 active:scale-95 transition-all duration-300"
+              title={isBengali ? 'Switch to English' : 'বাংলায় দেখুন'}
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>{isBengali ? 'বাংলা' : 'EN'}</span>
+            </button>
+
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              className="w-8 h-8 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 shadow-xs hover:bg-[#F2EFE9] dark:hover:bg-white/5 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
+              title="Toggle Light/Dark Theme"
+            >
+              {isDarkMode ? (
+                <Sun className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Moon className="w-4 h-4 text-[#007AFF]" />
+              )}
+            </button>
+
+            {/* AI Assistant Button */}
+            <button
+              onClick={() => setIsAssistantOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EFF6FF] dark:bg-[#172554] text-[#007AFF] dark:text-[#60A5FA] text-xs font-bold shadow-xs cursor-pointer hover:scale-105 active:scale-95 transition-all duration-300"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>JPG AI</span>
+            </button>
           </div>
-          
-          {/* Radius Filter */}
-          <div className="flex items-center gap-2 text-xs text-slate-500 font-semibold">
-              <span>Radius:</span>
-              {[1, 3, 5, 10, 20].map(r => (
-                  <button key={r} onClick={() => setRadius(r)} className={`${radius === r ? 'text-[#007AFF] font-bold' : ''}`}>{r}km</button>
-              ))}
-          </div>
+        </div>
+
+        {/* Search input */}
+        <div className="w-full bg-white dark:bg-[#1E293B] border border-[#D2CEBE] dark:border-white/10 rounded-2xl px-3.5 py-3 flex items-center gap-2.5 shadow-xs focus-within:border-[#007AFF] dark:focus-within:border-[#60A5FA] transition-all">
+          <Search className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+          <input
+            type="text"
+            placeholder={isBengali ? 'ট্রাফিক, সেবা, ডাক্তার, চাকরি, ওয়ার্ড খুঁজুন...' : 'Search traffic, services, doctors, jobs, wards...'}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full text-xs font-semibold text-[#0F172A] dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none bg-transparent"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="text-slate-400 hover:text-[#0F172A] dark:hover:text-white"
+            >
+              ×
+            </button>
+          )}
+        </div>
         </div>
       </header>
-      
-      {/* List / Map Toggle */}
-      <div className="flex justify-center p-4">
-        <div className="flex p-1 bg-white dark:bg-[#1E293B] rounded-xl border border-slate-200 dark:border-slate-700">
-            <button onClick={() => setViewMode('list')} className={`px-4 py-1.5 rounded-lg text-xs font-bold ${viewMode === 'list' ? 'bg-[#007AFF] text-white' : ''} flex items-center gap-1`}><List className="w-3.5 h-3.5"/>List</button>
-            <button onClick={() => setViewMode('map')} className={`px-4 py-1.5 rounded-lg text-xs font-bold ${viewMode === 'map' ? 'bg-[#007AFF] text-white' : ''} flex items-center gap-1`}><MapIcon className="w-3.5 h-3.5"/>Map</button>
+
+      <div className="max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
+        {/* Featured Live Traffic & Waterlogging Card */}
+        <div
+          onClick={() => navigate('alerts')}
+          className="p-4 rounded-3xl bg-gradient-to-br from-[#007AFF] to-[#0056b3] dark:from-[#1e3a8a] dark:to-[#0f172a] text-white shadow-md border border-[#007AFF]/20 dark:border-white/10 space-y-3 cursor-pointer group hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 ease-out"
+        >
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-400/20 text-blue-300 text-[10px] font-extrabold tracking-wide uppercase border border-blue-400/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping"></span>
+              <span>{isBengali ? 'লাইভ তথ্য' : 'Live Telemetry'}</span>
+            </span>
+            <span className="text-[11px] font-bold text-blue-200 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+              <span>{isBengali ? 'মানচিত্র খুলুন' : 'Open Map'}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </span>
+          </div>
+
+          <div>
+            <h2 className="text-base font-extrabold tracking-tight text-white flex items-center gap-2">
+              <Navigation className="w-4 h-4 text-blue-400" />
+              <span>{isBengali ? 'লাইভ ট্রাফিক ও জলজট' : 'Live Traffic & Waterlogging'}</span>
+            </h2>
+            <p className="text-xs text-blue-100/80 mt-1 leading-relaxed">
+              {isBengali
+                ? 'জলপাইগুড়ির প্রধান ট্রানজিট রুটে রিয়েল-টাইম গুগল ম্যাপস ট্রাফিক ও পুরসভার জলজট পর্যবেক্ষণ।'
+                : 'Real-time Google Maps Traffic Layer on Jalpaiguri transit corridors + official waterlogging & precipitation telemetry.'}
+            </p>
+          </div>
+
+          <div className="pt-2 flex items-center gap-4 text-[11px] font-semibold text-blue-200/90 border-t border-white/10">
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+              <span>{isBengali ? 'এনএইচ-২৭ ও তিস্তা' : 'NH-27 & Teesta'}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+              <span>{isBengali ? 'দিনবাজার ডিবি রোড' : 'Dinbazar DB Road'}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-blue-400"></span>
+              <span>{isBengali ? 'কদমতলা' : 'Kadamtala'}</span>
+            </div>
+          </div>
         </div>
-      </div>
-      
-      {/* Results */}
-      <div className="max-w-5xl mx-auto p-4">
-          {filteredResults.map(result => (
-              <div key={result.id} className="bg-white dark:bg-[#1E293B] p-4 rounded-2xl mb-3 shadow-sm border border-slate-100 dark:border-slate-800 flex justify-between items-center">
-                  <div>
-                      <h3 className="text-sm font-bold text-slate-900 dark:text-white">{result.name}</h3>
-                      <p className="text-xs text-slate-500">{result.category}</p>
+
+        {/* Directory Categorized Sections */}
+        {filteredCategories.map((sec, idx) => (
+          <div key={idx} className="space-y-2.5">
+            <h2 className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">
+              {sec.title}
+            </h2>
+            <div className="bg-white dark:bg-[#0B1224] rounded-3xl border border-[#E8E4DA] dark:border-white/10 divide-y divide-[#F0ECE1] dark:divide-white/5 shadow-xs overflow-hidden">
+              {sec.items.map((item, i) => {
+                const IconComponent = item.icon || ChevronRight;
+                return (
+                   <div
+                    key={i}
+                    onClick={() => navigate(item.view)}
+                    className="p-3.5 flex items-center justify-between hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-300 ease-out cursor-pointer group active:bg-blue-100 dark:active:bg-blue-900/40"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-2xl bg-blue-50 dark:bg-blue-900/40 text-[#007AFF] dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-blue-100 dark:group-hover:bg-blue-800/60 transition-all">
+                        <IconComponent className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className="text-xs font-extrabold text-[#0F172A] dark:text-white group-hover:text-[#007AFF] dark:group-hover:text-blue-400 transition-colors">
+                          {item.name}
+                        </h3>
+                        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 group-hover:text-blue-600/70 dark:group-hover:text-blue-300/70 transition-colors">
+                          {item.count}
+                        </span>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-[#007AFF] dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
                   </div>
-                  <button className="text-xs font-bold text-[#007AFF]">View</button>
-              </div>
-          ))}
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
