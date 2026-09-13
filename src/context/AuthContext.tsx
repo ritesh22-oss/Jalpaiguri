@@ -251,6 +251,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (userSnap.exists()) {
               const data = userSnap.data() as UserProfile;
               const role = isOfficialAdmin ? 'admin' : (data.role === 'admin' ? 'citizen' : (data.role || 'citizen'));
+              
+              // Determine if this is an existing user who should skip the tour
+              let tourCompleted = data.tourCompleted;
+              if (tourCompleted === undefined) {
+                // If the user was created before this feature, mark as completed
+                const createdDate = data.createdAt ? new Date(data.createdAt) : new Date(0);
+                const featureLaunchDate = new Date('2026-09-13T00:00:00Z');
+                if (createdDate < featureLaunchDate) {
+                  tourCompleted = true;
+                  // Persist to Firestore
+                  updateDoc(userDocRef, { tourCompleted: true });
+                }
+              }
+
               setUser({
                 id: fbUser.uid,
                 name: data.name || fbUser.displayName || '',
@@ -264,6 +278,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 language: data.language || 'English',
                 isBloodDonor: data.isBloodDonor ?? true,
                 isVolunteer: data.isVolunteer ?? false,
+                tourCompleted: tourCompleted,
+                tourLanguage: data.tourLanguage,
+                tourVersion: data.tourVersion,
                 createdAt: data.createdAt || new Date().toISOString()
               });
             } else {
