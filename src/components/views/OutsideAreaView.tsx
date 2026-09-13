@@ -193,7 +193,10 @@ export const OutsideAreaView: React.FC<OutsideAreaViewProps> = ({ onNavigate }) 
               <p className="font-bold text-[#11241C] dark:text-white mb-1.5">Simulate Coordinates for Testing:</p>
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => setSimulatedLocation('JALPAIGURI')}
+                  onClick={() => {
+                    setSimulatedLocation('JALPAIGURI');
+                    onNavigate('home');
+                  }}
                   className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-transparent dark:border-blue-800/40 text-[#007AFF] dark:text-blue-300 font-bold text-center hover:bg-blue-100 cursor-pointer"
                 >
                   ✓ Jalpaiguri (Inside)
