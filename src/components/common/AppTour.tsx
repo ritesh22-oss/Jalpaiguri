@@ -330,7 +330,9 @@ export const AppTour: React.FC = () => {
     await updateProfile({ tourCompleted: true, tourVersion: 1 });
   };
 
-  if (!user || user.tourCompleted || currentView !== 'home' || !isProfileComplete) {
+  const hasSeenTourLocal = localStorage.getItem('jpg_has_seen_tour') === 'true';
+
+  if (!user || user.tourCompleted || hasSeenTourLocal || currentView !== 'home' || !isProfileComplete) {
     return null;
   }
 
@@ -353,8 +355,11 @@ export const AppTour: React.FC = () => {
       };
 
   // Determine card placement (above vs below the highlighted element)
-  const cardWidth = Math.min(window.innerWidth - 32, 390);
-  const cardEstimatedHeight = 250;
+  // Determine card dimensions dynamically based on mobile screen width
+  const isMobile = window.innerWidth < 640;
+  const cardWidth = isMobile ? Math.min(window.innerWidth - 24, 320) : Math.min(window.innerWidth - 32, 380);
+  const cardEstimatedHeight = isMobile ? 180 : 230;
+  const cardPadding = isMobile ? 12 : 16;
 
   const spaceAbove = targetRect ? targetRect.top : 200;
   const spaceBelow = targetRect ? window.innerHeight - targetRect.bottom : 200;
@@ -362,27 +367,27 @@ export const AppTour: React.FC = () => {
   let isCardAbove = false;
   let cardTop = 100;
 
-  if (spaceBelow >= cardEstimatedHeight + 24) {
+  if (spaceBelow >= cardEstimatedHeight + cardPadding * 2) {
     // Plenty of space below the element
     isCardAbove = false;
-    cardTop = (targetRect?.bottom || 150) + 16;
-  } else if (spaceAbove >= cardEstimatedHeight + 24) {
+    cardTop = (targetRect?.bottom || 150) + cardPadding;
+  } else if (spaceAbove >= cardEstimatedHeight + cardPadding * 2) {
     // Plenty of space above the element
     isCardAbove = true;
-    cardTop = Math.max(16, (targetRect?.top || 300) - cardEstimatedHeight - 16);
+    cardTop = Math.max(8, (targetRect?.top || 300) - cardEstimatedHeight - cardPadding);
   } else {
     // In between: center or place where more room exists
     if (spaceBelow >= spaceAbove) {
       isCardAbove = false;
-      cardTop = Math.min(window.innerHeight - cardEstimatedHeight - 16, (targetRect?.bottom || 100) + 12);
+      cardTop = Math.min(window.innerHeight - cardEstimatedHeight - cardPadding, (targetRect?.bottom || 100) + cardPadding);
     } else {
       isCardAbove = true;
-      cardTop = Math.max(16, (targetRect?.top || 300) - cardEstimatedHeight - 12);
+      cardTop = Math.max(8, (targetRect?.top || 300) - cardEstimatedHeight - cardPadding);
     }
   }
 
-  // Ensure cardTop stays strictly inside viewport boundaries
-  cardTop = Math.max(16, Math.min(cardTop, window.innerHeight - cardEstimatedHeight - 16));
+  // Ensure cardTop stays strictly inside viewport boundaries with comfortable breathing room
+  cardTop = Math.max(8, Math.min(cardTop, window.innerHeight - cardEstimatedHeight - 8));
 
   return (
     <div className="fixed inset-0 z-[100] select-none pointer-events-none">
@@ -517,18 +522,18 @@ export const AppTour: React.FC = () => {
             )}
           </div>
 
-          <div className="bg-white/98 dark:bg-[#0F172A]/98 backdrop-blur-2xl rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.35)] border border-slate-200/80 dark:border-white/10 p-5 sm:p-5.5 relative overflow-hidden ring-1 ring-black/5">
+          <div className="bg-white/98 dark:bg-[#0F172A]/98 backdrop-blur-2xl rounded-2xl sm:rounded-3xl shadow-[0_16px_40px_rgba(0,0,0,0.3)] border border-slate-200/80 dark:border-white/10 p-3.5 sm:p-5 relative overflow-hidden ring-1 ring-black/5">
             {/* Top Accent Gradient Bar */}
             <div 
-              className="absolute top-0 left-0 right-0 h-1.5 transition-colors duration-300"
+              className="absolute top-0 left-0 right-0 h-1 transition-colors duration-300"
               style={{ background: `linear-gradient(90deg, ${currentStep.accentColor}, #38BDF8)` }}
             />
 
             {/* Header: Category Badge, Step Counter & Controls */}
-            <div className="flex items-center justify-between gap-2 mb-3 pt-1">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between gap-1.5 mb-2 pt-0.5">
+              <div className="flex items-center gap-1.5">
                 <span 
-                  className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full"
+                  className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
                   style={{
                     backgroundColor: `${currentStep.accentColor}18`,
                     color: currentStep.accentColor
@@ -536,20 +541,20 @@ export const AppTour: React.FC = () => {
                 >
                   {displayBengali ? currentStep.categoryBn : currentStep.categoryEn}
                 </span>
-                <span className="text-[11px] font-extrabold text-slate-400 dark:text-slate-400">
+                <span className="text-[10px] sm:text-[11px] font-extrabold text-slate-400 dark:text-slate-400">
                   {currentStepIndex + 1} / {TOUR_STEPS.length}
                 </span>
               </div>
 
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 {/* Language Switcher Button inside Tour */}
                 <button
                   type="button"
                   onClick={handleToggleLanguage}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 text-[10px] font-black hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                  className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 text-[9px] sm:text-[10px] font-black hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                   title="Switch Language"
                 >
-                  <Languages className="w-3 h-3 text-blue-500" />
+                  <Languages className="w-2.5 h-2.5 text-blue-500" />
                   <span>{displayBengali ? 'EN' : 'বাংলা'}</span>
                 </button>
 
@@ -557,44 +562,44 @@ export const AppTour: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleSkip}
-                  className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  className="p-0.5 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                   title="Close Tour"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
 
             {/* Title & Icon Row */}
-            <div className="flex items-start gap-3.5 mb-2.5">
+            <div className="flex items-start gap-2.5 mb-2">
               <motion.div
                 initial={{ scale: 0.6, rotate: -10 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: 'spring', stiffness: 450, damping: 18 }}
-                className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-md"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shrink-0 shadow-md [&_svg]:w-4 [&_svg]:h-4 [&_svg]:sm:w-5 [&_svg]:sm:h-5"
                 style={{ backgroundColor: currentStep.accentColor }}
               >
                 {currentStep.icon}
               </motion.div>
 
               <div className="flex-1 min-w-0">
-                <h3 className="text-base font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                <h3 className="text-[13px] sm:text-[15px] font-black text-slate-900 dark:text-white tracking-tight leading-tight">
                   {displayBengali ? currentStep.titleBn : currentStep.titleEn}
                 </h3>
-                <p className="text-[12px] text-slate-600 dark:text-slate-300 leading-relaxed mt-1 font-normal">
+                <p className="text-[11px] sm:text-[12px] text-slate-600 dark:text-slate-300 leading-relaxed mt-0.5 font-normal">
                   {displayBengali ? currentStep.descBn : currentStep.descEn}
                 </p>
               </div>
             </div>
 
             {/* Segmented Progress Bar */}
-            <div className="flex items-center gap-1.5 my-3.5">
+            <div className="flex items-center gap-1 my-2.5 sm:my-3.5">
               {TOUR_STEPS.map((step, idx) => (
                 <button
                   key={step.id}
                   type="button"
                   onClick={() => setCurrentStepIndex(idx)}
-                  className={`h-1.5 flex-1 rounded-full transition-all duration-300 cursor-pointer ${
+                  className={`h-1 flex-1 rounded-full transition-all duration-300 cursor-pointer ${
                     idx === currentStepIndex
                       ? 'bg-blue-600 dark:bg-blue-400 shadow-sm'
                       : idx < currentStepIndex
@@ -607,26 +612,26 @@ export const AppTour: React.FC = () => {
             </div>
 
             {/* Action Buttons: Back, Skip, Next / Complete */}
-            <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center justify-between pt-0.5">
               <button
                 type="button"
                 onClick={handleBack}
                 disabled={currentStepIndex === 0}
-                className={`flex items-center gap-1 text-xs font-black py-2 px-3 rounded-xl transition-all cursor-pointer ${
+                className={`flex items-center gap-0.5 text-[11px] sm:text-xs font-black py-1 px-2 rounded-lg transition-all cursor-pointer ${
                   currentStepIndex === 0
                     ? 'opacity-30 cursor-not-allowed text-slate-400'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-3.5 h-3.5" />
                 <span>{displayBengali ? 'আগেরটি' : 'Previous'}</span>
               </button>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={handleSkip}
-                  className="text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 px-2 py-1.5 transition-colors cursor-pointer"
+                  className="text-[11px] sm:text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 px-1.5 py-1 transition-colors cursor-pointer"
                 >
                   {displayBengali ? 'এড়িয়ে যান' : 'Skip'}
                 </button>
@@ -635,7 +640,7 @@ export const AppTour: React.FC = () => {
                   whileTap={{ scale: 0.95 }}
                   type="button"
                   onClick={handleNext}
-                  className="bg-gradient-to-r from-blue-600 to-[#007AFF] hover:from-blue-700 hover:to-blue-600 text-white font-black text-xs px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/25 flex items-center gap-1.5 cursor-pointer transition-all"
+                  className="bg-gradient-to-r from-blue-600 to-[#007AFF] hover:from-blue-700 hover:to-blue-600 text-white font-black text-[11px] sm:text-xs px-3 py-1.5 sm:px-4 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md shadow-blue-500/25 flex items-center gap-1 cursor-pointer transition-all"
                 >
                   <span>
                     {currentStepIndex === TOUR_STEPS.length - 1
@@ -647,9 +652,9 @@ export const AppTour: React.FC = () => {
                       : 'Next'}
                   </span>
                   {currentStepIndex < TOUR_STEPS.length - 1 ? (
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-3.5 h-3.5" />
                   ) : (
-                    <CheckCircle2 className="w-4 h-4" />
+                    <CheckCircle2 className="w-3.5 h-3.5" />
                   )}
                 </motion.button>
               </div>
