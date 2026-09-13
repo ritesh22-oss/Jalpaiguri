@@ -39,7 +39,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ userId }) =>
   return (
     <button
       onClick={() => navigate('notifications')}
-      className={`relative w-9 h-9 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 text-[#11241C] dark:text-[#F8FAFC] flex items-center justify-center shadow-sm hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] active:scale-95 transition-all cursor-pointer ${
+      className={`relative w-9 h-9 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 text-[#11241C] dark:text-[#F8FAFC] flex items-center justify-center shadow-sm hover:bg-[#F3F0E6] dark:hover:bg-blue-950/60 dark:hover:border-blue-500/50 dark:hover:text-blue-400 active:scale-95 transition-all cursor-pointer ${
         hasNewPulse ? 'animate-bounce' : ''
       }`}
       title="Notifications"
