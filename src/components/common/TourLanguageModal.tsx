@@ -12,9 +12,9 @@ export const TourLanguageModal: React.FC = () => {
   const [selectedLang, setSelectedLang] = useState<'English' | 'বাংলা'>(isBengali ? 'বাংলা' : 'English');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Show only if user is logged in, profile complete, tour hasn't started, AND on home view
+  // Show only if user is logged in, profile complete, tour hasn't started/completed, AND on home view
   const shouldShow = user && 
-                     user.tourCompleted === undefined && 
+                     user.tourCompleted !== true && 
                      !user.tourLanguage && 
                      currentView === 'home';
 

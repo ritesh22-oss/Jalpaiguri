@@ -213,7 +213,7 @@ export const AppTour: React.FC = () => {
     }
   };
 
-  if (!user || user.tourCompleted || localStorage.getItem('jpg_has_seen_tour') === 'true' || !isReady || currentView !== 'home' || !isProfileComplete) return null;
+  if (!user || user.tourCompleted || !isReady || currentView !== 'home' || !isProfileComplete) return null;
 
   // Calculate info card position
   const getCardStyle = () => {
