@@ -3,7 +3,9 @@ import { ArrowLeft, Search, Shield, Sparkles, Sun, Moon, Globe, Home } from 'luc
 import { useNav } from '../../context/NavigationContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import { JPGLogo } from './JPGLogo';
+import { NotificationBell } from './NotificationBell';
 
 interface HeaderProps {
   title?: string;
@@ -25,6 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
   const { goBack, navigate, setIsAssistantOpen } = useNav();
   const { isDarkMode, toggleTheme } = useTheme();
   const { language, toggleLanguage, isBengali } = useLanguage();
+  const { user } = useAuth();
 
   return (
     <header className="sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#020617]/90 backdrop-blur-md border-b border-[#E8E4DA]/60 dark:border-white/10 px-4 py-3 flex items-center justify-between transition-colors">
@@ -103,6 +106,9 @@ export const Header: React.FC<HeaderProps> = ({
             <Search className="w-4 h-4 stroke-[2]" />
           </button>
         )}
+
+        {/* Notifications Bell */}
+        <NotificationBell userId={user?.id} />
 
         {/* Switch to Admin Dashboard view toggle */}
         <button

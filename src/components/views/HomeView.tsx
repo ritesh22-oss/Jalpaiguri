@@ -36,6 +36,7 @@ import { useNav } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { JPGLogo } from '../common/JPGLogo';
+import { NotificationBell } from '../common/NotificationBell';
 import { useLocation } from '../../context/LocationContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { LiveJalpaiguriMap } from '../common/LiveJalpaiguriMap';
@@ -150,6 +151,7 @@ export const HomeView: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            <NotificationBell userId={user?.id} />
             {user ? (
               <button
                 id="home-profile-btn"
