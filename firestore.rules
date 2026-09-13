@@ -135,6 +135,15 @@ service cloud.firestore {
       match /saved_pandals/{pandalId} {
         allow read, create, delete: if isOwner(userId);
       }
+
+      match /notifications/{notifId} {
+        allow read, create, update, delete: if isOwner(userId);
+      }
+    }
+
+    match /adminNotifications/{id} {
+      allow read, update, delete: if isAdmin();
+      allow create: if isSignedIn();
     }
 
     match /workers/{workerId} {
@@ -177,7 +186,7 @@ service cloud.firestore {
     }
 
     match /blood_donors/{donorId} {
-      allow read: if (resource.data.isVisible == true && resource.data.agreedToSearch == true) || (isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin()));
+      allow read: if true;
       allow create: if isSignedIn() && isValidBloodDonor(incoming());
       allow update: if (isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin())) && isValidBloodDonor(incoming());
       allow delete: if isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin());

@@ -31,6 +31,7 @@ import { JPGLogo } from '../common/JPGLogo';
 import { db } from '../../lib/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { useAdminGuard } from '../../hooks/useAdminGuard';
+import { AdminNotificationBell } from '../common/AdminNotificationBell';
 import { JALPAIGURI_EXPLORE_PLACES } from '../../data/jalpaiguriPlaces';
 import { getAdminPlaceThumbnails, setAdminPlaceThumbnails } from '../../utils/placesPhotoClient';
 import { CMSManager } from '../admin/CMSManager';
@@ -350,10 +351,7 @@ export const AdminDashboardView: React.FC = () => {
 
           {/* Right Header Items: Notification & Admin Avatar */}
           <div className="flex items-center gap-4 relative">
-            <button className="relative p-2 text-[#11241C] hover:bg-[#FAF8F5] rounded-full cursor-pointer transition-colors">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#D9383A] rounded-full"></span>
-            </button>
+            <AdminNotificationBell />
 
             <div className="relative">
               <button

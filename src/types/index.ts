@@ -62,6 +62,7 @@ export type ViewType =
   | 'edit-profile'
   | 'settings'
   | 'admin-dashboard'
+  | 'admin-notifications'
   | 'ai-chat'
   | 'maps-explorer'
   | 'safety-sos'
@@ -535,14 +536,24 @@ export interface LostFoundItem {
 }
 
 export interface AppNotification {
-  id: string;
-  type: 'blood' | 'job' | 'service' | 'alert' | 'report' | 'system';
+  id?: string;
+  notificationId: string;
+  userId?: string;
+  type: string;
   title: string;
   message: string;
-  timestamp: string;
+  createdAt: string;
+  timestamp?: string;
   read: boolean;
+  icon?: string;
+  actionType?: string;
+  actionData?: Record<string, any>;
   actionView?: ViewType;
   actionParams?: any;
+  actorUid?: string;
+  actorName?: string;
+  entityId?: string;
+  entityType?: string;
 }
 
 export interface ChatMessage {

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { ViewType } from '../types';
 
 interface NavigationStackItem {
@@ -28,9 +28,36 @@ interface NavigationContextType {
 const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
 
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [history, setHistory] = useState<NavigationStackItem[]>([
-    { view: 'splash' }
-  ]);
+  const [history, setHistory] = useState<NavigationStackItem[]>(() => {
+    try {
+      // 1. Check sessionStorage for active view on refresh
+      const savedView = sessionStorage.getItem('jpg_current_view') as ViewType;
+      if (savedView && savedView !== 'splash') {
+        console.log('[MYJPG ROUTER] Restoring view from sessionStorage:', savedView);
+        return [{ view: savedView }];
+      }
+
+      // 2. Check URL pathname for direct Vercel links (e.g. /blood, /shops, /discover, /profile, /home)
+      const path = window.location.pathname;
+      if (path && path !== '/' && path !== '') {
+        const cleanPath = path.replace(/^\//, '');
+        if (cleanPath === 'blood') return [{ view: 'blood' }];
+        if (cleanPath === 'shops' || cleanPath === 'shop-marketplace') return [{ view: 'shop-marketplace' }];
+        if (cleanPath === 'discover') return [{ view: 'discover' }];
+        if (cleanPath === 'profile') return [{ view: 'profile' }];
+        if (cleanPath === 'home') return [{ view: 'home' }];
+        if (cleanPath === 'admin-dashboard') return [{ view: 'admin-dashboard' }];
+        if (cleanPath === 'admin-notifications') return [{ view: 'admin-notifications' }];
+        if (cleanPath === 'notifications') return [{ view: 'notifications' }];
+        if (cleanPath === 'auth') return [{ view: 'auth' }];
+      }
+    } catch (e) {
+      console.warn('[MYJPG ROUTER] Error restoring route:', e);
+    }
+
+    return [{ view: 'splash' }];
+  });
+
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
@@ -39,6 +66,26 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const currentItem = history[history.length - 1] || { view: 'home' };
   const currentView = currentItem.view;
   const params = currentItem.params || {};
+
+  // Sync current view to sessionStorage and URL pathname on view change
+  useEffect(() => {
+    if (currentView && currentView !== 'splash') {
+      try {
+        sessionStorage.setItem('jpg_current_view', currentView);
+        const pathMapping: Record<string, string> = {
+          'shop-marketplace': '/shops',
+          'blood': '/blood',
+          'discover': '/discover',
+          'profile': '/profile',
+          'home': '/home',
+          'notifications': '/notifications',
+          'admin-notifications': '/admin-notifications'
+        };
+        const urlPath = pathMapping[currentView] || `/${currentView}`;
+        window.history.replaceState(null, '', urlPath);
+      } catch (e) {}
+    }
+  }, [currentView]);
 
   const navigate = useCallback((view: ViewType, newParams?: Record<string, any>) => {
     setHistory((prev) => [...prev, { view, params: newParams }]);

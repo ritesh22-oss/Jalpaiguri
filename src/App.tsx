@@ -84,6 +84,10 @@ import { MapsExplorerView } from './components/views/MapsExplorerView';
 import { ProfileView } from './components/views/ProfileView';
 import { OfferServicesView } from './components/views/OfferServicesView';
 import { AdminDashboardView } from './components/views/AdminDashboardView';
+import { NotificationsView } from './components/views/NotificationsView';
+import { AdminNotificationsView } from './components/views/AdminNotificationsView';
+import { WelcomeNotificationPopup } from './components/common/WelcomeNotificationPopup';
+import { checkAndCreateWelcomeNotification } from './services/notificationService';
 import { FAQView } from './components/views/FAQView';
 import { OutsideAreaView } from './components/views/OutsideAreaView';
 import { LocationPermissionRequiredView } from './components/views/LocationPermissionRequiredView';
@@ -131,6 +135,21 @@ const AppContent: React.FC = () => {
   const { pujaPandals, addPujaPandal, reportPandalInfo } = useApp();
   const { isBengali } = useLanguage();
   const { isOnline } = useOnlineStatus();
+  const [showWelcomePopup, setShowWelcomePopup] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isAuthenticated && isProfileComplete && user && user.id) {
+      checkAndCreateWelcomeNotification({
+        id: user.id,
+        name: user.name || 'Citizen',
+        language: isBengali ? 'বাংলা' : 'English'
+      }).then((isNew) => {
+        if (isNew) {
+          setShowWelcomePopup(true);
+        }
+      });
+    }
+  }, [isAuthenticated, isProfileComplete, user, isBengali]);
 
   // 1. Initial Routing Effect (From Splash)
   React.useEffect(() => {
@@ -427,12 +446,15 @@ const AppContent: React.FC = () => {
       case 'profile':
       case 'volunteer':
       case 'settings':
-      case 'notifications':
         return <ProfileView />;
+      case 'notifications':
+        return <NotificationsView />;
       case 'offer-services':
         return <OfferServicesView />;
       case 'admin-dashboard':
         return <AdminDashboardView />;
+      case 'admin-notifications':
+        return <AdminNotificationsView />;
       case 'faq':
         return <FAQView />;
       default:
@@ -476,6 +498,13 @@ const AppContent: React.FC = () => {
           <JPGAssistantModal />
           <TourLanguageModal />
           <AppTour />
+          {showWelcomePopup && user && (
+            <WelcomeNotificationPopup
+              userName={user.name || 'Citizen'}
+              onClose={() => setShowWelcomePopup(false)}
+              isBengali={isBengali}
+            />
+          )}
         </>
       )}
       <Toast />
