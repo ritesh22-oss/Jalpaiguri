@@ -284,7 +284,7 @@ export const HomeView: React.FC = () => {
         </div>
 
         {/* JALPAIGURI LOCAL MARKETPLACE & SHOPS COMPACT SHOWCASE CARD */}
-        <div className="bg-white dark:bg-[#0B1224] border border-blue-100 dark:border-blue-900/50 rounded-2xl p-3.5 shadow-2xs hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md hover:scale-[1.01] transition-all duration-300 ease-out space-y-2.5">
+        <div id="home-marketplace-card" className="bg-white dark:bg-[#0B1224] border border-blue-100 dark:border-blue-900/50 rounded-2xl p-3.5 shadow-2xs hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md hover:scale-[1.01] transition-all duration-300 ease-out space-y-2.5">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-900/40">
@@ -497,7 +497,7 @@ export const HomeView: React.FC = () => {
         </div>
 
         {/* Live Traffic & Waterlogging Highlights */}
-        <div>
+        <div id="home-traffic-card">
           <div className="flex items-center justify-between mb-3 px-1">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-extrabold text-[#0F172A] dark:text-white tracking-tight flex items-center gap-1.5">
