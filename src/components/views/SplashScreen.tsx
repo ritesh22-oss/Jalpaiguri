@@ -31,14 +31,8 @@ export const SplashScreen: React.FC = () => {
           replaceView('profile-setup');
         }
       } else {
-        const hasOnboarded = localStorage.getItem('jpg_has_onboarded') === 'true';
-        const hasExistingAccount = !!localStorage.getItem('jpg_user_profile');
-        if (hasOnboarded || hasExistingAccount) {
-          replaceView('auth');
-        } else {
-          // New user -> Show Get Started screen (onboarding) after splash
-          replaceView('onboarding');
-        }
+        // Show Get Started screen (onboarding) after splash
+        replaceView('onboarding');
       }
     }, 1600);
 

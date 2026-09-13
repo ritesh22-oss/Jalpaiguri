@@ -30,29 +30,16 @@ const NavigationContext = createContext<NavigationContextType | undefined>(undef
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [history, setHistory] = useState<NavigationStackItem[]>(() => {
     try {
-      // 1. Check sessionStorage for active view on refresh
-      const savedView = sessionStorage.getItem('jpg_current_view') as ViewType;
-      if (savedView && savedView !== 'splash') {
-        console.log('[MYJPG ROUTER] Restoring view from sessionStorage:', savedView);
-        return [{ view: savedView }];
-      }
-
-      // 2. Check URL pathname for direct Vercel links (e.g. /blood, /shops, /discover, /profile, /home)
+      // Direct explicit deep links (e.g., /admin-dashboard) can be supported if specifically accessed, otherwise default to splash
       const path = window.location.pathname;
       if (path && path !== '/' && path !== '') {
         const cleanPath = path.replace(/^\//, '');
-        if (cleanPath === 'blood') return [{ view: 'blood' }];
-        if (cleanPath === 'shops' || cleanPath === 'shop-marketplace') return [{ view: 'shop-marketplace' }];
-        if (cleanPath === 'discover') return [{ view: 'discover' }];
-        if (cleanPath === 'profile') return [{ view: 'profile' }];
-        if (cleanPath === 'home') return [{ view: 'home' }];
         if (cleanPath === 'admin-dashboard') return [{ view: 'admin-dashboard' }];
-        if (cleanPath === 'admin-notifications') return [{ view: 'admin-notifications' }];
-        if (cleanPath === 'notifications') return [{ view: 'notifications' }];
         if (cleanPath === 'auth') return [{ view: 'auth' }];
+        if (cleanPath === 'onboarding') return [{ view: 'onboarding' }];
       }
     } catch (e) {
-      console.warn('[MYJPG ROUTER] Error restoring route:', e);
+      console.warn('[MYJPG ROUTER] Error initializing route:', e);
     }
 
     return [{ view: 'splash' }];
