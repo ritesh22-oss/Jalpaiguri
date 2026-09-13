@@ -42,21 +42,14 @@ import { LiveJalpaiguriMap } from '../common/LiveJalpaiguriMap';
 import { HomeSearchAssistant } from '../common/HomeSearchAssistant';
 import { UNIFIED_NEARBY_DIRECTORY } from '../../data/nearbyServicesDirectory';
 import { calculateHaversineDistance, formatDistanceString } from '../../data/jalpaiguriLocalities';
-import { NearbyCategoryType, DurgaPandalItem } from '../../types';
-import { HomePujaPandalsSection } from './HomePujaPandalsSection';
-import { PandalDetailsModal } from '../modals/PandalDetailsModal';
-import { ReportPandalModal } from '../modals/ReportPandalModal';
+import { NearbyCategoryType } from '../../types';
 
 export const HomeView: React.FC = () => {
   const { navigate, setIsAssistantOpen } = useNav();
   const { user, firebaseUser } = useAuth();
-  const { workers, doctors, localAlerts, civicReports, isRealtimeConnected, refreshData, pujaPandals, reportPandalInfo } = useApp();
+  const { workers, doctors, localAlerts, civicReports, isRealtimeConnected, refreshData } = useApp();
   const { location, status, setIsLocationSelectorOpen, requestCurrentLocation } = useLocation();
   const { isBengali, t, tLocality, tCategory } = useLanguage();
-
-  const [selectedPandal, setSelectedPandal] = useState<DurgaPandalItem | null>(null);
-  const [isPandalDetailsOpen, setIsPandalDetailsOpen] = useState(false);
-  const [isPandalReportOpen, setIsPandalReportOpen] = useState(false);
 
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
@@ -141,10 +134,10 @@ export const HomeView: React.FC = () => {
   ];
 
   return (
-    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#020617] pb-28 select-none transition-colors">
+    <div className="w-full h-full bg-[#FAF8F5] dark:bg-[#020617] pb-28 select-none transition-colors overflow-x-hidden">
       {/* Top Header */}
       <div className="w-full bg-white dark:bg-[#0B1224] border-b border-gray-100 dark:border-white/10 sticky top-0 z-20 shadow-xs transition-colors">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-3.5 pb-4 space-y-3">
+        <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 pt-3.5 pb-4 space-y-3">
         {/* Topmost Row: App Logo at most top left corner */}
         <div className="flex items-center justify-between">
           <div
@@ -354,21 +347,6 @@ export const HomeView: React.FC = () => {
           </div>
         </div>
 
-
-
-        {/* DURGA PUJA PANDALS SECTION: Completely replaces the old Nearby For You section */}
-        <div id="home-discovery">
-          <HomePujaPandalsSection
-            pandals={pujaPandals}
-            userLocation={location}
-            onSelectPandal={(pandal) => {
-              setSelectedPandal(pandal);
-              setIsPandalDetailsOpen(true);
-            }}
-            onNavigateToAll={() => navigate('puja-pandals')}
-          />
-        </div>
-
         {/* 12 Quick Services Icon Grid */}
         <div id="home-city-services">
           <div className="flex items-center justify-between mb-3 px-1">
@@ -565,24 +543,6 @@ export const HomeView: React.FC = () => {
           </div>
         </div>
 
-        {/* Pandal Modals */}
-        <PandalDetailsModal
-          pandal={selectedPandal}
-          isOpen={isPandalDetailsOpen}
-          onClose={() => setIsPandalDetailsOpen(false)}
-          userLocation={location}
-          onOpenReportModal={(pandal) => {
-            setSelectedPandal(pandal);
-            setIsPandalReportOpen(true);
-          }}
-        />
-
-        <ReportPandalModal
-          pandal={selectedPandal}
-          isOpen={isPandalReportOpen}
-          onClose={() => setIsPandalReportOpen(false)}
-          onSubmitReport={reportPandalInfo}
-        />
       </div>
     </div>
   );

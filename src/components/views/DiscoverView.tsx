@@ -42,13 +42,6 @@ export const DiscoverView: React.FC = () => {
       title: isBengali ? 'উৎসব ও নাগরিক পরিষেবা' : 'Festivals & Civic Services',
       items: [
         {
-          name: isBengali ? 'দুর্গাপূজা মণ্ডপ ডিরেক্টরি' : 'Durga Puja Pandals Directory',
-          count: isBengali ? 'সেরা পূজা মণ্ডপ ও গুগল ম্যাপস দিকনির্দেশ' : 'Top verified pandals & directions',
-          view: 'puja-pandals' as const,
-          icon: Sparkles,
-          isHighlight: true
-        },
-        {
           name: isBengali ? 'স্থান অন্বেষণ ও মানচিত্র' : 'Explore Places & Map Grounding',
           count: isBengali ? 'ক্লিনিক, দোকান ও দর্শনীয় স্থান' : 'Clinics, stores & tourist spots',
           view: 'maps-explorer' as const,

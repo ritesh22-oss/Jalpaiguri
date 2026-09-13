@@ -177,10 +177,10 @@ service cloud.firestore {
     }
 
     match /blood_donors/{donorId} {
-      allow read: if isSignedIn() && (isOwner(existing().userId) || isAdmin() || (existing().isVisible == true && existing().agreedToSearch == true));
+      allow read: if (resource.data.isVisible == true && resource.data.agreedToSearch == true) || (isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin()));
       allow create: if isSignedIn() && isValidBloodDonor(incoming());
-      allow update: if (isOwner(existing().userId) || isAdmin()) && isValidBloodDonor(incoming());
-      allow delete: if isOwner(existing().userId) || isAdmin();
+      allow update: if (isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin())) && isValidBloodDonor(incoming());
+      allow delete: if isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin());
     }
 
     match /local_alerts/{alertId} {

@@ -129,7 +129,7 @@ export const BloodView: React.FC = () => {
           {/* 1. I Need Blood (Soft Pink Card) */}
           <div
             onClick={() => navigate('emergency-blood-finder')}
-            className="bg-[#FFEBEA] dark:bg-[#281517] border border-[#FFD2D0] dark:border-red-900/40 rounded-3xl p-5 text-center shadow-xs hover:border-[#D9383A] active:scale-98 transition-all duration-300 cursor-pointer space-y-1.5"
+            className="bg-[#FFEBEA] dark:bg-[#281517] border border-[#FFD2D0] dark:border-red-900/40 rounded-3xl p-5 text-center shadow-xs hover:border-[#D9383A] active:scale-98 transition-all cursor-pointer space-y-1.5"
           >
             <div className="w-10 h-10 rounded-2xl bg-white/70 dark:bg-red-900/40 text-[#D9383A] dark:text-red-400 flex items-center justify-center mx-auto">
               <Droplet className="w-6 h-6 fill-[#D9383A] dark:fill-red-400" />
@@ -144,8 +144,11 @@ export const BloodView: React.FC = () => {
 
           {/* 2. I Want to Donate (Soft Mint Card) */}
           <div
-            onClick={() => navigate('profile')}
-            className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/40 rounded-3xl p-5 text-center shadow-xs hover:border-blue-500 hover:bg-blue-100/50 dark:hover:bg-blue-900/40 active:scale-98 transition-all duration-300 cursor-pointer space-y-1.5"
+            onClick={() => {
+                const el = document.getElementById('register-donor-form');
+                el?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="bg-[#DCEEE3] dark:bg-[#122A20] border border-[#C2E4D2] dark:border-blue-900/40 rounded-3xl p-5 text-center shadow-xs hover:border-[#007AFF] active:scale-98 transition-all cursor-pointer space-y-1.5"
           >
             <div className="w-10 h-10 rounded-2xl bg-white/70 dark:bg-blue-900/40 text-[#007AFF] dark:text-[#38BDF8] flex items-center justify-center mx-auto">
               <HeartHandshake className="w-6 h-6 text-[#007AFF] dark:text-[#38BDF8]" />
@@ -161,7 +164,7 @@ export const BloodView: React.FC = () => {
           {/* 3. Find Donors (Soft Neutral Warm Gray Card) */}
           <div
             onClick={() => navigate('emergency-blood-finder')}
-            className="bg-[#EFECE6] dark:bg-[#1C2822] border border-[#E0DCD3] dark:border-white/10 rounded-3xl p-5 text-center shadow-xs hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/40 active:scale-98 transition-all duration-300 cursor-pointer space-y-1.5"
+            className="bg-[#EFECE6] dark:bg-[#1C2822] border border-[#E0DCD3] dark:border-white/10 rounded-3xl p-5 text-center shadow-xs hover:border-[#11241C] active:scale-98 transition-all cursor-pointer space-y-1.5"
           >
             <div className="w-10 h-10 rounded-2xl bg-white/70 dark:bg-white/10 text-[#11241C] dark:text-white flex items-center justify-center mx-auto">
               <Search className="w-6 h-6 stroke-[2.5]" />
@@ -242,7 +245,7 @@ export const BloodView: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full py-3.5 bg-[#D9383A] text-white font-bold text-xs rounded-xl shadow-md hover:bg-blue-600 transition-all duration-300 active:scale-98 cursor-pointer"
+                className="w-full py-3.5 bg-[#D9383A] text-white font-bold text-xs rounded-xl shadow-md hover:bg-[#B92628] active:scale-98 transition-all cursor-pointer"
               >
                 Broadcast Urgent Blood Alert
               </button>

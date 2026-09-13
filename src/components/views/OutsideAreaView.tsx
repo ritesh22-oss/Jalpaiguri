@@ -84,8 +84,8 @@ export const OutsideAreaView: React.FC<OutsideAreaViewProps> = ({ onNavigate }) 
           </div>
 
           {/* Detected Location Box */}
-          <div className="bg-[#FAF8F5] dark:bg-[#121E19] border border-[#E5E1D5] dark:border-white/10 rounded-2xl p-4 text-left space-y-2 transition-colors">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#73827A] dark:text-[#A2B3AA]">
+          <div className="bg-[#EBF5FF] dark:bg-[#0C1A2E] border border-[#CCE4FF] dark:border-blue-900/30 rounded-2xl p-4 text-left space-y-2 transition-colors">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-[#0052CC] dark:text-[#60A5FA]">
               Your current location appears to be:
             </p>
             <div className="flex items-start justify-between">
@@ -97,12 +97,12 @@ export const OutsideAreaView: React.FC<OutsideAreaViewProps> = ({ onNavigate }) 
                   {detectedState} {distanceText && `• ${distanceText}`}
                 </p>
                 {location?.lat && location?.lng && (
-                  <p className="text-[11px] font-mono text-[#8C9B93] dark:text-[#A2B3AA] mt-1">
+                  <p className="text-[11px] font-mono text-[#0052CC] dark:text-[#60A5FA] mt-1">
                     GPS: {location.lat.toFixed(4)}°N, {location.lng.toFixed(4)}°E (±{location.accuracy || 20}m)
                   </p>
                 )}
               </div>
-              <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[#F2F4F7] dark:bg-white/10 text-[#475467] dark:text-[#A2B3AA]">
+              <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[#D1E9FF] dark:bg-blue-900/30 text-[#0047AB] dark:text-[#60A5FA]">
                 Outside Coverage
               </span>
             </div>
