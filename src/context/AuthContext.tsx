@@ -237,15 +237,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const role = isOfficialAdmin ? 'admin' : (data.role === 'admin' ? 'citizen' : (data.role || 'citizen'));
               
               let tourCompleted = data.tourCompleted;
-              // Only first login/new users who opened their account see the tour. Already signed up users bypass it.
+              // Only first login/new users who opened their account see the tour. Already signed up users bypass it completely.
               if (data.name && data.location) {
                 tourCompleted = true;
+                try {
+                  localStorage.setItem('jpg_has_seen_tour', 'true');
+                  if (data.tourCompleted !== true) {
+                    updateDoc(userDocRef, { tourCompleted: true }).catch(() => {});
+                  }
+                } catch (_) {}
               } else if (tourCompleted === undefined) {
                 const createdDate = data.createdAt ? new Date(data.createdAt) : new Date(0);
                 const featureLaunchDate = new Date('2026-09-13T00:00:00Z');
                 if (createdDate < featureLaunchDate) {
                   tourCompleted = true;
-                  updateDoc(userDocRef, { tourCompleted: true });
+                  try {
+                    localStorage.setItem('jpg_has_seen_tour', 'true');
+                    updateDoc(userDocRef, { tourCompleted: true }).catch(() => {});
+                  } catch (_) {}
                 }
               }
               console.log(`[MYJPG STARTUP] Tour completed: ${Boolean(tourCompleted)}`);
@@ -381,11 +390,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (userSnap.exists()) {
           const profileData = userSnap.data() as UserProfile;
+          const isExistingUser = Boolean(profileData.name && profileData.location);
+          if (isExistingUser) {
+            try {
+              localStorage.setItem('jpg_has_seen_tour', 'true');
+              if (profileData.tourCompleted !== true) {
+                updateDoc(userDocRef, { tourCompleted: true }).catch(() => {});
+              }
+            } catch (_) {}
+          }
+
           const updatedProfile: UserProfile = {
             ...profileData,
             role: assignedRole,
             email: fbUser.email || profileData.email || '',
-            tourCompleted: (profileData.name && profileData.location) ? true : profileData.tourCompleted
+            tourCompleted: isExistingUser ? true : profileData.tourCompleted
           };
           setUser(updatedProfile);
           setIsLoading(false);
@@ -475,13 +494,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (userSnap.exists()) {
           const profileData = userSnap.data() as UserProfile;
+          const isExistingUser = Boolean(profileData.name && profileData.location);
+          if (isExistingUser) {
+            try {
+              localStorage.setItem('jpg_has_seen_tour', 'true');
+              if (profileData.tourCompleted !== true) {
+                updateDoc(userDocRef, { tourCompleted: true }).catch(() => {});
+              }
+            } catch (_) {}
+          }
+
           const updatedProfile: UserProfile = {
             ...profileData,
             role: assignedRole,
             email: fbUser.email || profileData.email || '',
             emailVerified: fbUser.emailVerified,
             authMethod: 'email',
-            tourCompleted: (profileData.name && profileData.location) ? true : profileData.tourCompleted
+            tourCompleted: isExistingUser ? true : profileData.tourCompleted
           };
           setUser(updatedProfile);
           localStorage.setItem('jpg_user_profile', JSON.stringify(updatedProfile));
@@ -851,6 +880,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (!needsSetup && profileData) {
         profileData.tourCompleted = true;
+        try {
+          localStorage.setItem('jpg_has_seen_tour', 'true');
+          if (isFirebaseConfigured && db) {
+            const userDocRef = doc(db, 'users', effectiveUid);
+            updateDoc(userDocRef, { tourCompleted: true }).catch(() => {});
+          }
+        } catch (_) {}
       }
 
       setUser(profileData);
