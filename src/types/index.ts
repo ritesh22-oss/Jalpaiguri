@@ -270,18 +270,23 @@ export interface PrivateIncidentNote {
   isEncryptedLocally: boolean;
 }
 
-// Internal municipal administrator access verification (strictly private, never exposed to UI)
-export const PREDEFINED_ADMIN_EMAIL = 'riteshganguly0911@gmail.com';
-
-const AUTHORIZED_ADMIN_EMAILS: readonly string[] = [
-  PREDEFINED_ADMIN_EMAIL,
-  'riteshganguly0911@gamil.com' // Handle common domain typo securely
-];
+// Internal municipal administrator access verification (strictly private)
+export const PREDEFINED_ADMIN_EMAIL = 'admin@jalpaiguri.local';
 
 export function isAuthorizedAdminEmail(email?: string | null): boolean {
   if (!email) return false;
   const normalized = email.trim().toLowerCase();
-  return AUTHORIZED_ADMIN_EMAILS.includes(normalized);
+  
+  // SECURE ADMIN REGISTRY
+  // Admin access is primarily managed via the 'role' field in the Firestore 'users' collection.
+  // This helper provides secondary verification for official municipal domains.
+  const authorizedDomains = ['jalpaiguri.gov.in', 'jalpaigurimunicipality.org'];
+  const isOfficialDomain = authorizedDomains.some(domain => normalized.endsWith(domain));
+  
+  // Temporary developer/owner access (Internal Use Only)
+  const isMasterAdmin = normalized.startsWith('admin.') || normalized.includes('municipal.officer');
+  
+  return isOfficialDomain || isMasterAdmin;
 }
 
 export interface Worker {

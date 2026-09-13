@@ -89,7 +89,27 @@ export const ProfileView: React.FC = () => {
   const [editLocation, setEditLocation] = useState(user?.location || 'Kadamtala, Jalpaiguri');
   const [editPhone, setEditPhone] = useState(user?.phone || '');
   const [isDonor, setIsDonor] = useState(user?.isBloodDonor || false);
+  const [editAvatarUrl, setEditAvatarUrl] = useState<string | null>(user?.avatarUrl || null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) { // 2MB limit
+        alert(isBengali ? 'ছবি ২ এমবি-র কম হতে হবে' : 'Image must be less than 2MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditAvatarUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDeleteAvatar = () => {
+    setEditAvatarUrl(null);
+  };
 
   const bloodGroups: BloodGroup[] = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', "I don't know"];
 
@@ -109,6 +129,7 @@ export const ProfileView: React.FC = () => {
       setEditLocation(user.location || 'Kadamtala, Jalpaiguri');
       setEditPhone(user.phone || '');
       setIsDonor(Boolean(user.isBloodDonor));
+      setEditAvatarUrl(user.avatarUrl || null);
       setIsEditModalOpen(true);
       setSaveSuccess(false);
     }
@@ -126,7 +147,8 @@ export const ProfileView: React.FC = () => {
         bloodGroup: editBloodGroup,
         location: editLocation.trim(),
         phone: editPhone.trim(),
-        isBloodDonor: isDonor
+        isBloodDonor: isDonor,
+        avatarUrl: editAvatarUrl
       });
     }
 
@@ -201,9 +223,9 @@ export const ProfileView: React.FC = () => {
           <div className="bg-white dark:bg-[#0F172A] rounded-3xl p-5 border border-[#E8E4DA] dark:border-white/10 shadow-xs space-y-4 transition-colors">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3.5">
-                {firebaseUser?.photoURL ? (
+                {user?.avatarUrl || firebaseUser?.photoURL ? (
                   <img
-                    src={firebaseUser.photoURL}
+                    src={user?.avatarUrl || firebaseUser?.photoURL || ''}
                     alt={user?.name || 'User'}
                     className="w-16 h-16 rounded-3xl object-cover shadow-sm border border-[#E8E4DA] dark:border-white/10"
                     referrerPolicy="no-referrer"
@@ -445,28 +467,7 @@ export const ProfileView: React.FC = () => {
             </div>
           </div>
 
-          <div
-            onClick={() => {
-              window.dispatchEvent(new CustomEvent('replay-app-tour'));
-              navigate('home'); // Redirect to home to see the tour
-            }}
-            className="p-4 flex items-center justify-between hover:bg-[#FAF8F5] dark:hover:bg-blue-900/20 hover:scale-[1.01] cursor-pointer transition-all duration-300 ease-out active:bg-blue-50 dark:active:bg-blue-900/40"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-[#2563EB] dark:text-[#38BDF8] flex items-center justify-center">
-                <Sparkles className="w-4 h-4" />
-              </div>
-              <div>
-                <h3 className="text-xs font-extrabold text-[#11241C] dark:text-white">
-                  {isBengali ? 'অ্যাপ ট্যুর (কীভাবে ব্যবহার করবেন)' : 'App Tour Guide'}
-                </h3>
-                <p className="text-[11px] text-[#55685F] dark:text-[#A2B3AA]">
-                  {isBengali ? 'MYJPG কীভাবে কাজ করে শিখুন' : 'Learn how to use MYJPG features'}
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-[#8C9B93]" />
-          </div>
+
         </div>
 
         {/* Section: My Shop */}
@@ -639,7 +640,10 @@ export const ProfileView: React.FC = () => {
             </button>
 
             <button
-              onClick={() => navigate('auth')}
+              onClick={async () => {
+                await logout();
+                navigate('auth');
+              }}
               className="w-full py-3 bg-white dark:bg-[#0F172A] border border-[#D2CEBE] dark:border-white/15 text-[#2563EB] dark:text-[#38BDF8] font-bold text-xs rounded-2xl flex items-center justify-center gap-2 hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] cursor-pointer transition-colors"
             >
               <UserPlus className="w-4 h-4" />
@@ -701,6 +705,54 @@ export const ProfileView: React.FC = () => {
             )}
 
             <form onSubmit={handleSaveProfile} className="space-y-3.5">
+              {/* Profile Picture Upload */}
+              <div className="flex flex-col items-center gap-3 pb-2">
+                <div className="relative group">
+                  {editAvatarUrl || firebaseUser?.photoURL ? (
+                    <img
+                      src={editAvatarUrl || firebaseUser?.photoURL || ''}
+                      alt="Profile Preview"
+                      className="w-24 h-24 rounded-3xl object-cover shadow-md border-2 border-[#2563EB] dark:border-blue-500"
+                    />
+                  ) : (
+                    <div className="w-24 h-24 rounded-3xl bg-[#F1F5F9] dark:bg-white/5 border-2 border-dashed border-[#CBD5E1] dark:border-white/20 flex flex-col items-center justify-center text-[#64748B] dark:text-[#94A3B8]">
+                      <User className="w-8 h-8 mb-1" />
+                      <span className="text-[10px] font-bold">{isBengali ? 'ছবি নেই' : 'No Photo'}</span>
+                    </div>
+                  )}
+                  <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover:opacity-100 rounded-3xl cursor-pointer transition-opacity duration-200">
+                    <Edit3 className="w-6 h-6" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                
+                <div className="flex gap-2">
+                  <label className="px-4 py-1.5 bg-[#eff6ff] dark:bg-blue-950/60 text-[#2563EB] dark:text-[#38BDF8] text-[11px] font-bold rounded-full border border-blue-100 dark:border-blue-900/40 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors">
+                    {isBengali ? 'ছবি পরিবর্তন করুন' : 'Change Photo'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                      className="hidden"
+                    />
+                  </label>
+                  {(editAvatarUrl || firebaseUser?.photoURL) && (
+                    <button
+                      type="button"
+                      onClick={handleDeleteAvatar}
+                      className="px-4 py-1.5 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-[11px] font-bold rounded-full border border-red-100 dark:border-red-900/40 cursor-pointer hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors"
+                    >
+                      {isBengali ? 'মুছে ফেলুন' : 'Remove'}
+                    </button>
+                  )}
+                </div>
+              </div>
+
               {/* Full Name */}
               <div>
                 <label className="block text-xs font-bold text-[#11241C] dark:text-[#F8FAFC] uppercase mb-1">

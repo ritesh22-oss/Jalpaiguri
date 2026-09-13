@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronRight, 
@@ -10,9 +10,7 @@ import {
   MapPin, 
   Compass, 
   User, 
-  Bell,
-  Wrench,
-  CheckCircle2
+  Wrench
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
@@ -116,13 +114,12 @@ export const AppTour: React.FC = () => {
   const tourLanguage = user?.tourLanguage || (isBengali ? 'বাংলা' : 'English');
   const displayBengali = tourLanguage === 'বাংলা';
 
-  // Handle body overflow to fix scrolling after tour
+  // Handle body overflow
   useEffect(() => {
     const isTourActive = isReady && currentView === 'home' && !user?.tourCompleted && isProfileComplete;
     
     if (isTourActive) {
       document.body.style.overflow = 'hidden';
-      // Also prevent scrolling on touch devices
       document.body.style.touchAction = 'none';
     } else {
       document.body.style.overflow = '';
@@ -137,7 +134,6 @@ export const AppTour: React.FC = () => {
 
   // Update target rect when step changes or window resizes
   useEffect(() => {
-    // Only proceed if we are on the home view and profile is complete
     if (currentView !== 'home' || !isProfileComplete) return;
 
     const updateRect = () => {
@@ -146,7 +142,6 @@ export const AppTour: React.FC = () => {
         const rect = element.getBoundingClientRect();
         setTargetRect(rect);
         
-        // Auto-scroll to keep element in view if it's outside
         const isVisible = (
           rect.top >= 0 &&
           rect.left >= 0 &&
@@ -160,11 +155,10 @@ export const AppTour: React.FC = () => {
       }
     };
 
-    // Initial delay to let HomeView render completely
     const timer = setTimeout(() => {
       updateRect();
       setIsReady(true);
-    }, 600);
+    }, 400);
 
     window.addEventListener('resize', updateRect);
     window.addEventListener('scroll', updateRect);
@@ -205,7 +199,6 @@ export const AppTour: React.FC = () => {
 
   const handleComplete = async () => {
     if (user) {
-      // Ensure scrolling is restored immediately
       document.body.style.overflow = '';
       document.body.style.touchAction = '';
       localStorage.setItem('jpg_has_seen_tour', 'true');
@@ -215,19 +208,18 @@ export const AppTour: React.FC = () => {
 
   if (!user || user.tourCompleted || !isReady || currentView !== 'home' || !isProfileComplete) return null;
 
-  // Calculate info card position
+  // Calculate dynamic professional card position
   const getCardStyle = () => {
     if (!targetRect) return { top: '50%', left: '50%' };
 
-    const padding = 12;
-    const cardWidth = Math.min(window.innerWidth - 32, 240); // Maximum 240px width
-    const cardHeightEstimate = 140; 
+    const padding = 16;
+    const cardWidth = Math.min(window.innerWidth - 32, 320);
+    const cardHeightEstimate = 180;
     const spaceAbove = targetRect.top;
     const spaceBelow = window.innerHeight - targetRect.bottom;
 
     let top: number;
     
-    // Position below if space exists, otherwise above, otherwise center
     if (spaceBelow > cardHeightEstimate + padding) {
       top = targetRect.bottom + padding;
     } else if (spaceAbove > cardHeightEstimate + padding) {
@@ -236,9 +228,8 @@ export const AppTour: React.FC = () => {
       top = window.innerHeight / 2 - cardHeightEstimate / 2;
     }
 
-    // Boundary checks to ensure it stays on screen
-    const maxTop = window.innerHeight - cardHeightEstimate - 16;
-    const minTop = 16;
+    const maxTop = window.innerHeight - cardHeightEstimate - 24;
+    const minTop = 24;
     top = Math.max(minTop, Math.min(top, maxTop));
 
     return {
@@ -250,152 +241,159 @@ export const AppTour: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-[100] pointer-events-none">
-      {/* Dimmed Overlay with Hole */}
-      <div className="absolute inset-0 bg-black/40 transition-opacity duration-300 pointer-events-auto overflow-hidden">
-            {targetRect && (
+      {/* Dynamic Animated Spotlight Backdrop */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-xs transition-all duration-500 pointer-events-auto overflow-hidden">
+        {targetRect && (
           <motion.div 
             layoutId="spotlight"
             className="absolute bg-transparent pointer-events-auto"
             initial={false}
             animate={{
-              top: targetRect.top - 6,
-              left: targetRect.left - 6,
-              width: targetRect.width + 12,
-              height: targetRect.height + 12,
+              top: targetRect.top - 8,
+              left: targetRect.left - 8,
+              width: targetRect.width + 16,
+              height: targetRect.height + 16,
             }}
             transition={{ 
               type: 'spring', 
-              stiffness: 260, 
-              damping: 26,
-              mass: 0.8
+              stiffness: 300, 
+              damping: 28,
+              mass: 0.7
             }}
             style={{
-              borderRadius: '12px',
-              boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.45)',
+              borderRadius: '20px',
+              boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.65), 0 0 25px 4px rgba(0, 122, 255, 0.5)',
               zIndex: 1
             }}
           >
-            {/* Pulsing Accent */}
+            {/* Pulsing Outer Aura */}
             <motion.div 
               animate={{ 
-                scale: [1, 1.02, 1],
-                opacity: [0.5, 0.8, 0.5]
+                scale: [1, 1.04, 1],
+                opacity: [0.6, 1, 0.6]
               }}
               transition={{ 
-                duration: 2, 
+                duration: 1.8, 
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
-              className="absolute inset-0 border-2 border-blue-400/30 rounded-xl"
+              className="absolute inset-0 border-2 border-blue-400 rounded-2xl shadow-[0_0_15px_rgba(0,122,255,0.8)]"
             />
           </motion.div>
         )}
       </div>
 
-      {/* Info Card */}
+      {/* Professional Animated Info Card */}
       <AnimatePresence mode="wait">
         <motion.div
           key={currentStep.id}
-          initial={{ opacity: 0, y: 15, x: '-50%', scale: 0.95 }}
+          initial={{ opacity: 0, y: 25, x: '-50%', scale: 0.9 }}
           animate={{ opacity: 1, y: 0, x: '-50%', scale: 1 }}
-          exit={{ opacity: 0, y: 10, x: '-50%', scale: 0.95 }}
+          exit={{ opacity: 0, y: -15, x: '-50%', scale: 0.9 }}
           transition={{ 
             type: 'spring',
-            stiffness: 300,
-            damping: 25
+            stiffness: 320,
+            damping: 26
           }}
           className="absolute z-[102] pointer-events-auto"
           style={getCardStyle()}
         >
-            <div className="bg-white dark:bg-[#0F172A] rounded-xl shadow-2xl border border-blue-100/50 dark:border-blue-900/30 p-2.5 relative overflow-hidden">
-            {/* Animated Background Glow */}
-            <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500/5 rounded-full -mr-8 -mt-8 blur-xl" />
+          <div className="bg-white/95 dark:bg-[#0F172A]/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-blue-200/60 dark:border-blue-500/30 p-5 relative overflow-hidden ring-4 ring-blue-500/10">
+            {/* Background Decorative Glow */}
+            <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-full -mr-10 -mt-10 blur-2xl" />
 
             {/* Header */}
-            <div className="flex items-start gap-1.5 mb-1 relative z-10">
+            <div className="flex items-start gap-3 mb-3 relative z-10">
               <motion.div 
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="w-6 h-6 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0"
+                initial={{ scale: 0.5, rotate: -15, opacity: 0 }}
+                animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                className="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-600 to-[#007AFF] text-white flex items-center justify-center shadow-lg shadow-blue-500/30 flex-shrink-0"
               >
-                {React.cloneElement(currentStep.icon as React.ReactElement<any>, { className: 'w-3 h-3' })}
+                {currentStep.icon}
               </motion.div>
-              <div className="flex-1 min-w-0 pt-0.5">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                    {displayBengali ? `ধাপ ${currentStepIndex + 1} / ${TOUR_STEPS.length}` : `Step ${currentStepIndex + 1} of ${TOUR_STEPS.length}`}
+                  </span>
+                  <button 
+                    onClick={handleSkip}
+                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 -mr-1 transition-colors cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
                 <motion.h4 
-                  initial={{ opacity: 0, x: -5 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.15 }}
-                  className="text-[11px] font-black text-slate-900 dark:text-white leading-tight truncate"
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-sm font-black text-slate-900 dark:text-white tracking-tight leading-snug truncate"
                 >
                   {displayBengali ? currentStep.titleBn : currentStep.titleEn}
                 </motion.h4>
-                <div className="flex items-center gap-0.5 mt-0.5">
-                  {TOUR_STEPS.map((_, idx) => (
-                    <motion.div 
-                      key={idx}
-                      className={`h-0.5 rounded-full transition-all duration-300 ${
-                        idx === currentStepIndex 
-                          ? 'w-2 bg-blue-600' 
-                          : idx < currentStepIndex 
-                            ? 'w-1 bg-blue-300 dark:bg-blue-800' 
-                            : 'w-1 bg-slate-100 dark:bg-slate-700'
-                      }`}
-                    />
-                  ))}
-                </div>
               </div>
-              <button 
-                onClick={handleSkip}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5"
-              >
-                <X className="w-3 h-3" />
-              </button>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="flex items-center gap-1.5 mb-3.5 relative z-10">
+              {TOUR_STEPS.map((_, idx) => (
+                <div 
+                  key={idx}
+                  className={`h-1 flex-1 rounded-full transition-all duration-400 ${
+                    idx === currentStepIndex 
+                      ? 'bg-blue-600 shadow-xs shadow-blue-500/50' 
+                      : idx < currentStepIndex 
+                        ? 'bg-blue-300 dark:bg-blue-800' 
+                        : 'bg-slate-200 dark:bg-slate-800'
+                  }`}
+                />
+              ))}
             </div>
 
             {/* Description */}
             <motion.p 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="text-[10px] text-slate-600 dark:text-slate-400 leading-tight mb-2.5 px-0.5 relative z-10"
+              transition={{ delay: 0.15 }}
+              className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4 relative z-10 font-normal"
             >
               {displayBengali ? currentStep.descBn : currentStep.descEn}
             </motion.p>
 
             {/* Actions */}
-            <div className="flex items-center justify-between relative z-10">
+            <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-white/10 relative z-10">
               <button
                 onClick={handleBack}
                 disabled={currentStepIndex === 0}
-                className={`flex items-center gap-0.5 text-[10px] font-bold transition-colors ${
+                className={`flex items-center gap-1 text-xs font-bold transition-all ${
                   currentStepIndex === 0 
-                    ? 'text-slate-200 dark:text-slate-800 cursor-not-allowed' 
-                    : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer'
+                    ? 'opacity-30 cursor-not-allowed text-slate-400' 
+                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer active:scale-95'
                 }`}
               >
-                <ChevronLeft className="w-2.5 h-2.5" />
-                <span>{displayBengali ? 'পিছনে' : 'Back'}</span>
+                <ChevronLeft className="w-4 h-4" />
+                <span>{displayBengali ? 'পূর্ববর্তী' : 'Back'}</span>
               </button>
 
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={handleSkip}
-                  className="text-[9px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
+                  className="text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer px-2 py-1 transition-colors"
                 >
                   {displayBengali ? 'এড়িয়ে যান' : 'Skip'}
                 </button>
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={handleNext}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] px-3 py-1.5 rounded-lg shadow-md flex items-center gap-1 cursor-pointer transition-all"
+                  className="bg-gradient-to-r from-blue-600 to-[#007AFF] hover:from-blue-700 hover:to-blue-600 text-white font-black text-xs px-4 py-2 rounded-xl shadow-lg shadow-blue-500/30 flex items-center gap-1.5 cursor-pointer transition-all"
                 >
                   <span>
                     {currentStepIndex === TOUR_STEPS.length - 1 
-                      ? (displayBengali ? 'শুরু' : 'Finish') 
+                      ? (displayBengali ? 'শুরু করুন' : 'Finish Tour') 
                       : (displayBengali ? 'পরবর্তী' : 'Next')}
                   </span>
-                  {currentStepIndex < TOUR_STEPS.length - 1 && <ChevronRight className="w-2.5 h-2.5" />}
+                  {currentStepIndex < TOUR_STEPS.length - 1 && <ChevronRight className="w-4 h-4" />}
                 </motion.button>
               </div>
             </div>
@@ -406,31 +404,38 @@ export const AppTour: React.FC = () => {
       {/* Skip Confirmation Dialog */}
       <AnimatePresence>
         {showSkipConfirm && (
-          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm pointer-events-auto">
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm pointer-events-auto animate-in fade-in duration-200">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-[#1E293B] rounded-2xl p-5 w-full max-w-[320px] shadow-2xl border border-blue-50 dark:border-white/10"
+              className="bg-white dark:bg-[#0F172A] rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-slate-200 dark:border-white/10 space-y-4"
             >
-              <h3 className="text-base font-black text-slate-900 dark:text-white mb-1.5">
-                {displayBengali ? 'ট্যুরটি এড়িয়ে যাবেন?' : 'Skip the tour?'}
-              </h3>
-              <p className="text-[13px] text-slate-600 dark:text-slate-300 mb-5">
-                {displayBengali 
-                  ? 'গাইডেড ট্যুরের মাধ্যমে MYJPG-এর কিছু বৈশিষ্ট্য আবিষ্কার করা সহজ হতে পারে।' 
-                  : 'Guided tour helps discover MYJPG features easier.'}
-              </p>
-              <div className="flex flex-col gap-2">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto shadow-inner">
+                <Compass className="w-6 h-6 animate-spin-slow" />
+              </div>
+
+              <div className="text-center space-y-1">
+                <h3 className="text-base font-black text-slate-900 dark:text-white">
+                  {displayBengali ? 'ট্যুরটি এড়িয়ে যাবেন?' : 'Skip the app tour?'}
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300">
+                  {displayBengali 
+                    ? 'গাইডেড ট্যুরের মাধ্যমে MYJPG-এর সমস্ত দরকারী বৈশিষ্ট্যগুলো দ্রুত জেনে নেওয়া যায়।' 
+                    : 'The guided tour helps you quickly discover all key features of MYJPG.'}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-2">
                 <button
                   onClick={handleComplete}
-                  className="w-full bg-slate-50 dark:bg-slate-800/50 hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-500 dark:text-slate-400 hover:text-red-600 font-bold py-2.5 rounded-xl transition-colors cursor-pointer text-sm"
+                  className="py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-extrabold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                 >
-                  {displayBengali ? 'ট্যুর এড়িয়ে যান' : 'Skip Tour'}
+                  {displayBengali ? 'হ্যাঁ, এড়িয়ে যান' : 'Yes, Skip'}
                 </button>
                 <button
                   onClick={() => setShowSkipConfirm(false)}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-2.5 rounded-xl shadow-md shadow-blue-500/20 transition-all active:scale-95 cursor-pointer text-sm"
+                  className="py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold shadow-md shadow-blue-500/30 transition-all cursor-pointer"
                 >
                   {displayBengali ? 'ট্যুর চালিয়ে যান' : 'Continue Tour'}
                 </button>

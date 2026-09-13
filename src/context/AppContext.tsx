@@ -453,16 +453,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const submitCivicReport = async (reportData: Omit<CivicReport, 'id' | 'reportedAt' | 'status' | 'upvotes' | 'timeline'>): Promise<CivicReport> => {
     const randomId = 'JPG-' + Math.floor(10000 + Math.random() * 90000);
     const nowIso = new Date().toISOString();
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    const formattedTime = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    const fullDateTime = `${formattedDate}, ${formattedTime}`;
+
     const newReport: CivicReport = {
       ...reportData,
       id: randomId,
-      reportedAt: 'Just now',
+      reportedAt: fullDateTime,
       createdAt: nowIso,
       updatedAt: nowIso,
       status: 'Submitted',
       upvotes: 1,
       timeline: [
-        { title: 'Submitted by Citizen', time: 'Just now', done: true, desc: 'Issue registered in Jalpaiguri Municipal grievance log' },
+        { title: 'Submitted by Citizen', time: fullDateTime, done: true, desc: 'Issue registered in Jalpaiguri Municipal grievance log' },
         { title: 'Municipal Authority Review', time: 'Pending', done: false, desc: 'Under review by Ward Inspector & Engineering Dept' },
         { title: 'Action Dispatched', time: 'Pending', done: false, desc: 'Field maintenance or sanitary crew scheduled' },
         { title: 'Resolved', time: 'Pending', done: false, desc: 'Repaired, cleaned or fixed on site' }

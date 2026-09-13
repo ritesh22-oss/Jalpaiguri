@@ -338,7 +338,7 @@ export const UploadPlacePhotoModal: React.FC<UploadPlacePhotoModalProps> = ({
             <div className="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-2xl flex items-start gap-2.5 text-emerald-800 dark:text-emerald-300 text-xs border border-emerald-200/50 dark:border-emerald-800/30">
               <Sparkles className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
               <span>
-                Photos are moderated in the <strong>Municipal Admin Panel</strong>. Once reviewed by the administrator (<code>riteshganguly0911@gmail.com</code>), the selected best photo becomes the primary place thumbnail.
+                Photos are moderated in the <strong>Municipal Admin Panel</strong>. Once reviewed by the administrator, the selected best photo becomes the primary place thumbnail.
               </span>
             </div>
 

@@ -73,8 +73,10 @@ export const ProfileSetupView: React.FC = () => {
         gender: gender || 'Female',
         bloodGroup: bloodGroup || 'A+',
         location: savedLocation,
-        coordinates: { lat: location.lat, lng: location.lng }
+        coordinates: { lat: location.lat, lng: location.lng },
+        tourCompleted: false
       });
+      localStorage.removeItem('jpg_has_seen_tour');
 
       setLoading(false);
       replaceView('home');

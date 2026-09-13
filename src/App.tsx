@@ -183,15 +183,8 @@ const AppContent: React.FC = () => {
           replaceView('profile-setup');
         }
       } else {
-        const hasOnboarded = localStorage.getItem('jpg_has_onboarded') === 'true';
-        const hasExistingAccount = !!localStorage.getItem('jpg_user_profile');
-        if (hasOnboarded || hasExistingAccount) {
-          console.log('[MYJPG STARTUP] Final route: LOGIN');
-          replaceView('auth');
-        } else {
-          console.log('[MYJPG STARTUP] Final route: TOUR');
-          replaceView('onboarding');
-        }
+        console.log('[MYJPG STARTUP] Final route: GET_STARTED (onboarding)');
+        replaceView('onboarding');
       }
     }
   }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView, user?.role, serviceAreaStatus]);

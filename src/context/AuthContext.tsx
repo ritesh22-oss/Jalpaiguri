@@ -455,7 +455,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (fbUser) {
         const isOfficialAdmin = isAuthorizedAdminEmail(fbUser.email);
 
-        // Strict Admin Security Check: Only riteshganguly0911@gmail.com gets admin access!
+        // Strict Admin Security Check: Only authorized municipal administrators can access the Admin portal.
         if (options?.asAdmin && !isOfficialAdmin) {
           setIsLoading(false);
           return {
@@ -883,6 +883,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       tourCompleted: data.tourCompleted ?? user?.tourCompleted,
       tourLanguage: data.tourLanguage ?? user?.tourLanguage,
       tourVersion: data.tourVersion ?? user?.tourVersion,
+      avatarUrl: data.avatarUrl !== undefined ? data.avatarUrl : user?.avatarUrl,
       createdAt: user?.createdAt || new Date().toISOString()
     };
 
