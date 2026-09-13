@@ -235,6 +235,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               console.log(`[MYJPG STARTUP] Profile completed: ${isComp}`);
 
               const role = isOfficialAdmin ? 'admin' : (data.role === 'admin' ? 'citizen' : (data.role || 'citizen'));
+              if (isOfficialAdmin && data.role !== 'admin') {
+                updateDoc(userDocRef, { role: 'admin' }).catch(() => {});
+              }
               
               let tourCompleted = data.tourCompleted;
               // Only first login/new users who opened their account see the tour. Already signed up users bypass it completely.
