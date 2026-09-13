@@ -136,35 +136,53 @@ const AppContent: React.FC = () => {
   React.useEffect(() => {
     // We only take action if we are NOT loading AND we are currently on the splash screen
     if (!isLoading && currentView === 'splash') {
-      console.log('[STARTUP FLOW] Initialization complete. Determining destination...');
+      console.log('[MYJPG STARTUP] Determining final route...');
+      console.log(`[MYJPG STARTUP] Authenticated: ${isAuthenticated}`);
+      console.log(`[MYJPG STARTUP] Profile completed: ${isProfileComplete}`);
+      console.log(`[MYJPG STARTUP] Location service area status: ${serviceAreaStatus}`);
       
       if (isAuthenticated) {
         if (isProfileComplete) {
-          console.log('[STARTUP FLOW] Authenticated & Profile Complete -> Home');
-          const isAdminLogin = localStorage.getItem('jpg_admin_login_detected') === 'true';
-          if (isAdminLogin && user?.role === 'admin') {
-            localStorage.removeItem('jpg_admin_login_detected');
-            replaceView('admin-dashboard');
+          if (serviceAreaStatus === 'outside') {
+            console.log('[MYJPG STARTUP] Final route: LOCATION_RESTRICTION');
+            replaceView('outside-area');
           } else {
-            replaceView('home');
+            console.log('[MYJPG STARTUP] Authenticated & Profile Complete -> Home');
+            const isAdminLogin = localStorage.getItem('jpg_admin_login_detected') === 'true';
+            if (isAdminLogin && user?.role === 'admin') {
+              localStorage.removeItem('jpg_admin_login_detected');
+              console.log('[MYJPG STARTUP] Final route: ADMIN_DASHBOARD');
+              replaceView('admin-dashboard');
+            } else {
+              console.log('[MYJPG STARTUP] Final route: HOME');
+              replaceView('home');
+            }
           }
         } else {
-          console.log('[STARTUP FLOW] Authenticated but Profile Incomplete -> Profile Setup');
+          console.log('[MYJPG STARTUP] Final route: PROFILE');
           replaceView('profile-setup');
         }
       } else {
         const hasOnboarded = localStorage.getItem('jpg_has_onboarded') === 'true';
         const hasExistingAccount = !!localStorage.getItem('jpg_user_profile');
         if (hasOnboarded || hasExistingAccount) {
-          console.log('[STARTUP FLOW] Not Authenticated (Has account/Onboarded) -> Auth');
+          console.log('[MYJPG STARTUP] Final route: LOGIN');
           replaceView('auth');
         } else {
-          console.log('[STARTUP FLOW] Not Authenticated (New User) -> Onboarding');
+          console.log('[MYJPG STARTUP] Final route: TOUR');
           replaceView('onboarding');
         }
       }
     }
-  }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView, user?.role]);
+  }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView, user?.role, serviceAreaStatus]);
+
+  // 1.5. Service Area Transition Guard
+  React.useEffect(() => {
+    if (serviceAreaStatus === 'inside' && currentView === 'outside-area') {
+      console.log('[LOCATION GUARD] Inside Jalpaiguri service area. Returning to home.');
+      replaceView('home');
+    }
+  }, [serviceAreaStatus, currentView, replaceView]);
 
   // 2. Auth Guard Effects (Prevent access to auth screens if already logged in)
   React.useEffect(() => {

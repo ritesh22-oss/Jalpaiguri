@@ -185,87 +185,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [user]);
 
-  // Global Firebase Auth State Listener
+  // Global Firebase Auth State Listener & Startup State Machine
   useEffect(() => {
     validateFirestoreConnection();
 
-    console.log(`[AUTH SYSTEM] Initialization...`);
+    console.log(`[MYJPG STARTUP] Firebase initializing`);
     console.log(`[AUTH SYSTEM] ORIGIN: ${window.location.origin}`);
     console.log(`[AUTH SYSTEM] AUTH DOMAIN: gen-lang-client-0813805041.firebaseapp.com`);
 
     let unsubscribe = () => {};
-    let redirectChecked = false;
-    let authStateChecked = false;
-
-    const finishInitialization = () => {
-      if (redirectChecked && authStateChecked) {
-        setIsLoading(false);
-      }
-    };
 
     if (isFirebaseConfigured && auth) {
-      // Handle redirect auth result for APK / mobile WebView environments
-      // This is crucial for environments where popup authentication is unreliable.
-      getRedirectResult(auth)
-        .then((result) => {
-          if (result && result.user) {
-            console.log('[FIREBASE AUTH] Redirect sign-in success for:', result.user.email);
-            // Ensure the Firebase user state is updated immediately
-            setFirebaseUser(result.user);
-            
-            // Handle Admin navigation intent stored before redirect
-            try {
-              const asAdmin = sessionStorage.getItem('jpg_auth_as_admin') === 'true';
-              sessionStorage.removeItem('jpg_auth_as_admin');
-              if (asAdmin && isAuthorizedAdminEmail(result.user.email)) {
-                localStorage.setItem('jpg_admin_login_detected', 'true');
-              }
-            } catch (e) {}
-          }
-          // We only clear the pending flag AFTER result is processed
-          // This prevents the UI from flipping back to the splash screen too early
-          localStorage.removeItem('jpg_redirect_auth_pending');
-          setIsRedirectPending(false);
-          redirectChecked = true;
-          finishInitialization();
-        })
-        .catch((err) => {
-          console.error('[FIREBASE AUTH] Redirect result error:', err);
-          localStorage.removeItem('jpg_redirect_auth_pending');
-          setIsRedirectPending(false);
-          redirectChecked = true;
-          finishInitialization();
-        });
-
-      unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+      // Wait for authStateReady so Firebase has fully restored session from persistence storage
+      auth.authStateReady().then(async () => {
+        console.log(`[MYJPG STARTUP] Auth state restored`);
+        const fbUser = auth.currentUser;
         setFirebaseUser(fbUser);
 
         if (fbUser) {
-          console.log('[FIREBASE AUTH] Auth state changed: AUTHENTICATED', fbUser.email);
+          console.log(`[MYJPG STARTUP] UID: ${fbUser.uid}`);
+          console.log(`[MYJPG STARTUP] Loading profile`);
           try {
             const isOfficialAdmin = isAuthorizedAdminEmail(fbUser.email);
-            // Fetch Firestore Profile
+            // Fetch Firestore Profile by UID
             const userDocRef = doc(db, 'users', fbUser.uid);
             const userSnap = await getDoc(userDocRef);
 
             if (userSnap.exists()) {
               const data = userSnap.data() as UserProfile;
+              console.log(`[MYJPG STARTUP] Profile loaded`);
+              const isComp = Boolean(data.name && data.location);
+              console.log(`[MYJPG STARTUP] Profile completed: ${isComp}`);
+
               const role = isOfficialAdmin ? 'admin' : (data.role === 'admin' ? 'citizen' : (data.role || 'citizen'));
               
-              // Determine if this is an existing user who should skip the tour
               let tourCompleted = data.tourCompleted;
               if (tourCompleted === undefined) {
-                // If the user was created before this feature, mark as completed
                 const createdDate = data.createdAt ? new Date(data.createdAt) : new Date(0);
                 const featureLaunchDate = new Date('2026-09-13T00:00:00Z');
                 if (createdDate < featureLaunchDate) {
                   tourCompleted = true;
-                  // Persist to Firestore
                   updateDoc(userDocRef, { tourCompleted: true });
                 }
               }
+              console.log(`[MYJPG STARTUP] Tour completed: ${Boolean(tourCompleted)}`);
 
-              setUser({
+              const restoredUser: UserProfile = {
                 id: fbUser.uid,
                 name: data.name || fbUser.displayName || '',
                 phone: data.phone || fbUser.phoneNumber || '',
@@ -282,9 +247,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 tourLanguage: data.tourLanguage,
                 tourVersion: data.tourVersion,
                 createdAt: data.createdAt || new Date().toISOString()
-              });
+              };
+
+              setUser(restoredUser);
+              setIsProfileComplete(isComp);
             } else {
-              // Profile does not exist yet
+              console.log(`[MYJPG STARTUP] Profile loaded: none (new profile needed)`);
+              console.log(`[MYJPG STARTUP] Profile completed: false`);
               const partialProfile: UserProfile = {
                 id: fbUser.uid,
                 name: fbUser.displayName || '',
@@ -296,20 +265,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 language: 'English',
                 isBloodDonor: true,
                 isVolunteer: false,
-            createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString()
               };
               setUser(partialProfile);
+              setIsProfileComplete(false);
             }
           } catch (err) {
-            console.warn('Firestore profile fetch warning:', err);
+            console.error('[MYJPG STARTUP] Profile restoration error:', err);
           }
         } else {
-          console.log('[FIREBASE AUTH] Auth state changed: UNAUTHENTICATED');
+          console.log(`[MYJPG STARTUP] Auth state restored: UNAUTHENTICATED`);
           setUser(null);
+          setIsProfileComplete(false);
         }
 
-        authStateChecked = true;
-        finishInitialization();
+        // Handle redirect result if pending
+        try {
+          const result = await getRedirectResult(auth);
+          if (result && result.user) {
+            console.log('[FIREBASE AUTH] Redirect sign-in success for:', result.user.email);
+            setFirebaseUser(result.user);
+          }
+        } catch (redirectErr) {
+          console.warn('[FIREBASE AUTH] Redirect result error:', redirectErr);
+        } finally {
+          localStorage.removeItem('jpg_redirect_auth_pending');
+          setIsRedirectPending(false);
+        }
+
+        setIsLoading(false);
+      });
+
+      // Ongoing auth observer for state changes
+      unsubscribe = onAuthStateChanged(auth, (fbUser) => {
+        setFirebaseUser(fbUser);
+        if (!fbUser) {
+          setUser(null);
+          setIsProfileComplete(false);
+        }
       });
     } else {
       setIsLoading(false);
