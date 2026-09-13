@@ -125,7 +125,6 @@ import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { OfflineView } from './components/common/OfflineView';
 import { BeautifulLoader } from './components/common/BeautifulLoader';
 import { AppTour } from './components/common/AppTour';
-import { TourLanguageModal } from './components/common/TourLanguageModal';
 
 const AppContent: React.FC = () => {
   // 1. ALL HOOKS MUST BE AT THE VERY TOP, UNCONDITIONAL
@@ -501,7 +500,6 @@ const AppContent: React.FC = () => {
           <LocationSelectorModal />
           <FiltersBottomSheet />
           <JPGAssistantModal />
-          <TourLanguageModal />
           <AppTour />
           {showWelcomePopup && user && (
             <WelcomeNotificationPopup

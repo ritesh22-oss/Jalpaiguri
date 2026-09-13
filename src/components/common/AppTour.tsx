@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronRight, 
@@ -13,9 +13,7 @@ import {
   Store,
   Droplet,
   Languages,
-  CheckCircle2,
-  ArrowDown,
-  ArrowUp
+  CheckCircle2
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useAuth } from '../../context/AuthContext';
@@ -38,109 +36,109 @@ const TOUR_STEPS: TourStep[] = [
   {
     id: 'welcome',
     targetId: 'home-top-logo',
-    categoryEn: 'COMMUNITY PORTAL',
-    categoryBn: 'নাগরিক পোর্টাল',
+    categoryEn: 'PORTAL',
+    categoryBn: 'পোর্টাল',
     titleEn: 'Welcome to MYJPG',
-    titleBn: 'MYJPG-এ আপনাকে স্বাগতম',
-    descEn: 'Your unified digital gateway to Jalpaiguri. Connect with verified civic services, local workers, doctors, hospitals, and community resources instantly.',
-    descBn: 'জলপাইগুড়ির নিজস্ব ডিজিটাল নাগরিক প্ল্যাটফর্ম। এক জায়গা থেকেই জরুরি পরিষেবা, কর্মী, ডাক্তার, হাসপাতাল ও কমিউনিটি সুবিধাসমূহ সহজে পান।',
-    icon: <Home className="w-5 h-5" />,
+    titleBn: 'MYJPG-এ স্বাগতম',
+    descEn: 'Your digital civic hub for Jalpaiguri services, workers, and community resources.',
+    descBn: 'জলপাইগুড়ির নিজস্ব ডিজিটাল নাগরিক পোর্টাল। সকল সেবা এক ক্লিকে পান।',
+    icon: <Home className="w-3.5 h-3.5" />,
     accentColor: '#007AFF'
   },
   {
     id: 'locality',
     targetId: 'home-locality-btn',
-    categoryEn: 'GEO LOCATION',
-    categoryBn: 'এলাকা ও ওয়ার্ড নির্বাচন',
-    titleEn: 'Select Your Area or Ward',
-    titleBn: 'আপনার এলাকা বা ওয়ার্ড বেছে নিন',
-    descEn: 'Choose your locality (Kadamtala, Dinbazar, Hakimpada, etc.) or tap GPS to automatically discover the nearest services in your ward.',
-    descBn: 'আপনার পাড়া বা ওয়ার্ড (কদমতলা, দিনবাজার, হাকিমপাড়া ইত্যাদি) নির্বাচন করুন বা জিপিএস দিয়ে আপনার সবচেয়ে কাছের পরিষেবাগুলো দেখুন।',
-    icon: <MapPin className="w-5 h-5" />,
+    categoryEn: 'LOCATION',
+    categoryBn: 'এলাকা',
+    titleEn: 'Select Your Area',
+    titleBn: 'আপনার এলাকা নির্বাচন',
+    descEn: 'Pick your ward or tap GPS to discover nearby services and shops around you.',
+    descBn: 'ওয়ার্ড নির্বাচন করুন বা জিপিএস দিয়ে কাছের পরিষেবাগুলো দেখুন।',
+    icon: <MapPin className="w-3.5 h-3.5" />,
     accentColor: '#0284C7'
   },
   {
     id: 'search',
     targetId: 'home-search-bar',
-    categoryEn: 'SMART SEARCH',
-    categoryBn: 'দ্রুত অনুসন্ধান',
-    titleEn: 'Instant Universal Search',
-    titleBn: 'স্মার্ট অনুসন্ধান ও ভয়েস সার্চ',
-    descEn: 'Type or speak naturally to find electricians, doctors, medicine, shops, bus timings, emergency contacts, or anything you need.',
-    descBn: 'প্রয়োজনীয় কর্মী, ডাক্তার, ওষুধ, দোকান বা যেকোনো পরিষেবা খুঁজে পেতে টাইপ করুন অথবা মাইক্রোফোনে স্বাভাবিক ভাষায় কথা বলুন।',
-    icon: <Search className="w-5 h-5" />,
+    categoryEn: 'SEARCH',
+    categoryBn: 'অনুসন্ধান',
+    titleEn: 'Instant Search',
+    titleBn: 'দ্রুত অনুসন্ধান',
+    descEn: 'Search or speak to find doctors, electricians, shops, bus timings, and helplines.',
+    descBn: 'ডাক্তার, কারিগর, দোকান বা হেল্পলাইন লিখে বা মুখে বলে সহজেই খুঁজুন।',
+    icon: <Search className="w-3.5 h-3.5" />,
     accentColor: '#2563EB'
   },
   {
     id: 'ai-assistant',
     targetId: 'home-ai-assistant-box',
-    categoryEn: 'AI CIVIC AGENT',
-    categoryBn: 'এআই নাগরিক সহকারী',
-    titleEn: 'MYJPG AI City Assistant',
-    titleBn: 'আপনার ২৪x৭ এআই সহকারী',
-    descEn: 'Ask questions in English or Bengali! Get instant answers about bus schedules, emergency helplines, municipal offices, and local recommendations.',
-    descBn: 'বাংলা বা ইংরেজিতে সরাসরি যেকোনো প্রশ্ন করুন! বাস সময়সূচী, জরুরি হেল্পলাইন, পুরসভার তথ্য ও স্থানীয় পরামর্শ মুহূর্তেই জেনে নিন।',
-    icon: <Sparkles className="w-5 h-5" />,
+    categoryEn: 'AI AGENT',
+    categoryBn: 'এআই সহকারী',
+    titleEn: 'AI City Assistant',
+    titleBn: 'এআই নাগরিক সহকারী',
+    descEn: 'Ask civic questions 24/7 in English or Bengali for instant local guidance.',
+    descBn: 'যেকোনো নাগরিক তথ্যের জন্য বাংলা বা ইংরেজিতে প্রশ্ন করে উত্তর জানুন।',
+    icon: <Sparkles className="w-3.5 h-3.5" />,
     accentColor: '#7C3AED'
   },
   {
     id: 'city-services',
     targetId: 'home-city-services',
-    categoryEn: 'CIVIC SERVICES',
-    categoryBn: 'শহরের পরিষেবা',
-    titleEn: 'All City Services in One Tap',
-    titleBn: 'শহরের সকল প্রয়োজনীয় পরিষেবা',
-    descEn: 'Explore 16+ verified local service categories: Plumbers, Electricians, Transport, Courier, Education, Banks, Rentals, and Government portals.',
-    descBn: '১৬টিরও বেশি দরকারি ক্যাটাগরি: মেকানিক, প্লাম্বার, পরিবহন, কুরিয়ার, শিক্ষা, এটিএম, বাড়ি ভাড়া ও সরকারি ডিজিটাল সেবা।',
-    icon: <Wrench className="w-5 h-5" />,
+    categoryEn: 'SERVICES',
+    categoryBn: 'পরিষেবা',
+    titleEn: 'City Services',
+    titleBn: 'শহরের সকল পরিষেবা',
+    descEn: '16+ categories: Mechanics, Plumbers, Health, Transport, and Govt portals.',
+    descBn: '১৬টিরও বেশি ক্যাটাগরি: মেকানিক, চিকিৎসা, পরিবহন ও সরকারি সেবা।',
+    icon: <Wrench className="w-3.5 h-3.5" />,
     accentColor: '#059669'
   },
   {
     id: 'marketplace',
     targetId: 'home-marketplace-card',
-    categoryEn: 'LOCAL MARKETPLACE',
-    categoryBn: 'স্থানীয় বাজার ও দোকান',
-    titleEn: 'Neighborhood Shops & Catalogs',
-    titleBn: 'পাড়ার দোকান ও লাইভ পণ্য ক্যাটালগ',
-    descEn: 'Discover local grocery, sweets, pharmacy, apparel, and electronics stores with verified phone numbers and direct WhatsApp ordering.',
-    descBn: 'জলপাইগুড়ির স্থানীয় মুদিখানা, মিষ্টি, ওষুধ ও পোশাকের দোকান ব্রাউজ করুন এবং দোকানদারের সাথে সরাসরি হোয়াটসঅ্যাপে অর্ডার করুন।',
-    icon: <Store className="w-5 h-5" />,
+    categoryEn: 'MARKET',
+    categoryBn: 'বাজার',
+    titleEn: 'Neighborhood Shops',
+    titleBn: 'পাড়ার দোকান ও বাজার',
+    descEn: 'Discover local shops and catalogs with direct WhatsApp ordering.',
+    descBn: 'স্থানীয় দোকানগুলো ব্রাউজ করুন এবং সরাসরি কল বা হোয়াটসঅ্যাপে অর্ডার করুন।',
+    icon: <Store className="w-3.5 h-3.5" />,
     accentColor: '#D97706'
   },
   {
     id: 'map',
     targetId: 'home-live-map',
     categoryEn: 'LIVE MAP',
-    categoryBn: 'লাইভ মানচিত্র',
-    titleEn: 'Interactive Civic Map',
-    titleBn: 'ইন্টারেক্টিভ লাইভ ম্যাপ',
-    descEn: 'View real-time locations of nearby clinics, pharmacies, ATMs, landmark places, and municipal flood or traffic telemetry on the map.',
-    descBn: 'কাছাকাছি হাসপাতাল, এটিএম, থানা, ফার্মেসি ও দর্শনীয় স্থানগুলোর অবস্থান ম্যাপে সরাসরি দেখুন এবং এক ক্লিকে ডিরেকশন নিন।',
-    icon: <Compass className="w-5 h-5" />,
+    categoryBn: 'ম্যাপ',
+    titleEn: 'Interactive Map',
+    titleBn: 'লাইভ মানচিত্র',
+    descEn: 'View nearby clinics, pharmacies, ATMs, and landmark places on the live map.',
+    descBn: 'কাছের হাসপাতাল, এটিএম ও গুরুত্বপূর্ণ স্থানের অবস্থান ম্যাপে সরাসরি দেখুন।',
+    icon: <Compass className="w-3.5 h-3.5" />,
     accentColor: '#EA580C'
   },
   {
     id: 'blood',
     targetId: 'nav-blood',
-    categoryEn: 'EMERGENCY NETWORK',
-    categoryBn: 'জরুরি রক্তদান নেটওয়ার্ক',
-    titleEn: '24x7 Blood Donor Network',
-    titleBn: '২৪x৭ জরুরি রক্তদাতা নেটওয়ার্ক',
-    descEn: 'Tap the emergency blood icon anytime to find verified blood donors in Jalpaiguri by blood group, or submit an urgent blood request.',
-    descBn: 'জরুরি প্রয়োজনে যেকোনো সময় রক্তের গ্রুপ অনুযায়ী রক্তদাতাদের সাথে যোগাযোগ করুন অথবা রক্ত চেয়ে তাৎক্ষণিক রিকোয়েস্ট পোস্ট করুন।',
-    icon: <Droplet className="w-5 h-5" />,
+    categoryEn: 'EMERGENCY',
+    categoryBn: 'জরুরি',
+    titleEn: 'Blood Donor Network',
+    titleBn: 'জরুরি রক্তদাতা নেটওয়ার্ক',
+    descEn: 'Find verified donors by group or post an urgent blood request anytime.',
+    descBn: 'রক্তের গ্রুপ অনুযায়ী রক্তদাতা খুঁজুন অথবা রক্তের জরুরি আবেদন জানান।',
+    icon: <Droplet className="w-3.5 h-3.5" />,
     accentColor: '#DC2626'
   },
   {
     id: 'navigation',
     targetId: 'nav-home',
-    categoryEn: 'QUICK NAVIGATION',
-    categoryBn: 'সহজ নেভিগেশন',
-    titleEn: 'Effortless Bottom Navigation',
-    titleBn: 'সহজ নেভিগেশন বার',
-    descEn: 'Quickly switch between Home, Local Shops, Blood Network, City Discovery, and your Profile settings anytime.',
-    descBn: 'হোম, দোকান, রক্তদান, শহর অনুসন্ধান ও আপনার প্রোফাইল সেটিংসের মাঝে নিমেষেই চলাচল করুন।',
-    icon: <Compass className="w-5 h-5" />,
+    categoryEn: 'NAVIGATION',
+    categoryBn: 'নেভিগেশন',
+    titleEn: 'Quick Navigation',
+    titleBn: 'সহজ নেভিগেশন',
+    descEn: 'Switch between Home, Shops, Blood Donors, City Hub, and Profile anytime.',
+    descBn: 'হোম, দোকান, রক্তদান ও প্রোফাইলের মাঝে সহজে চলাফেরা করুন।',
+    icon: <Compass className="w-3.5 h-3.5" />,
     accentColor: '#007AFF'
   }
 ];
@@ -163,41 +161,58 @@ export const AppTour: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
   const [tourLang, setTourLang] = useState<'bn' | 'en'>(isBengali ? 'bn' : 'en');
 
+  // Dynamic viewport tracking
+  const [viewport, setViewport] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 360,
+    height: typeof window !== 'undefined' ? window.innerHeight : 640
+  });
+
+  // Dynamic card height measurement
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [measuredCardHeight, setMeasuredCardHeight] = useState(120);
+
   const animationFrameRef = useRef<number | null>(null);
-  const pollIntervalRef = useRef<any>(null);
 
-  const currentStep = TOUR_STEPS[currentStepIndex];
-  const displayBengali = tourLang === 'bn';
+  useEffect(() => {
+    const handleResize = () => {
+      setViewport({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, []);
 
-  // Toggle internal and global language
-  const handleToggleLanguage = () => {
+  useLayoutEffect(() => {
+    if (cardRef.current) {
+      const h = cardRef.current.offsetHeight;
+      if (h > 0 && Math.abs(h - measuredCardHeight) > 2) {
+        setMeasuredCardHeight(h);
+      }
+    }
+  }, [currentStepIndex, tourLang, measuredCardHeight]);
+
+  // Keep local tour language in sync with global language context
+  useEffect(() => {
+    setTourLang(isBengali ? 'bn' : 'en');
+  }, [isBengali]);
+
+  const handleToggleLanguage = (e: React.MouseEvent) => {
+    e.stopPropagation();
     const nextLang = tourLang === 'bn' ? 'en' : 'bn';
     setTourLang(nextLang);
     globalToggleLanguage();
   };
 
-  // Synchronize language if external changes
-  useEffect(() => {
-    setTourLang(isBengali ? 'bn' : 'en');
-  }, [isBengali]);
+  const displayBengali = tourLang === 'bn';
+  const currentStep = TOUR_STEPS[currentStepIndex] || TOUR_STEPS[0];
 
-  // Lock body scroll cleanly during tour
-  useEffect(() => {
-    const isTourActive = isReady && currentView === 'home' && !user?.tourCompleted && isProfileComplete;
-    if (isTourActive) {
-      document.body.style.overflow = 'hidden';
-      document.body.style.touchAction = 'none';
-    } else {
-      document.body.style.overflow = '';
-      document.body.style.touchAction = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.touchAction = '';
-    };
-  }, [isReady, currentView, user?.tourCompleted, isProfileComplete]);
-
-  // Measurement function that reads the DOM node bounding rect
+  // Measurement function reading DOM node bounding rect
   const measureTarget = useCallback(() => {
     if (currentView !== 'home' || !isProfileComplete) return;
 
@@ -215,21 +230,21 @@ export const AppTour: React.FC = () => {
         });
       }
     } else {
-      // Fallback: if element is not in DOM, provide sensible center area
-      const w = Math.min(window.innerWidth - 48, 360);
-      const h = 140;
+      // Fallback area centered in top half
+      const w = Math.min(window.innerWidth - 32, 280);
+      const h = 90;
       setTargetRect({
-        top: Math.max(80, window.innerHeight * 0.2),
+        top: Math.max(60, window.innerHeight * 0.15),
         left: (window.innerWidth - w) / 2,
         width: w,
         height: h,
-        bottom: Math.max(80, window.innerHeight * 0.2) + h,
+        bottom: Math.max(60, window.innerHeight * 0.15) + h,
         right: (window.innerWidth - w) / 2 + w
       });
     }
   }, [currentStep.targetId, currentView, isProfileComplete]);
 
-  // Scroll target into view and update rect smoothly
+  // Scroll target smoothly and update rect
   useEffect(() => {
     if (currentView !== 'home' || !isProfileComplete) return;
 
@@ -237,16 +252,18 @@ export const AppTour: React.FC = () => {
 
     const el = document.getElementById(currentStep.targetId);
     if (el) {
-      // Smoothly scroll the element into view centered
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // For items near the very bottom like fixed bottom nav, don't scroll
+      const isFixedBottom = currentStep.targetId.startsWith('nav-');
+      if (!isFixedBottom) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }
 
-    // Measure continuously for 650ms during smooth scroll
     let count = 0;
     const startPolling = () => {
       measureTarget();
       count++;
-      if (count < 22) {
+      if (count < 20) {
         animationFrameRef.current = requestAnimationFrame(startPolling);
       } else {
         setIsReady(true);
@@ -255,9 +272,8 @@ export const AppTour: React.FC = () => {
 
     const initialTimer = setTimeout(() => {
       startPolling();
-    }, 80);
+    }, 60);
 
-    // Event listeners on capture phase
     const handleScrollOrResize = () => {
       measureTarget();
     };
@@ -278,21 +294,20 @@ export const AppTour: React.FC = () => {
 
     return () => {
       clearTimeout(initialTimer);
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
       window.removeEventListener('resize', handleScrollOrResize);
       window.removeEventListener('scroll', handleScrollOrResize, true);
       scrollContainer?.removeEventListener('scroll', handleScrollOrResize);
       window.removeEventListener('replay-app-tour', handleReplay);
     };
-  }, [currentStep.targetId, currentStepIndex, measureTarget, updateProfile, currentView, isProfileComplete]);
+  }, [currentStepIndex, currentView, isProfileComplete, measureTarget, updateProfile]);
 
-  // Keyboard navigation support
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (user?.tourCompleted || currentView !== 'home' || !isProfileComplete) return;
-
-      if (e.key === 'ArrowRight' || e.key === 'Enter') {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
         handleNext();
       } else if (e.key === 'ArrowLeft') {
         handleBack();
@@ -303,7 +318,7 @@ export const AppTour: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentStepIndex, user?.tourCompleted, currentView, isProfileComplete]);
+  });
 
   const handleNext = () => {
     if (currentStepIndex < TOUR_STEPS.length - 1) {
@@ -326,7 +341,9 @@ export const AppTour: React.FC = () => {
   const handleComplete = async () => {
     document.body.style.overflow = '';
     document.body.style.touchAction = '';
-    localStorage.setItem('jpg_has_seen_tour', 'true');
+    try {
+      localStorage.setItem('jpg_has_seen_tour', 'true');
+    } catch (_) {}
     await updateProfile({ tourCompleted: true, tourVersion: 1 });
   };
 
@@ -336,67 +353,56 @@ export const AppTour: React.FC = () => {
     return null;
   }
 
-  // Calculate spotlight box coordinates with comfortable padding
-  const pad = 10;
+  // Compact spotlight calculation
+  const pad = 6;
   const spotlight = targetRect
     ? {
         x: Math.max(4, targetRect.left - pad),
         y: Math.max(4, targetRect.top - pad),
-        w: Math.min(window.innerWidth - 8, targetRect.width + pad * 2),
+        w: Math.min(viewport.width - 8, targetRect.width + pad * 2),
         h: targetRect.height + pad * 2,
-        r: targetRect.width < 60 && targetRect.height < 60 ? 28 : 20
+        r: targetRect.width < 50 && targetRect.height < 50 ? 22 : 14
       }
     : {
-        x: 20,
-        y: 100,
-        w: window.innerWidth - 40,
-        h: 180,
-        r: 20
+        x: 16,
+        y: 70,
+        w: viewport.width - 32,
+        h: 100,
+        r: 14
       };
 
-  // Determine card placement (above vs below the highlighted element)
-  // Determine card dimensions dynamically based on mobile screen width
-  const isMobile = window.innerWidth < 640;
-  const cardWidth = isMobile ? Math.min(window.innerWidth - 24, 320) : Math.min(window.innerWidth - 32, 380);
-  const cardEstimatedHeight = isMobile ? 180 : 230;
-  const cardPadding = isMobile ? 12 : 16;
+  // Screen-responsive card width: adapts to any mobile screen size (320px, 360px, 375px, 390px+)
+  const cardWidth = Math.min(viewport.width - 24, 304);
+  const cardHeight = measuredCardHeight || 120;
 
-  const spaceAbove = targetRect ? targetRect.top : 200;
-  const spaceBelow = targetRect ? window.innerHeight - targetRect.bottom : 200;
+  // Vertical placement math: strictly inside viewport boundaries
+  const targetTop = spotlight.y;
+  const targetBottom = spotlight.y + spotlight.h;
+  const spaceAbove = targetTop - 8;
+  const spaceBelow = viewport.height - targetBottom - 8;
 
   let isCardAbove = false;
-  let cardTop = 100;
-
-  if (spaceBelow >= cardEstimatedHeight + cardPadding * 2) {
-    // Plenty of space below the element
-    isCardAbove = false;
-    cardTop = (targetRect?.bottom || 150) + cardPadding;
-  } else if (spaceAbove >= cardEstimatedHeight + cardPadding * 2) {
-    // Plenty of space above the element
-    isCardAbove = true;
-    cardTop = Math.max(8, (targetRect?.top || 300) - cardEstimatedHeight - cardPadding);
-  } else {
-    // In between: center or place where more room exists
-    if (spaceBelow >= spaceAbove) {
-      isCardAbove = false;
-      cardTop = Math.min(window.innerHeight - cardEstimatedHeight - cardPadding, (targetRect?.bottom || 100) + cardPadding);
-    } else {
+  if (spaceBelow >= cardHeight + 8) {
+    // There is room below: if element is low on screen and plenty of room above, prefer above
+    if (targetTop > viewport.height * 0.58 && spaceAbove >= cardHeight + 8) {
       isCardAbove = true;
-      cardTop = Math.max(8, (targetRect?.top || 300) - cardEstimatedHeight - cardPadding);
+    } else {
+      isCardAbove = false;
     }
+  } else {
+    // Insufficient room below, must place above
+    isCardAbove = true;
   }
 
-  // Ensure cardTop stays strictly inside viewport boundaries with comfortable breathing room
-  cardTop = Math.max(8, Math.min(cardTop, window.innerHeight - cardEstimatedHeight - 8));
+  const desiredTop = isCardAbove ? targetTop - cardHeight - 8 : targetBottom + 8;
+  // Strict clamping: never off top (min 8px) and never off bottom (max viewport.height - cardHeight - 8px)
+  const minTop = 8;
+  const maxTop = Math.max(minTop, viewport.height - cardHeight - 8);
+  const cardTop = Math.min(Math.max(desiredTop, minTop), maxTop);
 
   return (
     <div className="fixed inset-0 z-[100] select-none pointer-events-none">
-      {/* 
-        CRITICAL ARCHITECTURE: SVG Mask Cut-out (ZERO BLUR)
-        - The backdrop uses pure SVG mask cutout.
-        - The cutout is 100% transparent with NO backdrop-blur.
-        - The underlying section on HomeView is 100% crisp, razor-sharp, with true vibrant colors!
-      */}
+      {/* SVG Mask Cut-out (Crystal clear section spotlight) */}
       <svg 
         className="fixed inset-0 w-full h-full pointer-events-auto cursor-pointer"
         onClick={handleNext}
@@ -404,9 +410,7 @@ export const AppTour: React.FC = () => {
       >
         <defs>
           <mask id="app-tour-spotlight-mask">
-            {/* White area = opaque backdrop covering the page */}
             <rect x="0" y="0" width="100%" height="100%" fill="white" />
-            {/* Black cutout = 100% crystal-clear transparent hole with zero overlay */}
             <rect
               x={spotlight.x}
               y={spotlight.y}
@@ -419,7 +423,6 @@ export const AppTour: React.FC = () => {
           </mask>
         </defs>
 
-        {/* Crisp, deep dark scrim that highlights the cut-out section without any blur */}
         <rect
           x="0"
           y="0"
@@ -430,7 +433,7 @@ export const AppTour: React.FC = () => {
         />
       </svg>
 
-      {/* Dynamic Animated Spotlight Frame (Surrounds the crystal-clear section) */}
+      {/* Dynamic Animated Spotlight Frame */}
       <motion.div
         className="fixed pointer-events-none z-[101]"
         initial={false}
@@ -443,97 +446,82 @@ export const AppTour: React.FC = () => {
         }}
         transition={{
           type: 'spring',
-          stiffness: 380,
-          damping: 32,
-          mass: 0.6
+          stiffness: 400,
+          damping: 34,
+          mass: 0.5
         }}
       >
-        {/* Glowing Neon Outline */}
         <div 
-          className="absolute inset-0 rounded-[inherit] border-2 transition-colors duration-300 shadow-[0_0_24px_rgba(0,122,255,0.7)]"
+          className="absolute inset-0 rounded-[inherit] border-2 transition-colors duration-300 shadow-[0_0_20px_rgba(0,122,255,0.6)]"
           style={{ borderColor: currentStep.accentColor }}
         />
 
-        {/* Dynamic Pulsing Halo */}
-        <motion.div
-          animate={{
-            scale: [1, 1.03, 1],
-            opacity: [0.9, 0.35, 0.9]
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: 'easeInOut'
-          }}
-          className="absolute -inset-1 rounded-[inherit] border transition-colors duration-300"
-          style={{ borderColor: currentStep.accentColor }}
-        />
-
-        {/* 4 Precision Corner Accent Markers (Modern High-Tech HUD Style) */}
         <div 
-          className="absolute -top-1 -left-1 w-3.5 h-3.5 border-t-2 border-l-2"
+          className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2"
           style={{ borderColor: currentStep.accentColor }}
         />
         <div 
-          className="absolute -top-1 -right-1 w-3.5 h-3.5 border-t-2 border-r-2"
+          className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2"
           style={{ borderColor: currentStep.accentColor }}
         />
         <div 
-          className="absolute -bottom-1 -left-1 w-3.5 h-3.5 border-b-2 border-l-2"
+          className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2"
           style={{ borderColor: currentStep.accentColor }}
         />
         <div 
-          className="absolute -bottom-1 -right-1 w-3.5 h-3.5 border-b-2 border-r-2"
+          className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2"
           style={{ borderColor: currentStep.accentColor }}
         />
       </motion.div>
 
-      {/* Upgraded Dynamic Info Card */}
+      {/* Ultra-Compact & Screen-Fitted Tour Guide Box */}
       <AnimatePresence mode="wait">
         <motion.div
           key={currentStep.id}
-          initial={{ opacity: 0, y: isCardAbove ? -18 : 18, scale: 0.96 }}
+          ref={cardRef}
+          initial={{ opacity: 0, y: isCardAbove ? -10 : 10, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: isCardAbove ? -12 : 12, scale: 0.96 }}
+          exit={{ opacity: 0, y: isCardAbove ? -8 : 8, scale: 0.98 }}
           transition={{
             type: 'spring',
-            stiffness: 380,
-            damping: 28,
-            mass: 0.7
+            stiffness: 420,
+            damping: 30,
+            mass: 0.6
           }}
           className="fixed z-[105] pointer-events-auto"
           style={{
             top: cardTop,
             left: '50%',
             transform: 'translateX(-50%)',
-            width: `${cardWidth}px`
+            width: `${cardWidth}px`,
+            maxWidth: 'calc(100vw - 24px)'
           }}
         >
-          {/* Directional Visual Pointer Arrow */}
+          {/* Subtle Direction Pointer */}
           <div 
             className={`absolute left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none transition-all ${
-              isCardAbove ? '-bottom-3 text-white dark:text-[#0B1224]' : '-top-3 text-white dark:text-[#0B1224]'
+              isCardAbove ? '-bottom-2' : '-top-2'
             }`}
           >
             {isCardAbove ? (
-              <div className="w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-white dark:border-t-[#0F172A] filter drop-shadow-[0_4px_3px_rgba(0,0,0,0.1)]" />
+              <div className="w-0 h-0 border-x-5 border-x-transparent border-t-6 border-t-white dark:border-t-[#0F172A] filter drop-shadow-[0_2px_2px_rgba(0,0,0,0.15)]" />
             ) : (
-              <div className="w-0 h-0 border-x-8 border-x-transparent border-b-8 border-b-white dark:border-b-[#0F172A] filter drop-shadow-[0_-4px_3px_rgba(0,0,0,0.1)]" />
+              <div className="w-0 h-0 border-x-5 border-x-transparent border-b-6 border-b-white dark:border-b-[#0F172A] filter drop-shadow-[0_-2px_2px_rgba(0,0,0,0.15)]" />
             )}
           </div>
 
-          <div className="bg-white/98 dark:bg-[#0F172A]/98 backdrop-blur-2xl rounded-2xl sm:rounded-3xl shadow-[0_16px_40px_rgba(0,0,0,0.3)] border border-slate-200/80 dark:border-white/10 p-3.5 sm:p-5 relative overflow-hidden ring-1 ring-black/5">
-            {/* Top Accent Gradient Bar */}
+          <div className="bg-white/98 dark:bg-[#0F172A]/98 backdrop-blur-xl rounded-xl shadow-[0_10px_28px_rgba(0,0,0,0.32)] border border-slate-200/90 dark:border-white/10 p-2.5 sm:p-3 relative overflow-hidden">
+            {/* Top Accent Gradient Line */}
             <div 
               className="absolute top-0 left-0 right-0 h-1 transition-colors duration-300"
               style={{ background: `linear-gradient(90deg, ${currentStep.accentColor}, #38BDF8)` }}
             />
 
             {/* Header: Category Badge, Step Counter & Controls */}
-            <div className="flex items-center justify-between gap-1.5 mb-2 pt-0.5">
+            <div className="flex items-center justify-between gap-1 mb-1.5 pt-0.5">
               <div className="flex items-center gap-1.5">
                 <span 
-                  className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
+                  className="text-[8.5px] sm:text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded"
                   style={{
                     backgroundColor: `${currentStep.accentColor}18`,
                     color: currentStep.accentColor
@@ -541,28 +529,28 @@ export const AppTour: React.FC = () => {
                 >
                   {displayBengali ? currentStep.categoryBn : currentStep.categoryEn}
                 </span>
-                <span className="text-[10px] sm:text-[11px] font-extrabold text-slate-400 dark:text-slate-400">
-                  {currentStepIndex + 1} / {TOUR_STEPS.length}
+                <span className="text-[9px] sm:text-[10px] font-bold text-slate-400">
+                  {currentStepIndex + 1}/{TOUR_STEPS.length}
                 </span>
               </div>
 
               <div className="flex items-center gap-1">
-                {/* Language Switcher Button inside Tour */}
+                {/* Language Switcher */}
                 <button
                   type="button"
                   onClick={handleToggleLanguage}
-                  className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 text-[9px] sm:text-[10px] font-black hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                  className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[9px] font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                   title="Switch Language"
                 >
                   <Languages className="w-2.5 h-2.5 text-blue-500" />
-                  <span>{displayBengali ? 'EN' : 'বাংলা'}</span>
+                  <span>{displayBengali ? 'EN' : 'বাং'}</span>
                 </button>
 
-                {/* Dismiss / Skip Button */}
+                {/* Close Button */}
                 <button
                   type="button"
                   onClick={handleSkip}
-                  className="p-0.5 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  className="p-0.5 rounded text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
                   title="Close Tour"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -571,35 +559,32 @@ export const AppTour: React.FC = () => {
             </div>
 
             {/* Title & Icon Row */}
-            <div className="flex items-start gap-2.5 mb-2">
-              <motion.div
-                initial={{ scale: 0.6, rotate: -10 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: 'spring', stiffness: 450, damping: 18 }}
-                className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shrink-0 shadow-md [&_svg]:w-4 [&_svg]:h-4 [&_svg]:sm:w-5 [&_svg]:sm:h-5"
+            <div className="flex items-start gap-2 mb-1.5">
+              <div
+                className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm mt-0.5"
                 style={{ backgroundColor: currentStep.accentColor }}
               >
                 {currentStep.icon}
-              </motion.div>
+              </div>
 
               <div className="flex-1 min-w-0">
-                <h3 className="text-[13px] sm:text-[15px] font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                <h3 className="text-xs sm:text-[13px] font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
                   {displayBengali ? currentStep.titleBn : currentStep.titleEn}
                 </h3>
-                <p className="text-[11px] sm:text-[12px] text-slate-600 dark:text-slate-300 leading-relaxed mt-0.5 font-normal">
+                <p className="text-[10px] sm:text-[10.5px] text-slate-600 dark:text-slate-300 leading-snug mt-0.5 line-clamp-2">
                   {displayBengali ? currentStep.descBn : currentStep.descEn}
                 </p>
               </div>
             </div>
 
-            {/* Segmented Progress Bar */}
-            <div className="flex items-center gap-1 my-2.5 sm:my-3.5">
+            {/* Slim Progress Bar */}
+            <div className="flex items-center gap-0.5 my-1.5">
               {TOUR_STEPS.map((step, idx) => (
                 <button
                   key={step.id}
                   type="button"
                   onClick={() => setCurrentStepIndex(idx)}
-                  className={`h-1 flex-1 rounded-full transition-all duration-300 cursor-pointer ${
+                  className={`h-0.5 flex-1 rounded-full transition-all duration-300 cursor-pointer ${
                     idx === currentStepIndex
                       ? 'bg-blue-600 dark:bg-blue-400 shadow-sm'
                       : idx < currentStepIndex
@@ -617,44 +602,44 @@ export const AppTour: React.FC = () => {
                 type="button"
                 onClick={handleBack}
                 disabled={currentStepIndex === 0}
-                className={`flex items-center gap-0.5 text-[11px] sm:text-xs font-black py-1 px-2 rounded-lg transition-all cursor-pointer ${
+                className={`flex items-center gap-0.5 text-[10px] font-bold py-1 px-1.5 rounded transition-all cursor-pointer ${
                   currentStepIndex === 0
-                    ? 'opacity-30 cursor-not-allowed text-slate-400'
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'opacity-25 cursor-not-allowed text-slate-400'
+                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
                 }`}
               >
-                <ChevronLeft className="w-3.5 h-3.5" />
-                <span>{displayBengali ? 'আগেরটি' : 'Previous'}</span>
+                <ChevronLeft className="w-3 h-3" />
+                <span>{displayBengali ? 'আগের' : 'Prev'}</span>
               </button>
 
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={handleSkip}
-                  className="text-[11px] sm:text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 px-1.5 py-1 transition-colors cursor-pointer"
+                  className="text-[10px] font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 px-1 py-1 cursor-pointer"
                 >
-                  {displayBengali ? 'এড়িয়ে যান' : 'Skip'}
+                  {displayBengali ? 'বাদ দিন' : 'Skip'}
                 </button>
 
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   type="button"
                   onClick={handleNext}
-                  className="bg-gradient-to-r from-blue-600 to-[#007AFF] hover:from-blue-700 hover:to-blue-600 text-white font-black text-[11px] sm:text-xs px-3 py-1.5 sm:px-4 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md shadow-blue-500/25 flex items-center gap-1 cursor-pointer transition-all"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10.5px] px-2.5 py-1 rounded-lg shadow-sm flex items-center gap-1 cursor-pointer transition-all"
                 >
                   <span>
                     {currentStepIndex === TOUR_STEPS.length - 1
                       ? displayBengali
-                        ? 'ট্যুর সম্পন্ন করুন'
-                        : 'Finish Tour'
+                        ? 'সম্পন্ন'
+                        : 'Finish'
                       : displayBengali
                       ? 'পরবর্তী'
                       : 'Next'}
                   </span>
                   {currentStepIndex < TOUR_STEPS.length - 1 ? (
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <ChevronRight className="w-3 h-3" />
                   ) : (
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <CheckCircle2 className="w-3 h-3" />
                   )}
                 </motion.button>
               </div>
@@ -663,45 +648,45 @@ export const AppTour: React.FC = () => {
         </motion.div>
       </AnimatePresence>
 
-      {/* Skip Confirmation Dialog */}
+      {/* Skip Confirmation Dialog (Compact for mobile) */}
       <AnimatePresence>
         {showSkipConfirm && (
-          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/70 pointer-events-auto">
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 bg-black/70 pointer-events-auto">
             <motion.div
-              initial={{ opacity: 0, scale: 0.92, y: 15 }}
+              initial={{ opacity: 0, scale: 0.92, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.92, y: 15 }}
-              className="bg-white dark:bg-[#0F172A] rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-slate-200 dark:border-white/10 space-y-4"
+              exit={{ opacity: 0, scale: 0.92, y: 10 }}
+              className="bg-white dark:bg-[#0F172A] rounded-2xl p-4 w-full max-w-[280px] shadow-2xl border border-slate-200 dark:border-white/10 space-y-3"
             >
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto shadow-inner">
-                <Compass className="w-6 h-6 animate-pulse" />
+              <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto shadow-inner">
+                <Compass className="w-5 h-5 animate-pulse" />
               </div>
 
-              <div className="text-center space-y-1.5">
-                <h4 className="text-base font-black text-slate-900 dark:text-white">
-                  {displayBengali ? 'ট্যুরটি কি এড়িয়ে যেতে চান?' : 'Skip the app tour?'}
+              <div className="text-center space-y-1">
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                  {displayBengali ? 'ট্যুর এড়িয়ে যাবেন?' : 'Skip tour?'}
                 </h4>
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
                   {displayBengali
-                    ? 'ট্যুর সম্পন্ন করলে আপনি জলপাইগুড়ির সমস্ত দরকারী বৈশিষ্ট্য এবং জরুরি পরিষেবা সহজে ব্যবহার করতে পারবেন।'
-                    : 'The guided tour helps you discover all key civic services, AI assistance, and emergency features.'}
+                    ? 'আপনি পরেও প্রোফাইল থেকে পুনরায় ট্যুরটি দেখতে পারবেন।'
+                    : 'You can replay the tour anytime from your Profile.'}
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5 pt-2">
+              <div className="grid grid-cols-2 gap-2 pt-1">
                 <button
                   type="button"
                   onClick={handleComplete}
-                  className="py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-extrabold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                  className="py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-[11px] font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                 >
-                  {displayBengali ? 'হ্যাঁ, বন্ধ করুন' : 'Yes, Skip'}
+                  {displayBengali ? 'হ্যাঁ, বন্ধ' : 'Yes, Skip'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowSkipConfirm(false)}
-                  className="py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold shadow-md shadow-blue-500/25 transition-all cursor-pointer"
+                  className="py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[11px] font-bold shadow transition-all cursor-pointer"
                 >
-                  {displayBengali ? 'ট্যুর চালিয়ে যান' : 'Continue Tour'}
+                  {displayBengali ? 'চালিয়ে যান' : 'Continue'}
                 </button>
               </div>
             </motion.div>
