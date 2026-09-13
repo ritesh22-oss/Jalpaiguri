@@ -138,7 +138,8 @@ const AppContent: React.FC = () => {
   const [showWelcomePopup, setShowWelcomePopup] = React.useState(false);
 
   React.useEffect(() => {
-    if (isAuthenticated && isProfileComplete && user && user.id) {
+    const isTourDone = user?.tourCompleted || localStorage.getItem('jpg_has_seen_tour') === 'true';
+    if (isAuthenticated && isProfileComplete && user && user.id && isTourDone) {
       checkAndCreateWelcomeNotification({
         id: user.id,
         name: user.name || 'Citizen',
@@ -149,7 +150,7 @@ const AppContent: React.FC = () => {
         }
       });
     }
-  }, [isAuthenticated, isProfileComplete, user, isBengali]);
+  }, [isAuthenticated, isProfileComplete, user, user?.tourCompleted, isBengali]);
 
   // 1. Initial Routing Effect (From Splash)
   React.useEffect(() => {
