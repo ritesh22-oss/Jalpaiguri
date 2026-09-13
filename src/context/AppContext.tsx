@@ -33,12 +33,11 @@ import {
   increment,
   addDoc,
   getDocs,
-  deleteDoc,
-  query,
-  where
+  deleteDoc
 } from 'firebase/firestore';
 import confetti from 'canvas-confetti';
 import { useLanguage } from './LanguageContext';
+import { useAuth } from './AuthContext';
 
 interface AppContextType {
   workers: Worker[];
@@ -154,6 +153,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const setLanguage = useCallback((lang: string) => {
     setGlobalLanguage(lang as 'en' | 'bn');
   }, [setGlobalLanguage]);
+
+  const { user } = useAuth();
 
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [savedItemIds, setSavedItemIds] = useState<string[]>(() => {
@@ -289,16 +290,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const unsubscribers: (() => void)[] = [];
     if (isFirebaseConfigured && db) {
       try {
-        const collections = [
+        const collections: { name: string; setter: (data: any[]) => void }[] = [
           { name: 'workers', setter: setWorkers },
           { name: 'civic_reports', setter: setCivicReports },
           { name: 'local_alerts', setter: setLocalAlerts },
-          { 
-            name: 'blood_donors', 
-            setter: setBloodDonors,
-            query: query(collection(db, 'blood_donors'), where('isVisible', '==', true), where('agreedToSearch', '==', true))
-          },
-          { name: 'blood_requests', setter: setBloodRequests },
+          { name: 'blood_donors', setter: setBloodDonors },
           { name: 'jobs', setter: setJobs },
           { name: 'rentals', setter: setRentals },
           { name: 'lost_found', setter: setLostFound },
@@ -334,7 +330,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           },
           { name: 'puja_pandals', setter: (data: DurgaPandalItem[]) => {
               if (data && data.length > 0) {
-                // Merge verified initial pandals with any custom Firestore pandals
                 const existingIds = new Set(data.map(p => p.id));
                 const merged = [...data];
                 INITIAL_DURGA_PUJA_PANDALS.forEach(p => {
@@ -347,6 +342,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             } 
           }
         ];
+
+        if (user) {
+          collections.push({ name: 'blood_requests', setter: setBloodRequests });
+        }
 
         const handleFirestoreError = (error: any, operation: string, path: string) => {
           const errInfo = {
@@ -362,11 +361,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           console.error('[Firestore Error Callback]', JSON.stringify(errInfo));
         };
 
-        collections.forEach(({ name, setter, query: customQuery }) => {
-          const target = customQuery || collection(db, name);
+        collections.forEach(({ name, setter }) => {
           unsubscribers.push(
             onSnapshot(
-              target,
+              collection(db, name),
               (snap) => {
                 const loaded: any[] = [];
                 snap.forEach((d) => loaded.push({ ...d.data(), id: d.id }));
@@ -377,11 +375,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 setter(loaded);
               },
               (error) => {
-                // Ignore permission errors for non-logged in users on protected collections
-                if (error.code === 'permission-denied') {
-                  console.warn(`[Firestore] Permission denied for ${name}. This is expected if not logged in or restricted.`);
-                  return;
-                }
                 handleFirestoreError(error, 'list', name);
               }
             )
@@ -398,7 +391,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => {
       unsubscribers.forEach((u) => u());
     };
-  }, []);
+  }, [user]);
 
   const showToast = (message: string, type: 'success' | 'info' | 'error' = 'success') => {
     setToast({ message, type });

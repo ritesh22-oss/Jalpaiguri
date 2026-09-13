@@ -433,6 +433,7 @@ export interface BloodDonor {
   note?: string;
   isVisible: boolean;
   distanceKm?: number;
+  isDemo?: boolean;
 }
 
 export interface BloodRequest {

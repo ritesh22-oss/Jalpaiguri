@@ -208,11 +208,12 @@ export const AppTour: React.FC = () => {
       // Ensure scrolling is restored immediately
       document.body.style.overflow = '';
       document.body.style.touchAction = '';
+      localStorage.setItem('jpg_has_seen_tour', 'true');
       await updateProfile({ tourCompleted: true, tourVersion: 1 });
     }
   };
 
-  if (!user || user.tourCompleted || !isReady || currentView !== 'home' || !isProfileComplete) return null;
+  if (!user || user.tourCompleted || localStorage.getItem('jpg_has_seen_tour') === 'true' || !isReady || currentView !== 'home' || !isProfileComplete) return null;
 
   // Calculate info card position
   const getCardStyle = () => {

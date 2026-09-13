@@ -173,7 +173,7 @@ export const DonorDetailsView: React.FC = () => {
         <div className="grid grid-cols-2 gap-4">
           <button
             onClick={() => handleWhatsApp(donor.phone, donor.bloodGroup)}
-            className="py-5 bg-[#25D366] text-white rounded-[24px] flex items-center justify-center gap-3 shadow-xl shadow-green-500/20 font-black text-xs uppercase tracking-widest active:scale-95 hover:bg-blue-400 transition-all duration-300"
+            className="py-5 bg-[#25D366] text-white rounded-[24px] flex items-center justify-center gap-3 shadow-xl shadow-green-500/20 font-black text-xs uppercase tracking-widest active:scale-95 transition-all"
           >
             <MessageSquare className="w-5 h-5" />
             WhatsApp

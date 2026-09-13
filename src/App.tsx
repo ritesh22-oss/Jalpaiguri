@@ -108,7 +108,6 @@ import { ShopDetailView } from './components/shops/ShopDetailView';
 import { AddShopWizardView } from './components/shops/AddShopWizardView';
 import { MerchantDashboardView } from './components/shops/MerchantDashboardView';
 import { SmartShoppingSearchView } from './components/shops/SmartShoppingSearchView';
-import { PujaPandalsView } from './components/views/PujaPandalsView';
 
 // Common Components & Modals
 import { BottomNav } from './components/common/BottomNav';
@@ -155,8 +154,9 @@ const AppContent: React.FC = () => {
         }
       } else {
         const hasOnboarded = localStorage.getItem('jpg_has_onboarded') === 'true';
-        if (hasOnboarded) {
-          console.log('[STARTUP FLOW] Not Authenticated (Onboarded) -> Auth');
+        const hasExistingAccount = !!localStorage.getItem('jpg_user_profile');
+        if (hasOnboarded || hasExistingAccount) {
+          console.log('[STARTUP FLOW] Not Authenticated (Has account/Onboarded) -> Auth');
           replaceView('auth');
         } else {
           console.log('[STARTUP FLOW] Not Authenticated (New User) -> Onboarding');
@@ -183,7 +183,8 @@ const AppContent: React.FC = () => {
 
   // 3. Profile Setup Guard
   React.useEffect(() => {
-    if (!isLoading && isAuthenticated && !isProfileComplete) {
+    const hasDismissed = localStorage.getItem('jpg_has_dismissed_profile_setup') === 'true';
+    if (!isLoading && isAuthenticated && !isProfileComplete && !hasDismissed) {
       if (
         currentView === 'home' ||
         currentView === 'nearby' ||
@@ -386,17 +387,6 @@ const AppContent: React.FC = () => {
         return <MerchantDashboardView />;
       case 'smart-shopping-search':
         return <SmartShoppingSearchView />;
-      case 'puja-pandals':
-      case 'pandal-detail':
-        return (
-          <PujaPandalsView
-            pandals={pujaPandals}
-            userLocation={location}
-            onBack={() => goBack()}
-            onAddPandal={addPujaPandal}
-            onReportPandal={reportPandalInfo}
-          />
-        );
       case 'transport':
         return <TransportView />;
       case 'courier':
@@ -435,7 +425,7 @@ const AppContent: React.FC = () => {
   const isPostLogin = !['splash', 'onboarding', 'auth', 'phone-auth', 'otp', 'profile-setup', 'profile-onboarding'].includes(currentView);
 
   return (
-    <div className="w-full min-h-screen min-h-[100dvh] bg-[#FAF8F5] dark:bg-[#020617] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col relative transition-colors">
+    <div className="w-full h-screen h-[100dvh] bg-[#FAF8F5] dark:bg-[#020617] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col relative transition-colors overflow-x-hidden overflow-y-auto">
       <AnimatePresence>
         {!isOnline && <OfflineView />}
       </AnimatePresence>

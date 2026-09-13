@@ -329,8 +329,8 @@ export const ProfileSetupView: React.FC = () => {
             )}
           </div>
 
-          {/* Action Continue Button */}
-          <div className="pt-4">
+        {/* Action Continue Button */}
+          <div className="pt-4 flex flex-col gap-3">
             <button
               id="btn-profile-continue"
               type="submit"
@@ -345,6 +345,16 @@ export const ProfileSetupView: React.FC = () => {
               ) : (
                 <span>{isBengali ? 'এগিয়ে যান' : 'Continue'}</span>
               )}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.setItem('jpg_has_dismissed_profile_setup', 'true');
+                replaceView('home');
+              }}
+              className="w-full h-[48px] rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold text-[14px] flex items-center justify-center transition-all cursor-pointer"
+            >
+              {isBengali ? 'এখনই না' : 'Skip for now'}
             </button>
           </div>
         </form>
