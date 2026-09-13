@@ -137,12 +137,29 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    try {
+      const cached = localStorage.getItem('jpg_user_profile');
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (e) {}
+    return null;
+  });
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRedirectPending, setIsRedirectPending] = useState<boolean>(() => {
     return localStorage.getItem('jpg_redirect_auth_pending') === 'true';
   });
-  const [isProfileComplete, setIsProfileComplete] = useState<boolean>(false);
+  const [isProfileComplete, setIsProfileComplete] = useState<boolean>(() => {
+    try {
+      const cached = localStorage.getItem('jpg_user_profile');
+      if (cached) {
+        const u = JSON.parse(cached);
+        return Boolean(u.name && u.location);
+      }
+    } catch (e) {}
+    return false;
+  });
 
   const [pendingPhone, setPendingPhone] = useState<string>('');
   const [activeOtp, setActiveOtp] = useState<string | null>(null);
