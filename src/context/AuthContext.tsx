@@ -237,7 +237,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const role = isOfficialAdmin ? 'admin' : (data.role === 'admin' ? 'citizen' : (data.role || 'citizen'));
               
               let tourCompleted = data.tourCompleted;
-              if (tourCompleted === undefined) {
+              // Only first login/new users who opened their account see the tour. Already signed up users bypass it.
+              if (data.name && data.location) {
+                tourCompleted = true;
+              } else if (tourCompleted === undefined) {
                 const createdDate = data.createdAt ? new Date(data.createdAt) : new Date(0);
                 const featureLaunchDate = new Date('2026-09-13T00:00:00Z');
                 if (createdDate < featureLaunchDate) {
@@ -381,7 +384,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const updatedProfile: UserProfile = {
             ...profileData,
             role: assignedRole,
-            email: fbUser.email || profileData.email || ''
+            email: fbUser.email || profileData.email || '',
+            tourCompleted: (profileData.name && profileData.location) ? true : profileData.tourCompleted
           };
           setUser(updatedProfile);
           setIsLoading(false);
@@ -476,7 +480,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             role: assignedRole,
             email: fbUser.email || profileData.email || '',
             emailVerified: fbUser.emailVerified,
-            authMethod: 'email'
+            authMethod: 'email',
+            tourCompleted: (profileData.name && profileData.location) ? true : profileData.tourCompleted
           };
           setUser(updatedProfile);
           localStorage.setItem('jpg_user_profile', JSON.stringify(updatedProfile));
@@ -842,6 +847,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
         needsSetup = true;
+      }
+
+      if (!needsSetup && profileData) {
+        profileData.tourCompleted = true;
       }
 
       setUser(profileData);

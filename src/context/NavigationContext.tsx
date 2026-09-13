@@ -30,13 +30,34 @@ const NavigationContext = createContext<NavigationContextType | undefined>(undef
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [history, setHistory] = useState<NavigationStackItem[]>(() => {
     try {
-      // Direct explicit deep links (e.g., /admin-dashboard) can be supported if specifically accessed, otherwise default to splash
+      // 1. Prioritize saved view from previous session/refresh to stay back at the same screen
+      const savedView = sessionStorage.getItem('jpg_current_view') as ViewType | null;
+      if (savedView && savedView !== 'splash') {
+        return [{ view: savedView }];
+      }
+
+      // 2. Deep linking / URL Pathname fallback
       const path = window.location.pathname;
       if (path && path !== '/' && path !== '') {
         const cleanPath = path.replace(/^\//, '');
-        if (cleanPath === 'admin-dashboard') return [{ view: 'admin-dashboard' }];
-        if (cleanPath === 'auth') return [{ view: 'auth' }];
-        if (cleanPath === 'onboarding') return [{ view: 'onboarding' }];
+        if (cleanPath) {
+          const pathMappingInv: Record<string, ViewType> = {
+            'shops': 'shop-marketplace',
+            'blood': 'blood',
+            'discover': 'discover',
+            'profile': 'profile',
+            'home': 'home',
+            'notifications': 'notifications',
+            'admin-notifications': 'admin-notifications',
+            'admin-dashboard': 'admin-dashboard',
+            'auth': 'auth',
+            'onboarding': 'onboarding'
+          };
+          const mappedView = pathMappingInv[cleanPath] || (cleanPath as ViewType);
+          if (mappedView && mappedView !== 'splash') {
+            return [{ view: mappedView }];
+          }
+        }
       }
     } catch (e) {
       console.warn('[MYJPG ROUTER] Error initializing route:', e);

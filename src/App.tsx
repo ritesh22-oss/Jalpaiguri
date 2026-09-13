@@ -197,6 +197,17 @@ const AppContent: React.FC = () => {
     }
   }, [serviceAreaStatus, currentView, replaceView]);
 
+  // 1.8. Unauthenticated Protection Guard
+  React.useEffect(() => {
+    const publicViews = ['splash', 'onboarding', 'auth', 'phone-auth', 'otp'];
+    if (!isLoading && !isAuthenticated) {
+      if (!publicViews.includes(currentView)) {
+        console.log('[AUTH GUARD] Unauthenticated user on protected view, redirecting to onboarding');
+        replaceView('onboarding');
+      }
+    }
+  }, [isLoading, isAuthenticated, currentView, replaceView]);
+
   // 2. Auth Guard Effects (Prevent access to auth screens if already logged in)
   React.useEffect(() => {
     if (!isLoading && isAuthenticated && isProfileComplete) {
