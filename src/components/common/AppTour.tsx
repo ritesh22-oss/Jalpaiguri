@@ -169,7 +169,7 @@ export const AppTour: React.FC = () => {
 
   // Dynamic card height measurement
   const cardRef = useRef<HTMLDivElement>(null);
-  const [measuredCardHeight, setMeasuredCardHeight] = useState(120);
+  const [measuredCardHeight, setMeasuredCardHeight] = useState(110);
 
   const animationFrameRef = useRef<number | null>(null);
 
@@ -231,8 +231,8 @@ export const AppTour: React.FC = () => {
       }
     } else {
       // Fallback area centered in top half
-      const w = Math.min(window.innerWidth - 32, 280);
-      const h = 90;
+      const w = Math.min(window.innerWidth - 32, 260);
+      const h = 80;
       setTargetRect({
         top: Math.max(60, window.innerHeight * 0.15),
         left: (window.innerWidth - w) / 2,
@@ -252,7 +252,6 @@ export const AppTour: React.FC = () => {
 
     const el = document.getElementById(currentStep.targetId);
     if (el) {
-      // For items near the very bottom like fixed bottom nav, don't scroll
       const isFixedBottom = currentStep.targetId.startsWith('nav-');
       if (!isFixedBottom) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -357,23 +356,21 @@ export const AppTour: React.FC = () => {
   const pad = 6;
   const spotlight = targetRect
     ? {
-        x: Math.max(4, targetRect.left - pad),
+        x: Math.max(4, Math.min(targetRect.left - pad, viewport.width - (Math.min(viewport.width - 8, targetRect.width + pad * 2)) - 4)),
         y: Math.max(4, targetRect.top - pad),
         w: Math.min(viewport.width - 8, targetRect.width + pad * 2),
         h: targetRect.height + pad * 2,
-        r: targetRect.width < 50 && targetRect.height < 50 ? 22 : 14
+        r: targetRect.width < 50 && targetRect.height < 50 ? 20 : 12
       }
     : {
         x: 16,
         y: 70,
         w: viewport.width - 32,
-        h: 100,
-        r: 14
+        h: 90,
+        r: 12
       };
 
-  // Screen-responsive card width: adapts to any mobile screen size (320px, 360px, 375px, 390px+)
-  const cardWidth = Math.min(viewport.width - 24, 304);
-  const cardHeight = measuredCardHeight || 120;
+  const cardHeight = measuredCardHeight || 110;
 
   // Vertical placement math: strictly inside viewport boundaries
   const targetTop = spotlight.y;
@@ -383,21 +380,18 @@ export const AppTour: React.FC = () => {
 
   let isCardAbove = false;
   if (spaceBelow >= cardHeight + 8) {
-    // There is room below: if element is low on screen and plenty of room above, prefer above
     if (targetTop > viewport.height * 0.58 && spaceAbove >= cardHeight + 8) {
       isCardAbove = true;
     } else {
       isCardAbove = false;
     }
   } else {
-    // Insufficient room below, must place above
     isCardAbove = true;
   }
 
-  const desiredTop = isCardAbove ? targetTop - cardHeight - 8 : targetBottom + 8;
-  // Strict clamping: never off top (min 8px) and never off bottom (max viewport.height - cardHeight - 8px)
-  const minTop = 8;
-  const maxTop = Math.max(minTop, viewport.height - cardHeight - 8);
+  const desiredTop = isCardAbove ? targetTop - cardHeight - 6 : targetBottom + 6;
+  const minTop = 10;
+  const maxTop = Math.max(minTop, viewport.height - cardHeight - 12);
   const cardTop = Math.min(Math.max(desiredTop, minTop), maxTop);
 
   return (
@@ -452,239 +446,232 @@ export const AppTour: React.FC = () => {
         }}
       >
         <div 
-          className="absolute inset-0 rounded-[inherit] border-2 transition-colors duration-300 shadow-[0_0_20px_rgba(0,122,255,0.6)]"
+          className="absolute inset-0 rounded-[inherit] border-2 transition-colors duration-300 shadow-[0_0_16px_rgba(0,122,255,0.6)]"
           style={{ borderColor: currentStep.accentColor }}
         />
 
         <div 
-          className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2"
+          className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2"
           style={{ borderColor: currentStep.accentColor }}
         />
         <div 
-          className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2"
+          className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2"
           style={{ borderColor: currentStep.accentColor }}
         />
         <div 
-          className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2"
+          className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2"
           style={{ borderColor: currentStep.accentColor }}
         />
         <div 
-          className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2"
+          className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2"
           style={{ borderColor: currentStep.accentColor }}
         />
       </motion.div>
 
-      {/* Ultra-Compact & Screen-Fitted Tour Guide Box */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentStep.id}
-          ref={cardRef}
-          initial={{ opacity: 0, y: isCardAbove ? -10 : 10, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: isCardAbove ? -8 : 8, scale: 0.98 }}
-          transition={{
-            type: 'spring',
-            stiffness: 420,
-            damping: 30,
-            mass: 0.6
-          }}
-          className="fixed z-[105] pointer-events-auto"
-          style={{
-            top: cardTop,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: `${cardWidth}px`,
-            maxWidth: 'calc(100vw - 24px)'
-          }}
-        >
-          {/* Subtle Direction Pointer */}
-          <div 
-            className={`absolute left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none transition-all ${
-              isCardAbove ? '-bottom-2' : '-top-2'
-            }`}
+      {/* Container wrapper for horizontal centering without transform conflicts */}
+      <div 
+        className="fixed inset-x-0 z-[105] pointer-events-none flex justify-center px-3"
+        style={{ top: `${cardTop}px` }}
+      >
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep.id}
+            ref={cardRef}
+            initial={{ opacity: 0, y: isCardAbove ? -6 : 6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: isCardAbove ? -6 : 6, scale: 0.98 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="w-full max-w-[260px] pointer-events-auto relative"
           >
-            {isCardAbove ? (
-              <div className="w-0 h-0 border-x-5 border-x-transparent border-t-6 border-t-white dark:border-t-[#0F172A] filter drop-shadow-[0_2px_2px_rgba(0,0,0,0.15)]" />
-            ) : (
-              <div className="w-0 h-0 border-x-5 border-x-transparent border-b-6 border-b-white dark:border-b-[#0F172A] filter drop-shadow-[0_-2px_2px_rgba(0,0,0,0.15)]" />
-            )}
-          </div>
-
-          <div className="bg-white/98 dark:bg-[#0F172A]/98 backdrop-blur-xl rounded-xl shadow-[0_10px_28px_rgba(0,0,0,0.32)] border border-slate-200/90 dark:border-white/10 p-2.5 sm:p-3 relative overflow-hidden">
-            {/* Top Accent Gradient Line */}
+            {/* Direction Pointer */}
             <div 
-              className="absolute top-0 left-0 right-0 h-1 transition-colors duration-300"
-              style={{ background: `linear-gradient(90deg, ${currentStep.accentColor}, #38BDF8)` }}
-            />
-
-            {/* Header: Category Badge, Step Counter & Controls */}
-            <div className="flex items-center justify-between gap-1 mb-1.5 pt-0.5">
-              <div className="flex items-center gap-1.5">
-                <span 
-                  className="text-[8.5px] sm:text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded"
-                  style={{
-                    backgroundColor: `${currentStep.accentColor}18`,
-                    color: currentStep.accentColor
-                  }}
-                >
-                  {displayBengali ? currentStep.categoryBn : currentStep.categoryEn}
-                </span>
-                <span className="text-[9px] sm:text-[10px] font-bold text-slate-400">
-                  {currentStepIndex + 1}/{TOUR_STEPS.length}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-1">
-                {/* Language Switcher */}
-                <button
-                  type="button"
-                  onClick={handleToggleLanguage}
-                  className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[9px] font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-                  title="Switch Language"
-                >
-                  <Languages className="w-2.5 h-2.5 text-blue-500" />
-                  <span>{displayBengali ? 'EN' : 'বাং'}</span>
-                </button>
-
-                {/* Close Button */}
-                <button
-                  type="button"
-                  onClick={handleSkip}
-                  className="p-0.5 rounded text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
-                  title="Close Tour"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
+              className={`absolute left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none transition-all ${
+                isCardAbove ? '-bottom-1.5' : '-top-1.5'
+              }`}
+            >
+              {isCardAbove ? (
+                <div className="w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-white dark:border-t-[#0F172A]" />
+              ) : (
+                <div className="w-0 h-0 border-x-4 border-x-transparent border-b-4 border-b-white dark:border-b-[#0F172A]" />
+              )}
             </div>
 
-            {/* Title & Icon Row */}
-            <div className="flex items-start gap-2 mb-1.5">
-              <div
-                className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm mt-0.5"
-                style={{ backgroundColor: currentStep.accentColor }}
-              >
-                {currentStep.icon}
-              </div>
+            <div className="bg-white/98 dark:bg-[#0F172A]/98 backdrop-blur-xl rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.35)] border border-slate-200/90 dark:border-white/10 p-2.5 relative overflow-hidden">
+              {/* Top Accent Gradient Line */}
+              <div 
+                className="absolute top-0 left-0 right-0 h-0.5 transition-colors duration-300"
+                style={{ background: `linear-gradient(90deg, ${currentStep.accentColor}, #38BDF8)` }}
+              />
 
-              <div className="flex-1 min-w-0">
-                <h3 className="text-xs sm:text-[13px] font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
-                  {displayBengali ? currentStep.titleBn : currentStep.titleEn}
-                </h3>
-                <p className="text-[10px] sm:text-[10.5px] text-slate-600 dark:text-slate-300 leading-snug mt-0.5 line-clamp-2">
-                  {displayBengali ? currentStep.descBn : currentStep.descEn}
-                </p>
-              </div>
-            </div>
-
-            {/* Slim Progress Bar */}
-            <div className="flex items-center gap-0.5 my-1.5">
-              {TOUR_STEPS.map((step, idx) => (
-                <button
-                  key={step.id}
-                  type="button"
-                  onClick={() => setCurrentStepIndex(idx)}
-                  className={`h-0.5 flex-1 rounded-full transition-all duration-300 cursor-pointer ${
-                    idx === currentStepIndex
-                      ? 'bg-blue-600 dark:bg-blue-400 shadow-sm'
-                      : idx < currentStepIndex
-                      ? 'bg-blue-200 dark:bg-blue-900'
-                      : 'bg-slate-200 dark:bg-slate-800'
-                  }`}
-                  title={displayBengali ? step.titleBn : step.titleEn}
-                />
-              ))}
-            </div>
-
-            {/* Action Buttons: Back, Skip, Next / Complete */}
-            <div className="flex items-center justify-between pt-0.5">
-              <button
-                type="button"
-                onClick={handleBack}
-                disabled={currentStepIndex === 0}
-                className={`flex items-center gap-0.5 text-[10px] font-bold py-1 px-1.5 rounded transition-all cursor-pointer ${
-                  currentStepIndex === 0
-                    ? 'opacity-25 cursor-not-allowed text-slate-400'
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
-                }`}
-              >
-                <ChevronLeft className="w-3 h-3" />
-                <span>{displayBengali ? 'আগের' : 'Prev'}</span>
-              </button>
-
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={handleSkip}
-                  className="text-[10px] font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 px-1 py-1 cursor-pointer"
-                >
-                  {displayBengali ? 'বাদ দিন' : 'Skip'}
-                </button>
-
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  type="button"
-                  onClick={handleNext}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10.5px] px-2.5 py-1 rounded-lg shadow-sm flex items-center gap-1 cursor-pointer transition-all"
-                >
-                  <span>
-                    {currentStepIndex === TOUR_STEPS.length - 1
-                      ? displayBengali
-                        ? 'সম্পন্ন'
-                        : 'Finish'
-                      : displayBengali
-                      ? 'পরবর্তী'
-                      : 'Next'}
+              {/* Header: Category Badge, Step Counter & Controls */}
+              <div className="flex items-center justify-between gap-1 mb-1 pt-0.5">
+                <div className="flex items-center gap-1.5">
+                  <span 
+                    className="text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded"
+                    style={{
+                      backgroundColor: `${currentStep.accentColor}18`,
+                      color: currentStep.accentColor
+                    }}
+                  >
+                    {displayBengali ? currentStep.categoryBn : currentStep.categoryEn}
                   </span>
-                  {currentStepIndex < TOUR_STEPS.length - 1 ? (
-                    <ChevronRight className="w-3 h-3" />
-                  ) : (
-                    <CheckCircle2 className="w-3 h-3" />
-                  )}
-                </motion.button>
+                  <span className="text-[9px] font-bold text-slate-400">
+                    {currentStepIndex + 1}/{TOUR_STEPS.length}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  {/* Language Switcher */}
+                  <button
+                    type="button"
+                    onClick={handleToggleLanguage}
+                    className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[8.5px] font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                    title="Switch Language"
+                  >
+                    <Languages className="w-2.5 h-2.5 text-blue-500" />
+                    <span>{displayBengali ? 'EN' : 'বাং'}</span>
+                  </button>
+
+                  {/* Close Button */}
+                  <button
+                    type="button"
+                    onClick={handleSkip}
+                    className="p-0.5 rounded text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
+                    title="Close Tour"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Title & Icon Row */}
+              <div className="flex items-start gap-1.5 mb-1">
+                <div
+                  className="w-5.5 h-5.5 rounded-md flex items-center justify-center text-white shrink-0 shadow-sm mt-0.5"
+                  style={{ backgroundColor: currentStep.accentColor }}
+                >
+                  {currentStep.icon}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-[11.5px] font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
+                    {displayBengali ? currentStep.titleBn : currentStep.titleEn}
+                  </h3>
+                  <p className="text-[9.5px] text-slate-600 dark:text-slate-300 leading-snug mt-0.5 line-clamp-2">
+                    {displayBengali ? currentStep.descBn : currentStep.descEn}
+                  </p>
+                </div>
+              </div>
+
+              {/* Slim Progress Bar */}
+              <div className="flex items-center gap-0.5 my-1">
+                {TOUR_STEPS.map((step, idx) => (
+                  <button
+                    key={step.id}
+                    type="button"
+                    onClick={() => setCurrentStepIndex(idx)}
+                    className={`h-0.5 flex-1 rounded-full transition-all duration-300 cursor-pointer ${
+                      idx === currentStepIndex
+                        ? 'bg-blue-600 dark:bg-blue-400 shadow-sm'
+                        : idx < currentStepIndex
+                        ? 'bg-blue-200 dark:bg-blue-900'
+                        : 'bg-slate-200 dark:bg-slate-800'
+                    }`}
+                    title={displayBengali ? step.titleBn : step.titleEn}
+                  />
+                ))}
+              </div>
+
+              {/* Action Buttons: Back, Skip, Next / Complete */}
+              <div className="flex items-center justify-between pt-0.5">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  disabled={currentStepIndex === 0}
+                  className={`flex items-center gap-0.5 text-[9.5px] font-bold py-1 px-1 rounded transition-all cursor-pointer ${
+                    currentStepIndex === 0
+                      ? 'opacity-25 cursor-not-allowed text-slate-400'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white'
+                  }`}
+                >
+                  <ChevronLeft className="w-3 h-3" />
+                  <span>{displayBengali ? 'আগের' : 'Prev'}</span>
+                </button>
+
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={handleSkip}
+                    className="text-[9.5px] font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 px-1 py-0.5 cursor-pointer"
+                  >
+                    {displayBengali ? 'বাদ দিন' : 'Skip'}
+                  </button>
+
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    type="button"
+                    onClick={handleNext}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] px-2 py-0.5 rounded shadow-sm flex items-center gap-0.5 cursor-pointer transition-all"
+                  >
+                    <span>
+                      {currentStepIndex === TOUR_STEPS.length - 1
+                        ? displayBengali
+                          ? 'সম্পন্ন'
+                          : 'Finish'
+                        : displayBengali
+                        ? 'পরবর্তী'
+                        : 'Next'}
+                    </span>
+                    {currentStepIndex < TOUR_STEPS.length - 1 ? (
+                      <ChevronRight className="w-3 h-3" />
+                    ) : (
+                      <CheckCircle2 className="w-3 h-3" />
+                    )}
+                  </motion.button>
+                </div>
               </div>
             </div>
-          </div>
-        </motion.div>
-      </AnimatePresence>
+          </motion.div>
+        </AnimatePresence>
+      </div>
 
       {/* Skip Confirmation Dialog (Compact for mobile) */}
       <AnimatePresence>
         {showSkipConfirm && (
           <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 bg-black/70 pointer-events-auto">
             <motion.div
-              initial={{ opacity: 0, scale: 0.92, y: 10 }}
+              initial={{ opacity: 0, scale: 0.92, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.92, y: 10 }}
-              className="bg-white dark:bg-[#0F172A] rounded-2xl p-4 w-full max-w-[280px] shadow-2xl border border-slate-200 dark:border-white/10 space-y-3"
+              exit={{ opacity: 0, scale: 0.92, y: 8 }}
+              className="bg-white dark:bg-[#0F172A] rounded-xl p-3.5 w-full max-w-[250px] shadow-2xl border border-slate-200 dark:border-white/10 space-y-2.5"
             >
-              <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto shadow-inner">
-                <Compass className="w-5 h-5 animate-pulse" />
+              <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto shadow-inner">
+                <Compass className="w-4 h-4 animate-pulse" />
               </div>
 
-              <div className="text-center space-y-1">
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+              <div className="text-center space-y-0.5">
+                <h4 className="text-[13px] font-bold text-slate-900 dark:text-white">
                   {displayBengali ? 'ট্যুর এড়িয়ে যাবেন?' : 'Skip tour?'}
                 </h4>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-snug">
                   {displayBengali
                     ? 'আপনি পরেও প্রোফাইল থেকে পুনরায় ট্যুরটি দেখতে পারবেন।'
                     : 'You can replay the tour anytime from your Profile.'}
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-1">
+              <div className="grid grid-cols-2 gap-1.5 pt-1">
                 <button
                   type="button"
                   onClick={handleComplete}
-                  className="py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-[11px] font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                  className="py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded text-[10px] font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                 >
                   {displayBengali ? 'হ্যাঁ, বন্ধ' : 'Yes, Skip'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowSkipConfirm(false)}
-                  className="py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[11px] font-bold shadow transition-all cursor-pointer"
+                  className="py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-[10px] font-bold shadow transition-all cursor-pointer"
                 >
                   {displayBengali ? 'চালিয়ে যান' : 'Continue'}
                 </button>
