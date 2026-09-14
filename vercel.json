@@ -18,6 +18,10 @@
       "destination": "/screenshots/:path*"
     },
     {
+      "source": "/.well-known/:path*",
+      "destination": "/.well-known/:path*"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
