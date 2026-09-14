@@ -1,13 +1,25 @@
 {
+  "id": "/",
   "name": "MYJPG",
   "short_name": "MYJPG",
   "description": "Local services and community platform for Jalpaiguri",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
   "orientation": "portrait-primary",
   "theme_color": "#2563EB",
   "background_color": "#FFFFFF",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": [
+    "lifestyle",
+    "utilities",
+    "social"
+  ],
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -27,5 +39,49 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Home",
+      "short_name": "Home",
+      "description": "Open MYJPG Home",
+      "url": "/"
+    },
+    {
+      "name": "AI Assistant",
+      "short_name": "AI",
+      "description": "Ask MYJPG Assistant",
+      "url": "/discover"
+    },
+    {
+      "name": "Blood Help",
+      "short_name": "Blood",
+      "description": "Find blood assistance",
+      "url": "/blood"
+    },
+    {
+      "name": "Shops",
+      "short_name": "Shops",
+      "description": "Explore local shops",
+      "url": "/shops"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/screenshot-mobile.png",
+      "sizes": "768x1376",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshots/screenshot-desktop.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  }
 }
+
