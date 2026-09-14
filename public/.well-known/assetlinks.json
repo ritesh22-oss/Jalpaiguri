@@ -3,9 +3,9 @@
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.myjpg.app",
+      "package_name": "app.myjpg.app",
       "sha256_cert_fingerprints": [
-        "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00"
+        "8A:C0:58:C2:7F:6D:82:B9:C1:30:EF:B9:34:6A:51:1A:B8:62:CD:BF"
       ]
     }
   }
