@@ -156,21 +156,46 @@ const AppContent: React.FC = () => {
     // 1. Wait for Firebase Auth & Profile restore to finish
     if (isLoading) return;
 
-    const publicViews = ['splash', 'onboarding', 'auth', 'phone-auth', 'otp'];
-    const isPublicView = publicViews.includes(currentView);
+    // A. Handle Splash Screen transition when initial auth restoration completes
+    if (currentView === 'splash') {
+      if (!isAuthenticated) {
+        console.log('[ROUTE_DECISION] Splash screen -> redirecting to onboarding (unauthenticated)');
+        replaceView('onboarding');
+      } else if (!isProfileComplete) {
+        console.log('[ROUTE_DECISION] Splash screen -> redirecting to profile-setup (incomplete profile)');
+        replaceView('profile-setup');
+      } else if (serviceAreaStatus === 'outside') {
+        console.log('[ROUTE_DECISION] Splash screen -> redirecting to outside-area (authenticated, outside coverage)');
+        replaceView('outside-area');
+      } else {
+        const isAdminLogin = localStorage.getItem('jpg_admin_login_detected') === 'true';
+        if (isAdminLogin && user?.role === 'admin') {
+          localStorage.removeItem('jpg_admin_login_detected');
+          console.log('[ROUTE_DECISION] Splash screen -> redirecting to admin-dashboard');
+          replaceView('admin-dashboard');
+        } else {
+          console.log('[ROUTE_DECISION] Splash screen -> redirecting to home');
+          replaceView('home');
+        }
+      }
+      return;
+    }
+
+    const publicAuthViews = ['onboarding', 'auth', 'phone-auth', 'otp'];
+    const isPublicAuthView = publicAuthViews.includes(currentView);
 
     console.log(`[ROUTE_DECISION] Evaluating route... currentView=${currentView}, authenticated=${isAuthenticated}, profileComplete=${isProfileComplete}, locationStatus=${serviceAreaStatus}`);
 
-    // A. Unauthenticated Users
+    // B. Unauthenticated Users trying to access protected views
     if (!isAuthenticated) {
-      if (!isPublicView) {
+      if (!isPublicAuthView) {
         console.log('[ROUTE_DECISION] Unauthenticated user on protected view -> redirecting to onboarding');
         replaceView('onboarding');
       }
       return;
     }
 
-    // B. Authenticated Users with Incomplete Profile
+    // C. Authenticated Users with Incomplete Profile
     if (!isProfileComplete) {
       if (currentView !== 'profile-setup' && currentView !== 'profile-onboarding') {
         console.log('[ROUTE_DECISION] Authenticated user with incomplete profile -> redirecting to profile-setup');
@@ -179,9 +204,8 @@ const AppContent: React.FC = () => {
       return;
     }
 
-    // C. Authenticated Users with Complete Profile
-    if (isPublicView) {
-      // Transition logged in users off public/auth/splash pages to their appropriate home/outside view
+    // D. Authenticated Users with Complete Profile on Auth/Onboarding Screens
+    if (isPublicAuthView) {
       if (serviceAreaStatus === 'outside') {
         console.log('[ROUTE_DECISION] Authenticated user on auth screen (outside coverage) -> redirecting to outside-area');
         replaceView('outside-area');
@@ -199,7 +223,7 @@ const AppContent: React.FC = () => {
       return;
     }
 
-    // D. Service Area Transition (User on outside-area screen moves inside Jalpaiguri)
+    // E. Service Area Transition (User on outside-area screen moves inside Jalpaiguri)
     if (serviceAreaStatus === 'inside' && currentView === 'outside-area') {
       console.log('[INSIDE_COVERAGE] User entered Jalpaiguri service area -> returning to home');
       replaceView('home');

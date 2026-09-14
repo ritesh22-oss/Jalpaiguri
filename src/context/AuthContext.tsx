@@ -325,6 +325,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         setIsLoading(false);
+      }).catch((err) => {
+        console.error('[AUTH_INIT] authStateReady error:', err);
+        setIsLoading(false);
       });
 
       // Ongoing auth observer for state changes
@@ -365,33 +368,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  // 1. Google Sign-In with Firebase Popup (Desktop/Mobile Web) or Redirect (Specific APK WebView)
+  // 1. Google Sign-In with Firebase Popup (Primary) & Fallback Redirect
   const loginWithGoogle = async (
     options?: { asAdmin?: boolean }
   ): Promise<{ success: boolean; isNewUser?: boolean; isAdmin?: boolean; message?: string }> => {
     setIsLoading(true);
-    const method = isMobileOrWebView() ? 'redirect' : 'popup';
-    console.log(`[AUTH ACTION] Sign-in with Google started using: ${method}`);
+    console.log(`[AUTH ACTION] Sign-in with Google initiated`);
 
     try {
       if (!isFirebaseConfigured || !auth) {
         throw new Error('Firebase Auth is not initialized');
       }
 
-      if (method === 'redirect') {
-        localStorage.setItem('jpg_redirect_auth_pending', 'true');
-        setIsRedirectPending(true);
-        if (options?.asAdmin) {
-          try {
-            sessionStorage.setItem('jpg_auth_as_admin', 'true');
-          } catch (e) {}
+      let result;
+      try {
+        // Primary: signInWithPopup opens native Google Account Chooser in Chrome, Android Chrome, and TWAs
+        result = await signInWithPopup(auth, googleProvider);
+      } catch (popupErr: any) {
+        // Fallback: If popup is explicitly blocked or unsupported in restricted webview, try redirect
+        if (
+          popupErr?.code === 'auth/popup-blocked' ||
+          popupErr?.code === 'auth/operation-not-supported-in-this-environment'
+        ) {
+          console.warn('[FIREBASE AUTH] Popup blocked/unsupported, falling back to signInWithRedirect:', popupErr);
+          localStorage.setItem('jpg_redirect_auth_pending', 'true');
+          setIsRedirectPending(true);
+          if (options?.asAdmin) {
+            try {
+              sessionStorage.setItem('jpg_auth_as_admin', 'true');
+            } catch (e) {}
+          }
+          await signInWithRedirect(auth, googleProvider);
+          return { success: true, message: 'Redirecting to Google...' };
         }
-        await signInWithRedirect(auth, googleProvider);
-        return { success: true, message: 'Redirecting to Google...' };
+        throw popupErr;
       }
 
-      const result = await signInWithPopup(auth, googleProvider);
-      const fbUser = result.user;
+      const fbUser = result?.user;
 
       if (fbUser) {
         console.log('[FIREBASE AUTH] Popup sign-in success:', fbUser.email);
