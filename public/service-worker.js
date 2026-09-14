@@ -1,4 +1,4 @@
-const CACHE_NAME = 'myjpg-static-cache-v1';
+const CACHE_NAME = 'myjpg-static-cache-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -6,7 +6,9 @@ const ASSETS_TO_CACHE = [
   '/logo.png',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
-  '/icons/icon-512-maskable.png'
+  '/icons/icon-512-maskable.png',
+  '/screenshots/screenshot-mobile.png',
+  '/screenshots/screenshot-desktop.png'
 ];
 
 // Install Event
@@ -38,28 +40,32 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Handle skipWaiting message
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 // Fetch Event
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // CRITICAL SECURITY RULE: Do NOT cache non-GET requests or private/sensitive APIs
+  // CRITICAL SECURITY RULE: Do NOT cache non-GET requests
   if (request.method !== 'GET') {
     return;
   }
 
-  // Strictly skip caching Firebase Auth, Firestore, and any external private APIs
+  // Strictly skip caching Firebase Auth, Firestore, Google APIs, and backend API routes
   if (
     url.origin.includes('googleapis.com') ||
     url.origin.includes('firebase') ||
-    url.pathname.startsWith('/api/auth') ||
-    url.pathname.startsWith('/api/admin') ||
-    url.pathname.startsWith('/api/donor') ||
-    url.pathname.startsWith('/api/messages') ||
-    url.pathname.startsWith('/api/profile') ||
-    url.pathname.startsWith('/api/user')
+    url.origin.includes('firestore') ||
+    url.pathname.startsWith('/api/') ||
+    url.origin !== self.location.origin
   ) {
-    // Network-only strategy for any private or Firebase operations
+    // Network-only strategy for private APIs and cross-origin authentication
     return;
   }
 
@@ -67,10 +73,13 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(request)
       .then((networkResponse) => {
-        // If it is a safe static asset, save a copy in the cache
+        // If it is a safe static asset or app asset, save a copy in the cache
         if (
           networkResponse.status === 200 &&
-          (url.pathname.startsWith('/assets/') || ASSETS_TO_CACHE.includes(url.pathname))
+          (url.pathname.startsWith('/assets/') || 
+           url.pathname.startsWith('/icons/') || 
+           url.pathname.startsWith('/screenshots/') ||
+           ASSETS_TO_CACHE.includes(url.pathname))
         ) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -88,9 +97,10 @@ self.addEventListener('fetch', (event) => {
           
           // For SPA navigation: route fallback to index.html if offline
           if (request.mode === 'navigate') {
-            return caches.match('/index.html');
+            return caches.match('/index.html') || caches.match('/');
           }
         });
       })
   );
 });
+
