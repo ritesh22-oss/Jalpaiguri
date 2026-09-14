@@ -206,7 +206,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     validateFirestoreConnection();
 
-    console.log(`[MYJPG STARTUP] Firebase initializing`);
+    console.log(`[AUTH_INIT] Firebase initializing...`);
     console.log(`[AUTH SYSTEM] ORIGIN: ${window.location.origin}`);
     console.log(`[AUTH SYSTEM] AUTH DOMAIN: gen-lang-client-0813805041.firebaseapp.com`);
 
@@ -215,13 +215,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isFirebaseConfigured && auth) {
       // Wait for authStateReady so Firebase has fully restored session from persistence storage
       auth.authStateReady().then(async () => {
-        console.log(`[MYJPG STARTUP] Auth state restored`);
-        const fbUser = auth.currentUser;
+        console.log(`[AUTH_INIT] Auth state restored`);
+
+        // Check redirect result first if returning from Google redirect
+        let redirectUser: FirebaseUser | null = null;
+        try {
+          const result = await getRedirectResult(auth);
+          if (result && result.user) {
+            console.log(`[GOOGLE_REDIRECT_RESULT] Redirect sign-in success for: ${result.user.email}`);
+            redirectUser = result.user;
+            setFirebaseUser(result.user);
+          }
+        } catch (redirectErr) {
+          console.warn('[FIREBASE AUTH] Redirect result error:', redirectErr);
+        } finally {
+          localStorage.removeItem('jpg_redirect_auth_pending');
+          setIsRedirectPending(false);
+        }
+
+        const fbUser = redirectUser || auth.currentUser;
         setFirebaseUser(fbUser);
 
         if (fbUser) {
-          console.log(`[MYJPG STARTUP] UID: ${fbUser.uid}`);
-          console.log(`[MYJPG STARTUP] Loading profile`);
+          console.log(`[AUTH_STATE_CHANGED] Firebase user detected: uid=${fbUser.uid}, email=${fbUser.email || 'N/A'}`);
+          console.log(`[PROFILE_LOAD_STARTED] Fetching profile for uid=${fbUser.uid}`);
           try {
             const isOfficialAdmin = isAuthorizedAdminEmail(fbUser.email);
             // Fetch Firestore Profile by UID
@@ -230,9 +247,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (userSnap.exists()) {
               const data = userSnap.data() as UserProfile;
-              console.log(`[MYJPG STARTUP] Profile loaded`);
               const isComp = Boolean(data.name && data.location);
-              console.log(`[MYJPG STARTUP] Profile completed: ${isComp}`);
+              console.log(`[PROFILE_FOUND] Profile loaded for ${fbUser.uid}: name="${data.name}", complete=${isComp}`);
 
               const role = isOfficialAdmin ? 'admin' : (data.role === 'admin' ? 'citizen' : (data.role || 'citizen'));
               if (isOfficialAdmin && data.role !== 'admin') {
@@ -249,18 +265,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     updateDoc(userDocRef, { tourCompleted: true }).catch(() => {});
                   }
                 } catch (_) {}
-              } else if (tourCompleted === undefined) {
-                const createdDate = data.createdAt ? new Date(data.createdAt) : new Date(0);
-                const featureLaunchDate = new Date('2026-09-13T00:00:00Z');
-                if (createdDate < featureLaunchDate) {
-                  tourCompleted = true;
-                  try {
-                    localStorage.setItem('jpg_has_seen_tour', 'true');
-                    updateDoc(userDocRef, { tourCompleted: true }).catch(() => {});
-                  } catch (_) {}
-                }
               }
-              console.log(`[MYJPG STARTUP] Tour completed: ${Boolean(tourCompleted)}`);
 
               const restoredUser: UserProfile = {
                 id: fbUser.uid,
@@ -283,9 +288,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
               setUser(restoredUser);
               setIsProfileComplete(isComp);
+              console.log(`[AUTHENTICATED] User session active: uid=${fbUser.uid}, email=${fbUser.email || 'N/A'}`);
             } else {
-              console.log(`[MYJPG STARTUP] Profile loaded: none (new profile needed)`);
-              console.log(`[MYJPG STARTUP] Profile completed: false`);
+              console.log(`[PROFILE_CREATED] New profile initialized for ${fbUser.uid}`);
               const partialProfile: UserProfile = {
                 id: fbUser.uid,
                 name: fbUser.displayName || '',
@@ -299,39 +304,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 isVolunteer: false,
                 createdAt: new Date().toISOString()
               };
+
+              try {
+                await setDoc(userDocRef, partialProfile);
+              } catch (e) {
+                console.warn('Initial profile doc note:', e);
+              }
+
               setUser(partialProfile);
               setIsProfileComplete(false);
+              console.log(`[PROFILE_INCOMPLETE] Profile setup required for ${fbUser.email || fbUser.uid}`);
             }
           } catch (err) {
             console.error('[MYJPG STARTUP] Profile restoration error:', err);
           }
         } else {
-          console.log(`[MYJPG STARTUP] Auth state restored: UNAUTHENTICATED`);
+          console.log(`[SIGNED_OUT] No active Firebase user session`);
           setUser(null);
           setIsProfileComplete(false);
-        }
-
-        // Handle redirect result if pending
-        try {
-          const result = await getRedirectResult(auth);
-          if (result && result.user) {
-            console.log('[FIREBASE AUTH] Redirect sign-in success for:', result.user.email);
-            setFirebaseUser(result.user);
-          }
-        } catch (redirectErr) {
-          console.warn('[FIREBASE AUTH] Redirect result error:', redirectErr);
-        } finally {
-          localStorage.removeItem('jpg_redirect_auth_pending');
-          setIsRedirectPending(false);
         }
 
         setIsLoading(false);
       });
 
       // Ongoing auth observer for state changes
-      unsubscribe = onAuthStateChanged(auth, (fbUser) => {
+      unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
         setFirebaseUser(fbUser);
-        if (!fbUser) {
+        if (fbUser) {
+          console.log(`[AUTH_STATE_CHANGED] Active user: ${fbUser.email || fbUser.uid}`);
+          setUser((current) => {
+            if (!current || current.id !== fbUser.uid) {
+              const userDocRef = doc(db, 'users', fbUser.uid);
+              getDoc(userDocRef).then((snap) => {
+                if (snap.exists()) {
+                  const data = snap.data() as UserProfile;
+                  const isComp = Boolean(data.name && data.location);
+                  setUser({
+                    ...data,
+                    id: fbUser.uid,
+                    email: fbUser.email || data.email || ''
+                  });
+                  setIsProfileComplete(isComp);
+                }
+              }).catch(() => {});
+            }
+            return current;
+          });
+        } else {
+          console.log(`[SIGNED_OUT] Firebase Auth onAuthStateChanged: null`);
           setUser(null);
           setIsProfileComplete(false);
         }

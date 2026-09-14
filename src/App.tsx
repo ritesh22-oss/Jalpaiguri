@@ -151,92 +151,60 @@ const AppContent: React.FC = () => {
     }
   }, [isAuthenticated, isProfileComplete, user, user?.tourCompleted, isBengali]);
 
-  // 1. Initial Routing Effect (From Splash)
+  // Unified Router & Protection State Machine
   React.useEffect(() => {
-    // We only take action if we are NOT loading AND we are currently on the splash screen
-    if (!isLoading && currentView === 'splash') {
-      console.log('[MYJPG STARTUP] Determining final route...');
-      console.log(`[MYJPG STARTUP] Authenticated: ${isAuthenticated}`);
-      console.log(`[MYJPG STARTUP] Profile completed: ${isProfileComplete}`);
-      console.log(`[MYJPG STARTUP] Location service area status: ${serviceAreaStatus}`);
-      
-      if (isAuthenticated) {
-        if (isProfileComplete) {
-          if (serviceAreaStatus === 'outside') {
-            console.log('[MYJPG STARTUP] Final route: LOCATION_RESTRICTION');
-            replaceView('outside-area');
-          } else {
-            console.log('[MYJPG STARTUP] Authenticated & Profile Complete -> Home');
-            const isAdminLogin = localStorage.getItem('jpg_admin_login_detected') === 'true';
-            if (isAdminLogin && user?.role === 'admin') {
-              localStorage.removeItem('jpg_admin_login_detected');
-              console.log('[MYJPG STARTUP] Final route: ADMIN_DASHBOARD');
-              replaceView('admin-dashboard');
-            } else {
-              console.log('[MYJPG STARTUP] Final route: HOME');
-              replaceView('home');
-            }
-          }
-        } else {
-          console.log('[MYJPG STARTUP] Final route: PROFILE');
-          replaceView('profile-setup');
-        }
-      } else {
-        console.log('[MYJPG STARTUP] Final route: GET_STARTED (onboarding)');
-        replaceView('onboarding');
-      }
-    }
-  }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView, user?.role, serviceAreaStatus]);
+    // 1. Wait for Firebase Auth & Profile restore to finish
+    if (isLoading) return;
 
-  // 1.5. Service Area Transition Guard
-  React.useEffect(() => {
-    if (serviceAreaStatus === 'inside' && currentView === 'outside-area') {
-      console.log('[LOCATION GUARD] Inside Jalpaiguri service area. Returning to home.');
-      replaceView('home');
-    }
-  }, [serviceAreaStatus, currentView, replaceView]);
-
-  // 1.8. Unauthenticated Protection Guard
-  React.useEffect(() => {
     const publicViews = ['splash', 'onboarding', 'auth', 'phone-auth', 'otp'];
-    if (!isLoading && !isAuthenticated) {
-      if (!publicViews.includes(currentView)) {
-        console.log('[AUTH GUARD] Unauthenticated user on protected view, redirecting to onboarding');
+    const isPublicView = publicViews.includes(currentView);
+
+    console.log(`[ROUTE_DECISION] Evaluating route... currentView=${currentView}, authenticated=${isAuthenticated}, profileComplete=${isProfileComplete}, locationStatus=${serviceAreaStatus}`);
+
+    // A. Unauthenticated Users
+    if (!isAuthenticated) {
+      if (!isPublicView) {
+        console.log('[ROUTE_DECISION] Unauthenticated user on protected view -> redirecting to onboarding');
         replaceView('onboarding');
       }
+      return;
     }
-  }, [isLoading, isAuthenticated, currentView, replaceView]);
 
-  // 2. Auth Guard Effects (Prevent access to auth screens if already logged in)
-  React.useEffect(() => {
-    if (!isLoading && isAuthenticated && isProfileComplete) {
-      if (
-        currentView === 'auth' ||
-        currentView === 'phone-auth' ||
-        currentView === 'otp' ||
-        currentView === 'onboarding'
-      ) {
-        console.log('[AUTH GUARD] User already authenticated, redirecting to home');
-        replaceView('home');
-      }
-    }
-  }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView]);
-
-  // 3. Profile Setup Guard
-  React.useEffect(() => {
-    const hasDismissed = localStorage.getItem('jpg_has_dismissed_profile_setup') === 'true';
-    if (!isLoading && isAuthenticated && !isProfileComplete && !hasDismissed) {
-      if (
-        currentView === 'home' ||
-        currentView === 'nearby' ||
-        currentView === 'discover' ||
-        currentView === 'profile'
-      ) {
-        console.log('[AUTH GUARD] Profile incomplete, redirecting to profile setup');
+    // B. Authenticated Users with Incomplete Profile
+    if (!isProfileComplete) {
+      if (currentView !== 'profile-setup' && currentView !== 'profile-onboarding') {
+        console.log('[ROUTE_DECISION] Authenticated user with incomplete profile -> redirecting to profile-setup');
         replaceView('profile-setup');
       }
+      return;
     }
-  }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView]);
+
+    // C. Authenticated Users with Complete Profile
+    if (isPublicView) {
+      // Transition logged in users off public/auth/splash pages to their appropriate home/outside view
+      if (serviceAreaStatus === 'outside') {
+        console.log('[ROUTE_DECISION] Authenticated user on auth screen (outside coverage) -> redirecting to outside-area');
+        replaceView('outside-area');
+      } else {
+        const isAdminLogin = localStorage.getItem('jpg_admin_login_detected') === 'true';
+        if (isAdminLogin && user?.role === 'admin') {
+          localStorage.removeItem('jpg_admin_login_detected');
+          console.log('[ROUTE_DECISION] Authenticated Admin -> admin-dashboard');
+          replaceView('admin-dashboard');
+        } else {
+          console.log('[ROUTE_DECISION] Authenticated User -> home');
+          replaceView('home');
+        }
+      }
+      return;
+    }
+
+    // D. Service Area Transition (User on outside-area screen moves inside Jalpaiguri)
+    if (serviceAreaStatus === 'inside' && currentView === 'outside-area') {
+      console.log('[INSIDE_COVERAGE] User entered Jalpaiguri service area -> returning to home');
+      replaceView('home');
+    }
+  }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView, user?.role, serviceAreaStatus]);
   
   const hideBottomNavViews = [
     'splash',

@@ -11,33 +11,7 @@ export const SplashScreen: React.FC = () => {
 
   useEffect(() => {
     sessionStorage.setItem('jpg_splash_shown', 'true');
-
-    // Automatically transition after 1.6s so user can clearly see the splash screen
-    const timer = setTimeout(() => {
-      if (isAuthenticated) {
-        if (isProfileComplete) {
-          if (serviceAreaStatus === 'outside') {
-            replaceView('outside-area');
-          } else {
-            const isAdminLogin = localStorage.getItem('jpg_admin_login_detected') === 'true';
-            if (isAdminLogin) {
-              localStorage.removeItem('jpg_admin_login_detected');
-              replaceView('admin-dashboard');
-            } else {
-              replaceView('home');
-            }
-          }
-        } else {
-          replaceView('profile-setup');
-        }
-      } else {
-        // Show Get Started screen (onboarding) after splash
-        replaceView('onboarding');
-      }
-    }, 1600);
-
-    return () => clearTimeout(timer);
-  }, [isAuthenticated, isProfileComplete, serviceAreaStatus, replaceView]);
+  }, []);
 
   return (
     <div

@@ -9,10 +9,13 @@ import {
   ChevronRight,
   ExternalLink,
   Compass,
-  AlertCircle
+  AlertCircle,
+  LogOut,
+  UserCheck
 } from 'lucide-react';
 import { useLocation } from '../../context/LocationContext';
 import { useSafety } from '../../context/SafetyContext';
+import { useAuth } from '../../context/AuthContext';
 import { ViewType } from '../../types';
 
 interface OutsideAreaViewProps {
@@ -31,6 +34,7 @@ export const OutsideAreaView: React.FC<OutsideAreaViewProps> = ({ onNavigate }) 
     setSimulatedLocation
   } = useLocation();
 
+  const { user, firebaseUser, isAuthenticated, logout } = useAuth();
   const { call112 } = useSafety();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showDevControls, setShowDevControls] = useState(false);
@@ -64,6 +68,30 @@ export const OutsideAreaView: React.FC<OutsideAreaViewProps> = ({ onNavigate }) 
             <span>SOS Hub</span>
           </button>
         </div>
+
+        {/* User Auth Status Banner */}
+        {isAuthenticated && (
+          <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 rounded-2xl p-3 flex items-center justify-between text-xs transition-colors">
+            <div className="flex items-center gap-2 min-w-0">
+              <UserCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <div className="min-w-0">
+                <p className="font-bold text-emerald-900 dark:text-emerald-200 truncate">
+                  Authenticated: {user?.name || firebaseUser?.displayName || 'Citizen'}
+                </p>
+                <p className="text-[11px] text-emerald-700 dark:text-emerald-400/80 truncate">
+                  {firebaseUser?.email || user?.phone || 'Firebase Session Active'}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={logout}
+              className="px-2.5 py-1 text-[11px] font-bold text-rose-700 dark:text-rose-400 bg-rose-100/60 dark:bg-rose-950/60 rounded-lg hover:bg-rose-200/60 transition-colors shrink-0 flex items-center gap-1 cursor-pointer"
+            >
+              <LogOut className="w-3 h-3" />
+              <span>Sign Out</span>
+            </button>
+          </div>
+        )}
 
         {/* Primary Restriction Card */}
         <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-6 shadow-sm space-y-6 text-center mt-4 transition-colors">
