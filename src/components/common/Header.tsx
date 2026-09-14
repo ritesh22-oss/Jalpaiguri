@@ -6,6 +6,8 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { JPGLogo } from './JPGLogo';
 import { NotificationBell } from './NotificationBell';
+import { PWAInstallButton } from './PWAInstallButton';
+
 
 interface HeaderProps {
   title?: string;
@@ -66,6 +68,9 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="flex items-center gap-2">
+        {/* PWA Install Button */}
+        <PWAInstallButton />
+
         {/* Quick Language Switch Button */}
         <button
           id="header-lang-btn"
