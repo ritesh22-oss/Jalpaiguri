@@ -50,10 +50,22 @@ function formatFirebaseAuthError(err: any): string {
     return 'Please re-authenticate to perform this action.';
   }
   if (code === 'auth/popup-closed-by-user') {
-    return 'Sign-in popup was closed.';
+    return 'Sign-in popup was closed before completing authentication.';
   }
   if (code === 'auth/popup-blocked') {
-    return 'Sign-in popup was blocked by your browser. Please allow popups.';
+    return 'Sign-in popup was blocked by your browser/WebView. Please allow popups or enable web popups in your app settings.';
+  }
+  if (code === 'auth/cancelled-popup-request') {
+    return 'Sign-in request was cancelled by another authentication attempt.';
+  }
+  if (code === 'auth/unauthorized-domain') {
+    return 'This domain is not authorized for Google Sign-In in Firebase Console.';
+  }
+  if (code === 'auth/account-exists-with-different-credential') {
+    return 'An account already exists with this email address using a different sign-in method.';
+  }
+  if (code === 'auth/operation-not-supported-in-this-environment') {
+    return 'Popups are not supported in this WebView environment. Falling back to web redirect...';
   }
   return err.message || 'Authentication error. Please try again.';
 }
@@ -206,28 +218,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     validateFirestoreConnection();
 
-    console.log(`[AUTH_INIT] Firebase initializing...`);
-    console.log(`[AUTH SYSTEM] ORIGIN: ${window.location.origin}`);
-    console.log(`[AUTH SYSTEM] AUTH DOMAIN: gen-lang-client-0813805041.firebaseapp.com`);
+    console.log(`[MYJPG AUTH] INITIALIZING`);
+    console.log(`[MYJPG AUTH] ORIGIN: ${window.location.origin}`);
+    console.log(`[MYJPG AUTH] AUTH DOMAIN: gen-lang-client-0813805041.firebaseapp.com`);
 
     let unsubscribe = () => {};
 
     if (isFirebaseConfigured && auth) {
+      console.log(`[MYJPG AUTH] AUTH_RESTORING`);
       // Wait for authStateReady so Firebase has fully restored session from persistence storage
       auth.authStateReady().then(async () => {
-        console.log(`[AUTH_INIT] Auth state restored`);
+        console.log(`[MYJPG AUTH] Auth state restored from persistence`);
 
         // Check redirect result first if returning from Google redirect
         let redirectUser: FirebaseUser | null = null;
         try {
           const result = await getRedirectResult(auth);
           if (result && result.user) {
-            console.log(`[GOOGLE_REDIRECT_RESULT] Redirect sign-in success for: ${result.user.email}`);
+            console.log(`[MYJPG AUTH] GOOGLE_SIGNIN_SUCCESS (redirect): ${result.user.email}`);
             redirectUser = result.user;
             setFirebaseUser(result.user);
           }
         } catch (redirectErr) {
-          console.warn('[FIREBASE AUTH] Redirect result error:', redirectErr);
+          console.warn('[MYJPG AUTH] Redirect result error:', redirectErr);
         } finally {
           localStorage.removeItem('jpg_redirect_auth_pending');
           setIsRedirectPending(false);
@@ -237,8 +250,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setFirebaseUser(fbUser);
 
         if (fbUser) {
-          console.log(`[AUTH_STATE_CHANGED] Firebase user detected: uid=${fbUser.uid}, email=${fbUser.email || 'N/A'}`);
-          console.log(`[PROFILE_LOAD_STARTED] Fetching profile for uid=${fbUser.uid}`);
+          console.log(`[MYJPG AUTH] AUTH_STATE_CHANGED: active uid=${fbUser.uid}, email=${fbUser.email || 'N/A'}`);
           try {
             const isOfficialAdmin = isAuthorizedAdminEmail(fbUser.email);
             // Fetch Firestore Profile by UID
@@ -248,7 +260,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (userSnap.exists()) {
               const data = userSnap.data() as UserProfile;
               const isComp = Boolean(data.name && data.location);
-              console.log(`[PROFILE_FOUND] Profile loaded for ${fbUser.uid}: name="${data.name}", complete=${isComp}`);
+              console.log(`[MYJPG AUTH] PROFILE_FOUND: loaded for uid=${fbUser.uid}, complete=${isComp}`);
 
               const role = isOfficialAdmin ? 'admin' : (data.role === 'admin' ? 'citizen' : (data.role || 'citizen'));
               if (isOfficialAdmin && data.role !== 'admin') {
@@ -288,9 +300,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
               setUser(restoredUser);
               setIsProfileComplete(isComp);
-              console.log(`[AUTHENTICATED] User session active: uid=${fbUser.uid}, email=${fbUser.email || 'N/A'}`);
             } else {
-              console.log(`[PROFILE_CREATED] New profile initialized for ${fbUser.uid}`);
+              console.log(`[MYJPG AUTH] PROFILE_CREATED: Initializing new profile for uid=${fbUser.uid}`);
               const partialProfile: UserProfile = {
                 id: fbUser.uid,
                 name: fbUser.displayName || '',
@@ -308,25 +319,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               try {
                 await setDoc(userDocRef, partialProfile);
               } catch (e) {
-                console.warn('Initial profile doc note:', e);
+                console.warn('[MYJPG AUTH] Initial profile doc note:', e);
               }
 
               setUser(partialProfile);
               setIsProfileComplete(false);
-              console.log(`[PROFILE_INCOMPLETE] Profile setup required for ${fbUser.email || fbUser.uid}`);
             }
           } catch (err) {
-            console.error('[MYJPG STARTUP] Profile restoration error:', err);
+            console.error('[MYJPG AUTH] Profile restoration error:', err);
           }
         } else {
-          console.log(`[SIGNED_OUT] No active Firebase user session`);
+          console.log(`[MYJPG AUTH] SIGNED_OUT: No active Firebase session`);
           setUser(null);
           setIsProfileComplete(false);
         }
 
         setIsLoading(false);
       }).catch((err) => {
-        console.error('[AUTH_INIT] authStateReady error:', err);
+        console.error('[MYJPG AUTH] authStateReady error:', err);
         setIsLoading(false);
       });
 
@@ -334,7 +344,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
         setFirebaseUser(fbUser);
         if (fbUser) {
-          console.log(`[AUTH_STATE_CHANGED] Active user: ${fbUser.email || fbUser.uid}`);
+          console.log(`[MYJPG AUTH] AUTH_STATE_CHANGED: active user ${fbUser.email || fbUser.uid}`);
           setUser((current) => {
             if (!current || current.id !== fbUser.uid) {
               const userDocRef = doc(db, 'users', fbUser.uid);
@@ -342,6 +352,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (snap.exists()) {
                   const data = snap.data() as UserProfile;
                   const isComp = Boolean(data.name && data.location);
+                  console.log(`[MYJPG AUTH] PROFILE_FOUND: loaded via state change for uid=${fbUser.uid}`);
                   setUser({
                     ...data,
                     id: fbUser.uid,
@@ -354,7 +365,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return current;
           });
         } else {
-          console.log(`[SIGNED_OUT] Firebase Auth onAuthStateChanged: null`);
+          console.log(`[MYJPG AUTH] SIGNED_OUT: Firebase Auth onAuthStateChanged: null`);
           setUser(null);
           setIsProfileComplete(false);
         }
@@ -373,7 +384,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     options?: { asAdmin?: boolean }
   ): Promise<{ success: boolean; isNewUser?: boolean; isAdmin?: boolean; message?: string }> => {
     setIsLoading(true);
-    console.log(`[AUTH ACTION] Sign-in with Google initiated`);
+    console.log(`[MYJPG AUTH] GOOGLE_SIGNIN_STARTED`);
 
     try {
       if (!isFirebaseConfigured || !auth) {
@@ -382,7 +393,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       let result;
       try {
-        // Primary: signInWithPopup opens native Google Account Chooser in Chrome, Android Chrome, and TWAs
+        // Primary: signInWithPopup opens native Google Account Chooser in Chrome, Android Chrome, and Appilix WebViews
         result = await signInWithPopup(auth, googleProvider);
       } catch (popupErr: any) {
         // Fallback: If popup is explicitly blocked or unsupported in restricted webview, try redirect
@@ -390,7 +401,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           popupErr?.code === 'auth/popup-blocked' ||
           popupErr?.code === 'auth/operation-not-supported-in-this-environment'
         ) {
-          console.warn('[FIREBASE AUTH] Popup blocked/unsupported, falling back to signInWithRedirect:', popupErr);
+          console.warn('[MYJPG AUTH] Popup blocked/unsupported, falling back to signInWithRedirect:', popupErr);
           localStorage.setItem('jpg_redirect_auth_pending', 'true');
           setIsRedirectPending(true);
           if (options?.asAdmin) {
@@ -407,7 +418,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const fbUser = result?.user;
 
       if (fbUser) {
-        console.log('[FIREBASE AUTH] Popup sign-in success:', fbUser.email);
+        console.log(`[MYJPG AUTH] GOOGLE_SIGNIN_SUCCESS: ${fbUser.email || fbUser.uid}`);
         const isOfficialAdmin = isAuthorizedAdminEmail(fbUser.email);
 
         // Strict Admin Security Check: Only verified municipal administrators are granted admin access
@@ -427,6 +438,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (userSnap.exists()) {
           const profileData = userSnap.data() as UserProfile;
           const isExistingUser = Boolean(profileData.name && profileData.location);
+          console.log(`[MYJPG AUTH] PROFILE_FOUND: Google user ${fbUser.uid}, complete=${isExistingUser}`);
           if (isExistingUser) {
             try {
               localStorage.setItem('jpg_has_seen_tour', 'true');
@@ -450,6 +462,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             isNewUser: !profileData.name || !profileData.location
           };
         } else {
+          console.log(`[MYJPG AUTH] PROFILE_CREATED: Google user new profile for ${fbUser.uid}`);
           // New Google Citizen User -> Create initial doc
           const newProfile: UserProfile = {
             id: fbUser.uid,
@@ -468,7 +481,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           try {
             await setDoc(userDocRef, newProfile);
           } catch (e) {
-            console.warn('Initial profile doc note:', e);
+            console.warn('[MYJPG AUTH] Initial profile doc note:', e);
           }
 
           setUser(newProfile);
@@ -484,13 +497,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, message: 'Google authentication was cancelled.' };
     } catch (err: any) {
       setIsLoading(false);
-      console.warn('Google sign-in error:', err);
-      let msg = 'Google sign-in could not be completed. Please try again.';
-      if (err.code === 'auth/popup-closed-by-user') {
-        msg = 'Sign-in popup was closed.';
-      } else if (err.code === 'auth/popup-blocked') {
-        msg = 'Sign-in popup was blocked by browser. Please allow popups.';
-      }
+      console.warn('[MYJPG AUTH] Google sign-in error:', err?.code, err?.message, err);
+      const msg = formatFirebaseAuthError(err);
       return { success: false, message: msg };
     }
   };
