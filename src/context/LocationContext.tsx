@@ -235,11 +235,13 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Real GPS detection via native Geolocation API
   const requestCurrentLocation = useCallback(async (): Promise<{ success: boolean; locality?: string; location?: ExtendedUserLocation; error?: string }> => {
+    console.log('[AUTH] location check started');
     setStatus('detecting');
     setErrorMessage(null);
 
     if (typeof window === 'undefined' || !navigator.geolocation) {
       const msg = 'Geolocation is not supported by your browser or device.';
+      console.warn(`[LOCATION ERROR] message: ${msg}`);
       setStatus('unavailable');
       setErrorMessage(msg);
       return { success: false, error: msg };
@@ -299,10 +301,12 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           setStatus('found');
           setErrorMessage(null);
 
+          console.log(`[AUTH] location result: ${validation.serviceAreaStatus === 'inside' ? 'INSIDE_JALPAIGURI' : 'OUTSIDE_JALPAIGURI'} (${geoResult.formattedName})`);
           console.log(`[GPS DETECTED] (${lat.toFixed(4)}, ${lng.toFixed(4)}) -> ${geoResult.formattedName} -> Service Area: ${validation.serviceAreaStatus.toUpperCase()}`);
           resolve({ success: true, locality: geoResult.locality, location: newLoc });
         },
         (error) => {
+          console.warn(`[LOCATION ERROR] message: ${error.message}`);
           // Graceful fallback to Jalpaiguri default center for Vercel / remote deployment
           const defaultLat = 26.5265;
           const defaultLng = 88.7230;
@@ -325,6 +329,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           setLocation(defaultLoc);
           setStatus('found');
           setErrorMessage(null);
+          console.log('[AUTH] location result: INSIDE_JALPAIGURI (Default Fallback Center)');
           resolve({ success: true, locality: 'Kadamtala', location: defaultLoc });
         },
         options

@@ -218,163 +218,158 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     validateFirestoreConnection();
 
-    console.log(`[MYJPG AUTH] INITIALIZING`);
-    console.log(`[MYJPG AUTH] ORIGIN: ${window.location.origin}`);
-    console.log(`[MYJPG AUTH] AUTH DOMAIN: gen-lang-client-0813805041.firebaseapp.com`);
+    console.log('[AUTH] Firebase initialization started');
+    console.log(`[AUTH] ORIGIN: ${window.location.origin}`);
 
+    let isMounted = true;
     let unsubscribe = () => {};
 
     if (isFirebaseConfigured && auth) {
-      console.log(`[MYJPG AUTH] AUTH_RESTORING`);
-      // Wait for authStateReady so Firebase has fully restored session from persistence storage
-      auth.authStateReady().then(async () => {
-        console.log(`[MYJPG AUTH] Auth state restored from persistence`);
+      // Synchronize/Fetch Firestore Profile for Firebase User
+      const syncUserProfile = async (fbUser: FirebaseUser) => {
+        console.log(`[AUTH] user UID: ${fbUser.uid}`);
+        console.log(`[AUTH] profile loading: ${fbUser.uid}`);
+        try {
+          const isOfficialAdmin = isAuthorizedAdminEmail(fbUser.email);
+          const userDocRef = doc(db, 'users', fbUser.uid);
+          const userSnap = await getDoc(userDocRef);
 
-        // Check redirect result first if returning from Google redirect
-        let redirectUser: FirebaseUser | null = null;
+          if (!isMounted) return;
+
+          if (userSnap.exists()) {
+            const data = userSnap.data() as UserProfile;
+            const isComp = Boolean(data.name && data.location);
+            console.log(`[AUTH] profile loaded: name="${data.name}", complete=${isComp}`);
+
+            const role = isOfficialAdmin ? 'admin' : (data.role === 'admin' ? 'citizen' : (data.role || 'citizen'));
+            if (isOfficialAdmin && data.role !== 'admin') {
+              updateDoc(userDocRef, { role: 'admin' }).catch(() => {});
+            }
+
+            let tourCompleted = data.tourCompleted;
+            if (data.name && data.location) {
+              tourCompleted = true;
+              try {
+                localStorage.setItem('jpg_has_seen_tour', 'true');
+                if (data.tourCompleted !== true) {
+                  updateDoc(userDocRef, { tourCompleted: true }).catch(() => {});
+                }
+              } catch (_) {}
+            }
+
+            const restoredUser: UserProfile = {
+              id: fbUser.uid,
+              name: data.name || fbUser.displayName || '',
+              phone: data.phone || fbUser.phoneNumber || '',
+              email: data.email || fbUser.email || '',
+              age: data.age,
+              gender: data.gender,
+              bloodGroup: data.bloodGroup || 'O+',
+              location: data.location || 'Kadamtala, Jalpaiguri',
+              role,
+              language: data.language || 'English',
+              isBloodDonor: data.isBloodDonor ?? true,
+              isVolunteer: data.isVolunteer ?? false,
+              tourCompleted: tourCompleted,
+              tourLanguage: data.tourLanguage,
+              tourVersion: data.tourVersion,
+              createdAt: data.createdAt || new Date().toISOString()
+            };
+
+            setUser(restoredUser);
+            setIsProfileComplete(isComp);
+          } else {
+            console.log(`[AUTH] profile missing for UID=${fbUser.uid}, initializing new profile`);
+            const partialProfile: UserProfile = {
+              id: fbUser.uid,
+              name: fbUser.displayName || '',
+              phone: fbUser.phoneNumber || '',
+              email: fbUser.email || '',
+              bloodGroup: 'O+',
+              location: '',
+              role: isOfficialAdmin ? 'admin' : 'citizen',
+              language: 'English',
+              isBloodDonor: true,
+              isVolunteer: false,
+              createdAt: new Date().toISOString()
+            };
+
+            try {
+              await setDoc(userDocRef, partialProfile);
+            } catch (e) {
+              console.warn('[PROFILE ERROR] Initial profile doc note:', e);
+            }
+
+            setUser(partialProfile);
+            setIsProfileComplete(false);
+          }
+        } catch (profileErr: any) {
+          console.error(`[PROFILE ERROR] code: ${profileErr?.code || 'unknown'}, message: ${profileErr?.message || profileErr}`);
+          // CRITICAL REQUIREMENT 6: Do NOT sign out if Firestore profile loading fails.
+          // Fallback to partial profile using fbUser details so authentication remains active.
+          const fallbackProfile: UserProfile = {
+            id: fbUser.uid,
+            name: fbUser.displayName || 'Citizen',
+            email: fbUser.email || '',
+            phone: fbUser.phoneNumber || '',
+            bloodGroup: 'O+',
+            location: '',
+            role: isAuthorizedAdminEmail(fbUser.email) ? 'admin' : 'citizen',
+            language: 'English',
+            createdAt: new Date().toISOString()
+          };
+          setUser(fallbackProfile);
+          setIsProfileComplete(Boolean(fallbackProfile.name && fallbackProfile.location));
+        }
+      };
+
+      // Wait for authStateReady before registering listener to avoid unhydrated null state
+      auth.authStateReady().then(async () => {
         try {
           const result = await getRedirectResult(auth);
           if (result && result.user) {
-            console.log(`[MYJPG AUTH] GOOGLE_SIGNIN_SUCCESS (redirect): ${result.user.email}`);
-            redirectUser = result.user;
+            console.log(`[AUTH] redirect result checked: Google sign-in success (${result.user.email})`);
             setFirebaseUser(result.user);
+            await syncUserProfile(result.user);
+          } else {
+            console.log('[AUTH] redirect result checked: no pending redirect');
           }
-        } catch (redirectErr) {
-          console.warn('[MYJPG AUTH] Redirect result error:', redirectErr);
+        } catch (redirectErr: any) {
+          console.warn(`[AUTH ERROR] code: ${redirectErr?.code || 'unknown'}, message: ${redirectErr?.message || redirectErr}`);
         } finally {
           localStorage.removeItem('jpg_redirect_auth_pending');
-          setIsRedirectPending(false);
+          if (isMounted) setIsRedirectPending(false);
         }
 
-        const fbUser = redirectUser || auth.currentUser;
-        setFirebaseUser(fbUser);
+        // Attach onAuthStateChanged after persistence hydration
+        unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+          if (!isMounted) return;
+          console.log(`[AUTH] auth state changed: ${fbUser ? `uid=${fbUser.uid}` : 'null'}`);
+          setFirebaseUser(fbUser);
 
-        if (fbUser) {
-          console.log(`[MYJPG AUTH] AUTH_STATE_CHANGED: active uid=${fbUser.uid}, email=${fbUser.email || 'N/A'}`);
-          try {
-            const isOfficialAdmin = isAuthorizedAdminEmail(fbUser.email);
-            // Fetch Firestore Profile by UID
-            const userDocRef = doc(db, 'users', fbUser.uid);
-            const userSnap = await getDoc(userDocRef);
-
-            if (userSnap.exists()) {
-              const data = userSnap.data() as UserProfile;
-              const isComp = Boolean(data.name && data.location);
-              console.log(`[MYJPG AUTH] PROFILE_FOUND: loaded for uid=${fbUser.uid}, complete=${isComp}`);
-
-              const role = isOfficialAdmin ? 'admin' : (data.role === 'admin' ? 'citizen' : (data.role || 'citizen'));
-              if (isOfficialAdmin && data.role !== 'admin') {
-                updateDoc(userDocRef, { role: 'admin' }).catch(() => {});
-              }
-              
-              let tourCompleted = data.tourCompleted;
-              // Only first login/new users who opened their account see the tour. Already signed up users bypass it completely.
-              if (data.name && data.location) {
-                tourCompleted = true;
-                try {
-                  localStorage.setItem('jpg_has_seen_tour', 'true');
-                  if (data.tourCompleted !== true) {
-                    updateDoc(userDocRef, { tourCompleted: true }).catch(() => {});
-                  }
-                } catch (_) {}
-              }
-
-              const restoredUser: UserProfile = {
-                id: fbUser.uid,
-                name: data.name || fbUser.displayName || '',
-                phone: data.phone || fbUser.phoneNumber || '',
-                email: data.email || fbUser.email || '',
-                age: data.age,
-                gender: data.gender,
-                bloodGroup: data.bloodGroup || 'O+',
-                location: data.location || 'Kadamtala, Jalpaiguri',
-                role,
-                language: data.language || 'English',
-                isBloodDonor: data.isBloodDonor ?? true,
-                isVolunteer: data.isVolunteer ?? false,
-                tourCompleted: tourCompleted,
-                tourLanguage: data.tourLanguage,
-                tourVersion: data.tourVersion,
-                createdAt: data.createdAt || new Date().toISOString()
-              };
-
-              setUser(restoredUser);
-              setIsProfileComplete(isComp);
-            } else {
-              console.log(`[MYJPG AUTH] PROFILE_CREATED: Initializing new profile for uid=${fbUser.uid}`);
-              const partialProfile: UserProfile = {
-                id: fbUser.uid,
-                name: fbUser.displayName || '',
-                phone: fbUser.phoneNumber || '',
-                email: fbUser.email || '',
-                bloodGroup: 'O+',
-                location: '',
-                role: isOfficialAdmin ? 'admin' : 'citizen',
-                language: 'English',
-                isBloodDonor: true,
-                isVolunteer: false,
-                createdAt: new Date().toISOString()
-              };
-
-              try {
-                await setDoc(userDocRef, partialProfile);
-              } catch (e) {
-                console.warn('[MYJPG AUTH] Initial profile doc note:', e);
-              }
-
-              setUser(partialProfile);
-              setIsProfileComplete(false);
-            }
-          } catch (err) {
-            console.error('[MYJPG AUTH] Profile restoration error:', err);
+          if (fbUser) {
+            await syncUserProfile(fbUser);
+          } else {
+            console.log('[AUTH] auth state changed: signed out');
+            setUser(null);
+            setIsProfileComplete(false);
           }
-        } else {
-          console.log(`[MYJPG AUTH] SIGNED_OUT: No active Firebase session`);
-          setUser(null);
-          setIsProfileComplete(false);
-        }
 
-        setIsLoading(false);
-      }).catch((err) => {
-        console.error('[MYJPG AUTH] authStateReady error:', err);
-        setIsLoading(false);
-      });
-
-      // Ongoing auth observer for state changes
-      unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-        setFirebaseUser(fbUser);
-        if (fbUser) {
-          console.log(`[MYJPG AUTH] AUTH_STATE_CHANGED: active user ${fbUser.email || fbUser.uid}`);
-          setUser((current) => {
-            if (!current || current.id !== fbUser.uid) {
-              const userDocRef = doc(db, 'users', fbUser.uid);
-              getDoc(userDocRef).then((snap) => {
-                if (snap.exists()) {
-                  const data = snap.data() as UserProfile;
-                  const isComp = Boolean(data.name && data.location);
-                  console.log(`[MYJPG AUTH] PROFILE_FOUND: loaded via state change for uid=${fbUser.uid}`);
-                  setUser({
-                    ...data,
-                    id: fbUser.uid,
-                    email: fbUser.email || data.email || ''
-                  });
-                  setIsProfileComplete(isComp);
-                }
-              }).catch(() => {});
-            }
-            return current;
-          });
-        } else {
-          console.log(`[MYJPG AUTH] SIGNED_OUT: Firebase Auth onAuthStateChanged: null`);
-          setUser(null);
-          setIsProfileComplete(false);
-        }
+          if (isMounted) {
+            setIsLoading(false);
+            console.log('[AUTH] Firebase initialization complete');
+          }
+        });
+      }).catch((err: any) => {
+        console.error(`[AUTH ERROR] code: ${err?.code || 'unknown'}, message: ${err?.message || err}`);
+        if (isMounted) setIsLoading(false);
       });
     } else {
       setIsLoading(false);
     }
 
     return () => {
+      isMounted = false;
       unsubscribe();
     };
   }, []);
@@ -384,7 +379,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     options?: { asAdmin?: boolean }
   ): Promise<{ success: boolean; isNewUser?: boolean; isAdmin?: boolean; message?: string }> => {
     setIsLoading(true);
-    console.log(`[MYJPG AUTH] GOOGLE_SIGNIN_STARTED`);
+    console.log('[AUTH] Google sign-in started');
 
     try {
       if (!isFirebaseConfigured || !auth) {
@@ -393,15 +388,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       let result;
       try {
-        // Primary: signInWithPopup opens native Google Account Chooser in Chrome, Android Chrome, and Appilix WebViews
+        // Primary: signInWithPopup opens native Google Account Chooser
         result = await signInWithPopup(auth, googleProvider);
       } catch (popupErr: any) {
-        // Fallback: If popup is explicitly blocked or unsupported in restricted webview, try redirect
         if (
           popupErr?.code === 'auth/popup-blocked' ||
           popupErr?.code === 'auth/operation-not-supported-in-this-environment'
         ) {
-          console.warn('[MYJPG AUTH] Popup blocked/unsupported, falling back to signInWithRedirect:', popupErr);
+          console.warn(`[AUTH ERROR] Popup blocked/unsupported (${popupErr?.code}), falling back to signInWithRedirect`);
           localStorage.setItem('jpg_redirect_auth_pending', 'true');
           setIsRedirectPending(true);
           if (options?.asAdmin) {
@@ -418,16 +412,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const fbUser = result?.user;
 
       if (fbUser) {
-        console.log(`[MYJPG AUTH] GOOGLE_SIGNIN_SUCCESS: ${fbUser.email || fbUser.uid}`);
+        console.log(`[AUTH] Google sign-in completed: ${fbUser.email || fbUser.uid}`);
+        setFirebaseUser(fbUser);
         const isOfficialAdmin = isAuthorizedAdminEmail(fbUser.email);
 
-        // Strict Admin Security Check: Only verified municipal administrators are granted admin access
         if (options?.asAdmin && !isOfficialAdmin) {
           setIsLoading(false);
           return {
             success: false,
             isAdmin: false,
-            message: 'Access Denied: Administrative console access is restricted exclusively to authorized municipal officers. This Google account is not on the authorized municipal registry.'
+            message: 'Access Denied: Administrative console access is restricted exclusively to authorized municipal officers.'
           };
         }
 
@@ -438,7 +432,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (userSnap.exists()) {
           const profileData = userSnap.data() as UserProfile;
           const isExistingUser = Boolean(profileData.name && profileData.location);
-          console.log(`[MYJPG AUTH] PROFILE_FOUND: Google user ${fbUser.uid}, complete=${isExistingUser}`);
+          console.log(`[AUTH] profile loaded: Google user ${fbUser.uid}, complete=${isExistingUser}`);
           if (isExistingUser) {
             try {
               localStorage.setItem('jpg_has_seen_tour', 'true');
@@ -455,6 +449,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             tourCompleted: isExistingUser ? true : profileData.tourCompleted
           };
           setUser(updatedProfile);
+          setIsProfileComplete(isExistingUser);
           setIsLoading(false);
           return {
             success: true,
@@ -462,8 +457,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             isNewUser: !profileData.name || !profileData.location
           };
         } else {
-          console.log(`[MYJPG AUTH] PROFILE_CREATED: Google user new profile for ${fbUser.uid}`);
-          // New Google Citizen User -> Create initial doc
+          console.log(`[AUTH] profile created for new Google user ${fbUser.uid}`);
           const newProfile: UserProfile = {
             id: fbUser.uid,
             name: fbUser.displayName || '',
@@ -481,10 +475,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           try {
             await setDoc(userDocRef, newProfile);
           } catch (e) {
-            console.warn('[MYJPG AUTH] Initial profile doc note:', e);
+            console.warn('[PROFILE ERROR] Initial profile doc creation note:', e);
           }
 
           setUser(newProfile);
+          setIsProfileComplete(false);
           setIsLoading(false);
           return {
             success: true,
@@ -497,7 +492,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, message: 'Google authentication was cancelled.' };
     } catch (err: any) {
       setIsLoading(false);
-      console.warn('[MYJPG AUTH] Google sign-in error:', err?.code, err?.message, err);
+      console.warn(`[AUTH ERROR] code: ${err?.code || 'unknown'}, message: ${err?.message || err?.toString()}`);
       const msg = formatFirebaseAuthError(err);
       return { success: false, message: msg };
     }

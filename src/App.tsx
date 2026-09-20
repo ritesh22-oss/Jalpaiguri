@@ -158,38 +158,32 @@ const AppContent: React.FC = () => {
 
     // A. Handle Splash Screen transition when initial auth restoration completes
     if (currentView === 'splash') {
+      let targetView = 'home';
       if (!isAuthenticated) {
-        console.log('[MYJPG ROUTER] Splash screen -> routing to onboarding (unauthenticated)');
-        replaceView('onboarding');
+        targetView = 'onboarding';
       } else if (!isProfileComplete) {
-        console.log('[MYJPG ROUTER] Splash screen -> routing to profile-setup (incomplete profile)');
-        replaceView('profile-setup');
+        targetView = 'profile-setup';
       } else if (serviceAreaStatus === 'outside') {
-        console.log('[MYJPG ROUTER] AUTHENTICATED_OUTSIDE_COVERAGE -> Splash screen routing to outside-area');
-        replaceView('outside-area');
+        targetView = 'outside-area';
       } else {
         const isAdminLogin = localStorage.getItem('jpg_admin_login_detected') === 'true';
         if (isAdminLogin && user?.role === 'admin') {
           localStorage.removeItem('jpg_admin_login_detected');
-          console.log('[MYJPG ROUTER] AUTHENTICATED_DASHBOARD -> Admin routing to admin-dashboard');
-          replaceView('admin-dashboard');
-        } else {
-          console.log('[MYJPG ROUTER] AUTHENTICATED_DASHBOARD -> Routing to home');
-          replaceView('home');
+          targetView = 'admin-dashboard';
         }
       }
+      console.log(`[AUTH] routing decision: splash -> ${targetView}`);
+      replaceView(targetView as any);
       return;
     }
 
     const publicAuthViews = ['onboarding', 'auth', 'phone-auth', 'otp'];
     const isPublicAuthView = publicAuthViews.includes(currentView);
 
-    console.log(`[MYJPG ROUTER] Evaluating route... currentView=${currentView}, authenticated=${isAuthenticated}, profileComplete=${isProfileComplete}, locationStatus=${serviceAreaStatus}`);
-
     // B. Unauthenticated Users trying to access protected views
     if (!isAuthenticated) {
       if (!isPublicAuthView) {
-        console.log('[MYJPG ROUTER] Unauthenticated user on protected view -> routing to onboarding');
+        console.log(`[AUTH] routing decision: ${currentView} (unauthenticated) -> onboarding`);
         replaceView('onboarding');
       }
       return;
@@ -198,7 +192,7 @@ const AppContent: React.FC = () => {
     // C. Authenticated Users with Incomplete Profile
     if (!isProfileComplete) {
       if (currentView !== 'profile-setup' && currentView !== 'profile-onboarding') {
-        console.log('[MYJPG ROUTER] Authenticated user with incomplete profile -> routing to profile-setup');
+        console.log(`[AUTH] routing decision: ${currentView} (profile incomplete) -> profile-setup`);
         replaceView('profile-setup');
       }
       return;
@@ -207,18 +201,14 @@ const AppContent: React.FC = () => {
     // D. Authenticated Users with Complete Profile on Auth/Onboarding Screens
     if (isPublicAuthView) {
       if (serviceAreaStatus === 'outside') {
-        console.log('[MYJPG ROUTER] AUTHENTICATED_OUTSIDE_COVERAGE -> Authenticated user on auth screen routing to outside-area');
+        console.log(`[AUTH] routing decision: ${currentView} (authenticated outside) -> outside-area`);
         replaceView('outside-area');
       } else {
         const isAdminLogin = localStorage.getItem('jpg_admin_login_detected') === 'true';
-        if (isAdminLogin && user?.role === 'admin') {
-          localStorage.removeItem('jpg_admin_login_detected');
-          console.log('[MYJPG ROUTER] AUTHENTICATED_DASHBOARD -> Admin routing to admin-dashboard');
-          replaceView('admin-dashboard');
-        } else {
-          console.log('[MYJPG ROUTER] AUTHENTICATED_DASHBOARD -> Routing to home');
-          replaceView('home');
-        }
+        const target = (isAdminLogin && user?.role === 'admin') ? 'admin-dashboard' : 'home';
+        if (isAdminLogin) localStorage.removeItem('jpg_admin_login_detected');
+        console.log(`[AUTH] routing decision: ${currentView} (authenticated inside) -> ${target}`);
+        replaceView(target as any);
       }
       return;
     }
@@ -233,14 +223,14 @@ const AppContent: React.FC = () => {
       'profile'
     ];
     if (serviceAreaStatus === 'outside' && !exemptFromOutsideView.includes(currentView)) {
-      console.log('[MYJPG ROUTER] AUTHENTICATED_OUTSIDE_COVERAGE -> Routing active session to outside-area');
+      console.log(`[AUTH] routing decision: ${currentView} (outside service area) -> outside-area`);
       replaceView('outside-area');
       return;
     }
 
     // F. Service Area Transition (User on outside-area screen moves inside Jalpaiguri)
     if (serviceAreaStatus === 'inside' && currentView === 'outside-area') {
-      console.log('[MYJPG ROUTER] AUTHENTICATED_DASHBOARD -> User entered Jalpaiguri service area -> returning to home');
+      console.log(`[AUTH] routing decision: outside-area (entered service area) -> home`);
       replaceView('home');
     }
   }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView, user?.role, serviceAreaStatus]);
