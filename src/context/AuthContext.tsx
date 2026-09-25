@@ -18,7 +18,9 @@ import {
   updateProfile as updateFirebaseProfile,
   updatePassword,
   EmailAuthProvider,
-  reauthenticateWithCredential
+  reauthenticateWithCredential,
+  setPersistence,
+  browserLocalPersistence
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
@@ -323,47 +325,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       };
 
-      // Wait for authStateReady before registering listener to avoid unhydrated null state
-      auth.authStateReady().then(async () => {
-        try {
-          const result = await getRedirectResult(auth);
-          if (result && result.user) {
-            console.log(`[AUTH] redirect result checked: Google sign-in success (${result.user.email})`);
-            setFirebaseUser(result.user);
-            await syncUserProfile(result.user);
-          } else {
-            console.log('[AUTH] redirect result checked: no pending redirect');
-          }
-        } catch (redirectErr: any) {
-          console.warn(`[AUTH ERROR] code: ${redirectErr?.code || 'unknown'}, message: ${redirectErr?.message || redirectErr}`);
-        } finally {
-          localStorage.removeItem('jpg_redirect_auth_pending');
-          if (isMounted) setIsRedirectPending(false);
-        }
-
-        // Attach onAuthStateChanged after persistence hydration
-        unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-          if (!isMounted) return;
-          console.log(`[AUTH] auth state changed: ${fbUser ? `uid=${fbUser.uid}` : 'null'}`);
-          setFirebaseUser(fbUser);
-
-          if (fbUser) {
-            await syncUserProfile(fbUser);
-          } else {
-            console.log('[AUTH] auth state changed: signed out');
-            setUser(null);
-            setIsProfileComplete(false);
+      // Explicitly set local persistence to preserve sessions across reloads and WebView restarts
+      setPersistence(auth, browserLocalPersistence)
+        .then(() => {
+          console.log('[AUTH] browserLocalPersistence explicitly set on startup');
+        })
+        .catch((persErr: any) => {
+          console.warn(`[AUTH ERROR] setPersistence error: ${persErr?.code || persErr?.message || persErr}`);
+        })
+        .then(() => auth.authStateReady())
+        .then(async () => {
+          try {
+            const result = await getRedirectResult(auth);
+            if (result && result.user) {
+              console.log(`[AUTH] redirect result checked: Google sign-in success (${result.user.email})`);
+              setFirebaseUser(result.user);
+              await syncUserProfile(result.user);
+            } else {
+              console.log('[AUTH] redirect result checked: no pending redirect');
+            }
+          } catch (redirectErr: any) {
+            console.warn(`[AUTH ERROR] code: ${redirectErr?.code || 'unknown'}, message: ${redirectErr?.message || redirectErr}`);
+          } finally {
+            localStorage.removeItem('jpg_redirect_auth_pending');
+            if (isMounted) setIsRedirectPending(false);
           }
 
-          if (isMounted) {
-            setIsLoading(false);
-            console.log('[AUTH] Firebase initialization complete');
-          }
+          // Attach onAuthStateChanged after persistence hydration
+          unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+            if (!isMounted) return;
+            console.log(`[AUTH] auth state changed: ${fbUser ? `uid=${fbUser.uid}` : 'null'}`);
+            setFirebaseUser(fbUser);
+
+            if (fbUser) {
+              await syncUserProfile(fbUser);
+            } else {
+              console.log('[AUTH] auth state changed: signed out');
+              setUser(null);
+              setIsProfileComplete(false);
+            }
+
+            if (isMounted) {
+              setIsLoading(false);
+              console.log('[AUTH] Firebase initialization complete');
+            }
+          });
+        }).catch((err: any) => {
+          console.error(`[AUTH ERROR] code: ${err?.code || 'unknown'}, message: ${err?.message || err}`);
+          if (isMounted) setIsLoading(false);
         });
-      }).catch((err: any) => {
-        console.error(`[AUTH ERROR] code: ${err?.code || 'unknown'}, message: ${err?.message || err}`);
-        if (isMounted) setIsLoading(false);
-      });
     } else {
       setIsLoading(false);
     }
