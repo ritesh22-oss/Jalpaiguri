@@ -5,6 +5,8 @@ import {
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
+  signInWithCredential,
+  GoogleAuthProvider,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   User as FirebaseUser,
@@ -397,26 +399,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       let result;
-      try {
-        // Primary: signInWithPopup opens native Google Account Chooser
-        result = await signInWithPopup(auth, googleProvider);
-      } catch (popupErr: any) {
-        if (
-          popupErr?.code === 'auth/popup-blocked' ||
-          popupErr?.code === 'auth/operation-not-supported-in-this-environment'
-        ) {
-          console.warn(`[AUTH ERROR] Popup blocked/unsupported (${popupErr?.code}), falling back to signInWithRedirect`);
-          localStorage.setItem('jpg_redirect_auth_pending', 'true');
-          setIsRedirectPending(true);
-          if (options?.asAdmin) {
-            try {
-              sessionStorage.setItem('jpg_auth_as_admin', 'true');
-            } catch (e) {}
-          }
-          await signInWithRedirect(auth, googleProvider);
-          return { success: true, message: 'Redirecting to Google...' };
+      // Native Android APK Bridge Integration
+      if (typeof window !== 'undefined' && (window as any).AndroidGoogleAuth) {
+        console.log('[AUTH] Android Native GoogleAuth interface detected. Triggering Credential Manager...');
+        try {
+          const idToken: string = await new Promise((resolve, reject) => {
+            (window as any).onAndroidGoogleSignInSuccess = (token: string) => resolve(token);
+            (window as any).onAndroidGoogleSignInError = (err: string) => reject(new Error(err));
+            (window as any).AndroidGoogleAuth.requestGoogleSignIn();
+          });
+
+          const credential = GoogleAuthProvider.credential(idToken);
+          result = await signInWithCredential(auth, credential);
+        } catch (nativeErr: any) {
+          console.warn('[AUTH ERROR] Native Android GoogleAuth error:', nativeErr);
+          throw nativeErr;
         }
-        throw popupErr;
+      } else {
+        try {
+          // Primary: signInWithPopup opens Google Account Chooser
+          result = await signInWithPopup(auth, googleProvider);
+        } catch (popupErr: any) {
+          if (
+            popupErr?.code === 'auth/popup-blocked' ||
+            popupErr?.code === 'auth/operation-not-supported-in-this-environment'
+          ) {
+            console.warn(`[AUTH ERROR] Popup blocked/unsupported (${popupErr?.code}), falling back to signInWithRedirect`);
+            localStorage.setItem('jpg_redirect_auth_pending', 'true');
+            setIsRedirectPending(true);
+            if (options?.asAdmin) {
+              try {
+                sessionStorage.setItem('jpg_auth_as_admin', 'true');
+              } catch (e) {}
+            }
+            await signInWithRedirect(auth, googleProvider);
+            return { success: true, message: 'Redirecting to Google...' };
+          }
+          throw popupErr;
+        }
       }
 
       const fbUser = result?.user;

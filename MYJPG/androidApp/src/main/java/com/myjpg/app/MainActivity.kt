@@ -1,141 +1,176 @@
 package com.myjpg.app
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
+import android.webkit.*
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.myjpg.app.auth.GoogleAuthManager
-import com.myjpg.app.location.LocationValidator
-import com.myjpg.app.models.AuthState
-import com.myjpg.app.models.UserProfile
-import com.myjpg.app.ui.AuthScreen
-import com.myjpg.app.ui.HomeScreen
-import com.myjpg.app.ui.MYJPGTheme
-import com.myjpg.app.ui.OutsideCoverageScreen
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
+    private lateinit var webView: WebView
     private lateinit var googleAuthManager: GoogleAuthManager
-    private val firebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
+    private var filePathCallback: ValueCallback<Array<Uri>>? = null
 
+    companion object {
+        private const val TAG = "MYJPG_MainActivity"
+        // Production web app URL hosted on Vercel or local assets
+        const val WEB_APP_URL = "https://jalpaiguri-zxml.vercel.app/"
+    }
+
+    private val filePickerLauncher = registerForActivityResult(
+        ActivityResultContracts.GetMultipleContents()
+    ) { uris ->
+        filePathCallback?.onReceiveValue(uris.toTypedArray())
+        filePathCallback = null
+    }
+
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val fineGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+        val coarseGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
+        if (fineGranted || coarseGranted) {
+            Log.d(TAG, "Location permissions granted for WebView Geolocation")
+        }
+    }
+
+    @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         googleAuthManager = GoogleAuthManager(this)
 
-        setContent {
-            MYJPGTheme {
-                var currentAuthState by remember { mutableStateOf(AuthState.AUTH_INITIALIZING) }
-                var currentUserProfile by remember { mutableStateOf<UserProfile?>(null) }
-                var isLoading by remember { mutableStateOf(false) }
-                var errorMessage by remember { mutableStateOf<String?>(null) }
+        // Request Location Permissions at Startup
+        requestLocationPermissions()
 
-                // Observe Firebase Authentication State Changes
-                DisposableEffect(Unit) {
-                    val authListener = FirebaseAuth.AuthStateListener { auth ->
-                        val user = auth.currentUser
-                        if (user != null) {
-                            val profile = UserProfile(
-                                id = user.uid,
-                                name = user.displayName ?: "Citizen of Jalpaiguri",
-                                email = user.email ?: "",
-                                phone = user.phoneNumber ?: "",
-                                location = "Kadamtala, Jalpaiguri"
-                            )
-                            currentUserProfile = profile
+        webView = WebView(this).apply {
+            settings.apply {
+                javaScriptEnabled = true
+                domStorageEnabled = true
+                databaseEnabled = true
+                allowFileAccess = true
+                allowContentAccess = true
+                useWideViewPort = true
+                loadWithOverviewMode = true
+                setSupportZoom(false)
+                builtInZoomControls = false
+                mediaPlaybackRequiresUserGesture = false
+                mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                userAgentString = "${settings.userAgentString} MYJPGNativeApp/1.0.0"
+            }
 
-                            // Check GPS Location Boundaries
-                            val isInside = LocationValidator.isInsideJalpaiguri(profile.latitude, profile.longitude)
-                            currentAuthState = if (isInside) AuthState.INSIDE_JALPAIGURI else AuthState.OUTSIDE_JALPAIGURI
-                        } else {
-                            currentUserProfile = null
-                            currentAuthState = AuthState.SIGNED_OUT
-                        }
-                    }
-                    firebaseAuth.addAuthStateListener(authListener)
-                    onDispose {
-                        firebaseAuth.removeAuthStateListener(authListener)
-                    }
+            // JavaScript Interface for Native Google Sign-In via Credential Manager
+            addJavascriptInterface(AndroidGoogleAuthInterface(), "AndroidGoogleAuth")
+
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    Log.d(TAG, "WebView page loaded: $url")
                 }
 
-                when (currentAuthState) {
-                    AuthState.AUTH_INITIALIZING -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
+                override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
+                    super.onReceivedError(view, request, error)
+                    Log.e(TAG, "WebView error: ${error?.description}")
+                }
+            }
+
+            webChromeClient = object : WebChromeClient() {
+                // Geolocation Permission Handler for Maps
+                override fun onGeolocationPermissionsShowPrompt(origin: String?, callback: GeolocationPermissions.Callback?) {
+                    callback?.invoke(origin, true, false)
+                }
+
+                // File Upload Picker Handler for Shops & Profile Photos
+                override fun onShowFileChooser(
+                    webView: WebView?,
+                    filePathCallback: ValueCallback<Array<Uri>>?,
+                    fileChooserParams: FileChooserParams?
+                ): Boolean {
+                    this@MainActivity.filePathCallback = filePathCallback
+                    filePickerLauncher.launch("*/*")
+                    return true
+                }
+            }
+        }
+
+        setContentView(webView)
+
+        // Load Local Asset if available, otherwise load live web app
+        try {
+            val assetManager = assets
+            val files = assetManager.list("www")
+            if (files != null && files.contains("index.html")) {
+                Log.d(TAG, "Loading local offline web app asset file:///android_asset/www/index.html")
+                webView.loadUrl("file:///android_asset/www/index.html")
+            } else {
+                Log.d(TAG, "Loading live web app URL $WEB_APP_URL")
+                webView.loadUrl(WEB_APP_URL)
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, "Defaulting to live web app URL $WEB_APP_URL")
+            webView.loadUrl(WEB_APP_URL)
+        }
+    }
+
+    private fun requestLocationPermissions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
+    // Native JavaScript Interface Bridge
+    inner class AndroidGoogleAuthInterface {
+        @JavascriptInterface
+        fun requestGoogleSignIn() {
+            Log.d(TAG, "Received JavaScript call: AndroidGoogleAuth.requestGoogleSignIn()")
+            lifecycleScope.launch {
+                val result = googleAuthManager.signInWithGoogle()
+                result.onSuccess { authResult ->
+                    val user = authResult.user
+                    user?.getIdToken(false)?.addOnSuccessListener { tokenResult ->
+                        val idToken = tokenResult.token ?: ""
+                        runOnUiThread {
+                            webView.evaluateJavascript("if(window.onAndroidGoogleSignInSuccess) window.onAndroidGoogleSignInSuccess('$idToken');", null)
+                        }
+                    }?.addOnFailureListener { e ->
+                        runOnUiThread {
+                            webView.evaluateJavascript("if(window.onAndroidGoogleSignInError) window.onAndroidGoogleSignInError('${e.message}');", null)
                         }
                     }
-
-                    AuthState.SIGNED_OUT, AuthState.AUTH_ERROR -> {
-                        AuthScreen(
-                            onGoogleSignInClick = {
-                                isLoading = true
-                                errorMessage = null
-                                lifecycleScope.launch {
-                                    val result = googleAuthManager.signInWithGoogle()
-                                    isLoading = false
-                                    result.onFailure { err ->
-                                        errorMessage = err.message ?: "Google Sign-In failed"
-                                    }
-                                }
-                            },
-                            onPhoneSignInClick = { phone ->
-                                Toast.makeText(this@MainActivity, "Dispatching SMS OTP to +91 $phone...", Toast.LENGTH_SHORT).show()
-                            },
-                            isLoading = isLoading,
-                            errorMessage = errorMessage
-                        )
-                    }
-
-                    AuthState.INSIDE_JALPAIGURI -> {
-                        currentUserProfile?.let { user ->
-                            HomeScreen(
-                                user = user,
-                                onOpenShopsClick = {
-                                    Toast.makeText(this@MainActivity, "Opening Jalpaiguri Shop Directory", Toast.LENGTH_SHORT).show()
-                                },
-                                onOpenAiAssistantClick = {
-                                    Toast.makeText(this@MainActivity, "Launching Jalpaiguri AI Assistant", Toast.LENGTH_SHORT).show()
-                                },
-                                onSignOutClick = {
-                                    googleAuthManager.signOut()
-                                }
-                            )
-                        }
-                    }
-
-                    AuthState.OUTSIDE_JALPAIGURI -> {
-                        OutsideCoverageScreen(
-                            user = currentUserProfile,
-                            onSelectLocationClick = {
-                                currentAuthState = AuthState.INSIDE_JALPAIGURI
-                            },
-                            onContinueAnywayClick = {
-                                currentAuthState = AuthState.INSIDE_JALPAIGURI
-                            },
-                            onSignOutClick = {
-                                googleAuthManager.signOut()
-                            }
-                        )
-                    }
-
-                    else -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator()
-                        }
+                }.onFailure { err ->
+                    val errorMsg = err.message ?: "Google Sign-In failed"
+                    runOnUiThread {
+                        webView.evaluateJavascript("if(window.onAndroidGoogleSignInError) window.onAndroidGoogleSignInError('$errorMsg');", null)
                     }
                 }
             }
+        }
+
+        @JavascriptInterface
+        fun getAppVersion(): String = "1.0.0"
+    }
+
+    override fun onBackPressed() {
+        if (webView.canGoBack()) {
+            webView.goBack()
+        } else {
+            super.onBackPressed()
         }
     }
 }
