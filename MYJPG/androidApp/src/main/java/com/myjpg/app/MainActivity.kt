@@ -63,6 +63,16 @@ class MainActivity : ComponentActivity() {
         splashScreen.setKeepOnScreenCondition { !webContentReady }
         super.onCreate(savedInstanceState)
 
+    private val appSurfaceColor = Color.parseColor("#FAF8F5")
+
+    @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // Keep the branded system splash visible only until the first web document is ready.
+        // This avoids a blank frame and the previous back-to-back splash sequence.
+        val splashScreen = installSplashScreen()
+        splashScreen.setKeepOnScreenCondition { !webContentReady }
+        super.onCreate(savedInstanceState)
+
         configureSystemBars()
 
         googleAuthManager = GoogleAuthManager(this)
@@ -71,8 +81,8 @@ class MainActivity : ComponentActivity() {
         requestLocationPermissions()
 
         webView = WebView(this).apply {
-            // This is also the color visible behind the separated system-bar area.
-            setBackgroundColor(Color.WHITE)
+            // Match the MYJPG app background surface color seamlessly
+            setBackgroundColor(appSurfaceColor)
             settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true
@@ -85,7 +95,7 @@ class MainActivity : ComponentActivity() {
                 builtInZoomControls = false
                 mediaPlaybackRequiresUserGesture = false
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-                userAgentString = "${settings.userAgentString} MYJPGNativeApp/1.0.2"
+                userAgentString = "${settings.userAgentString} MYJPGNativeApp/1.0.3"
             }
 
             // JavaScript Interface for Native Google Sign-In via Credential Manager
@@ -126,7 +136,7 @@ class MainActivity : ComponentActivity() {
         }
 
         val root = FrameLayout(this).apply {
-            setBackgroundColor(Color.WHITE)
+            setBackgroundColor(appSurfaceColor)
             addView(
                 webView,
                 FrameLayout.LayoutParams(
@@ -157,14 +167,14 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * Android 15 enforces edge-to-edge for targetSdk 35. The host draws the white system-bar
-     * surface, while the WebView is physically laid out within the safe drawing bounds.
+     * Android 15 enforces edge-to-edge for targetSdk 35. The host draws the app surface color,
+     * while the WebView is physically laid out within the safe drawing bounds.
      */
     private fun configureSystemBars() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.decorView.setBackgroundColor(Color.WHITE)
-        window.statusBarColor = Color.WHITE
-        window.navigationBarColor = Color.WHITE
+        window.decorView.setBackgroundColor(appSurfaceColor)
+        window.statusBarColor = appSurfaceColor
+        window.navigationBarColor = appSurfaceColor
 
         WindowInsetsControllerCompat(window, window.decorView).apply {
             isAppearanceLightStatusBars = true

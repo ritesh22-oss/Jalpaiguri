@@ -194,83 +194,83 @@ export const DiscoverView: React.FC = () => {
   }, [searchQuery, directoryCategories]);
 
   return (
-    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#020617] text-[#0F172A] dark:text-[#E2E8F0] pb-28 select-none transition-colors duration-200">
-      {/* Header */}
-      <header className="w-full sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#020617]/95 backdrop-blur-md border-b border-[#E8E4DA] dark:border-white/10">
-        <div className="max-w-5xl mx-auto px-5 pt-6 pb-3 space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-[#0F172A] dark:text-white">
-              {isBengali ? 'অন্বেষণ' : 'Discover'}
-            </h1>
-            <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-              {isBengali ? 'জলপাইগুড়ির নাগরিক ও স্থানীয় পরিমণ্ডল' : 'Jalpaiguri civic & local ecosystem'}
-            </p>
+    <div className="w-full min-h-full bg-[#FAF8F5] dark:bg-[#020617] text-[#0F172A] dark:text-[#E2E8F0] pb-32 select-none transition-colors duration-200">
+      {/* Attached Top Header */}
+      <header className="w-full sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#020617]/95 backdrop-blur-md border-b border-[#E8E4DA] dark:border-white/10 shadow-2xs">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#0F172A] dark:text-white truncate">
+                {isBengali ? 'অন্বেষণ' : 'Discover'}
+              </h1>
+              <p className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate">
+                {isBengali ? 'জলপাইগুড়ির নাগরিক ও স্থানীয় পরিমণ্ডল' : 'Jalpaiguri civic & local ecosystem'}
+              </p>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+              <button
+                onClick={() => navigate('home')}
+                className="w-8 h-8 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#007AFF] dark:text-blue-400 shadow-2xs hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
+                aria-label="Home"
+                title="Return to Dashboard"
+              >
+                <HomeIcon className="w-4 h-4 stroke-[2.5]" />
+              </button>
+
+              {/* Language Switcher */}
+              <button
+                onClick={toggleLanguage}
+                className="h-8 px-2 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#007AFF] dark:text-[#60A5FA] flex items-center gap-1 shadow-2xs cursor-pointer hover:scale-105 active:scale-95 transition-all duration-300"
+                title={isBengali ? 'Switch to English' : 'বাংলায় দেখুন'}
+              >
+                <Globe className="w-3.5 h-3.5" />
+                <span>{isBengali ? 'বাংলা' : 'EN'}</span>
+              </button>
+
+              {/* Theme Toggle Button */}
+              <button
+                onClick={toggleTheme}
+                className="w-8 h-8 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 shadow-2xs hover:bg-[#F2EFE9] dark:hover:bg-white/5 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
+                title="Toggle Light/Dark Theme"
+              >
+                {isDarkMode ? (
+                  <Sun className="w-4 h-4 text-amber-400" />
+                ) : (
+                  <Moon className="w-4 h-4 text-[#007AFF]" />
+                )}
+              </button>
+
+              {/* AI Assistant Button */}
+              <button
+                onClick={() => setIsAssistantOpen(true)}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-[#EFF6FF] dark:bg-[#172554] text-[#007AFF] dark:text-[#60A5FA] text-xs font-bold shadow-2xs cursor-pointer hover:scale-105 active:scale-95 transition-all duration-300"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>AI</span>
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate('home')}
-              className="w-8 h-8 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#007AFF] dark:text-blue-400 shadow-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:scale-110 active:scale-90 transition-all duration-300 cursor-pointer"
-              aria-label="Home"
-              title="Return to Dashboard"
-            >
-              <HomeIcon className="w-4 h-4 stroke-[2.5]" />
-            </button>
-
-            {/* Language Switcher */}
-            <button
-              onClick={toggleLanguage}
-              className="h-8 px-2.5 rounded-full bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 text-xs font-bold text-[#007AFF] dark:text-[#60A5FA] flex items-center gap-1 shadow-xs cursor-pointer hover:scale-105 active:scale-95 transition-all duration-300"
-              title={isBengali ? 'Switch to English' : 'বাংলায় দেখুন'}
-            >
-              <Globe className="w-3.5 h-3.5" />
-              <span>{isBengali ? 'বাংলা' : 'EN'}</span>
-            </button>
-
-            {/* Theme Toggle Button */}
-            <button
-              onClick={toggleTheme}
-              className="w-8 h-8 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 shadow-xs hover:bg-[#F2EFE9] dark:hover:bg-white/5 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
-              title="Toggle Light/Dark Theme"
-            >
-              {isDarkMode ? (
-                <Sun className="w-4 h-4 text-amber-400" />
-              ) : (
-                <Moon className="w-4 h-4 text-[#007AFF]" />
-              )}
-            </button>
-
-            {/* AI Assistant Button */}
-            <button
-              onClick={() => setIsAssistantOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#EFF6FF] dark:bg-[#172554] text-[#007AFF] dark:text-[#60A5FA] text-xs font-bold shadow-xs cursor-pointer hover:scale-105 active:scale-95 transition-all duration-300"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>JPG AI</span>
-            </button>
+          {/* Search input */}
+          <div className="w-full bg-white dark:bg-[#1E293B] border border-[#D2CEBE] dark:border-white/10 rounded-xl px-3.5 py-2 flex items-center gap-2.5 shadow-2xs focus-within:border-[#007AFF] dark:focus-within:border-[#60A5FA] transition-all">
+            <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
+            <input
+              type="text"
+              placeholder={isBengali ? 'ট্রাফিক, সেবা, ডাক্তার, চাকরি, ওয়ার্ড খুঁজুন...' : 'Search traffic, services, doctors, jobs, wards...'}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full text-xs font-semibold text-[#0F172A] dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none bg-transparent"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-slate-400 hover:text-[#0F172A] dark:hover:text-white"
+              >
+                ×
+              </button>
+            )}
           </div>
-        </div>
-
-        {/* Search input */}
-        <div className="w-full bg-white dark:bg-[#1E293B] border border-[#D2CEBE] dark:border-white/10 rounded-2xl px-3.5 py-3 flex items-center gap-2.5 shadow-xs focus-within:border-[#007AFF] dark:focus-within:border-[#60A5FA] transition-all">
-          <Search className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-          <input
-            type="text"
-            placeholder={isBengali ? 'ট্রাফিক, সেবা, ডাক্তার, চাকরি, ওয়ার্ড খুঁজুন...' : 'Search traffic, services, doctors, jobs, wards...'}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full text-xs font-semibold text-[#0F172A] dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none bg-transparent"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="text-slate-400 hover:text-[#0F172A] dark:hover:text-white"
-            >
-              ×
-            </button>
-          )}
-        </div>
         </div>
       </header>
 

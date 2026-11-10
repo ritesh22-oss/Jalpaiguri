@@ -172,47 +172,47 @@ export const ProfileView: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] pb-28 select-none transition-colors">
-      <header className="w-full sticky top-0 z-30 bg-[#FAF8F5]/90 dark:bg-[#0B132B]/90 backdrop-blur-md border-b border-[#E8E4DA]/50 dark:border-white/10 transition-colors">
-        <div className="max-w-4xl mx-auto px-5 pt-6 pb-3 flex items-center justify-between">
-        <h1 className="text-2xl font-extrabold text-[#11241C] dark:text-white tracking-tight">
-          {isBengali ? 'নাগরিক প্রোফাইল' : 'Citizen Profile'}
-        </h1>
-        <div className="flex items-center gap-2">
-          {/* Simple Light / Dark Mode Toggle Icon */}
-          <button
-            onClick={toggleTheme}
-            className="w-8 h-8 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#55685F] dark:text-[#A2B3AA] hover:text-[#2563EB] dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] hover:scale-110 active:scale-90 transition-all duration-300 cursor-pointer shadow-xs"
-            title={isDarkMode ? (isBengali ? 'লাইট মোডে পরিবর্তন করুন' : 'Switch to Bright Mode') : (isBengali ? 'ডার্ক মোডে পরিবর্তন করুন' : 'Switch to Dark Mode')}
-            aria-label="Toggle Bright/Dark Mode"
-          >
-            {isDarkMode ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4" />}
-          </button>
-
-          {user ? (
-            isOfficialAdmin ? (
-              <button
-                onClick={() => navigate('admin-dashboard')}
-                className="text-xs font-bold text-white bg-[#2563EB] dark:bg-blue-600 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer shadow-xs hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all duration-300"
-              >
-                <LayoutDashboard className="w-3.5 h-3.5 text-blue-300" />
-                <span>{isBengali ? 'অ্যাডমিন প্যানেল' : 'Admin Console'}</span>
-              </button>
-            ) : (
-              <span className="text-[11px] font-bold text-[#2563EB] dark:text-[#38BDF8] bg-[#eff6ff] dark:bg-blue-950/60 px-3 py-1 rounded-full border border-[#C3E6D0] dark:border-blue-800/60">
-                {isBengali ? 'যাচাইকৃত নাগরিক' : 'Citizen Verified'}
-              </span>
-            )
-          ) : (
+    <div className="w-full min-h-full bg-[#FAF8F5] dark:bg-[#0B132B] pb-32 select-none transition-colors">
+      <header className="w-full sticky top-0 z-30 bg-[#FAF8F5]/95 dark:bg-[#0B132B]/95 backdrop-blur-md border-b border-[#E8E4DA]/80 dark:border-white/10 shadow-2xs transition-colors">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-2 min-h-[56px]">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-[#11241C] dark:text-white tracking-tight truncate">
+            {isBengali ? 'নাগরিক প্রোফাইল' : 'Citizen Profile'}
+          </h1>
+          <div className="flex shrink-0 items-center gap-2">
+            {/* Simple Light / Dark Mode Toggle Icon */}
             <button
-              onClick={() => navigate('auth')}
-              className="text-xs font-bold text-white bg-[#2563EB] dark:bg-blue-600 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-xs cursor-pointer"
+              onClick={toggleTheme}
+              className="w-8 h-8 rounded-full bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 flex items-center justify-center text-[#55685F] dark:text-[#A2B3AA] hover:text-[#2563EB] dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#1F312A] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer shadow-2xs"
+              title={isDarkMode ? (isBengali ? 'লাইট মোডে পরিবর্তন করুন' : 'Switch to Bright Mode') : (isBengali ? 'ডার্ক মোডে পরিবর্তন করুন' : 'Switch to Dark Mode')}
+              aria-label="Toggle Bright/Dark Mode"
             >
-              <LogIn className="w-3.5 h-3.5" />
-              <span>{isBengali ? 'লগইন' : 'Sign In'}</span>
+              {isDarkMode ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4" />}
             </button>
-          )}
-        </div>
+
+            {user ? (
+              isOfficialAdmin ? (
+                <button
+                  onClick={() => navigate('admin-dashboard')}
+                  className="text-xs font-bold text-white bg-[#2563EB] dark:bg-blue-600 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer shadow-2xs hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all duration-300"
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5 text-blue-300" />
+                  <span>{isBengali ? 'অ্যাডমিন প্যানেল' : 'Admin Console'}</span>
+                </button>
+              ) : (
+                <span className="text-[11px] font-bold text-[#2563EB] dark:text-[#38BDF8] bg-[#eff6ff] dark:bg-blue-950/60 px-3 py-1 rounded-full border border-[#C3E6D0] dark:border-blue-800/60">
+                  {isBengali ? 'যাচাইকৃত নাগরিক' : 'Citizen Verified'}
+                </span>
+              )
+            ) : (
+              <button
+                onClick={() => navigate('auth')}
+                className="text-xs font-bold text-white bg-[#2563EB] dark:bg-blue-600 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-2xs cursor-pointer"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>{isBengali ? 'লগইন' : 'Sign In'}</span>
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
