@@ -8,10 +8,15 @@ export const SplashScreen: React.FC = () => {
   const { replaceView } = useNav();
   const { isAuthenticated, isProfileComplete } = useAuth();
   const { serviceAreaStatus } = useLocation();
+  const isNativeAndroid = typeof window !== 'undefined' && 'AndroidGoogleAuth' in window;
 
   useEffect(() => {
     sessionStorage.setItem('jpg_splash_shown', 'true');
   }, []);
+
+  // Android keeps its native branded splash up until this document is ready. Rendering a
+  // second web splash here would make launch feel slower without adding useful feedback.
+  if (isNativeAndroid) return null;
 
   return (
     <div

@@ -23,6 +23,7 @@ import {
   LogOut,
   Store,
   Camera
+  , Menu, X
 } from 'lucide-react';
 import { useNav } from '../../context/NavigationContext';
 import { useApp } from '../../context/AppContext';
@@ -57,6 +58,8 @@ export const AdminDashboardView: React.FC = () => {
   const [localError, setLocalError] = useState('');
   const [isProcessingAction, setIsProcessingAction] = useState(false);
   const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [adminShops, setAdminShops] = useState<any[]>([]);
 
   const [selectedPlaceIdForThumbs, setSelectedPlaceIdForThumbs] = useState<string>(JALPAIGURI_EXPLORE_PLACES[0]?.placeId || '');
@@ -173,10 +176,10 @@ export const AdminDashboardView: React.FC = () => {
           {currentEmail ? (
             <div className="w-full bg-rose-950/40 border border-rose-900/60 rounded-2xl p-3.5 mb-6 text-left">
               <span className="text-[10px] uppercase font-bold text-rose-400 tracking-wider block">
-                Connected Account
+                Signed-in account
               </span>
               <p className="text-xs text-rose-200 font-medium break-all mt-0.5">
-                {currentEmail}
+                Account identity is protected and is not displayed here.
               </p>
               <span className="text-[10px] text-rose-300/90 mt-1.5 flex items-center gap-1">
                 <Lock className="w-3 h-3 text-rose-400 shrink-0" />
@@ -264,36 +267,48 @@ export const AdminDashboardView: React.FC = () => {
     { id: 'Analytics', label: 'Analytics', icon: <BarChart3 className="w-5 h-5" /> }
   ];
 
+  const selectTab = (tab: typeof activeTab) => {
+    setActiveTab(tab);
+    setIsSidebarOpen(false);
+  };
+
   return (
-    <div className="min-h-screen bg-[#FAF8F5] flex flex-col md:flex-row select-none">
-      {/* Left Sidebar matching Screenshot 5 */}
-      <aside className="w-full md:w-64 bg-white border-r border-[#E8E4DA] flex flex-col justify-between p-4 shrink-0 shadow-xs">
+    <div className="min-h-screen bg-[#FAF8F5] flex select-none overflow-x-hidden">
+      {isSidebarOpen && (
+        <button
+          aria-label="Close navigation"
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 z-30 bg-slate-950/40 backdrop-blur-[1px] md:hidden"
+        />
+      )}
+
+      <aside className={`fixed inset-y-0 left-0 z-40 flex w-72 flex-col justify-between border-r border-[#E8E4DA] bg-white p-4 shadow-xl transition-transform duration-300 md:sticky md:top-0 md:h-screen md:translate-x-0 md:shadow-xs ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      } ${isSidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
         <div>
-          {/* Logo */}
-          <div className="flex items-center justify-between pb-6 pt-2 px-2 border-b border-[#F0ECE1]">
+          <div className={`flex items-center justify-between pb-5 pt-2 px-2 border-b border-[#F0ECE1] ${isSidebarCollapsed ? 'md:justify-center' : ''}`}>
             <div className="flex items-center gap-2.5">
               <JPGLogo size="sm" showText={false} />
-              <span className="font-extrabold text-base text-[#11241C] tracking-tight">
-                MYJPG
-              </span>
+              {!isSidebarCollapsed && <div className="hidden min-w-0 md:block"><p className="font-extrabold text-base text-[#11241C] tracking-tight">MYJPG</p><p className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#007AFF]">Jalpaiguri Connected</p></div>}
             </div>
             <button
-              onClick={() => navigate('home')}
-              className="md:hidden text-xs font-bold text-[#007AFF] bg-[#E6F4EA] px-2 py-1 rounded-lg"
+              onClick={() => setIsSidebarOpen(false)}
+              className="md:hidden rounded-lg p-2 text-[#55685F] hover:bg-slate-100"
+              aria-label="Close navigation"
             >
-              App View
+              <X className="h-4 w-4" />
             </button>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="space-y-1 mt-6">
+          <nav className="mt-5 space-y-1 overflow-y-auto">
             {sidebarLinks.map((link) => {
               const isActive = activeTab === link.id;
               return (
                 <button
                   key={link.id}
-                  onClick={() => setActiveTab(link.id as any)}
-                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                  onClick={() => selectTab(link.id as typeof activeTab)}
+                  title={isSidebarCollapsed ? link.label : undefined}
+                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSidebarCollapsed ? 'md:justify-center' : ''} ${
                     isActive
                       ? 'bg-[#007AFF] text-white shadow-xs'
                       : 'text-[#55685F] hover:bg-[#FAF8F5] hover:text-[#11241C]'
@@ -302,43 +317,55 @@ export const AdminDashboardView: React.FC = () => {
                   <span className={isActive ? 'text-white' : 'text-[#55685F]'}>
                     {link.icon}
                   </span>
-                  <span>{link.label}</span>
+                  <span className={isSidebarCollapsed ? 'md:hidden' : ''}>{link.label}</span>
                 </button>
               );
             })}
           </nav>
         </div>
 
-        {/* Bottom Settings & Back to Consumer App */}
         <div className="pt-4 border-t border-[#F0ECE1] space-y-2">
           <button
-            onClick={() => setActiveTab('Settings')}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-colors cursor-pointer ${
+            onClick={() => selectTab('Settings')}
+            title={isSidebarCollapsed ? 'Settings' : undefined}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${isSidebarCollapsed ? 'md:justify-center' : ''} ${
               activeTab === 'Settings'
                 ? 'bg-[#007AFF] text-white'
                 : 'text-[#55685F] hover:bg-[#FAF8F5]'
             }`}
           >
             <Settings className="w-4 h-4" />
-            <span>Settings</span>
+            <span className={isSidebarCollapsed ? 'md:hidden' : ''}>Settings</span>
           </button>
 
           <button
             onClick={() => navigate('home')}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-[#E6F4EA] text-[#007AFF] text-xs font-bold hover:bg-[#D5EADB] transition-colors cursor-pointer"
+            title={isSidebarCollapsed ? 'Return to Mobile App' : undefined}
+            className={`w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-[#E6F4EA] text-[#007AFF] text-xs font-bold hover:bg-[#D5EADB] transition-colors cursor-pointer ${isSidebarCollapsed ? 'md:px-2' : ''}`}
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Return to Mobile App</span>
+            <span className={isSidebarCollapsed ? 'md:hidden' : ''}>Return to Mobile App</span>
           </button>
+          <div className={`flex items-center gap-2 px-2 py-2 ${isSidebarCollapsed ? 'md:justify-center' : ''}`}>
+            <img src={firebaseUser?.photoURL || ''} alt="" className="h-7 w-7 rounded-full bg-slate-100 object-cover" />
+            <span className={`min-w-0 truncate text-[10px] font-bold text-[#55685F] ${isSidebarCollapsed ? 'md:hidden' : ''}`}>{user?.name || 'Administrator'}</span>
+          </div>
         </div>
       </aside>
 
       {/* Main Admin Content Area */}
       <main className="flex-1 flex flex-col min-w-0">
         {/* Top Bar matching Screenshot 5 */}
-        <header className="bg-white border-b border-[#E8E4DA] px-6 py-3.5 flex items-center justify-between gap-4 sticky top-0 z-20 shadow-xs">
+        <header className="bg-white border-b border-[#E8E4DA] px-4 sm:px-6 py-3 flex items-center justify-between gap-3 sticky top-0 z-20 shadow-xs">
+          <button
+            onClick={() => window.innerWidth < 768 ? setIsSidebarOpen(true) : setIsSidebarCollapsed((value) => !value)}
+            className="shrink-0 rounded-xl p-2.5 text-[#55685F] hover:bg-[#FAF8F5] hover:text-[#007AFF]"
+            aria-label="Toggle administration navigation"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
           {/* Search Input */}
-          <div className="flex-1 max-w-lg bg-[#FAF8F5] border border-[#D2CEBE] rounded-full px-4 py-2 flex items-center gap-2.5 shadow-inner">
+          <div className="min-w-0 flex-1 max-w-lg bg-[#FAF8F5] border border-[#D2CEBE] rounded-full px-3 sm:px-4 py-2 flex items-center gap-2.5 shadow-inner">
             <Search className="w-4 h-4 text-[#55685F]" />
             <input
               type="text"
@@ -350,7 +377,7 @@ export const AdminDashboardView: React.FC = () => {
           </div>
 
           {/* Right Header Items: Notification & Admin Avatar */}
-          <div className="flex items-center gap-4 relative">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-4 relative">
             <AdminNotificationBell />
 
             <div className="relative">
@@ -709,7 +736,7 @@ export const AdminDashboardView: React.FC = () => {
                                 </td>
                                 <td className="py-3.5 px-4">
                                   <span className="font-semibold text-gray-800 block">{sub.uploaderName}</span>
-                                  <span className="text-[10px] text-gray-500">{sub.uploaderEmail}</span>
+                                  <span className="text-[10px] text-gray-500">Contributor identity protected</span>
                                 </td>
                                 <td className="py-3.5 px-4">
                                   <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${

@@ -79,7 +79,7 @@ export const OutsideAreaView: React.FC<OutsideAreaViewProps> = ({ onNavigate }) 
                   Authenticated: {user?.name || firebaseUser?.displayName || 'Citizen'}
                 </p>
                 <p className="text-[11px] text-emerald-700 dark:text-emerald-400/80 truncate">
-                  {firebaseUser?.email || user?.phone || 'Firebase Session Active'}
+                  Secure account session active
                 </p>
               </div>
             </div>

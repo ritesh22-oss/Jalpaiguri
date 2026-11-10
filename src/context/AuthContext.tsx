@@ -151,6 +151,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/** Authentication identity stays in Firebase Auth. Never copy email, role, or auth metadata
+ * into the public Firestore profile document. */
+const toPublicProfile = (profile: UserProfile): Omit<UserProfile, 'email' | 'role' | 'emailVerified' | 'authMethod'> => {
+  const { email: _email, role: _role, emailVerified: _emailVerified, authMethod: _authMethod, ...publicProfile } = profile;
+  return publicProfile;
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [user, setUser] = useState<UserProfile | null>(() => {
@@ -299,7 +306,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             };
 
             try {
-              await setDoc(userDocRef, partialProfile);
+              await setDoc(userDocRef, toPublicProfile(partialProfile));
             } catch (e) {
               console.warn('[PROFILE ERROR] Initial profile doc note:', e);
             }
@@ -340,7 +347,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           try {
             const result = await getRedirectResult(auth);
             if (result && result.user) {
-              console.log(`[AUTH] redirect result checked: Google sign-in success (${result.user.email})`);
+              console.log('[AUTH] redirect result checked: Google sign-in success.');
               setFirebaseUser(result.user);
               await syncUserProfile(result.user);
             } else {
@@ -442,7 +449,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const fbUser = result?.user;
 
       if (fbUser) {
-        console.log(`[AUTH] Google sign-in completed: ${fbUser.email || fbUser.uid}`);
+        console.log('[AUTH] Google sign-in completed.');
         setFirebaseUser(fbUser);
         const isOfficialAdmin = isAuthorizedAdminEmail(fbUser.email);
 
@@ -503,7 +510,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           };
 
           try {
-            await setDoc(userDocRef, newProfile);
+            await setDoc(userDocRef, toPublicProfile(newProfile));
           } catch (e) {
             console.warn('[PROFILE ERROR] Initial profile doc creation note:', e);
           }
@@ -609,7 +616,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           };
 
           try {
-            await setDoc(userDocRef, newProfile);
+            await setDoc(userDocRef, toPublicProfile(newProfile));
           } catch (e) {
             console.warn('Initial profile doc write note:', e);
           }
@@ -664,7 +671,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         await sendEmailVerification(fbUser);
       } catch (vErr) {
-        console.warn('Verification email dispatch note:', vErr);
+        console.warn('Verification dispatch note:', vErr);
       }
 
       const isOfficialAdmin = isAuthorizedAdminEmail(fbUser.email);
@@ -687,7 +694,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
 
       try {
-        await setDoc(doc(db, 'users', fbUser.uid), newProfile);
+        await setDoc(doc(db, 'users', fbUser.uid), toPublicProfile(newProfile));
       } catch (e) {
         console.warn('Initial firestore write note:', e);
       }
@@ -736,7 +743,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('jpg_user_profile', JSON.stringify(updated));
         if (isFirebaseConfigured && db && user.id) {
           try {
-            await updateDoc(doc(db, 'users', user.id), { emailVerified: true });
+            // Verification status is held by Firebase Auth; do not mirror auth metadata publicly.
           } catch (_) {}
         }
       }
@@ -939,7 +946,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (isFirebaseConfigured && db) {
           try {
             const userDocRef = doc(db, 'users', effectiveUid);
-            await setDoc(userDocRef, profileData);
+            await setDoc(userDocRef, toPublicProfile(profileData));
           } catch (saveErr) {
             console.warn('[AUTH] Firestore profile write notice:', saveErr);
           }
@@ -1008,7 +1015,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (isFirebaseConfigured && db) {
       try {
-        await setDoc(doc(db, 'users', userId), updatedProfile, { merge: true });
+        await setDoc(doc(db, 'users', userId), toPublicProfile(updatedProfile), { merge: true });
       } catch (e) {
         console.warn('Error syncing profile to Firestore:', e);
       }
@@ -1072,7 +1079,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (user.role !== 'admin') {
       const email = user.email || firebaseUser?.email;
       if (!isAuthorizedAdminEmail(email)) {
-        console.warn('[AUTH] Admin role switch blocked: Unauthorized email', email);
+        console.warn('[AUTH] Admin role switch blocked: account lacks administrator authorization.');
         return;
       }
     }

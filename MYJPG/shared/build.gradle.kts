@@ -34,7 +34,7 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.kotlinx.coroutines.android)
-            implementation(platform(libs.firebase.bom))
+            implementation(platform(libs.firebase.bom.get()))
             implementation(libs.firebase.auth)
             implementation(libs.firebase.firestore)
         }

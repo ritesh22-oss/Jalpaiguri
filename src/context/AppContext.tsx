@@ -354,8 +354,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             path: path,
             authInfo: {
               userId: auth.currentUser?.uid,
-              email: auth.currentUser?.email,
-              emailVerified: auth.currentUser?.emailVerified,
+              signedIn: Boolean(auth.currentUser),
             }
           };
           console.error('[Firestore Error Callback]', JSON.stringify(errInfo));

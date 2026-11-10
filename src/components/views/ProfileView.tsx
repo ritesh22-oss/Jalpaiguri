@@ -22,7 +22,6 @@ import {
   Droplet,
   Shield,
   Calendar,
-  Mail,
   Lock,
   RotateCcw,
   HelpCircle,
@@ -241,12 +240,6 @@ export const ProfileView: React.FC = () => {
                     <MapPin className="w-3.5 h-3.5 text-[#2563EB] dark:text-[#38BDF8]" />
                     <span>{user?.location ? tLocality(user.location) : (isBengali ? 'জলপাইগুড়ি, পঃবঃ' : 'Jalpaiguri, WB')}</span>
                   </p>
-                  {(user?.email || firebaseUser?.email) && (
-                    <p className="text-[11px] font-semibold text-[#55685F] dark:text-blue-300 mt-0.5 flex items-center gap-1">
-                      <Mail className="w-3 h-3 text-[#2563EB] dark:text-[#38BDF8]" />
-                      <span className="truncate max-w-[170px]">{user?.email || firebaseUser?.email}</span>
-                    </p>
-                  )}
                   {user?.phone && (
                     <p className="text-[11px] font-semibold text-[#8C9B93] dark:text-blue-400 mt-0.5 flex items-center gap-1">
                       <Phone className="w-3 h-3 text-[#2563EB] dark:text-[#38BDF8]" />

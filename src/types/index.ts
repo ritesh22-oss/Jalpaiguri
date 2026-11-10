@@ -1028,7 +1028,8 @@ export interface PlacePhotoSubmission {
   category: string;
   imageUrl: string;
   uploaderName: string;
-  uploaderEmail: string;
+  /** Private auth data is intentionally never copied into public photo submissions. */
+  uploaderEmail?: string;
   timestamp: string;
   status: 'pending' | 'approved' | 'rejected';
 }

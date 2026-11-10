@@ -21,7 +21,7 @@ export const UploadPlacePhotoModal: React.FC<UploadPlacePhotoModalProps> = ({
   onUploaded
 }) => {
   const { submitPlacePhoto } = useApp();
-  const { user, firebaseUser } = useAuth();
+  const { user } = useAuth();
 
   const [activeMode, setActiveMode] = useState<'upload' | 'url'>('upload');
   const [photoUrl, setPhotoUrl] = useState('');
@@ -114,15 +114,12 @@ export const UploadPlacePhotoModal: React.FC<UploadPlacePhotoModalProps> = ({
 
     try {
       const uploaderName = contributorName.trim() || user?.name || 'Jalpaiguri Citizen';
-      const uploaderEmail = firebaseUser?.email || user?.email || 'citizen@jalpaiguri.local';
-
       await submitPlacePhoto({
         placeId,
         placeName,
         category,
         imageUrl: finalUrl,
-        uploaderName,
-        uploaderEmail
+        uploaderName
       });
 
       setSuccess(true);

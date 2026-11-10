@@ -6,7 +6,6 @@ export interface ServerShop {
   ownerId: string;
   ownerName: string;
   ownerPhone: string;
-  ownerEmail?: string;
   whatsappNumber?: string;
   name: string;
   nameBn?: string;
@@ -102,8 +101,9 @@ class ShopStore {
     const open = shop.openingTime || '08:00 AM';
     const close = shop.closingTime || '09:00 PM';
     const weeklyOff = shop.weeklyOff || 'None';
+    const { ownerEmail: _privateOwnerEmail, ...publicShop } = shop as ServerShop & { ownerEmail?: string };
     return {
-      ...shop,
+      ...publicShop,
       phone,
       ownerPhone: phone,
       whatsappNumber: shop.whatsappNumber || phone,
@@ -224,7 +224,6 @@ class ShopStore {
       ownerId: data.ownerId || 'unknown-owner',
       ownerName: data.ownerName || 'Jalpaiguri Merchant',
       ownerPhone: data.ownerPhone || '',
-      ownerEmail: data.ownerEmail,
       whatsappNumber: data.whatsappNumber || data.ownerPhone,
       name: data.name || 'My Shop',
       nameBn: data.nameBn,

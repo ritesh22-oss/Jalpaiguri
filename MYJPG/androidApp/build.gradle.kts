@@ -12,8 +12,8 @@ android {
         applicationId = "com.myjpg.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 100
-        versionName = "1.0.0"
+        versionCode = 102
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -29,10 +29,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-        }
-        debug {
-            applicationIdSuffix = ".debug"
-            isDebuggable = true
         }
     }
     compileOptions {
@@ -53,11 +49,12 @@ dependencies {
     implementation(project(":shared"))
 
     implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
 
     // Android Credential Manager & Google Auth
     implementation(libs.androidx.credentials)
-    implementation(libs.androidx.credentials.play-services-auth)
+    implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
     implementation(libs.play.services.auth)
     implementation(libs.play.services.location)

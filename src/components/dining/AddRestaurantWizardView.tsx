@@ -70,7 +70,6 @@ export const AddRestaurantWizardView: React.FC = () => {
   const [ownerName, setOwnerName] = useState(user?.name || '');
   const [ownerPhone, setOwnerPhone] = useState(user?.phone || '+91 ');
   const [ownerWhatsapp, setOwnerWhatsapp] = useState(user?.phone || '');
-  const [ownerEmail, setOwnerEmail] = useState(user?.email || '');
 
   const [restaurantName, setRestaurantName] = useState('');
   const [restaurantNameBengali, setRestaurantNameBengali] = useState('');
@@ -124,7 +123,6 @@ export const AddRestaurantWizardView: React.FC = () => {
         if (data.ownerName) setOwnerName(data.ownerName);
         if (data.ownerPhone) setOwnerPhone(data.ownerPhone);
         if (data.ownerWhatsapp) setOwnerWhatsapp(data.ownerWhatsapp);
-        if (data.ownerEmail) setOwnerEmail(data.ownerEmail);
         if (data.restaurantName) setRestaurantName(data.restaurantName);
         if (data.restaurantNameBengali) setRestaurantNameBengali(data.restaurantNameBengali);
         if (data.category) setCategory(data.category);
@@ -164,7 +162,6 @@ export const AddRestaurantWizardView: React.FC = () => {
         ownerName,
         ownerPhone,
         ownerWhatsapp,
-        ownerEmail,
         restaurantName,
         restaurantNameBengali,
         category,
@@ -337,7 +334,6 @@ export const AddRestaurantWizardView: React.FC = () => {
         phone: ownerPhone.trim(),
         ownerPhone: ownerPhone.trim(),
         whatsappNumber: ownerWhatsapp.trim() || ownerPhone.trim(),
-        email: ownerEmail.trim() || user?.email || undefined,
         ownerId: user?.id || firebaseUser?.uid || 'restaurantOwner-user',
         ownerName: ownerName.trim(),
         openingHours: {
@@ -601,23 +597,6 @@ export const AddRestaurantWizardView: React.FC = () => {
                 />
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="font-bold text-[#11241C] dark:text-white">
-                    Email Address (ইমেল আইডি)
-                  </label>
-                  <span className="text-[10px] font-semibold text-gray-400">
-                    {language === 'bn' ? 'ঐচ্ছিক' : 'Optional'}
-                  </span>
-                </div>
-                <input
-                  type="email"
-                  value={ownerEmail}
-                  onChange={(e) => setOwnerEmail(e.target.value)}
-                  placeholder="restaurantOwner@example.com"
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-white/5 border border-[#E8E4DA] dark:border-white/10 rounded-xl font-semibold text-[#11241C] dark:text-white focus:outline-none focus:border-[#007AFF]"
-                />
-              </div>
             </div>
           </div>
         )}

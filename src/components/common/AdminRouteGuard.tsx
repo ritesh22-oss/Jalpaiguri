@@ -74,10 +74,10 @@ export const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({ children, fall
         {currentEmail ? (
           <div className="w-full bg-rose-950/40 border border-rose-900/60 rounded-2xl p-3.5 mb-6 text-left">
             <span className="text-[10px] uppercase font-bold text-rose-400 tracking-wider block">
-              Connected Account
+              Signed-in account
             </span>
             <p className="text-xs text-rose-200 font-medium break-all mt-0.5">
-              {currentEmail}
+              Account identity is protected and not shown here.
             </p>
             <span className="text-[10px] text-rose-300/90 mt-1.5 flex items-center gap-1">
               <Lock className="w-3 h-3 text-rose-400 shrink-0" />

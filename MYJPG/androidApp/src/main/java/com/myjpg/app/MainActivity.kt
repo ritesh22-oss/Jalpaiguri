@@ -3,24 +3,34 @@ package com.myjpg.app
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.ViewGroup
 import android.webkit.*
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.myjpg.app.auth.GoogleAuthManager
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var webView: WebView
     private lateinit var googleAuthManager: GoogleAuthManager
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
+    private var webContentReady = false
 
     companion object {
         private const val TAG = "MYJPG_MainActivity"
@@ -47,7 +57,13 @@ class MainActivity : ComponentActivity() {
 
     @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Keep the branded system splash visible only until the first web document is ready.
+        // This avoids a blank frame and the previous back-to-back splash sequence.
+        val splashScreen = installSplashScreen()
+        splashScreen.setKeepOnScreenCondition { !webContentReady }
         super.onCreate(savedInstanceState)
+
+        configureSystemBars()
 
         googleAuthManager = GoogleAuthManager(this)
 
@@ -55,6 +71,8 @@ class MainActivity : ComponentActivity() {
         requestLocationPermissions()
 
         webView = WebView(this).apply {
+            // This is also the color visible behind the separated system-bar area.
+            setBackgroundColor(Color.WHITE)
             settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true
@@ -67,7 +85,7 @@ class MainActivity : ComponentActivity() {
                 builtInZoomControls = false
                 mediaPlaybackRequiresUserGesture = false
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-                userAgentString = "${settings.userAgentString} MYJPGNativeApp/1.0.0"
+                userAgentString = "${settings.userAgentString} MYJPGNativeApp/1.0.2"
             }
 
             // JavaScript Interface for Native Google Sign-In via Credential Manager
@@ -77,11 +95,14 @@ class MainActivity : ComponentActivity() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
                     Log.d(TAG, "WebView page loaded: $url")
+                    webContentReady = true
+                    applyHostedLayoutCorrection()
                 }
 
                 override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
                     super.onReceivedError(view, request, error)
                     Log.e(TAG, "WebView error: ${error?.description}")
+                    if (request?.isForMainFrame == true) webContentReady = true
                 }
             }
 
@@ -104,7 +125,19 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        setContentView(webView)
+        val root = FrameLayout(this).apply {
+            setBackgroundColor(Color.WHITE)
+            addView(
+                webView,
+                FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+            )
+        }
+        setContentView(root)
+        // Insets can only be requested after the root has been attached to the window.
+        applySystemBarInsets(root)
 
         // Load Local Asset if available, otherwise load live web app
         try {
@@ -121,6 +154,74 @@ class MainActivity : ComponentActivity() {
             Log.d(TAG, "Defaulting to live web app URL $WEB_APP_URL")
             webView.loadUrl(WEB_APP_URL)
         }
+    }
+
+    /**
+     * Android 15 enforces edge-to-edge for targetSdk 35. The host draws the white system-bar
+     * surface, while the WebView is physically laid out within the safe drawing bounds.
+     */
+    private fun configureSystemBars() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.decorView.setBackgroundColor(Color.WHITE)
+        window.statusBarColor = Color.WHITE
+        window.navigationBarColor = Color.WHITE
+
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = true
+            isAppearanceLightNavigationBars = true
+        }
+    }
+
+    private fun applySystemBarInsets(root: FrameLayout) {
+        ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
+            val safeInsets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.statusBars() or
+                    WindowInsetsCompat.Type.navigationBars() or
+                    WindowInsetsCompat.Type.displayCutout()
+            )
+            val layoutParams = webView.layoutParams as FrameLayout.LayoutParams
+            if (
+                layoutParams.leftMargin != safeInsets.left ||
+                layoutParams.topMargin != safeInsets.top ||
+                layoutParams.rightMargin != safeInsets.right ||
+                layoutParams.bottomMargin != safeInsets.bottom
+            ) {
+                layoutParams.setMargins(
+                    safeInsets.left,
+                    safeInsets.top,
+                    safeInsets.right,
+                    safeInsets.bottom
+                )
+                webView.layoutParams = layoutParams
+            }
+            windowInsets
+        }
+        // A post guarantees that the request is made after setContentView attaches the root.
+        root.post { ViewCompat.requestApplyInsets(root) }
+    }
+
+    /**
+     * The hosted page can be deployed independently of this client. Keep its route container
+     * content-sized so a sticky header has a real containing block instead of one viewport.
+     */
+    private fun applyHostedLayoutCorrection() {
+        if (!::webView.isInitialized) return
+
+        val script = """
+            (function () {
+              var style = document.getElementById('myjpg-hosted-layout-correction');
+              if (!style) {
+                style = document.createElement('style');
+                style.id = 'myjpg-hosted-layout-correction';
+                document.head.appendChild(style);
+              }
+
+              style.textContent = '#app-root-scroll > main > div > div {' +
+                ' min-height: 100% !important; height: auto !important; }';
+            })();
+        """.trimIndent()
+
+        webView.evaluateJavascript(script, null)
     }
 
     private fun requestLocationPermissions() {
@@ -141,22 +242,20 @@ class MainActivity : ComponentActivity() {
             Log.d(TAG, "Received JavaScript call: AndroidGoogleAuth.requestGoogleSignIn()")
             lifecycleScope.launch {
                 val result = googleAuthManager.signInWithGoogle()
-                result.onSuccess { authResult ->
-                    val user = authResult.user
-                    user?.getIdToken(false)?.addOnSuccessListener { tokenResult ->
-                        val idToken = tokenResult.token ?: ""
-                        runOnUiThread {
-                            webView.evaluateJavascript("if(window.onAndroidGoogleSignInSuccess) window.onAndroidGoogleSignInSuccess('$idToken');", null)
-                        }
-                    }?.addOnFailureListener { e ->
-                        runOnUiThread {
-                            webView.evaluateJavascript("if(window.onAndroidGoogleSignInError) window.onAndroidGoogleSignInError('${e.message}');", null)
-                        }
+                result.onSuccess { googleIdToken ->
+                    runOnUiThread {
+                        webView.evaluateJavascript(
+                            "if(window.onAndroidGoogleSignInSuccess) window.onAndroidGoogleSignInSuccess(${JSONObject.quote(googleIdToken)});",
+                            null
+                        )
                     }
                 }.onFailure { err ->
                     val errorMsg = err.message ?: "Google Sign-In failed"
                     runOnUiThread {
-                        webView.evaluateJavascript("if(window.onAndroidGoogleSignInError) window.onAndroidGoogleSignInError('$errorMsg');", null)
+                        webView.evaluateJavascript(
+                            "if(window.onAndroidGoogleSignInError) window.onAndroidGoogleSignInError(${JSONObject.quote(errorMsg)});",
+                            null
+                        )
                     }
                 }
             }
