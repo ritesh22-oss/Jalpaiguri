@@ -135,12 +135,11 @@ export const HomeView: React.FC = () => {
   ];
 
   return (
-    <div className="w-full min-h-full bg-[#FAF8F5] dark:bg-[#020617] pb-28 select-none transition-colors overflow-x-hidden">
-      {/* Top Header */}
-      <div className="relative z-20 w-full shrink-0 bg-white dark:bg-[#0B1224] border-b border-gray-100 dark:border-white/10 sticky top-0 shadow-xs transition-colors">
-        <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 pt-4 sm:pt-5 pb-4 space-y-3">
-        {/* Topmost Row: App Logo at most top left corner */}
-        <div className="flex min-h-11 items-center justify-between gap-3">
+    <div className="w-full min-h-full bg-[#FAF8F5] dark:bg-[#020617] pb-32 select-none transition-colors overflow-x-hidden">
+      {/* 1. MYJPG Top Header Bar (Compact 56px Sticky Bar) */}
+      <header className="relative z-30 w-full shrink-0 bg-white/95 dark:bg-[#0B1224]/95 backdrop-blur-md border-b border-gray-100 dark:border-white/10 sticky top-0 shadow-2xs transition-colors">
+        <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3 min-h-[56px]">
+          {/* Logo & Branding */}
           <div
             id="home-top-logo"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -150,13 +149,14 @@ export const HomeView: React.FC = () => {
             <JPGLogo size="sm" showText={true} />
           </div>
 
+          {/* Notifications & Profile Avatar */}
           <div className="flex shrink-0 items-center gap-2">
             <NotificationBell userId={user?.id} />
             {user ? (
               <button
                 id="home-profile-btn"
                 onClick={() => navigate('profile')}
-                className="w-11 h-11 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-xs cursor-pointer hover:ring-4 hover:ring-blue-300/50 hover:scale-105 active:scale-95 overflow-hidden transition-all duration-300 ease-out"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs cursor-pointer hover:ring-4 hover:ring-blue-300/50 hover:scale-105 active:scale-95 overflow-hidden transition-all duration-300 ease-out"
                 title="View Profile"
               >
                 {firebaseUser?.photoURL ? (
@@ -174,81 +174,78 @@ export const HomeView: React.FC = () => {
               <button
                 id="home-signin-btn"
                 onClick={() => navigate('auth')}
-                className="min-h-11 text-xs font-extrabold text-white bg-[#007AFF] dark:bg-blue-600 px-3.5 py-1.5 rounded-full shadow-xs hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all duration-300 ease-out cursor-pointer"
+                className="min-h-9 text-xs font-extrabold text-white bg-[#007AFF] dark:bg-blue-600 px-3.5 py-1.5 rounded-full shadow-2xs hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all duration-300 ease-out cursor-pointer"
               >
                 {isBengali ? 'সাইন ইন' : 'Sign In'}
               </button>
             )}
           </div>
         </div>
+      </header>
 
-        {/* User Greeting & Quick Actions */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div>
-              <h2 className="text-base font-extrabold text-[#0F172A] dark:text-white tracking-tight flex items-center gap-1.5">
-                <span className="truncate">{greeting}, {userName}</span>
-                <span>👋</span>
-              </h2>
-              <div className="flex items-center gap-2 mt-0.5">
-                <div
-                  id="home-locality-btn"
-                  onClick={() => setIsLocationSelectorOpen(true)}
-                  className="flex items-center gap-1 text-xs font-bold text-[#007AFF] dark:text-blue-400 cursor-pointer hover:underline hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-                >
-                  <MapPin className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate max-w-[150px]">{tLocality(location.name || `${location.locality}, ${location.city || ''}`)}</span>
-                </div>
-                <button
-                  id="home-gps-detect-btn"
-                  onClick={handleUseCurrentLocation}
-                  disabled={isDetectingLocation}
-                  className="min-h-8 flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 text-[10px] font-bold cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900 hover:scale-105 active:scale-95 transition-all duration-300 border border-blue-200/60 dark:border-blue-800/40"
-                  title="Use GPS to detect location"
-                >
-                  {isDetectingLocation ? (
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                  ) : (
-                    <Navigation className="w-3 h-3" />
-                  )}
-                  <span>{isBengali ? 'জিপিএস' : 'GPS'}</span>
-                </button>
-              </div>
-            </div>
+      {/* Main Dashboard Content Stack */}
+      <main className="relative z-0 w-full">
+        <div className="max-w-5xl mx-auto p-4 sm:p-6 space-y-4">
+          {/* 2. User Greeting Section */}
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-extrabold text-[#0F172A] dark:text-white tracking-tight flex items-center gap-1.5">
+              <span className="truncate">{greeting}, {userName}</span>
+              <span>👋</span>
+            </h2>
           </div>
-        </div>
 
-        {/* "What do you need today?" & Search Bar */}
-        <div className="space-y-1.5 pt-1">
-          <h3 className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-0.5">
-            {isBengali ? 'আজ আপনার কি প্রয়োজন?' : 'What do you need today?'}
-          </h3>
-          <div
-            onClick={() => navigate('nearby')}
-            id="home-search-bar"
-            className="w-full bg-[#F8FAFC] dark:bg-[#1A2634] border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-xs cursor-pointer hover:border-[#007AFF] dark:hover:border-blue-500 hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 ease-out"
-          >
-            <Search className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-            <span className="text-xs font-medium text-gray-600 dark:text-gray-300 flex-1">
-              {placeholders[placeholderIndex]}
-            </span>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsAssistantOpen(true);
-              }}
-              className="text-gray-400 dark:text-gray-500 hover:text-[#007AFF]"
+          {/* 3. Location & GPS Section */}
+          <div className="flex items-center gap-2">
+            <div
+              id="home-locality-btn"
+              onClick={() => setIsLocationSelectorOpen(true)}
+              className="flex items-center gap-1 text-xs font-bold text-[#007AFF] dark:text-blue-400 cursor-pointer hover:underline hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
             >
-              <Mic className="w-4 h-4" />
+              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate max-w-[180px] sm:max-w-[240px]">{tLocality(location.name || `${location.locality}, ${location.city || ''}`)}</span>
+            </div>
+            <button
+              id="home-gps-detect-btn"
+              onClick={handleUseCurrentLocation}
+              disabled={isDetectingLocation}
+              className="min-h-7 flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-[#007AFF] dark:text-blue-300 text-[10px] font-bold cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900 hover:scale-105 active:scale-95 transition-all duration-300 border border-blue-200/60 dark:border-blue-800/40"
+              title="Use GPS to detect location"
+            >
+              {isDetectingLocation ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Navigation className="w-3 h-3" />
+              )}
+              <span>{isBengali ? 'জিপিএস' : 'GPS'}</span>
             </button>
           </div>
-        </div>
-      </div>
-    </div>
 
-      <main className="relative z-0 w-full">
-      <div className="max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
+          {/* 4. Search Section */}
+          <div className="space-y-1.5 pt-0.5">
+            <h3 className="text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-0.5">
+              {isBengali ? 'আজ আপনার কি প্রয়োজন?' : 'What do you need today?'}
+            </h3>
+            <div
+              onClick={() => navigate('nearby')}
+              id="home-search-bar"
+              className="w-full bg-white dark:bg-[#1A2634] border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-2xs cursor-pointer hover:border-[#007AFF] dark:hover:border-blue-500 hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 ease-out"
+            >
+              <Search className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-300 flex-1">
+                {placeholders[placeholderIndex]}
+              </span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsAssistantOpen(true);
+                }}
+                className="text-gray-400 dark:text-gray-500 hover:text-[#007AFF]"
+              >
+                <Mic className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
         {/* JPG AI Assistant Compact Search/Chat Input Box */}
         <div
           id="home-ai-assistant-box"

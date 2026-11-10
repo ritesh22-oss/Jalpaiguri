@@ -209,6 +209,7 @@ class MainActivity : ComponentActivity() {
 
         val script = """
             (function () {
+              document.documentElement.setAttribute('data-native-app', 'true');
               var style = document.getElementById('myjpg-hosted-layout-correction');
               if (!style) {
                 style = document.createElement('style');

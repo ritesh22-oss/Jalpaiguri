@@ -39,34 +39,44 @@
 
 /* One shared safe-area policy for every route. Native Android overrides these values with
    actual WindowInsets; standalone PWAs use the browser-provided environment values. */
+:root {
+  --app-safe-top: env(safe-area-inset-top, 0px);
+  --app-safe-right: env(safe-area-inset-right, 0px);
+  --app-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --app-safe-left: env(safe-area-inset-left, 0px);
+}
+
+html[data-native-app="true"] {
+  --app-safe-top: 0px !important;
+  --app-safe-bottom: 0px !important;
+}
+
 .app-root-safe-area {
   box-sizing: border-box;
-  padding: var(--app-safe-top) var(--app-safe-right) var(--app-safe-bottom) var(--app-safe-left);
+  padding-top: var(--app-safe-top);
+  padding-right: var(--app-safe-right);
+  padding-bottom: 0px;
+  padding-left: var(--app-safe-left);
 }
 
 .app-root-safe-area .sticky.top-0 {
-  top: var(--app-safe-top);
+  top: 0px;
 }
 
 .app-root-safe-area .fixed.bottom-0 {
-  bottom: var(--app-safe-bottom);
+  bottom: 0px;
 }
 
 .app-root-safe-area .fixed.inset-0 {
-  padding: var(--app-safe-top) var(--app-safe-right) var(--app-safe-bottom) var(--app-safe-left);
+  padding-top: var(--app-safe-top);
+  padding-right: var(--app-safe-right);
+  padding-bottom: var(--app-safe-bottom);
+  padding-left: var(--app-safe-left);
 }
 
-/* A route root must grow with its content. Keeping it at h-full makes a sticky header's
-   containing block only one viewport tall, so the following content can collide with it. */
-#app-root-scroll > main > div > div {
-  min-height: 100%;
-  height: auto;
-}
-
-/* Native Android applies physical system insets to its WebView exactly once. This rule
-   covers standalone browser/PWA installs, where CSS exposes the safe-area value instead. */
+/* Native Android applies physical system insets to its WebView layout. */
 .app-bottom-nav {
-  padding-bottom: max(0.25rem, var(--app-safe-bottom));
+  padding-bottom: max(0.35rem, var(--app-safe-bottom));
 }
 
 /* Custom scrollbar */
