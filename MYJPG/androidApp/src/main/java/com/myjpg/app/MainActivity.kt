@@ -95,6 +95,7 @@ class MainActivity : ComponentActivity() {
                 builtInZoomControls = false
                 mediaPlaybackRequiresUserGesture = false
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                cacheMode = WebSettings.LOAD_NO_CACHE
                 userAgentString = "${settings.userAgentString} MYJPGNativeApp/1.0.3"
             }
 

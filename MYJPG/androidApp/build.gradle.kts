@@ -12,8 +12,8 @@ android {
         applicationId = "com.myjpg.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 102
-        versionName = "1.0.2"
+        versionCode = 103
+        versionName = "1.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -42,6 +42,18 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+// Gradle task to ensure the latest compiled web app assets are always bundled into the Android APK
+tasks.register<Copy>("syncWebAssets") {
+    from(file("../../dist"))
+    into(file("src/main/assets/www"))
+}
+
+tasks.whenTaskAdded {
+    if (name.startsWith("generate") && name.endsWith("Assets")) {
+        dependsOn("syncWebAssets")
     }
 }
 
