@@ -38,7 +38,7 @@ export const BottomNav: React.FC = () => {
     currentView === 'saved';
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#0F172A]/95 backdrop-blur-md border-t border-gray-100 dark:border-white/10 px-2 py-1 shadow-[0_-4px_25px_rgba(0,0,0,0.06)] transition-colors w-full app-bottom-nav">
+    <nav className="relative z-40 shrink-0 bg-[#FAF8F5] dark:bg-[#0F172A] border-t border-[#E8E4DA] dark:border-white/10 px-2 py-1 transition-colors w-full app-bottom-nav">
       <div className="w-full max-w-2xl lg:max-w-3xl mx-auto flex items-center justify-around">
         {/* 1. Home */}
         <button

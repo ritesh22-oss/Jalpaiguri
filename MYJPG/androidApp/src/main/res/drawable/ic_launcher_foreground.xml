@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:antialias="true"
-    android:gravity="fill"
-    android:src="@drawable/myjpg_launcher_mark" />
+<!-- Android adaptive icons expose only a central safe zone. The official MYJPG mark is kept
+     centered inside it rather than being scaled edge-to-edge and cropped by launcher masks. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="32dp"
+    android:insetTop="32dp"
+    android:insetRight="32dp"
+    android:insetBottom="32dp">
+    <bitmap
+        android:antialias="true"
+        android:gravity="center"
+        android:src="@drawable/myjpg_launcher_mark" />
+</inset>

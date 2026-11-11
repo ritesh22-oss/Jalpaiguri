@@ -135,6 +135,23 @@ const AppContent: React.FC = () => {
   const { isBengali } = useLanguage();
   const { isOnline } = useOnlineStatus();
   const [showWelcomePopup, setShowWelcomePopup] = React.useState(false);
+  const contentScrollRef = React.useRef<HTMLElement>(null);
+
+  // The application has one scroll owner. Reset it when changing routes so content from a
+  // previously scrolled route can never appear behind the next route's sticky header.
+  React.useLayoutEffect(() => {
+    const scrollContainer = contentScrollRef.current;
+    if (scrollContainer) {
+      scrollContainer.scrollTop = 0;
+      scrollContainer.scrollLeft = 0;
+    }
+  }, [currentView]);
+
+  React.useEffect(() => {
+    if (user?.role === 'admin' && currentView === 'admin-dashboard') {
+      sessionStorage.setItem('jpg_splash_shown', 'true');
+    }
+  }, [currentView, user?.role]);
 
   React.useEffect(() => {
     const isTourDone = user?.tourCompleted || localStorage.getItem('jpg_has_seen_tour') === 'true';
@@ -156,26 +173,9 @@ const AppContent: React.FC = () => {
     // 1. Wait for Firebase Auth & Profile restore to finish
     if (isLoading) return;
 
-    // A. Handle Splash Screen transition when initial auth restoration completes
-    if (currentView === 'splash') {
-      let targetView = 'home';
-      if (!isAuthenticated) {
-        targetView = 'onboarding';
-      } else if (!isProfileComplete) {
-        targetView = 'profile-setup';
-      } else if (serviceAreaStatus === 'outside') {
-        targetView = 'outside-area';
-      } else {
-        const isAdminLogin = localStorage.getItem('jpg_admin_login_detected') === 'true';
-        if (isAdminLogin && user?.role === 'admin') {
-          localStorage.removeItem('jpg_admin_login_detected');
-          targetView = 'admin-dashboard';
-        }
-      }
-      console.log(`[AUTH] routing decision: splash -> ${targetView}`);
-      replaceView(targetView as any);
-      return;
-    }
+    // SplashScreen owns its timed transition so its branded three-dot animation is always
+    // visible. Do not replace it immediately when Firebase restores its initial state.
+    if (currentView === 'splash') return;
 
     const publicAuthViews = ['onboarding', 'auth', 'phone-auth', 'otp'];
     const isPublicAuthView = publicAuthViews.includes(currentView);
@@ -263,17 +263,6 @@ const AppContent: React.FC = () => {
 
   // 3. CONDITIONAL EARLY RETURNS (Must be AFTER all hooks)
   
-  // Admin bypass
-  if (user?.role === 'admin' && currentView === 'admin-dashboard') {
-    sessionStorage.setItem('jpg_splash_shown', 'true');
-    return (
-      <div className="min-h-screen bg-[#FAF8F5]">
-        <AdminDashboardView />
-        <Toast />
-      </div>
-    );
-  }
-
   // Location bypass
   if (serviceAreaStatus === 'outside' && !isExemptView) {
     return (
@@ -466,13 +455,14 @@ const AppContent: React.FC = () => {
   const isPostLogin = !['splash', 'onboarding', 'auth', 'phone-auth', 'otp', 'profile-setup', 'profile-onboarding'].includes(currentView);
 
   return (
-    <div id="app-root-scroll" className="app-root-safe-area w-full h-screen h-[100dvh] bg-[#FAF8F5] dark:bg-[#020617] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col relative transition-colors overflow-x-hidden overflow-y-auto">
+    <div id="app-root-scroll" className="app-root-safe-area w-full h-screen h-[100dvh] bg-[#FAF8F5] dark:bg-[#020617] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col relative transition-colors overflow-hidden">
       <AnimatePresence>
         {!isOnline && <OfflineView />}
       </AnimatePresence>
 
       <main
-        className={`flex-1 w-full ${isBengali ? 'font-bengali' : ''} ${!isOnline ? 'hidden' : ''}`}
+        ref={contentScrollRef}
+        className={`app-content-scroll flex-1 min-h-0 w-full overflow-x-hidden overflow-y-auto ${isBengali ? 'font-bengali' : ''} ${!isOnline ? 'hidden' : ''}`}
         data-lang={isBengali ? 'bn' : 'en'}
       >
         <AnimatePresence mode="wait">
@@ -482,7 +472,7 @@ const AppContent: React.FC = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -12, scale: 0.99 }}
             transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="w-full h-full flex flex-col"
+            className="app-route w-full h-full min-h-0 flex flex-col"
           >
             {renderView()}
           </motion.div>

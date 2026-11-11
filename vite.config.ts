@@ -5,6 +5,9 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    // The Android app serves this bundle from file:///android_asset/www/. A relative base keeps
+    // generated JS/CSS URLs inside that directory instead of resolving /assets at file:///.
+    base: './',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

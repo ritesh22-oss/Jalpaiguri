@@ -78,6 +78,25 @@ interface LocationContextType {
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
 
+// The application renders map, directory, profile, and assistant surfaces before the asynchronous
+// Android GPS callback completes. Keep one valid, in-area coordinate from the first render so no
+// route can ever dereference `location.lat`/`location.lng` while GPS is still pending.
+const DEFAULT_JALPAIGURI_LOCATION: ExtendedUserLocation = {
+  name: 'Jalpaiguri Sadar',
+  locality: 'Kadamtala',
+  city: 'Jalpaiguri',
+  district: 'Jalpaiguri',
+  state: 'West Bengal',
+  country: 'India',
+  pincode: '735101',
+  lat: 26.5265,
+  lng: 88.7230,
+  isApproximate: true,
+  locationSource: 'manual',
+  serviceAreaStatus: 'inside',
+  updatedAt: new Date(0).toISOString()
+};
+
 // Real reverse geocoding via dedicated server-side proxy
 async function reverseGeocodeCoordinates(lat: number, lng: number): Promise<ReverseGeocodeResult> {
   try {
@@ -173,7 +192,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     } catch (e) {
       console.warn('Error reading saved location:', e);
     }
-    return null;
+    return DEFAULT_JALPAIGURI_LOCATION;
   });
 
   // Track the ground-truth verified GPS reading (distinct from any manual info view)
@@ -308,21 +327,8 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         (error) => {
           console.warn(`[LOCATION ERROR] message: ${error.message}`);
           // Graceful fallback to Jalpaiguri default center for Vercel / remote deployment
-          const defaultLat = 26.5265;
-          const defaultLng = 88.7230;
           const defaultLoc: ExtendedUserLocation = {
-            name: 'Jalpaiguri Sadar',
-            locality: 'Kadamtala',
-            city: 'Jalpaiguri',
-            district: 'Jalpaiguri',
-            state: 'West Bengal',
-            country: 'India',
-            pincode: '735101',
-            lat: defaultLat,
-            lng: defaultLng,
-            isApproximate: true,
-            locationSource: 'manual',
-            serviceAreaStatus: 'inside',
+            ...DEFAULT_JALPAIGURI_LOCATION,
             updatedAt: new Date().toISOString()
           };
 

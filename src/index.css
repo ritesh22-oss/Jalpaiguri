@@ -4,6 +4,9 @@
 
 @layer base {
   :root {
+    --app-surface: #FAF8F5;
+    --app-header-surface: #FAF8F5;
+    --app-card-surface: #FFFFFF;
     --app-safe-top: env(safe-area-inset-top, 0px);
     --app-safe-right: env(safe-area-inset-right, 0px);
     --app-safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -59,12 +62,25 @@ html[data-native-app="true"] {
   padding-left: var(--app-safe-left);
 }
 
-.app-root-safe-area .sticky.top-0 {
-  top: 0px;
+/* The root has exactly one scroll container: the route header sticks inside it and the
+   bottom navigation occupies normal layout space below it. This prevents competing page,
+   viewport, and fixed-element coordinate systems on Android WebView. */
+.app-content-scroll {
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
 }
 
-.app-root-safe-area .fixed.bottom-0 {
-  bottom: 0px;
+.app-route > * {
+  min-height: 100%;
+}
+
+html:not(.dark) .app-route :is(header.sticky, .sticky.top-0) {
+  background-color: var(--app-header-surface) !important;
+  border-color: #E8E4DA !important;
+}
+
+.app-root-safe-area .sticky.top-0 {
+  top: 0px;
 }
 
 .app-root-safe-area .fixed.inset-0 {
@@ -74,9 +90,10 @@ html[data-native-app="true"] {
   padding-left: var(--app-safe-left);
 }
 
-/* Native Android applies physical system insets to its WebView layout. */
+/* Native Android applies physical system insets to its WebView layout. The bottom navigation
+   is in normal flex flow, while fixed elements here are limited to route-local action bars. */
 .app-bottom-nav {
-  padding-bottom: max(0.35rem, var(--app-safe-bottom));
+  padding-bottom: 0.35rem;
 }
 
 /* Custom scrollbar */

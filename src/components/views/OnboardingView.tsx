@@ -20,10 +20,10 @@ export const OnboardingView: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-[#EFF6FF] via-[#F8FAFC] to-[#F1F5F9] dark:from-[#030712] dark:via-[#0B1329] dark:to-[#020617] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col justify-between p-6 select-none transition-colors">
-      <div className="w-full max-w-lg mx-auto flex-1 flex flex-col justify-between">
+    <div className="w-full min-h-[100dvh] bg-gradient-to-b from-[#EFF6FF] via-[#F8FAFC] to-[#F1F5F9] dark:from-[#030712] dark:via-[#0B1329] dark:to-[#020617] text-[#0F172A] dark:text-[#F8FAFC] px-5 py-5 sm:px-6 sm:py-7 select-none transition-colors overflow-y-auto">
+      <div className="w-full max-w-lg mx-auto min-h-[calc(100dvh-2.5rem)] sm:min-h-[calc(100dvh-3.5rem)] grid grid-rows-[auto_minmax(0,1fr)_auto] gap-y-5 sm:gap-y-7">
       {/* Top bar with Language Switcher */}
-      <div className="w-full pt-1 flex items-center justify-between">
+      <div className="w-full flex items-center justify-between">
         <JPGLogo size="sm" showText={true} />
         <button
           onClick={toggleLanguage}
@@ -35,12 +35,12 @@ export const OnboardingView: React.FC = () => {
       </div>
 
       {/* Center Community Illustration & Information */}
-      <div className="flex-1 flex flex-col items-center justify-center text-center px-2 my-auto pt-2">
+      <div className="min-h-0 flex flex-col items-center justify-center text-center px-2 py-2 sm:py-4">
         {/* Community Illustration Clipped Inside the Letters 'MY JPG' */}
-        <MyJpgLetterMaskHero className="w-full mb-6" />
+        <MyJpgLetterMaskHero className="w-full max-w-[430px] mb-5 sm:mb-7" />
 
         {/* Title */}
-        <h1 className="text-[26px] sm:text-[28px] font-extrabold text-[#002D62] dark:text-blue-300 tracking-tight mb-3 font-sans leading-tight">
+        <h1 className="text-[26px] sm:text-[29px] font-extrabold text-[#002D62] dark:text-blue-300 tracking-tight mb-3 font-sans leading-tight">
           {isBengali ? (
             <>
               আপনার নিজের শহরের<br />সাথে যুক্ত থাকুন
@@ -53,7 +53,7 @@ export const OnboardingView: React.FC = () => {
         </h1>
 
         {/* Description */}
-        <p className="text-xs sm:text-[13px] text-gray-600 dark:text-gray-300 leading-relaxed max-w-[320px] mx-auto font-normal">
+        <p className="text-[13px] sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed max-w-[340px] mx-auto font-normal">
           {isBengali
             ? 'স্থানীয় সেবা, জরুরি রক্তদাতা, চিকিৎসকের তালিকা ও পৌর সমস্যা জানান—সবকিছু এক ঠিকানায়।'
             : 'Discover local services, find blood donors, access medical directories, and report civic issues—all in one place.'}
@@ -61,7 +61,7 @@ export const OnboardingView: React.FC = () => {
       </div>
 
       {/* Bottom Action Button & Login Link */}
-      <div className="space-y-3 pt-2 pb-1">
+      <div className="space-y-3 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
         <button
           id="get-started-btn"
           onClick={handleGetStarted}

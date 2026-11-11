@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <script>
       (function() {
+        function reportNativeStartupError(message) {
+          try {
+            if (window.AndroidGoogleAuth && window.AndroidGoogleAuth.reportWebAppError) {
+              window.AndroidGoogleAuth.reportWebAppError(String(message || 'Unknown startup error'));
+            }
+          } catch (_) {}
+        }
+
+        window.addEventListener('error', function(event) {
+          reportNativeStartupError(event.message || 'JavaScript startup error');
+        });
+        window.addEventListener('unhandledrejection', function(event) {
+          reportNativeStartupError(event.reason && event.reason.message ? event.reason.message : event.reason);
+        });
+
         function makeFetchWritable(obj) {
           if (!obj) return;
           try {

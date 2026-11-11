@@ -137,7 +137,7 @@ export const HomeView: React.FC = () => {
   return (
     <div className="w-full min-h-full bg-[#FAF8F5] dark:bg-[#020617] pb-32 select-none transition-colors overflow-x-hidden">
       {/* 1. MYJPG Top Header Bar (Compact 56px Sticky Bar) */}
-      <header className="relative z-30 w-full shrink-0 bg-white/95 dark:bg-[#0B1224]/95 backdrop-blur-md border-b border-gray-100 dark:border-white/10 sticky top-0 shadow-2xs transition-colors">
+      <header className="relative z-30 w-full shrink-0 bg-[#FAF8F5] dark:bg-[#0B1224] border-b border-[#E8E4DA] dark:border-white/10 sticky top-0 transition-colors">
         <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3 min-h-[56px]">
           {/* Logo & Branding */}
           <div

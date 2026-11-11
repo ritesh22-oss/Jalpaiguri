@@ -1,5 +1,5 @@
 <resources>
-    <color name="myjpg_splash_background">#FFFFFF</color>
+    <color name="myjpg_splash_background">#FAF8F5</color>
     <color name="myjpg_launcher_background">#FFFFFF</color>
-    <color name="myjpg_window_background">#FFFFFF</color>
+    <color name="myjpg_window_background">#FAF8F5</color>
 </resources>

@@ -8,15 +8,33 @@ export const SplashScreen: React.FC = () => {
   const { replaceView } = useNav();
   const { isAuthenticated, isProfileComplete } = useAuth();
   const { serviceAreaStatus } = useLocation();
-  const isNativeAndroid = typeof window !== 'undefined' && 'AndroidGoogleAuth' in window;
-
   useEffect(() => {
     sessionStorage.setItem('jpg_splash_shown', 'true');
-  }, []);
 
-  // Android keeps its native branded splash up until this document is ready. Rendering a
-  // second web splash here would make launch feel slower without adding useful feedback.
-  if (isNativeAndroid) return null;
+    // Restore the original brief MYJPG splash. The native Android 12 splash covers process
+    // startup; this web splash bridges it to the application after React is ready.
+    const timer = window.setTimeout(() => {
+      if (isAuthenticated) {
+        if (!isProfileComplete) {
+          replaceView('profile-setup');
+        } else if (serviceAreaStatus === 'outside') {
+          replaceView('outside-area');
+        } else {
+          const isAdminLogin = localStorage.getItem('jpg_admin_login_detected') === 'true';
+          if (isAdminLogin) {
+            localStorage.removeItem('jpg_admin_login_detected');
+            replaceView('admin-dashboard');
+          } else {
+            replaceView('home');
+          }
+        }
+      } else {
+        replaceView('onboarding');
+      }
+    }, 1600);
+
+    return () => window.clearTimeout(timer);
+  }, [isAuthenticated, isProfileComplete, serviceAreaStatus, replaceView]);
 
   return (
     <div
@@ -26,11 +44,11 @@ export const SplashScreen: React.FC = () => {
         initial={{ opacity: 0, scale: 1.15 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        src="/screen.png"
+        src="./screen.png"
         alt="Splash Screen"
         className="w-full h-full object-cover"
         onError={(e) => {
-          (e.target as HTMLImageElement).src = '/logo.png';
+          (e.target as HTMLImageElement).src = './logo.png';
           (e.target as HTMLImageElement).className = 'w-32 h-32 object-contain m-auto';
         }}
       />

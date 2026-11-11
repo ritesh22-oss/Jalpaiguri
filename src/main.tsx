@@ -40,10 +40,18 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 );
 
+// The Android launch screen is released only after React has painted. This prevents the
+// WebView's white document frame from ever being shown as the application startup screen.
+requestAnimationFrame(() => {
+  (window as any).AndroidGoogleAuth?.reportWebAppReady?.();
+});
+
 // Register service worker for Progressive Web App (PWA) support
-if ('serviceWorker' in navigator) {
+// APK assets are already offline-capable. Do not install a PWA service worker in WebView: it
+// can retain a stale app shell across APK upgrades and mask the newly bundled UI.
+if ('serviceWorker' in navigator && !(window as any).AndroidGoogleAuth) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
+    navigator.serviceWorker.register('./service-worker.js')
       .then((reg) => {
         console.log('[Service Worker] Registered successfully with scope:', reg.scope);
       })

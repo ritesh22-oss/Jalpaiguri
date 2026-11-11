@@ -18,11 +18,72 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct MYJPGApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject private var authViewModel = AuthViewModel()
+    @State private var isShowingLaunchSplash = true
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(authViewModel)
+            ZStack {
+                ContentView()
+                    .environmentObject(authViewModel)
+
+                if isShowingLaunchSplash {
+                    NativeSplashView()
+                        .transition(.opacity)
+                        .zIndex(1)
+                }
+            }
+            .task {
+                // The native launch screen covers process startup. This short branded bridge
+                // restores the MYJPG three-dot animation while auth state is restored.
+                try? await Task.sleep(nanoseconds: 1_400_000_000)
+                withAnimation(.easeOut(duration: 0.25)) {
+                    isShowingLaunchSplash = false
+                }
+            }
+        }
+    }
+}
+
+private struct NativeSplashView: View {
+    @State private var activeDot = 0
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [Color(red: 0.90, green: 0.96, blue: 1.0), .white],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+
+            VStack(spacing: 18) {
+                Image(systemName: "mappin.and.ellipse")
+                    .font(.system(size: 56, weight: .bold))
+                    .foregroundStyle(Color(red: 0.0, green: 0.48, blue: 1.0))
+                Text("MYJPG")
+                    .font(.system(size: 34, weight: .black, design: .rounded))
+                    .foregroundStyle(Color(red: 0.0, green: 0.18, blue: 0.38))
+                Text("JALPAIGURI CONNECTED")
+                    .font(.caption.weight(.bold))
+                    .tracking(2)
+                    .foregroundStyle(Color(red: 0.0, green: 0.38, blue: 0.78))
+
+                HStack(spacing: 9) {
+                    ForEach(0..<3, id: \.self) { index in
+                        Circle()
+                            .fill(index == activeDot ? Color(red: 0.0, green: 0.48, blue: 1.0) : Color(red: 0.38, green: 0.69, blue: 0.95))
+                            .frame(width: 9, height: 9)
+                            .scaleEffect(index == activeDot ? 1.15 : 0.8)
+                    }
+                }
+                .padding(.top, 4)
+            }
+        }
+        .task {
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 280_000_000)
+                activeDot = (activeDot + 1) % 3
+            }
         }
     }
 }
