@@ -6,6 +6,7 @@ import {
   Mic,
   ArrowRight,
   Maximize2,
+  RotateCcw,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
@@ -28,6 +29,8 @@ interface AssistantMsg {
   action?: { label: string; view: any; params?: any };
   groundingPlaces?: GroundingPlace[];
   modelUsed?: string;
+  isError?: boolean;
+  failedQuery?: string;
 }
 
 const CONTEXT_SUGGESTIONS = {
@@ -65,6 +68,7 @@ export const JPGAssistantModal: React.FC = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const isSubmittingRef = useRef(false);
 
   const stopRecording = () => {
     if (recognitionRef.current) {
@@ -186,21 +190,45 @@ export const JPGAssistantModal: React.FC = () => {
     return suggestions.general;
   };
 
-  const handleSend = async (textToSend?: string) => {
+  const handleSend = async (textToSend?: string, isRetry = false) => {
+    if (isSubmittingRef.current) return;
     const query = (textToSend || prompt).trim();
-    if (!query || loading) return;
+    if (!query) return;
 
-    const userMsg: AssistantMsg = { role: 'user', text: query };
-    const updatedHistory = [...chatHistory, userMsg];
-    setChatHistory(updatedHistory);
-    setPrompt('');
+    isSubmittingRef.current = true;
     setLoading(true);
 
+    let updatedHistory: AssistantMsg[];
+    if (isRetry) {
+      // Remove any trailing error message so we don't duplicate query or accumulate error boxes
+      const cleanHistory = chatHistory.filter((m) => !m.isError);
+      const lastMsg = cleanHistory[cleanHistory.length - 1];
+      if (lastMsg && lastMsg.role === 'user' && lastMsg.text === query) {
+        updatedHistory = cleanHistory;
+      } else {
+        updatedHistory = [...cleanHistory, { role: 'user', text: query }];
+      }
+    } else {
+      const lastMsg = chatHistory[chatHistory.length - 1];
+      if (lastMsg && lastMsg.role === 'user' && lastMsg.text === query && loading) {
+        // Prevent accidental double submit
+        isSubmittingRef.current = false;
+        return;
+      }
+      updatedHistory = [...chatHistory, { role: 'user', text: query }];
+    }
+
+    setChatHistory(updatedHistory);
+    setPrompt('');
+
     try {
-      const historyPayload = updatedHistory.slice(-8).map((m) => ({
-        role: m.role,
-        text: m.text
-      }));
+      const historyPayload = updatedHistory
+        .filter((m) => !m.isError)
+        .slice(-8)
+        .map((m) => ({
+          role: m.role,
+          text: m.text
+        }));
 
       const res = await apiClient.geminiChat({
         message: query,
@@ -216,7 +244,7 @@ export const JPGAssistantModal: React.FC = () => {
       });
 
       setChatHistory((prev) => [
-        ...prev,
+        ...prev.filter((m) => !m.isError),
         {
           role: 'model',
           text: res?.reply || (lang === 'bn' ? 'নমস্কার! আমি আপনাকে কীভাবে সাহায্য করতে পারি?' : 'Nomoshkar! How can I help you?'),
@@ -225,24 +253,47 @@ export const JPGAssistantModal: React.FC = () => {
         }
       ]);
     } catch (e: any) {
+      const statusCode = e?.status ?? 0;
       const rawMsg = e?.message || e?.error || '';
       const serverErr = typeof rawMsg === 'string' 
         ? rawMsg 
         : (typeof rawMsg === 'object' ? JSON.stringify(rawMsg) : String(rawMsg));
 
-      const displayMsg = serverErr && serverErr !== '[object Object]'
-        ? `⚠️ Error: ${serverErr}`
-        : (lang === 'bn' ? 'দুঃখিত, সংযোগে সমস্যা হচ্ছে। পরে আবার চেষ্টা করুন।' : 'Sorry, I am having trouble connecting. Please try again later.');
+      let displayMsg = '';
+      if (statusCode === 0 || serverErr.toLowerCase().includes('failed to fetch') || serverErr.toLowerCase().includes('network')) {
+        displayMsg = lang === 'bn'
+          ? '⚠️ ব্যাকএন্ড সংযোগ ব্যর্থ: সার্ভারে পৌঁছানো যাচ্ছে না। আপনার ইন্টারনেট ও মোবাইল ডেটা যাচাই করে নিচে পুনরায় চেষ্টা বোতামে চাপ দিন।'
+          : '⚠️ Backend Connection Error: Could not reach the MYJPG AI server (https://jalpaiguri-zxml.vercel.app). Please check your internet connectivity and tap Retry below.';
+      } else if (statusCode === 429 || serverErr.includes('429') || serverErr.toLowerCase().includes('quota')) {
+        displayMsg = lang === 'bn'
+          ? '⚠️ এআই কোটা সাময়িকভাবে শেষ হয়েছে (429)। অনুগ্রহ করে এক মিনিট অপেক্ষা করে পুনরায় চেষ্টা করুন।'
+          : '⚠️ AI Rate Limit / Quota Exceeded (429): Google AI Studio quota temporarily reached. Please wait a moment and tap Retry.';
+      } else if (statusCode === 503 || serverErr.includes('503') || serverErr.toLowerCase().includes('high demand') || serverErr.toLowerCase().includes('unavailable')) {
+        displayMsg = lang === 'bn'
+          ? '⚠️ এআই মডেলটিতে অতিরিক্ত চাপের কারণে সাময়িক বিলম্ব হচ্ছে (503)। অনুগ্রহ করে কয়েক সেকেন্ড পর আবার চেষ্টা করুন।'
+          : '⚠️ AI Service Busy (503): High demand spike on the AI model. Please tap Retry.';
+      } else if (statusCode === 408 || serverErr.toLowerCase().includes('timed out')) {
+        displayMsg = lang === 'bn'
+          ? '⚠️ অনুরোধটির সময়সীমা শেষ হয়েছে (408)। পুনরায় চেষ্টা বোতামে চাপ দিন।'
+          : '⚠️ Request Timed Out (408): The AI response took too long. Please tap Retry.';
+      } else {
+        displayMsg = lang === 'bn'
+          ? `⚠️ এআই পরিষেবা ত্রুটি (${statusCode || 'Server'}): ${serverErr.slice(0, 150)}`
+          : `⚠️ AI Service Error (${statusCode || 'Server'}): ${serverErr.slice(0, 150)}`;
+      }
 
       setChatHistory((prev) => [
         ...prev,
         {
           role: 'model',
-          text: displayMsg
+          text: displayMsg,
+          isError: true,
+          failedQuery: query
         }
       ]);
     } finally {
       setLoading(false);
+      isSubmittingRef.current = false;
     }
   };
 
@@ -314,12 +365,23 @@ export const JPGAssistantModal: React.FC = () => {
                   className={`max-w-[85%] rounded-2xl p-4 text-sm leading-relaxed shadow-sm ${
                     msg.role === 'user'
                       ? 'bg-[#007AFF] text-white rounded-br-none'
+                      : msg.isError
+                      ? 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 rounded-bl-none border border-red-200 dark:border-red-900/40'
                       : 'bg-gray-100 dark:bg-blue-900/20 text-[#11241C] dark:text-white rounded-bl-none border border-gray-200 dark:border-white/5'
                   }`}
                 >
                   <ReactMarkdown>{msg.text}</ReactMarkdown>
+                  {msg.isError && msg.failedQuery && (
+                    <button
+                      onClick={() => handleSend(msg.failedQuery, true)}
+                      className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-all"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      {lang === 'bn' ? 'পুনরায় চেষ্টা করুন' : 'Retry'}
+                    </button>
+                  )}
                 </div>
-                {msg.role === 'model' && (
+                {msg.role === 'model' && !msg.isError && (
                   <motion.div 
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -339,11 +401,16 @@ export const JPGAssistantModal: React.FC = () => {
           )}
           {loading && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3 justify-start items-center">
-               <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-blue-900/20 flex items-center justify-center border border-gray-200 dark:border-white/5">
-                  <Sparkles className="w-4 h-4 text-[#007AFF]" />
+               <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center border border-blue-200 dark:border-blue-800">
+                  <Sparkles className="w-4 h-4 text-[#007AFF] animate-pulse" />
                </div>
-               <div className="bg-gray-100 dark:bg-blue-900/20 rounded-2xl px-4 py-2 flex items-center shadow-sm border border-gray-200 dark:border-white/5 text-xs text-gray-500">
-                 Fetching results...
+               <div className="bg-gray-100 dark:bg-blue-900/20 rounded-2xl px-4 py-3 flex items-center gap-1.5 shadow-sm border border-gray-200 dark:border-white/5">
+                 <span className="w-2 h-2 rounded-full bg-[#007AFF] animate-bounce [animation-delay:-0.3s]" />
+                 <span className="w-2 h-2 rounded-full bg-[#007AFF] animate-bounce [animation-delay:-0.15s]" />
+                 <span className="w-2 h-2 rounded-full bg-[#007AFF] animate-bounce" />
+                 <span className="ml-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+                   {lang === 'bn' ? 'উত্তর তৈরি হচ্ছে...' : 'Generating response...'}
+                 </span>
                </div>
             </motion.div>
           )}
@@ -368,7 +435,7 @@ export const JPGAssistantModal: React.FC = () => {
               )}
             </button>
             <textarea
-              placeholder={lang === 'bn' ? 'জলপাইগুড়ি সম্পর্কে যেকোনো কিছু জিজ্ঞাসা করুন...' : 'Ask anything about Jalpaiguri...'}
+              placeholder={lang === 'bn' ? 'যেকোনো প্রশ্ন বা জলপাইগুড়ি সম্পর্কে জিজ্ঞাসা করুন...' : 'Ask any question or about Jalpaiguri...'}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => {

@@ -125,6 +125,7 @@ import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { OfflineView } from './components/common/OfflineView';
 import { BeautifulLoader } from './components/common/BeautifulLoader';
 import { AppTour } from './components/common/AppTour';
+import { isAuthorizedAdminEmail } from './types';
 
 const AppContent: React.FC = () => {
   // 1. ALL HOOKS MUST BE AT THE VERY TOP, UNCONDITIONAL
@@ -189,7 +190,20 @@ const AppContent: React.FC = () => {
       return;
     }
 
-    // C. Authenticated Users with Incomplete Profile
+    // Check if authenticated user is the designated municipal administrator
+    const isOfficialAdmin = user?.role === 'admin' || isAuthorizedAdminEmail(user?.email || firebaseUser?.email);
+
+    // D. Designated Municipal Administrator: Always route directly to Admin Dashboard from auth screens,
+    // and exempt from citizen profile setup & service area geofence.
+    if (isOfficialAdmin) {
+      if (isPublicAuthView) {
+        console.log(`[AUTH] routing decision: ${currentView} (municipal admin) -> admin-dashboard`);
+        replaceView('admin-dashboard');
+      }
+      return;
+    }
+
+    // C. Authenticated Citizens with Incomplete Profile
     if (!isProfileComplete) {
       if (currentView !== 'profile-setup' && currentView !== 'profile-onboarding') {
         console.log(`[AUTH] routing decision: ${currentView} (profile incomplete) -> profile-setup`);
@@ -198,17 +212,14 @@ const AppContent: React.FC = () => {
       return;
     }
 
-    // D. Authenticated Users with Complete Profile on Auth/Onboarding Screens
+    // D. Authenticated Citizens with Complete Profile on Auth/Onboarding Screens
     if (isPublicAuthView) {
       if (serviceAreaStatus === 'outside') {
         console.log(`[AUTH] routing decision: ${currentView} (authenticated outside) -> outside-area`);
         replaceView('outside-area');
       } else {
-        const isAdminLogin = localStorage.getItem('jpg_admin_login_detected') === 'true';
-        const target = (isAdminLogin && user?.role === 'admin') ? 'admin-dashboard' : 'home';
-        if (isAdminLogin) localStorage.removeItem('jpg_admin_login_detected');
-        console.log(`[AUTH] routing decision: ${currentView} (authenticated inside) -> ${target}`);
-        replaceView(target as any);
+        console.log(`[AUTH] routing decision: ${currentView} (authenticated inside) -> home`);
+        replaceView('home');
       }
       return;
     }
@@ -220,7 +231,9 @@ const AppContent: React.FC = () => {
       'profile-onboarding',
       'safety-sos',
       'sexual-violence-support',
-      'profile'
+      'profile',
+      'admin-dashboard',
+      'admin-notifications'
     ];
     if (serviceAreaStatus === 'outside' && !exemptFromOutsideView.includes(currentView)) {
       console.log(`[AUTH] routing decision: ${currentView} (outside service area) -> outside-area`);

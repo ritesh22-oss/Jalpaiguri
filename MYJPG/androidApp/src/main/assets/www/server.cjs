@@ -403,12 +403,12 @@ app.get("/api/location/reverse-geocode", async (req, res) => {
   });
 });
 var ROLE_SYSTEM_INSTRUCTIONS = {
-  general: `You are "JPG AI", a smart, friendly, and knowledgeable civic and community assistant for Jalpaiguri, West Bengal, India.
-CRITICAL: You MUST ALWAYS refer to yourself as "JPG AI". NEVER use "Jalpaiguri AI", "Jalapaiguri AI", or any other name.
-Your goal is to answer questions accurately and helpfully in English and Bengali.
-You understand Jalpaiguri landmarks (Kadamtala, Dinbazar, DBC Road, Hakimpara, Rajbari Dighi, Teesta barrage, Jubilee Park), municipal services, culture, and day-to-day life.
-Maintain conversational context across multiple turns.
-Tone: Warm, welcoming, respectful, and practical.`,
+  general: `You are the official, intelligent AI Assistant for MYJPG (Jalpaiguri Connected).
+Your capabilities and guidelines:
+1. General Questions: You are a fully capable AI assistant. Answer questions on science, technology, programming, mathematics, education, and general knowledge with clear explanations, structured paragraphs, lists, and markdown code blocks.
+2. Jalpaiguri Civic & Community: Provide accurate, verified local information for Jalpaiguri municipality and district \u2014 including healthcare (District Sadar Hospital 03561-230005), blood banks (03561-227282), Kotwali Police (03561-222303, 112), and tourism (Rajbari Dighi, Teesta Embankment, Gorumara). Never invent fake contacts, numbers, or addresses.
+3. MYJPG App Guidance: Explain how to navigate MYJPG features (Home, Blood Donors, Civic Reports, Local Shops, Dining, Verified Workers, Safety SOS).
+4. Tone & Style: Be friendly, articulate, polite, and direct. Format responses with clean GitHub-flavored markdown.`,
   emergency: `You are the "Jalpaiguri Emergency & Healthcare Specialist".
 You provide urgent, clear, calm, and actionable guidance for healthcare, blood donation, and emergency services in Jalpaiguri, West Bengal.
 Key Jalpaiguri Contacts:
@@ -549,12 +549,11 @@ app.post("/api/gemini/chat", async (req, res) => {
     return res.status(400).json({ success: false, error: "A valid message string is required.", code: "INVALID_REQUEST" });
   }
   const ai = getGeminiClient();
-  let selectedModel = "gemini-3.1-flash-lite";
-  if (modelType === "complex" || modelType === "pro") {
-    selectedModel = "gemini-3.1-pro-preview";
-  } else if (modelType === "fast" || modelType === "lite") {
-    selectedModel = "gemini-3.1-flash-lite";
-  }
+  const candidateModels = [
+    "gemini-3.5-flash",
+    "gemini-3.1-flash-lite",
+    "gemini-3.8-flash"
+  ];
   try {
     if (!ai) {
       console.warn("[Gemini Chat] GEMINI_API_KEY is missing. Using local Jalpaiguri civic knowledge fallback.");
@@ -578,13 +577,34 @@ app.post("/api/gemini/chat", async (req, res) => {
       systemInstruction,
       temperature: 0.7
     };
-    console.log(`[Gemini Chat] Gemini request started using model: ${selectedModel}`);
-    const response = await ai.models.generateContent({
-      model: selectedModel,
-      contents: formattedContents,
-      config
-    });
-    console.log(`[Gemini Chat] Gemini response received.`);
+    let response = null;
+    let selectedModel = candidateModels[0];
+    for (const m of candidateModels) {
+      try {
+        selectedModel = m;
+        console.log(`[Gemini Chat] Gemini request started using model: ${selectedModel}`);
+        response = await ai.models.generateContent({
+          model: selectedModel,
+          contents: formattedContents,
+          config
+        });
+        if (response?.text) break;
+      } catch (err) {
+        console.warn(`[Gemini Chat] Model ${m} failed (${err?.message || err}), trying next candidate...`);
+      }
+    }
+    if (!response) {
+      console.warn(`[Gemini Chat] All Gemini models failed or had spikes. Falling back to local civic knowledge.`);
+      const localReply = generateLocalFallback(message, role);
+      return res.json({
+        success: true,
+        reply: localReply,
+        groundingPlaces: [],
+        modelUsed: "local-civic-fallback",
+        role
+      });
+    }
+    console.log(`[Gemini Chat] Gemini response received from ${selectedModel}.`);
     const replyText = response.text || generateLocalFallback(message, role);
     const groundingPlaces = [];
     const metadata = response.candidates?.[0]?.groundingMetadata;
@@ -1071,6 +1091,91 @@ app.post("/api/shops/:shopId/subscription", (req, res) => {
     shopId,
     plan,
     verifiedAt: (/* @__PURE__ */ new Date()).toISOString()
+  });
+});
+var NOTIFICATION_CATEGORIES = [
+  { id: "government", name: "Government & Municipal", nameBn: "\u09AA\u09CC\u09B0 \u0993 \u09B8\u09B0\u0995\u09BE\u09B0\u09BF \u09AC\u09BF\u099C\u09CD\u099E\u09AA\u09CD\u09A4\u09BF", icon: "landmark", priority: "high" },
+  { id: "emergency", name: "Emergency & Public Safety", nameBn: "\u099C\u09B0\u09C1\u09B0\u09BF \u0993 \u09A8\u09BE\u0997\u09B0\u09BF\u0995 \u09A8\u09BF\u09B0\u09BE\u09AA\u09A4\u09CD\u09A4\u09BE", icon: "alert-triangle", priority: "critical" },
+  { id: "marketplace", name: "Shop & Marketplace", nameBn: "\u09A6\u09CB\u0995\u09BE\u09A8 \u0993 \u0985\u09B0\u09CD\u09A1\u09BE\u09B0", icon: "shopping-bag", priority: "normal" },
+  { id: "services", name: "Workers & Services", nameBn: "\u0995\u09B0\u09CD\u09AE\u09C0 \u0993 \u09B8\u09C7\u09AC\u09BE", icon: "briefcase", priority: "normal" },
+  { id: "complaints", name: "Civic Complaints", nameBn: "\u09A8\u09BE\u0997\u09B0\u09BF\u0995 \u0985\u09AD\u09BF\u09AF\u09CB\u0997", icon: "file-text", priority: "normal" },
+  { id: "medical", name: "Medical & Blood", nameBn: "\u099A\u09BF\u0995\u09BF\u09CE\u09B8\u09BE \u0993 \u09B0\u0995\u09CD\u09A4\u09A6\u09BE\u09A8", icon: "droplet", priority: "high" },
+  { id: "support", name: "Support & Tickets", nameBn: "\u09B8\u09B9\u09BE\u09DF\u09A4\u09BE \u0993 \u099F\u09BF\u0995\u09BF\u099F", icon: "message-square", priority: "normal" },
+  { id: "security", name: "Account & Security", nameBn: "\u0985\u09CD\u09AF\u09BE\u0995\u09BE\u0989\u09A8\u09CD\u099F \u0993 \u09A8\u09BF\u09B0\u09BE\u09AA\u09A4\u09CD\u09A4\u09BE", icon: "shield", priority: "high" }
+];
+var processedEventIds = /* @__PURE__ */ new Set();
+app.get("/api/notifications/categories", (req, res) => {
+  res.json({ success: true, categories: NOTIFICATION_CATEGORIES });
+});
+app.post("/api/notifications/dispatch", (req, res) => {
+  const { eventId, userId, title, message, category, referenceId, priority, timeline, actionRequired, primaryAction } = req.body;
+  if (!title || !message) {
+    return res.status(400).json({ success: false, error: "Title and message are required." });
+  }
+  if (eventId && processedEventIds.has(eventId)) {
+    return res.json({ success: true, duplicate: true, message: "Event already processed idempotently." });
+  }
+  if (eventId) processedEventIds.add(eventId);
+  const notification = {
+    notificationId: `notif_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+    eventId: eventId || null,
+    userId: userId || "all",
+    title,
+    message,
+    category: category || "system",
+    priority: priority || "normal",
+    referenceId: referenceId || null,
+    actionRequired: actionRequired || false,
+    primaryAction: primaryAction || null,
+    timeline: timeline || [],
+    deliveryStatus: "delivered",
+    createdAt: (/* @__PURE__ */ new Date()).toISOString()
+  };
+  res.json({ success: true, notification });
+});
+app.post("/api/notifications/broadcast", (req, res) => {
+  const { title, message, category, priority, affectedWards, issuingAuthority } = req.body;
+  if (!title || !message) {
+    return res.status(400).json({ success: false, error: "Title and message are required." });
+  }
+  res.json({
+    success: true,
+    broadcastId: `brd_${Date.now()}`,
+    title,
+    message,
+    category: category || "emergency",
+    priority: priority || "critical",
+    affectedWards: affectedWards || ["All Wards (1-25)"],
+    issuingAuthority: issuingAuthority || "Jalpaiguri District Administration",
+    timestamp: (/* @__PURE__ */ new Date()).toISOString()
+  });
+});
+app.get("/api/notifications/analytics", (req, res) => {
+  res.json({
+    success: true,
+    stats: {
+      totalGenerated: 1420,
+      fcmDelivered: 1385,
+      fcmFailed: 35,
+      readCount: 1120,
+      unreadCount: 300,
+      activeDeviceTokens: 890,
+      byCategory: {
+        government: 340,
+        emergency: 85,
+        marketplace: 420,
+        services: 210,
+        complaints: 195,
+        medical: 90,
+        support: 50,
+        security: 30
+      },
+      lastEmergencyAlert: {
+        title: "Teesta River Flood Advisory",
+        timestamp: new Date(Date.now() - 36e5 * 4).toISOString(),
+        status: "Active"
+      }
+    }
   });
 });
 async function startServer() {

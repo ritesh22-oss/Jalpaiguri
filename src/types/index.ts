@@ -530,6 +530,35 @@ export interface LostFoundItem {
   status: 'Open' | 'Resolved';
 }
 
+export type NotificationCategory =
+  | 'all'
+  | 'government'
+  | 'emergency'
+  | 'services'
+  | 'marketplace'
+  | 'complaints'
+  | 'medical'
+  | 'support'
+  | 'security'
+  | 'system';
+
+export type NotificationPriority = 'critical' | 'high' | 'normal' | 'low';
+
+export interface NotificationTimelineEvent {
+  title: string;
+  time: string;
+  status: string;
+  note?: string;
+}
+
+export interface NotificationAction {
+  label: string;
+  actionType: string;
+  actionData?: Record<string, any>;
+  actionParams?: any;
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
+}
+
 export interface AppNotification {
   id?: string;
   notificationId: string;
@@ -537,10 +566,36 @@ export interface AppNotification {
   type: string;
   title: string;
   message: string;
+  previewMessage?: string;
+  detailedMessage?: string;
+  category?: NotificationCategory | string;
+  subcategory?: string;
+  priority?: NotificationPriority;
+  senderName?: string;
+  department?: string;
+  issuingAuthority?: string;
   createdAt: string;
   timestamp?: string;
+  expiresAt?: string;
   read: boolean;
+  deliveryStatus?: 'sent' | 'delivered' | 'read';
+  language?: 'en' | 'bn';
   icon?: string;
+  imageUrl?: string;
+  attachmentUrl?: string;
+  referenceId?: string;
+  currentStatus?: string;
+  previousStatus?: string;
+  actionRequired?: boolean | string;
+  primaryAction?: NotificationAction;
+  secondaryAction?: NotificationAction;
+  deepLink?: string;
+  timeline?: NotificationTimelineEvent[];
+  contactInfo?: {
+    phone?: string;
+    email?: string;
+    address?: string;
+  };
   actionType?: string;
   actionData?: Record<string, any>;
   actionView?: ViewType;

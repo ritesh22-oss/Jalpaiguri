@@ -1,19 +1,47 @@
-// Ensure window.fetch is writable and compatible across iframe sandbox environments
+// Ensure window.fetch is writable and routes API requests to the production backend in native WebView
 (function() {
+  const PROD_BACKEND = 'https://jalpaiguri-zxml.vercel.app';
+
+  function resolveApiUrl(input: RequestInfo | URL): RequestInfo | URL {
+    if (typeof input === 'string') {
+      if (input.startsWith('/api/')) {
+        const origin = typeof window !== 'undefined' ? window.location.origin || '' : '';
+        const isNative = origin.includes('appassets.androidplatform.net') ||
+                         origin.startsWith('file:') ||
+                         (typeof document !== 'undefined' && document.documentElement?.getAttribute('data-native-app') === 'true') ||
+                         (typeof window !== 'undefined' && (window as any).AndroidGoogleAuth !== undefined);
+        if (isNative || (!origin.includes('localhost') && !origin.includes('127.0.0.1') && !origin.includes('0.0.0.0'))) {
+          return `${PROD_BACKEND}${input}`;
+        }
+      }
+    } else if (input instanceof URL) {
+      if (input.pathname.startsWith('/api/') && input.origin.includes('appassets.androidplatform.net')) {
+        return new URL(`${PROD_BACKEND}${input.pathname}${input.search}`);
+      }
+    }
+    return input;
+  }
+
   function makeFetchWritable(obj: any) {
     if (!obj) return;
     try {
-      let originalFetch = typeof obj.fetch === 'function' ? obj.fetch.bind(obj) : null;
-      if (!originalFetch && typeof fetch === 'function') {
-        originalFetch = fetch;
-      }
-      let storedFetch = originalFetch;
+      const rawFetch = typeof obj.fetch === 'function' ? obj.fetch.bind(obj) : (typeof fetch === 'function' ? fetch : null);
+      if (!rawFetch) return;
+
+      const wrappedFetch: typeof fetch = function(input: RequestInfo | URL, init?: RequestInit) {
+        const resolvedInput = resolveApiUrl(input);
+        return rawFetch(resolvedInput, init);
+      };
+
+      let storedFetch = wrappedFetch;
       Object.defineProperty(obj, 'fetch', {
         get() {
-          return storedFetch || (typeof window !== 'undefined' && window !== obj && typeof window.fetch === 'function' ? window.fetch : fetch);
+          return storedFetch || wrappedFetch;
         },
         set(val) {
-          storedFetch = val;
+          storedFetch = typeof val === 'function' ? function(input: RequestInfo | URL, init?: RequestInit) {
+            return val(resolveApiUrl(input), init);
+          } as any : val;
         },
         configurable: true,
         enumerable: true

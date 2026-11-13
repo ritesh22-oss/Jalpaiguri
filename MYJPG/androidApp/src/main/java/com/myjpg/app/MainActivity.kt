@@ -6,11 +6,11 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
 import android.view.ViewGroup
 import android.webkit.*
 import android.widget.FrameLayout
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -21,7 +21,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.webkit.WebViewAssetLoader
-import com.google.firebase.auth.FirebaseAuth
 import com.myjpg.app.auth.GoogleAuthManager
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -32,18 +31,19 @@ class MainActivity : ComponentActivity() {
     private lateinit var googleAuthManager: GoogleAuthManager
     private lateinit var webViewAssetLoader: WebViewAssetLoader
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
+
     @Volatile
     private var webContentReady = false
     private var hasTriedHostedFallback = false
-    // This is the same warm application surface used by the web shell. Android owns the
-    // physical system-bar insets, so no second safe-area offset is sent to the WebView.
-    private val appSurfaceColor = Color.parseColor("#FAF8F5")
 
     companion object {
         private const val TAG = "MYJPG_MainActivity"
         // Production web app URL hosted on Vercel or local assets
         const val WEB_APP_URL = "https://jalpaiguri-zxml.vercel.app/"
     }
+
+    // App surface color matching React warm background
+    private val appSurfaceColor = Color.parseColor("#FAF8F5")
 
     private val filePickerLauncher = registerForActivityResult(
         ActivityResultContracts.GetMultipleContents()
@@ -68,15 +68,12 @@ class MainActivity : ComponentActivity() {
         // Loading the HTML document alone is not enough: its module bundle can still be loading.
         val splashScreen = installSplashScreen()
         splashScreen.setKeepOnScreenCondition { !webContentReady }
-        super.onCreate(savedInstanceState)
 
+        super.onCreate(savedInstanceState)
         configureSystemBars()
 
         googleAuthManager = GoogleAuthManager(this)
         webViewAssetLoader = WebViewAssetLoader.Builder()
-            // Maps https://appassets.androidplatform.net/assets/www/... to the APK's
-            // android_asset/www/... files. This provides WebView a real, same-origin HTTPS
-            // document instead of relying on brittle file:// module resolution.
             .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
             .build()
 
@@ -84,7 +81,6 @@ class MainActivity : ComponentActivity() {
         requestLocationPermissions()
 
         webView = WebView(this).apply {
-            // Match the MYJPG app background surface color seamlessly
             setBackgroundColor(appSurfaceColor)
             settings.apply {
                 javaScriptEnabled = true
@@ -102,7 +98,6 @@ class MainActivity : ComponentActivity() {
                 userAgentString = "${settings.userAgentString} MYJPGNativeApp/1.0.9"
             }
 
-            // JavaScript Interface for Native Google Sign-In via Credential Manager
             addJavascriptInterface(AndroidGoogleAuthInterface(), "AndroidGoogleAuth")
 
             webViewClient = object : WebViewClient() {
@@ -141,12 +136,10 @@ class MainActivity : ComponentActivity() {
                     return super.onConsoleMessage(consoleMessage)
                 }
 
-                // Geolocation Permission Handler for Maps
                 override fun onGeolocationPermissionsShowPrompt(origin: String?, callback: GeolocationPermissions.Callback?) {
                     callback?.invoke(origin, true, false)
                 }
 
-                // File Upload Picker Handler for Shops & Profile Photos
                 override fun onShowFileChooser(
                     webView: WebView?,
                     filePathCallback: ValueCallback<Array<Uri>>?,
@@ -169,22 +162,18 @@ class MainActivity : ComponentActivity() {
                 )
             )
         }
+
         setContentView(root)
-        // Insets can only be requested after the root has been attached to the window.
         applySystemBarInsets(root)
 
-        // Do not leave a blank frame if an unexpected WebView, asset, or JavaScript startup
-        // failure prevents the bridge callback. The error is logged and replaced with a usable
-        // retry screen instead.
+        // Fallback for unexpected WebView or JS loading failure
         root.postDelayed({
             if (!webContentReady) loadHostedFallbackOrShowFailure()
         }, 10_000)
 
-        // Load the bundled web app through WebViewAssetLoader. This is the supported local-WebView
-        // architecture and keeps relative JS/CSS imports, localStorage, and origin behavior stable.
+        // Initialize and load bundled web app in background while animation runs
         try {
-            val assetManager = assets
-            val files = assetManager.list("www")
+            val files = assets.list("www")
             if (files != null && files.contains("index.html")) {
                 Log.d(TAG, "Loading local web app through WebViewAssetLoader")
                 webView.loadUrl("https://appassets.androidplatform.net/assets/www/index.html")
@@ -193,21 +182,16 @@ class MainActivity : ComponentActivity() {
                 webView.loadUrl(WEB_APP_URL)
             }
         } catch (e: Exception) {
-            Log.d(TAG, "Defaulting to live web app URL $WEB_APP_URL")
+            Log.d(TAG, "Defaulting to live web app URL $WEB_APP_URL: ${e.message}")
             webView.loadUrl(WEB_APP_URL)
         }
     }
 
-    /**
-     * Android 15 enforces edge-to-edge for targetSdk 35. The host owns system-bar drawing and
-     * lays the WebView inside the resulting safe rectangle. The page therefore never applies a
-     * second status/navigation-bar offset.
-     */
     private fun configureSystemBars() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.decorView.setBackgroundColor(appSurfaceColor)
-        window.statusBarColor = appSurfaceColor
-        window.navigationBarColor = appSurfaceColor
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = Color.TRANSPARENT
 
         WindowInsetsControllerCompat(window, window.decorView).apply {
             isAppearanceLightStatusBars = true
@@ -239,14 +223,9 @@ class MainActivity : ComponentActivity() {
             }
             windowInsets
         }
-        // A post guarantees that the request is made after setContentView attaches the root.
         root.post { ViewCompat.requestApplyInsets(root) }
     }
 
-    /**
-     * The page uses this marker to disable browser safe-area padding because Android has already
-     * applied the physical insets to the WebView bounds.
-     */
     private fun markNativeWebView() {
         if (!::webView.isInitialized) return
 
@@ -275,11 +254,6 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    /**
-     * The hosted app is the production fallback for a device whose WebView cannot start the
-     * bundled module graph. We try it once, then show an explicit failure screen rather than
-     * leaving the user on a white page.
-     */
     private fun loadHostedFallbackOrShowFailure() {
         if (webContentReady) return
         if (hasTriedHostedFallback) {
@@ -311,7 +285,7 @@ class MainActivity : ComponentActivity() {
         @JavascriptInterface
         fun reportWebAppReady() {
             runOnUiThread {
-                Log.d(TAG, "React application rendered")
+                Log.d(TAG, "React application rendered and reported ready")
                 webContentReady = true
             }
         }
@@ -319,7 +293,9 @@ class MainActivity : ComponentActivity() {
         @JavascriptInterface
         fun reportWebAppError(message: String?) {
             Log.e(TAG, "Web application startup error: $message")
-            runOnUiThread { loadHostedFallbackOrShowFailure() }
+            runOnUiThread {
+                loadHostedFallbackOrShowFailure()
+            }
         }
 
         @JavascriptInterface
@@ -347,7 +323,7 @@ class MainActivity : ComponentActivity() {
         }
 
         @JavascriptInterface
-        fun getAppVersion(): String = "1.0.8"
+        fun getAppVersion(): String = "1.0.9"
     }
 
     override fun onBackPressed() {

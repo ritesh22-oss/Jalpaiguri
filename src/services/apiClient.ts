@@ -159,7 +159,8 @@ class ApiClient {
   }
 
   /**
-   * Resolve API base URL from Vite or Expo environment variables
+   * Resolve API base URL from Vite or Expo environment variables,
+   * with automatic fallback to production backend for Android WebView / PWA.
    */
   private getBaseUrl(): string {
     if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) {
@@ -168,6 +169,20 @@ class ApiClient {
     if (typeof process !== 'undefined' && process.env && process.env.EXPO_PUBLIC_API_URL) {
       return (process.env.EXPO_PUBLIC_API_URL as string).replace(/\/+$/, '');
     }
+
+    if (typeof window !== 'undefined') {
+      const origin = window.location.origin || '';
+      const isNativeApp =
+        origin.includes('appassets.androidplatform.net') ||
+        origin.startsWith('file:') ||
+        (typeof document !== 'undefined' && document.documentElement?.getAttribute('data-native-app') === 'true') ||
+        (window as any).AndroidGoogleAuth !== undefined;
+
+      if (isNativeApp || (!origin.includes('localhost') && !origin.includes('127.0.0.1') && !origin.includes('0.0.0.0'))) {
+        return 'https://jalpaiguri-zxml.vercel.app';
+      }
+    }
+
     return '';
   }
 
@@ -281,7 +296,7 @@ class ApiClient {
    * Multi-turn chat with Gemini AI, role instructions, and Google Maps Grounding
    */
   public geminiChat(params: GeminiChatRequest): Promise<GeminiChatResponse> {
-    return this.post<GeminiChatResponse>('/api/gemini/chat', params);
+    return this.post<GeminiChatResponse>('/api/gemini/chat', params, { skipAuth: true });
   }
 
   /**

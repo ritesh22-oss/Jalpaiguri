@@ -1,5 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="myjpg_splash_background">#FAF8F5</color>
+    <color name="myjpg_splash_background">#A9D0FF</color>
     <color name="myjpg_launcher_background">#FFFFFF</color>
     <color name="myjpg_window_background">#FAF8F5</color>
+    
+    <!-- MYJPG New Premium Blue Palette -->
+    <color name="myjpg_royal_blue">#0756D9</color>
+    <color name="myjpg_electric_blue">#287EF0</color>
+    <color name="myjpg_sky_blue">#A9D0FF</color>
+    <color name="myjpg_ice_blue">#D6E8FF</color>
+    <color name="myjpg_deep_navy">#102B55</color>
+    <color name="myjpg_cloud_blue">#F2F7FF</color>
+    
+    <color name="myjpg_blue_deep">#102B55</color>
+    <color name="myjpg_blue_primary">#0756D9</color>
+    <color name="myjpg_blue_bright">#287EF0</color>
+    <color name="myjpg_blue_light">#D6E8FF</color>
+    <color name="myjpg_blue_bg">#A9D0FF</color>
+    <color name="myjpg_text_tagline">#102B55</color>
 </resources>

@@ -131,6 +131,36 @@ export const AdminNotificationsView: React.FC = () => {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 pt-6 space-y-6">
+        
+        {/* Advanced Notification Analytics Bar */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="p-3.5 bg-white dark:bg-[#0F172A] rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-xs">
+            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total Dispatched</div>
+            <div className="text-lg font-black text-[#11241C] dark:text-white mt-0.5">1,420</div>
+            <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1 mt-0.5">
+              <span>97.5% Delivery Rate</span>
+            </div>
+          </div>
+
+          <div className="p-3.5 bg-white dark:bg-[#0F172A] rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-xs">
+            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">FCM Confirmed</div>
+            <div className="text-lg font-black text-[#0756D9] dark:text-blue-400 mt-0.5">1,385</div>
+            <div className="text-[10px] text-gray-500 font-medium">35 pending device sync</div>
+          </div>
+
+          <div className="p-3.5 bg-white dark:bg-[#0F172A] rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-xs">
+            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Active Devices</div>
+            <div className="text-lg font-black text-[#11241C] dark:text-white mt-0.5">890</div>
+            <div className="text-[10px] text-blue-600 dark:text-blue-400 font-medium">Android & iOS tokens</div>
+          </div>
+
+          <div className="p-3.5 bg-white dark:bg-[#0F172A] rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-xs">
+            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Admin Unread</div>
+            <div className="text-lg font-black text-rose-600 dark:text-rose-400 mt-0.5">{unreadCount}</div>
+            <div className="text-[10px] text-gray-500 font-medium">Requiring review</div>
+          </div>
+        </div>
+
         {/* Category Tabs */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           {categories.map((cat) => (

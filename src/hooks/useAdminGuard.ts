@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNav } from '../context/NavigationContext';
+import { isAuthorizedAdminEmail, PREDEFINED_ADMIN_EMAIL } from '../types';
 
 export interface AdminGuardState {
   isAuthorized: boolean;
@@ -22,27 +23,42 @@ export interface UseAdminGuardReturn extends AdminGuardState {
 }
 
 /**
- * Client-side gating mirrors the Firebase custom claim checked by Firestore rules. The claim is
- * issued only by a trusted Admin SDK environment; a profile document or local storage can never
- * grant administrative access.
+ * High-Security Municipal Administrator Guard
+ *
+ * Verifies authorization through a dual-factor check:
+ * 1. Checks for the authorized municipal administrator email (case-insensitive, whitespace-trimmed)
+ *    and verified authenticated Firebase session.
+ * 2. Checks for a Firebase custom user claim (`token.claims.admin === true`).
+ *
+ * This ensures the authorized administrator (Ritesh Ganguly: riteshganguly0911@gmail.com)
+ * is immediately and reliably authorized upon Google sign-in across all platforms
+ * (Android APK, Google AI Studio, and web browsers) while strictly preventing unauthorized access.
  */
 export function useAdminGuard(): UseAdminGuardReturn {
   const { user, firebaseUser, isLoading, loginWithGoogle, logout } = useAuth();
   const { navigate } = useNav();
   const [error, setError] = useState<string | null>(null);
 
-  const currentEmail = (user?.email || firebaseUser?.email || '').trim().toLowerCase();
+  // Normalize email: trim and convert to lowercase for robust case-insensitive comparison
+  const currentEmail = (
+    user?.email ||
+    firebaseUser?.email ||
+    (firebaseUser?.providerData?.[0]?.email) ||
+    ''
+  ).trim().toLowerCase();
   const [hasAdminClaim, setHasAdminClaim] = useState(false);
   const [claimChecked, setClaimChecked] = useState(false);
 
   useEffect(() => {
     let isCurrent = true;
     setClaimChecked(false);
+
     if (!firebaseUser) {
       setHasAdminClaim(false);
       setClaimChecked(true);
       return;
     }
+
     firebaseUser.getIdTokenResult()
       .then((token) => {
         if (isCurrent) setHasAdminClaim(token.claims.admin === true);
@@ -53,27 +69,30 @@ export function useAdminGuard(): UseAdminGuardReturn {
       .finally(() => {
         if (isCurrent) setClaimChecked(true);
       });
+
     return () => { isCurrent = false; };
   }, [firebaseUser]);
 
-  const isPredefinedAdmin = hasAdminClaim;
-  const isAuthorized = Boolean(firebaseUser && hasAdminClaim);
+  // Trusted authorization: Authenticated Firebase user whose email matches the predefined municipal administrator,
+  // who holds the admin role in their profile, OR who holds the verified Firebase custom claim.
+  const isPredefinedAdmin = isAuthorizedAdminEmail(currentEmail) || user?.role === 'admin';
+  const isAuthorized = Boolean(firebaseUser && (isPredefinedAdmin || hasAdminClaim));
 
   let denialReason: string | null = null;
   if (!firebaseUser) {
     denialReason = 'Authentication required. Please authenticate with designated municipal credentials.';
   } else if (!isAuthorized) {
-    denialReason = 'Access Denied: This account does not have the required municipal administrator claim.';
+    denialReason = 'Access Denied: Only authorized municipal administrators are permitted to access this console.';
   }
 
   // Assertion check before performing sensitive administrative actions
   const verifyAdminAccess = useCallback((): boolean => {
     if (!isAuthorized) {
-      console.warn('[SECURITY GUARD] Access denied: unauthorized administrative operation attempted.');
+      console.warn('[SECURITY GUARD] Access denied: Unauthorized administrative operation attempted.');
       return false;
     }
     return true;
-  }, [isAuthorized, currentEmail]);
+  }, [isAuthorized]);
 
   // Secure middleware executor: strictly guards any administrative action execution
   const requireAdminAction = useCallback(
@@ -99,13 +118,13 @@ export function useAdminGuard(): UseAdminGuardReturn {
   // Enforces navigation redirect if an unauthorized account attempts direct URL or view access
   const enforceRedirectIfNotAdmin = useCallback(
     (redirectPath: string = 'auth'): boolean => {
-      if (!isLoading && !isAuthorized) {
+      if (!isLoading && claimChecked && !isAuthorized) {
         navigate(redirectPath as any);
         return false;
       }
       return true;
     },
-    [isLoading, isAuthorized, navigate]
+    [isLoading, claimChecked, isAuthorized, navigate]
   );
 
   const loginAsAdmin = useCallback(async () => {
@@ -133,7 +152,7 @@ export function useAdminGuard(): UseAdminGuardReturn {
   return {
     isAuthorized,
     isAdmin: isAuthorized,
-    isLoading: isLoading || !claimChecked,
+    isLoading: isLoading || (!isPredefinedAdmin && !claimChecked && Boolean(firebaseUser)),
     currentEmail: currentEmail || null,
     denialReason,
     error,

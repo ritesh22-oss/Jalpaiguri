@@ -17,7 +17,7 @@ import {
   Store, Wrench, PlusSquare, Users, AlertTriangle, 
   Plus, Edit2, Trash2, Eye, EyeOff, Check, X, 
   Camera, Image, ArrowRightLeft, Star, Heart, MapPin, 
-  Phone, Calendar, Clock, Loader2, ChevronRight, CheckSquare, Sparkles, Search
+  Phone, Calendar, Clock, Loader2, ChevronRight, CheckSquare, Sparkles, Search, FileSpreadsheet
 } from 'lucide-react';
 
 interface CMSItem {
@@ -55,6 +55,19 @@ interface CollectionMeta {
 }
 
 const COLLECTIONS_META: CollectionMeta[] = [
+  {
+    id: 'cms_content',
+    label: 'Homepage, City & Notices',
+    icon: <FileSpreadsheet className="w-4 h-4 text-blue-600" />,
+    dbName: 'cms_content',
+    fields: [
+      { name: 'contentType', label: 'Content Area', type: 'select', options: ['Homepage', 'City Information', 'Announcement', 'Government Notice', 'Service Description'], required: true },
+      { name: 'title', label: 'Title', type: 'text', required: true, placeholder: 'Public-facing heading' },
+      { name: 'description', label: 'Content', type: 'textarea', required: true, placeholder: 'Public-facing copy' },
+      { name: 'locality', label: 'Area / City (optional)', type: 'text' },
+      { name: 'publishedAt', label: 'Publication date', type: 'text', placeholder: 'YYYY-MM-DD' }
+    ]
+  },
   {
     id: 'shops',
     label: 'Shops & Merchants',

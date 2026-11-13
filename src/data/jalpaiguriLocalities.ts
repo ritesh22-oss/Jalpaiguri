@@ -23,167 +23,99 @@ export interface LocalityInfo {
   pincode: string;
   lat: number;
   lng: number;
+  radiusKm?: number;
   popularLandmarks: string[];
   type: 'commercial' | 'residential' | 'healthcare' | 'transport' | 'civic';
 }
 
 export const JALPAIGURI_DEFAULT_LOCATION = {
-  name: 'Jalpaiguri, West Bengal',
+  name: 'Kadamtala, Jalpaiguri, West Bengal',
   locality: 'Kadamtala',
-  lat: 26.5228,
-  lng: 88.7245,
-  isApproximate: true
+  lat: 26.52537,
+  lng: 88.72030,
+  isApproximate: false
 };
 
+/**
+ * Ground-Truth Verified Jalpaiguri Localities and Neighborhoods
+ * Geocoded to exact geographic centers with specific boundary radii to prevent cross-neighborhood confusion.
+ */
 export const JALPAIGURI_LOCALITIES: LocalityInfo[] = [
+  {
+    id: 'senpara',
+    name: 'Senpara',
+    shortName: 'Senpara',
+    pincode: '735101',
+    lat: 26.53647,
+    lng: 88.72564,
+    radiusKm: 0.45,
+    popularLandmarks: ['Senpara Club & Library', 'Senpara Main Road', 'Durgapuja Ground'],
+    type: 'residential'
+  },
+  {
+    id: 'raikatpara',
+    name: 'Raikatpara',
+    shortName: 'Raikatpara',
+    pincode: '735101',
+    lat: 26.53526,
+    lng: 88.71979,
+    radiusKm: 0.45,
+    popularLandmarks: ['Raikatpara Sporting Association Ground', 'Mohun Bagan Sarani', 'Raikatpara Rakha Kali Mandir'],
+    type: 'residential'
+  },
+  {
+    id: 'rajbari-para',
+    name: 'Rajbari Para (Baikunthapur Palace)',
+    shortName: 'Rajbari',
+    pincode: '735101',
+    lat: 26.54103,
+    lng: 88.71958,
+    radiusKm: 0.55,
+    popularLandmarks: ['Baikunthapur Rajbari Palace', 'Rajbari Dighi', 'Rajbari Park', 'Rajbari Kali Mandir'],
+    type: 'civic'
+  },
   {
     id: 'kadamtala',
     name: 'Kadamtala',
     shortName: 'Kadamtala',
     pincode: '735101',
-    lat: 26.5228,
-    lng: 88.7245,
-    popularLandmarks: ['Kadamtala More', 'Municipality Complex', 'Rail Crossing'],
+    lat: 26.52537,
+    lng: 88.72030,
+    radiusKm: 0.50,
+    popularLandmarks: ['Kadamtala More', 'Municipality Complex', 'Mobile Hospital', 'Rail Crossing'],
     type: 'commercial'
+  },
+  {
+    id: 'kamarpara',
+    name: 'Kamarpara',
+    shortName: 'Kamarpara',
+    pincode: '735101',
+    lat: 26.52533,
+    lng: 88.72165,
+    radiusKm: 0.40,
+    popularLandmarks: ['Doctor Charu Chandra Sanyal Sarani', 'Kamarpara Community Center'],
+    type: 'residential'
   },
   {
     id: 'dinbazar',
     name: 'Dinbazar Wholesale Market',
     shortName: 'Dinbazar',
     pincode: '735101',
-    lat: 26.5186,
-    lng: 88.7291,
-    popularLandmarks: ['Dinbazar Wholesale Market', 'Subzi Mandi', 'Cloth Market'],
+    lat: 26.51860,
+    lng: 88.72910,
+    radiusKm: 0.50,
+    popularLandmarks: ['Dinbazar Wholesale Market', 'Subzi Mandi', 'Cloth Market', 'Netaji Subhash Chandra Bose Road'],
     type: 'commercial'
   },
   {
-    id: 'silpasamiti',
-    name: 'Silpasamiti Para',
-    shortName: 'Silpasamiti Para',
+    id: 'ashrampara',
+    name: 'Ashrampara',
+    shortName: 'Ashrampara',
     pincode: '735101',
-    lat: 26.5292,
-    lng: 88.7180,
-    popularLandmarks: ['Silpasamiti Ground', 'Club Road', 'Community Hall'],
-    type: 'residential'
-  },
-  {
-    id: 'hakimpara',
-    name: 'Hakimpara',
-    shortName: 'Hakimpara',
-    pincode: '735101',
-    lat: 26.5245,
-    lng: 88.7212,
-    popularLandmarks: ['Hakimpara Girls High School', 'Court More'],
-    type: 'residential'
-  },
-  {
-    id: 'sadar-hospital',
-    name: 'Sadar Hospital & Post Office More',
-    shortName: 'Hospital Road',
-    pincode: '735101',
-    lat: 26.5202,
-    lng: 88.7258,
-    popularLandmarks: ['District Sadar Hospital', 'Super Speciality Hospital', 'Head Post Office'],
-    type: 'healthcare'
-  },
-  {
-    id: 'paharpur',
-    name: 'Paharpur More',
-    shortName: 'Paharpur',
-    pincode: '735121',
-    lat: 26.5385,
-    lng: 88.7360,
-    popularLandmarks: ['Paharpur Bus Stand', 'Tea Auction Centre Road'],
-    type: 'commercial'
-  },
-  {
-    id: 'mohitnagar',
-    name: 'Mohitnagar',
-    shortName: 'Mohitnagar',
-    pincode: '735102',
-    lat: 26.5410,
-    lng: 88.7450,
-    popularLandmarks: ['Mohitnagar Substation', 'Agricultural Research Station'],
-    type: 'residential'
-  },
-  {
-    id: 'pandapara',
-    name: 'Pandapara',
-    shortName: 'Pandapara',
-    pincode: '735101',
-    lat: 26.5150,
-    lng: 88.7190,
-    popularLandmarks: ['Pandapara Kali Mandir', 'Primary School'],
-    type: 'residential'
-  },
-  {
-    id: 'maskalaibari',
-    name: 'Maskalaibari',
-    shortName: 'Maskalaibari',
-    pincode: '735101',
-    lat: 26.5110,
-    lng: 88.7250,
-    popularLandmarks: ['Maskalaibari Shibtala', 'Sports Ground'],
-    type: 'residential'
-  },
-  {
-    id: 'raikatpara',
-    name: 'Raikatpara (Rajbari)',
-    shortName: 'Raikatpara',
-    pincode: '735101',
-    lat: 26.5280,
-    lng: 88.7265,
-    popularLandmarks: ['Baikunthapur Rajbari', 'Rajbari Dighi', 'Heritage Gate'],
-    type: 'civic'
-  },
-  {
-    id: 'town-club',
-    name: 'Town Club & Jubilee Park',
-    shortName: 'Town Club',
-    pincode: '735101',
-    lat: 26.5210,
-    lng: 88.7210,
-    popularLandmarks: ['Town Club Stadium', 'Jubilee Park Promenade'],
-    type: 'civic'
-  },
-  {
-    id: 'nh31-desun',
-    name: 'NH31 Bypass / Desun Hospital Area',
-    shortName: 'NH31 Bypass',
-    pincode: '735101',
-    lat: 26.5370,
-    lng: 88.7150,
-    popularLandmarks: ['Desun Hospital', 'Highway Fuel Hub', 'Transport Nagar'],
-    type: 'healthcare'
-  },
-  {
-    id: 'adarpara',
-    name: 'Adarpara',
-    shortName: 'Adarpara',
-    pincode: '735101',
-    lat: 26.5320,
-    lng: 88.7390,
-    popularLandmarks: ['Adarpara High School', 'Karala River Ghat'],
-    type: 'residential'
-  },
-  {
-    id: 'town-station',
-    name: 'Jalpaiguri Town Railway Station',
-    shortName: 'Town Station',
-    pincode: '735101',
-    lat: 26.5050,
-    lng: 88.7320,
-    popularLandmarks: ['Town Railway Station', 'Railway Colony', 'Auto Stand'],
-    type: 'transport'
-  },
-  {
-    id: 'deshbandhu-para',
-    name: 'Deshbandhu Para',
-    shortName: 'Deshbandhu Para',
-    pincode: '735101',
-    lat: 26.5255,
-    lng: 88.7320,
-    popularLandmarks: ['Deshbandhu District Library', 'Neta Ji Subhash Statue'],
+    lat: 26.51525,
+    lng: 88.72697,
+    radiusKm: 0.45,
+    popularLandmarks: ['Ramakrishna Mission Ashram Road', 'Ashrampara Community Ground'],
     type: 'residential'
   },
   {
@@ -191,19 +123,131 @@ export const JALPAIGURI_LOCALITIES: LocalityInfo[] = [
     name: 'Babupara',
     shortName: 'Babupara',
     pincode: '735101',
-    lat: 26.5160,
-    lng: 88.7280,
-    popularLandmarks: ['Babupara Field', 'Shiva Mandir'],
+    lat: 26.52297,
+    lng: 88.72738,
+    radiusKm: 0.45,
+    popularLandmarks: ['Babupara Field', 'Babupara Shiva Mandir', 'Station Road'],
     type: 'residential'
   },
   {
-    id: 'shantipara',
-    name: 'Shantipara',
+    id: 'nayabasti',
+    name: 'Nayabasti',
+    shortName: 'Nayabasti',
+    pincode: '735101',
+    lat: 26.51701,
+    lng: 88.73039,
+    radiusKm: 0.45,
+    popularLandmarks: ['Club Road', 'Nayabasti Community Ground', 'R2 Bike Hospital'],
+    type: 'residential'
+  },
+  {
+    id: 'shanti-para',
+    name: 'Shanti Para',
     shortName: 'Shantipara',
     pincode: '735101',
-    lat: 26.5295,
-    lng: 88.7345,
-    popularLandmarks: ['Shantipara More', 'Karala River View'],
+    lat: 26.53558,
+    lng: 88.71206,
+    radiusKm: 0.50,
+    popularLandmarks: ['Shantipara More', 'Vidyasagar Sarani', 'Siliguri Road Entrance'],
+    type: 'residential'
+  },
+  {
+    id: 'hakimpara',
+    name: 'Hakimpara',
+    shortName: 'Hakimpara',
+    pincode: '735101',
+    lat: 26.52913,
+    lng: 88.73125,
+    radiusKm: 0.45,
+    popularLandmarks: ['Hakimpara Temple', 'Court More', 'Hakimpara Girls High School'],
+    type: 'residential'
+  },
+  {
+    id: 'sadar-hospital',
+    name: 'District Sadar Hospital & Post Office More',
+    shortName: 'Hospital Road',
+    pincode: '735101',
+    lat: 26.52943,
+    lng: 88.72759,
+    radiusKm: 0.40,
+    popularLandmarks: ['Jalpaiguri District Sadar Hospital', 'Super Speciality Hospital', 'Head Post Office', 'OPD Block'],
+    type: 'healthcare'
+  },
+  {
+    id: 'adarpara',
+    name: 'Adarpara',
+    shortName: 'Adarpara',
+    pincode: '735101',
+    lat: 26.51339,
+    lng: 88.72487,
+    radiusKm: 0.50,
+    popularLandmarks: ['Adarpara High School', 'Karala River Ghat'],
+    type: 'residential'
+  },
+  {
+    id: 'tb-hospital-para',
+    name: 'TB Hospital Para',
+    shortName: 'TB Hospital Para',
+    pincode: '735101',
+    lat: 26.54074,
+    lng: 88.70731,
+    radiusKm: 0.50,
+    popularLandmarks: ['TB Hospital Complex', 'Maskalaibari Bridge Link'],
+    type: 'healthcare'
+  },
+  {
+    id: 'maskalaibari',
+    name: 'Maskalaibari',
+    shortName: 'Maskalaibari',
+    pincode: '735101',
+    lat: 26.53478,
+    lng: 88.70715,
+    radiusKm: 0.50,
+    popularLandmarks: ['Maskalaibari Ground', 'Maskalaibari Bridge', 'Shashan Kali Mandir'],
+    type: 'residential'
+  },
+  {
+    id: 'deshbandhu-para',
+    name: 'Deshbandhu Para',
+    shortName: 'Deshbandhu Para',
+    pincode: '735101',
+    lat: 26.53191,
+    lng: 88.71139,
+    radiusKm: 0.45,
+    popularLandmarks: ['Deshbandhu Para Sarbojonin Kalibari', 'Vidyasagar Sarani'],
+    type: 'residential'
+  },
+  {
+    id: 'pandapara',
+    name: 'Pandapara',
+    shortName: 'Pandapara',
+    pincode: '735101',
+    lat: 26.51723,
+    lng: 88.72087,
+    radiusKm: 0.50,
+    popularLandmarks: ['Pandapara Kalibari', 'Pandapara Tumol Lane', 'Jay Lane'],
+    type: 'residential'
+  },
+  {
+    id: 'town-station',
+    name: 'Jalpaiguri Town Railway Station',
+    shortName: 'Town Station',
+    pincode: '735101',
+    lat: 26.51869,
+    lng: 88.72415,
+    radiusKm: 0.45,
+    popularLandmarks: ['Jalpaiguri Railway Station', 'Station Road Auto Stand', 'Railway Colony'],
+    type: 'transport'
+  },
+  {
+    id: 'silpasamiti',
+    name: 'Silpasamiti Para',
+    shortName: 'Silpasamiti Para',
+    pincode: '735101',
+    lat: 26.52920,
+    lng: 88.71800,
+    radiusKm: 0.45,
+    popularLandmarks: ['Silpasamiti Ground', 'Club Road', 'Community Hall'],
     type: 'residential'
   },
   {
@@ -211,23 +255,46 @@ export const JALPAIGURI_LOCALITIES: LocalityInfo[] = [
     name: 'Goshala More',
     shortName: 'Goshala',
     pincode: '735102',
-    lat: 26.5480,
-    lng: 88.7250,
-    popularLandmarks: ['Goshala Temple', 'Siliguri Road Crossing'],
+    lat: 26.54705,
+    lng: 88.70913,
+    radiusKm: 0.50,
+    popularLandmarks: ['Goshala Temple', 'NH27 Junction', 'Siliguri Road Crossing'],
+    type: 'commercial'
+  },
+  {
+    id: 'paharpur',
+    name: 'Paharpur More',
+    shortName: 'Paharpur',
+    pincode: '735121',
+    lat: 26.55869,
+    lng: 88.72444,
+    radiusKm: 0.70,
+    popularLandmarks: ['Paharpur Bus Stop', 'NH27 Crossing', 'Tea Auction Centre Road'],
     type: 'commercial'
   },
   {
     id: 'raninagar',
-    name: 'Raninagar',
+    name: 'Raninagar BSF & Industrial Area',
     shortName: 'Raninagar',
     pincode: '735133',
-    lat: 26.5580,
-    lng: 88.7050,
-    popularLandmarks: ['Raninagar Industrial Estate', 'BSF Camp'],
+    lat: 26.53963,
+    lng: 88.63662,
+    radiusKm: 1.50,
+    popularLandmarks: ['Raninagar Industrial Estate', 'BSF Camp', 'NH27 Overpass'],
     type: 'civic'
+  },
+  {
+    id: 'mohitnagar',
+    name: 'Mohitnagar Station & Research Farm',
+    shortName: 'Mohitnagar',
+    pincode: '735102',
+    lat: 26.53065,
+    lng: 88.66768,
+    radiusKm: 1.20,
+    popularLandmarks: ['Mohitnagar Railway Station', 'Agricultural Research Station'],
+    type: 'residential'
   }
 ];
-
 
 export function formatDistanceString(distanceKm: number): string {
   if (distanceKm < 1) {
@@ -252,15 +319,27 @@ export function isWithinJalpaiguriRegion(lat: number, lng: number): boolean {
   return validateServiceArea(lat, lng).isInside;
 }
 
-// Find closest locality name in Jalpaiguri (only valid if within the Jalpaiguri service region)
-export function getClosestLocalityName(lat: number, lng: number): { locality: string; fullName: string; distanceKm: number; isWithinRegion: boolean } {
+/**
+ * High-accuracy Jalpaiguri Locality Finder.
+ * Uses exact distance checking against known neighborhood boundaries.
+ * If distance exceeds the neighborhood's radius (default 500m), it designates the area as a specific coordinate point
+ * rather than improperly substituting an adjacent neighborhood (e.g. tapping Senpara will never return Raikatpara).
+ */
+export function getClosestLocalityName(lat: number, lng: number): {
+  locality: string;
+  fullName: string;
+  distanceKm: number;
+  isWithinRegion: boolean;
+  isExactNeighborhood: boolean;
+} {
   const validation = validateServiceArea(lat, lng);
   if (!validation.isInside) {
     return {
       locality: 'Outside Jalpaiguri',
       fullName: 'Outside Jalpaiguri Service Area',
       distanceKm: validation.centerDistanceKm,
-      isWithinRegion: false
+      isWithinRegion: false,
+      isExactNeighborhood: false
     };
   }
 
@@ -275,10 +354,26 @@ export function getClosestLocalityName(lat: number, lng: number): { locality: st
     }
   }
 
+  const radiusThreshold = closest.radiusKm || 0.5;
+  const isExact = minDistance <= radiusThreshold;
+
+  if (isExact) {
+    return {
+      locality: closest.shortName,
+      fullName: `${closest.name}, Jalpaiguri`,
+      distanceKm: minDistance,
+      isWithinRegion: true,
+      isExactNeighborhood: true
+    };
+  }
+
+  // Tapped coordinate is in between neighborhoods or outside a tight centroid.
+  // We clearly indicate this without falsely claiming it is the adjacent neighborhood.
   return {
-    locality: closest.shortName,
-    fullName: `${closest.name}, Jalpaiguri`,
+    locality: `Near ${closest.shortName}`,
+    fullName: `Area near ${closest.name} (${Math.round(minDistance * 1000)}m), Jalpaiguri`,
     distanceKm: minDistance,
-    isWithinRegion: true
+    isWithinRegion: true,
+    isExactNeighborhood: false
   };
 }

@@ -1,10 +1,13 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+/** Shared Firebase Storage instance for administrator-managed place media. */
+export const storage = getStorage(app);
 export const auth = getAuth(app);
 
 // Securely persist Firebase auth session across app restarts and Play Store updates

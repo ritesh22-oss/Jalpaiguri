@@ -34,6 +34,15 @@ export const AuthView: React.FC = () => {
       setLoading(false);
 
       if (res.success) {
+        if (res.isAdmin) {
+          localStorage.setItem('jpg_admin_login_detected', 'true');
+          setSuccessMsg(isBengali ? 'অ্যাডমিন ড্যাশবোর্ডে স্বাগতম!' : 'Welcome to Municipal Admin Console!');
+          setTimeout(() => {
+            replaceView('admin-dashboard');
+          }, 300);
+          return;
+        }
+
         setSuccessMsg(res.isNewUser ? (isBengali ? 'MYJPG-এ স্বাগতম!' : 'Welcome to MYJPG!') : (isBengali ? 'আবার স্বাগতম!' : 'Welcome back!'));
         setTimeout(() => {
           if (res.isNewUser) {
@@ -64,10 +73,11 @@ export const AuthView: React.FC = () => {
       setLoading(false);
 
       if (res.success) {
-        setSuccessMsg(isBengali ? 'অ্যাডমিন ড্যাশবোর্ডে স্বাগতম!' : 'Welcome to Admin Dashboard!');
+        localStorage.setItem('jpg_admin_login_detected', 'true');
+        setSuccessMsg(isBengali ? 'অ্যাডমিন ড্যাশবোর্ডে স্বাগতম!' : 'Welcome to Municipal Admin Console!');
         setTimeout(() => {
           replaceView('admin-dashboard');
-        }, 500);
+        }, 300);
       } else {
         // Specifically show the exact message requested by the user, if denied
         if (res.message) {
