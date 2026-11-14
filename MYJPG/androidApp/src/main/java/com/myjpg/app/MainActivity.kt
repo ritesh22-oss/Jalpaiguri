@@ -82,6 +82,7 @@ class MainActivity : ComponentActivity() {
 
         webView = WebView(this).apply {
             setBackgroundColor(appSurfaceColor)
+            clearCache(true)
             settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true
@@ -95,7 +96,7 @@ class MainActivity : ComponentActivity() {
                 mediaPlaybackRequiresUserGesture = false
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                 cacheMode = WebSettings.LOAD_NO_CACHE
-                userAgentString = "${settings.userAgentString} MYJPGNativeApp/1.0.9"
+                userAgentString = "${settings.userAgentString} MYJPGNativeApp/1.1.0"
             }
 
             addJavascriptInterface(AndroidGoogleAuthInterface(), "AndroidGoogleAuth")
@@ -323,7 +324,7 @@ class MainActivity : ComponentActivity() {
         }
 
         @JavascriptInterface
-        fun getAppVersion(): String = "1.0.9"
+        fun getAppVersion(): String = "1.1.0"
     }
 
     override fun onBackPressed() {

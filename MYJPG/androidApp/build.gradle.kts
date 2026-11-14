@@ -12,8 +12,8 @@ android {
         applicationId = "com.myjpg.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 109
-        versionName = "1.0.9"
+        versionCode = 110
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -45,12 +45,45 @@ android {
     }
 }
 
+val isWindows = System.getProperty("os.name").lowercase().contains("windows")
+
+val buildWebAssets = tasks.register<Exec>("buildWebAssets") {
+    workingDir = file("../..")
+    val currentPath = System.getenv("PATH") ?: ""
+    val enhancedPath = if (!isWindows) {
+        listOf("/usr/local/bin", "/opt/homebrew/bin", "/usr/bin", "/bin")
+            .filter { !currentPath.contains(it) }
+            .joinToString(":") + (if (currentPath.isNotEmpty()) ":$currentPath" else "")
+    } else {
+        currentPath
+    }
+    environment("PATH", enhancedPath)
+
+    if (isWindows) {
+        commandLine("cmd", "/c", "npm", "run", "build")
+    } else {
+        commandLine("npm", "run", "build")
+    }
+    inputs.dir(file("../../src"))
+    inputs.file(file("../../index.html"))
+    inputs.file(file("../../package.json"))
+    inputs.file(file("../../vite.config.ts"))
+    outputs.dir(file("../../dist"))
+}
+
 // Stage the compiled web app under build/, rather than mutating src/main/assets during an
 // Android build. Keeping generated files out of the source asset directory prevents AGP from
 // discovering the same web bundle twice and producing an APK with stale assets.
 tasks.register<Sync>("syncWebAssets") {
+    dependsOn(buildWebAssets)
     from(file("../../dist"))
     into(layout.buildDirectory.dir("generated/webAssets/www"))
+    doLast {
+        copy {
+            from(file("../../dist"))
+            into(file("src/main/assets/www"))
+        }
+    }
 }
 
 android {

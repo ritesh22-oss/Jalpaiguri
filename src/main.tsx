@@ -74,18 +74,36 @@ requestAnimationFrame(() => {
   (window as any).AndroidGoogleAuth?.reportWebAppReady?.();
 });
 
-// Register service worker for Progressive Web App (PWA) support
-// APK assets are already offline-capable. Do not install a PWA service worker in WebView: it
-// can retain a stale app shell across APK upgrades and mask the newly bundled UI.
-if ('serviceWorker' in navigator && !(window as any).AndroidGoogleAuth) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js')
-      .then((reg) => {
-        console.log('[Service Worker] Registered successfully with scope:', reg.scope);
-      })
-      .catch((err) => {
-        console.warn('[Service Worker] Registration failed:', err);
+// Service Worker Handling:
+// PWA browsers use service workers for offline caching.
+// Native Android WebView has bundled assets; unregister any previously cached service workers
+// so updated APK assets are always loaded immediately without cache retention.
+if ('serviceWorker' in navigator) {
+  if ((window as any).AndroidGoogleAuth) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const reg of registrations) {
+        reg.unregister().then(() => {
+          console.log('[Service Worker] Unregistered stale worker in native app');
+        });
+      }
+    });
+    if ('caches' in window) {
+      caches.keys().then((keys) => {
+        for (const key of keys) {
+          caches.delete(key);
+        }
       });
-  });
+    }
+  } else {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then((reg) => {
+          console.log('[Service Worker] Registered successfully with scope:', reg.scope);
+        })
+        .catch((err) => {
+          console.warn('[Service Worker] Registration failed:', err);
+        });
+    });
+  }
 }
 
