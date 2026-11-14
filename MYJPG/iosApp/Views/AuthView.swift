@@ -11,14 +11,8 @@ struct AuthView: View {
             Spacer()
 
             // Header Icon & Branding
-            ZStack {
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color(red: 0.12, green: 0.23, blue: 0.54))
-                    .frame(width: 80, height: 80)
-                Text("JPG")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.white)
-            }
+            OfficialMYJPGEmblem()
+                .frame(width: 84, height: 84)
 
             VStack(spacing: 6) {
                 Text(selectedLanguage == "Bengali" ? "মাইজলপাইগুড়ি কানেক্ট" : "MYJPG - Jalpaiguri Connect")

@@ -18,7 +18,11 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn() && (
         request.auth.token.admin == true ||
-        (request.auth.token.email != null && request.auth.token.email.lower() == 'riteshganguly0911@gmail.com')
+        (
+          request.auth.token.email != null &&
+          request.auth.token.email_verified == true &&
+          request.auth.token.email.lower() == 'riteshganguly0911@gmail.com'
+        )
       );
     }
 
@@ -38,8 +42,8 @@ service cloud.firestore {
 
     function isValidUserProfile(data) {
       return data.keys().hasAll(['id', 'name', 'phone', 'location', 'language', 'createdAt']) &&
-             data.keys().size() <= 16 &&
-             data.id == request.auth.uid &&
+             data.keys().size() <= 32 &&
+             (data.id == request.auth.uid || isAdmin()) &&
              data.name is string && data.name.size() <= 100 &&
              data.phone is string && data.phone.size() <= 20 &&
              data.location is string && data.location.size() <= 200 &&
@@ -49,45 +53,50 @@ service cloud.firestore {
 
     function isValidWorker(data) {
       return data.keys().hasAll(['userId', 'name', 'profession', 'category', 'phone', 'serviceArea', 'description']) &&
-             data.userId == request.auth.uid &&
+             (data.userId == request.auth.uid || isAdmin()) &&
              data.name is string && data.name.size() <= 100 &&
              data.profession is string && data.profession.size() <= 100 &&
              data.category is string && data.category.size() <= 50 &&
              data.phone is string && data.phone.size() <= 20 &&
+             data.serviceArea is string && data.serviceArea.size() <= 200 &&
              data.description is string && data.description.size() <= 2000;
     }
 
     function isValidShop(data) {
       return data.keys().hasAll(['ownerId', 'name', 'category', 'address', 'locality', 'pincode', 'lat', 'lng']) &&
-             data.ownerId == request.auth.uid &&
+             (data.ownerId == request.auth.uid || isAdmin()) &&
              data.name is string && data.name.size() <= 100 &&
              data.category is string && data.category.size() <= 100 &&
              data.address is string && data.address.size() <= 300 &&
+             data.locality is string && data.locality.size() <= 150 &&
+             data.pincode is string && data.pincode.size() <= 20 &&
              data.lat is number && data.lng is number;
     }
 
     function isValidCivicReport(data) {
       return data.keys().hasAll(['userId', 'category', 'location', 'description', 'status', 'reportedAt']) &&
-             data.userId == request.auth.uid &&
+             (data.userId == request.auth.uid || isAdmin()) &&
              data.category is string && data.category.size() <= 100 &&
+             data.location is string && data.location.size() <= 200 &&
              data.description is string && data.description.size() <= 2000 &&
-             data.status is string &&
+             data.status is string && data.status.size() <= 50 &&
              data.reportedAt is string;
     }
 
-
     function isValidRestaurant(data) {
       return data.keys().hasAll(['ownerId', 'name', 'category', 'address', 'locality', 'pincode', 'lat', 'lng']) &&
-             data.ownerId == request.auth.uid &&
+             (data.ownerId == request.auth.uid || isAdmin()) &&
              data.name is string && data.name.size() <= 100 &&
              data.category is string && data.category.size() <= 100 &&
              data.address is string && data.address.size() <= 300 &&
+             data.locality is string && data.locality.size() <= 150 &&
+             data.pincode is string && data.pincode.size() <= 20 &&
              data.lat is number && data.lng is number;
     }
 
     function isValidMenuItem(data) {
       return data.keys().hasAll(['restaurantId', 'ownerId', 'name', 'category', 'price']) &&
-             data.ownerId == request.auth.uid &&
+             (data.ownerId == request.auth.uid || isAdmin()) &&
              data.restaurantId is string && data.restaurantId.size() <= 100 &&
              data.name is string && data.name.size() <= 100 &&
              data.category is string && data.category.size() <= 100 &&
@@ -97,7 +106,7 @@ service cloud.firestore {
     function isValidBloodDonor(data) {
       return data.keys().hasAll(['userId', 'name', 'bloodGroup', 'phone', 'availability', 'agreedToSearch', 'lat', 'lng', 'isVisible', 'lastUpdated']) &&
              data.keys().size() <= 20 &&
-             data.userId == request.auth.uid &&
+             (data.userId == request.auth.uid || isAdmin()) &&
              data.name is string && data.name.size() <= 100 &&
              data.bloodGroup in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', "I don't know"] &&
              data.phone is string && data.phone.size() <= 20 &&
@@ -111,7 +120,7 @@ service cloud.firestore {
     function isValidBloodRequest(data) {
       return data.keys().hasAll(['userId', 'patientName', 'bloodGroup', 'units', 'urgency', 'hospitalName', 'contactPhone', 'status', 'createdAt']) &&
              data.keys().size() <= 20 &&
-             data.userId == request.auth.uid &&
+             (data.userId == request.auth.uid || isAdmin()) &&
              data.patientName is string && data.patientName.size() <= 100 &&
              data.bloodGroup in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', "I don't know"] &&
              data.units is number &&
@@ -122,16 +131,32 @@ service cloud.firestore {
              data.createdAt is string;
     }
 
+    function isValidAuditLog(data) {
+      return data.keys().hasAll(['action', 'section', 'actorUid', 'createdAt']) &&
+             data.keys().size() <= 12 &&
+             data.action is string && data.action.size() <= 120 &&
+             data.section is string && data.section.size() <= 80 &&
+             data.actorUid == request.auth.uid &&
+             data.createdAt is string;
+    }
+
     // --- COLLECTION RULES ---
 
     match /users/{userId} {
       // Public profiles are not a directory. A citizen can access only their private profile;
-      // administrators need a trusted custom claim.
+      // administrators need verified admin identity/claim.
       allow read: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && isValidUserProfile(incoming()) &&
-                    !incoming().keys().hasAny(['email', 'role', 'emailVerified', 'authMethod']);
-      allow update: if isOwner(userId) && isValidUserProfile(incoming()) && 
-                    incoming().diff(existing()).affectedKeys().hasOnly(['name', 'phone', 'location', 'language', 'age', 'gender', 'bloodGroup', 'avatarUrl', 'isVolunteer', 'isBloodDonor', 'coordinates', 'latitude', 'longitude', 'accuracy', 'city', 'district', 'state', 'pincode', 'locationSource', 'locationUpdatedAt', 'serviceAreaStatus', 'tourCompleted', 'tourLanguage', 'tourVersion']);
+                    !incoming().keys().hasAny(['email', 'role', 'emailVerified', 'authMethod', 'status']);
+      allow update: if (
+        isOwner(userId) && isValidUserProfile(incoming()) &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'phone', 'location', 'language', 'age', 'gender', 'bloodGroup', 'avatarUrl', 'isVolunteer', 'isBloodDonor', 'coordinates', 'latitude', 'longitude', 'accuracy', 'city', 'district', 'state', 'pincode', 'locationSource', 'locationUpdatedAt', 'serviceAreaStatus', 'tourCompleted', 'tourLanguage', 'tourVersion'])
+      ) || (
+        isAdmin() &&
+        incoming().id == existing().id &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt', 'updatedBy', 'isVerifiedCitizen']) &&
+        (!incoming().keys().hasAny(['status']) || incoming().status in ['active', 'suspended'])
+      );
       allow delete: if isAdmin();
 
       match /saved_pandals/{pandalId} {
@@ -148,9 +173,14 @@ service cloud.firestore {
       allow create: if isSignedIn();
     }
 
-    // Console-managed editorial content and administrator preferences. These remain
-    // unreadable/write-protected for citizens; public-facing views should expose only
-    // explicitly published content through their own curated data path.
+    // Immutable admin audit log
+    match /admin_audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidId(logId) && isValidAuditLog(incoming());
+      allow update, delete: if false;
+    }
+
+    // Console-managed editorial content and administrator preferences.
     match /cms_content/{id} {
       allow read, create, update, delete: if isAdmin();
     }
@@ -162,21 +192,26 @@ service cloud.firestore {
     match /workers/{workerId} {
       allow read: if true;
       allow create: if isSignedIn() && isValidWorker(incoming()) && !incoming().keys().hasAny(['email', 'ownerEmail']);
-      allow update: if (isOwner(existing().userId) || isAdmin()) && isValidWorker(incoming());
+      allow update: if (
+        isOwner(existing().userId) && isValidWorker(incoming()) && incoming().userId == existing().userId
+      ) || (
+        isAdmin() && (!incoming().keys().hasAny(['userId']) || incoming().userId == existing().userId)
+      );
       allow delete: if isOwner(existing().userId) || isAdmin();
     }
-
 
     match /restaurants/{restaurantId} {
       allow read: if true;
       allow create: if isSignedIn() && isValidRestaurant(incoming()) && !incoming().keys().hasAny(['email', 'ownerEmail']);
-      allow update: if (isOwner(existing().ownerId) || isAdmin());
+      allow update: if (
+        isOwner(existing().ownerId) && isValidRestaurant(incoming()) && incoming().ownerId == existing().ownerId
+      ) || isAdmin();
       allow delete: if isOwner(existing().ownerId) || isAdmin();
-      
+
       match /menuItems/{menuItemId} {
         allow read: if true;
         allow create: if isSignedIn() && isValidMenuItem(incoming());
-        allow update: if (isOwner(existing().ownerId) || isAdmin());
+        allow update: if (isOwner(existing().ownerId) && isValidMenuItem(incoming())) || isAdmin();
         allow delete: if isOwner(existing().ownerId) || isAdmin();
       }
     }
@@ -184,7 +219,11 @@ service cloud.firestore {
     match /shops/{shopId} {
       allow read: if true;
       allow create: if isSignedIn() && isValidShop(incoming()) && !incoming().keys().hasAny(['email', 'ownerEmail']);
-      allow update: if (isOwner(existing().ownerId) || isAdmin()) && isValidShop(incoming());
+      allow update: if (
+        isOwner(existing().ownerId) && isValidShop(incoming()) && incoming().ownerId == existing().ownerId
+      ) || (
+        isAdmin() && (!incoming().keys().hasAny(['ownerId']) || incoming().ownerId == existing().ownerId)
+      );
       allow delete: if isOwner(existing().ownerId) || isAdmin();
     }
 
@@ -201,8 +240,8 @@ service cloud.firestore {
     match /blood_donors/{donorId} {
       allow read: if true;
       allow create: if isSignedIn() && isValidBloodDonor(incoming());
-      allow update: if (isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin())) && isValidBloodDonor(incoming());
-      allow delete: if isSignedIn() && (request.auth.uid == resource.data.userId || isAdmin());
+      allow update: if ((isOwner(existing().userId) || isAdmin()) && isValidBloodDonor(incoming())) || isAdmin();
+      allow delete: if isOwner(existing().userId) || isAdmin();
     }
 
     match /local_alerts/{alertId} {
@@ -215,35 +254,35 @@ service cloud.firestore {
     match /blood_requests/{requestId} {
       allow read: if isSignedIn();
       allow create: if isSignedIn() && isValidBloodRequest(incoming());
-      allow update: if (isOwner(existing().userId) || isAdmin()) && isValidBloodRequest(incoming());
+      allow update: if ((isOwner(existing().userId) || isAdmin()) && isValidBloodRequest(incoming())) || isAdmin();
       allow delete: if isOwner(existing().userId) || isAdmin();
     }
 
     match /jobs/{id} {
       allow read: if true;
       allow create: if isSignedIn();
-      allow update: if isSignedIn();
+      allow update: if isSignedIn() || isAdmin();
       allow delete: if isAdmin();
     }
 
     match /rentals/{id} {
       allow read: if true;
       allow create: if isSignedIn();
-      allow update: if isSignedIn();
+      allow update: if isSignedIn() || isAdmin();
       allow delete: if isAdmin();
     }
 
     match /lost_found/{id} {
       allow read: if true;
       allow create: if isSignedIn();
-      allow update: if isSignedIn();
+      allow update: if isSignedIn() || isAdmin();
       allow delete: if isAdmin();
     }
 
     match /service_requests/{id} {
       allow read: if true;
       allow create: if isSignedIn();
-      allow update: if isSignedIn();
+      allow update: if isSignedIn() || isAdmin();
       allow delete: if isAdmin();
     }
 
@@ -303,27 +342,27 @@ service cloud.firestore {
 
     match /vehicles/{id} {
       allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow create, update, delete: if isSignedIn() || isAdmin();
     }
 
     match /animals/{id} {
       allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow create, update, delete: if isSignedIn() || isAdmin();
     }
 
     match /transports/{id} {
       allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow create, update, delete: if isSignedIn() || isAdmin();
     }
 
     match /gov_services/{id} {
       allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow create, update, delete: if isSignedIn() || isAdmin();
     }
 
     match /education/{id} {
       allow read: if true;
-      allow create, update, delete: if isSignedIn();
+      allow create, update, delete: if isSignedIn() || isAdmin();
     }
   }
 }

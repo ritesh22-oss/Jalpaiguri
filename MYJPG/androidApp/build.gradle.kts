@@ -1,8 +1,30 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.services)
 }
+
+val localProperties = Properties().apply {
+    val propsFile = rootProject.file("local.properties")
+    if (propsFile.exists()) {
+        propsFile.inputStream().use { load(it) }
+    }
+}
+
+val mapsApiKey: String = (
+    localProperties.getProperty("MAPS_API_KEY")
+        ?: System.getenv("MAPS_API_KEY")
+        ?: ""
+).trim().replace("\"", "\\\"")
+
+val routesProxyBaseUrl: String = (
+    localProperties.getProperty("ROUTES_PROXY_BASE_URL")
+        ?: System.getenv("ROUTES_PROXY_BASE_URL")
+        ?: "https://jalpaiguri-zxml.vercel.app"
+).trim().trimEnd('/')
 
 android {
     namespace = "com.myjpg.app"
@@ -19,6 +41,15 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
+        buildConfigField("String", "ROUTES_PROXY_BASE_URL", "\"$routesProxyBaseUrl\"")
+    }
+
+    buildFeatures {
+        compose = true
+        buildConfig = true
     }
 
     buildTypes {
@@ -45,45 +76,12 @@ android {
     }
 }
 
-val isWindows = System.getProperty("os.name").lowercase().contains("windows")
-
-val buildWebAssets = tasks.register<Exec>("buildWebAssets") {
-    workingDir = file("../..")
-    val currentPath = System.getenv("PATH") ?: ""
-    val enhancedPath = if (!isWindows) {
-        listOf("/usr/local/bin", "/opt/homebrew/bin", "/usr/bin", "/bin")
-            .filter { !currentPath.contains(it) }
-            .joinToString(":") + (if (currentPath.isNotEmpty()) ":$currentPath" else "")
-    } else {
-        currentPath
-    }
-    environment("PATH", enhancedPath)
-
-    if (isWindows) {
-        commandLine("cmd", "/c", "npm", "run", "build")
-    } else {
-        commandLine("npm", "run", "build")
-    }
-    inputs.dir(file("../../src"))
-    inputs.file(file("../../index.html"))
-    inputs.file(file("../../package.json"))
-    inputs.file(file("../../vite.config.ts"))
-    outputs.dir(file("../../dist"))
-}
-
 // Stage the compiled web app under build/, rather than mutating src/main/assets during an
 // Android build. Keeping generated files out of the source asset directory prevents AGP from
 // discovering the same web bundle twice and producing an APK with stale assets.
 tasks.register<Sync>("syncWebAssets") {
-    dependsOn(buildWebAssets)
     from(file("../../dist"))
     into(layout.buildDirectory.dir("generated/webAssets/www"))
-    doLast {
-        copy {
-            from(file("../../dist"))
-            into(file("src/main/assets/www"))
-        }
-    }
 }
 
 android {
@@ -112,12 +110,30 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.webkit:webkit:1.12.1")
 
+    // Jetpack Compose for Native Google Maps Screen
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.compose.ui)
+    implementation(libs.compose.foundation)
+    implementation(libs.compose.material3)
+    implementation(libs.compose.material.icons.extended)
+    debugImplementation(libs.compose.ui.tooling)
+
+    // Google Maps SDK for Android, Maps Compose & Places SDK (New)
+    implementation(libs.play.services.maps)
+    implementation(libs.maps.compose)
+    implementation(libs.places)
+    implementation(libs.play.services.maps3d)
+
     // Android Credential Manager & Google Auth
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
     implementation(libs.play.services.auth)
     implementation(libs.play.services.location)
+
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     // Firebase
     implementation(platform(libs.firebase.bom))

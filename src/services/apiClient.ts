@@ -124,10 +124,28 @@ export interface PlaceImageGenerateResponse {
   error?: string;
 }
 
+export interface NearbyPoiSummary {
+  placeId: string;
+  name: string;
+  category: string;
+  primaryType?: string;
+  address?: string;
+  formattedAddress?: string;
+  lat: number;
+  lng: number;
+  distanceMeters: number;
+  rating?: number;
+  userRatingCount?: number;
+  googleMapsUri?: string;
+}
+
 export interface ReverseGeocodeResponse {
   success: boolean;
   lat: number;
   lng: number;
+  kind?: 'poi' | 'road' | 'locality' | 'coordinate';
+  title?: string;
+  category?: string;
   name: string;
   locality: string;
   city: string;
@@ -136,8 +154,135 @@ export interface ReverseGeocodeResponse {
   country: string;
   pincode: string;
   road?: string;
+  placeId?: string;
+  primaryPlace?: {
+    placeId?: string;
+    name: string;
+    category?: string;
+    address?: string;
+    rating?: number;
+    userRatingCount?: number;
+    googleMapsUri?: string;
+    openNow?: boolean;
+  } | null;
+  nearbyPlaces?: NearbyPoiSummary[];
+  landmarks?: Array<{
+    name: string;
+    description?: string;
+    distanceMeters?: number;
+    placeId?: string;
+  }>;
   rawAddress?: any;
   source: string;
+}
+
+export interface GooglePlaceNewResult {
+  id: string;
+  displayName?: { text: string; languageCode?: string };
+  formattedAddress?: string;
+  shortFormattedAddress?: string;
+  location?: { latitude: number; longitude: number };
+  primaryType?: string;
+  primaryTypeDisplayName?: { text: string };
+  types?: string[];
+  rating?: number;
+  userRatingCount?: number;
+  googleMapsUri?: string;
+  currentOpeningHours?: { openNow?: boolean };
+}
+
+export interface AutocompletePredictionItem {
+  placePrediction?: {
+    placeId: string;
+    text?: { text: string };
+    structuredFormat?: {
+      mainText?: { text: string };
+      secondaryText?: { text: string };
+    };
+    types?: string[];
+    distanceMeters?: number;
+  };
+}
+
+export interface RoutesComputeRequest {
+  origin: { lat: number; lng: number };
+  destination: { lat: number; lng: number };
+  travelMode?: 'DRIVE' | 'WALK' | 'TWO_WHEELER' | 'BICYCLE';
+  computeAlternativeRoutes?: boolean;
+  languageCode?: 'en' | 'bn';
+}
+
+export interface RouteStepSummary {
+  distanceMeters?: number;
+  staticDuration?: string;
+  navigationInstruction?: {
+    maneuver?: string;
+    instructions?: string;
+  };
+  startLocation?: { latLng?: { latitude: number; longitude: number } };
+  endLocation?: { latLng?: { latitude: number; longitude: number } };
+}
+
+export interface RoutesComputeResponse {
+  routes?: Array<{
+    description?: string;
+    routeLabels?: string[];
+    distanceMeters?: number;
+    duration?: string;
+    polyline?: { encodedPolyline?: string };
+    viewport?: {
+      low?: { latitude: number; longitude: number };
+      high?: { latitude: number; longitude: number };
+    };
+    legs?: Array<{
+      distanceMeters?: number;
+      duration?: string;
+      steps?: RouteStepSummary[];
+    }>;
+  }>;
+}
+
+export interface StreetViewMetadataResponse {
+  available: boolean;
+  status: string;
+  panoId?: string | null;
+  lat?: number;
+  lng?: number;
+  date?: string | null;
+  copyright?: string;
+  distanceFromQueryMeters?: number;
+  nearestPano?: {
+    panoId?: string | null;
+    lat: number;
+    lng: number;
+    date?: string | null;
+    copyright?: string;
+    distanceFromQueryMeters?: number;
+  } | null;
+  error?: string;
+}
+
+export interface JourneyPreviewStop {
+  stopIndex: number;
+  role: 'START' | 'WAYPOINT' | 'DESTINATION';
+  label: string;
+  lat: number;
+  lng: number;
+  panoLat: number | null;
+  panoLng: number | null;
+  panoId: string | null;
+  streetViewAvailable: boolean;
+  headingDegrees: number;
+  captureDate: string | null;
+  copyright: string | null;
+  distanceFromStartMeters: number;
+}
+
+export interface JourneyPreviewResponse {
+  stops: JourneyPreviewStop[];
+  coveredCount: number;
+  totalStops: number;
+  metadataDenied?: boolean;
 }
 
 class ApiClient {
@@ -178,7 +323,7 @@ class ApiClient {
         (typeof document !== 'undefined' && document.documentElement?.getAttribute('data-native-app') === 'true') ||
         (window as any).AndroidGoogleAuth !== undefined;
 
-      if (isNativeApp || (!origin.includes('localhost') && !origin.includes('127.0.0.1') && !origin.includes('0.0.0.0'))) {
+      if (isNativeApp) {
         return 'https://jalpaiguri-zxml.vercel.app';
       }
     }
@@ -190,10 +335,23 @@ class ApiClient {
    * Centralized HTTP request execution
    */
   public async request<T>(endpoint: string, options: ApiRequestOptions = {}): Promise<T> {
-    const { timeoutMs = this.defaultTimeoutMs, skipAuth = false, headers = {}, ...fetchOptions } = options;
+    const { timeoutMs = this.defaultTimeoutMs, skipAuth = false, headers = {}, signal: externalSignal, ...fetchOptions } = options;
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    let didTimeout = false;
+    const timeoutId = setTimeout(() => {
+      didTimeout = true;
+      controller.abort();
+    }, timeoutMs);
+
+    const onExternalAbort = () => controller.abort();
+    if (externalSignal) {
+      if (externalSignal.aborted) {
+        clearTimeout(timeoutId);
+        throw new ApiClientError('Request cancelled', 499, endpoint);
+      }
+      externalSignal.addEventListener('abort', onExternalAbort, { once: true });
+    }
 
     const baseUrl = this.getBaseUrl();
     const targetUrl = endpoint.startsWith('http://') || endpoint.startsWith('https://')
@@ -221,6 +379,7 @@ class ApiClient {
       });
 
       clearTimeout(timeoutId);
+      if (externalSignal) externalSignal.removeEventListener('abort', onExternalAbort);
 
       if (!response.ok) {
         let errData: any = null;
@@ -230,36 +389,59 @@ class ApiClient {
           // ignore non-json error responses
         }
 
-        console.error("MYJPG AI API ERROR", {
-          url: targetUrl,
+        if (
+          typeof window !== 'undefined' &&
+          (response.status === 429 || errData?.error?.status === 'RESOURCE_EXHAUSTED' || errData?.status === 'RESOURCE_EXHAUSTED')
+        ) {
+          window.dispatchEvent(new CustomEvent('gmp-quota-exceeded'));
+        }
+
+        console.error('MYJPG API ERROR', {
+          endpoint,
           status: response.status,
           statusText: response.statusText,
-          body: errData
+          googleStatus: errData?.googleStatus || errData?.error?.status,
+          message: errData?.error?.message || errData?.error || errData?.message
         });
 
         const rawErr = errData?.error || errData?.message;
-        const errorMsg = typeof rawErr === 'string'
-          ? rawErr
-          : (rawErr?.message || (typeof errData === 'string' ? errData : null) || `API request to ${endpoint} failed with status ${response.status}`);
-        
-        throw new ApiClientError(
-          typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg),
-          response.status,
-          endpoint,
-          errData
-        );
+        const parsedMsg = typeof rawErr === 'string' ? rawErr : rawErr?.message;
+        let errorMsg = parsedMsg;
+        if (!errorMsg) {
+          if (response.status === 400) errorMsg = `Invalid request parameters (${endpoint})`;
+          else if (response.status === 401 || response.status === 403) errorMsg = `Authorization or API restriction issue (${response.status})`;
+          else if (response.status === 404) errorMsg = `Maps service endpoint unavailable (404) on backend — redeploy latest server for ${endpoint}`;
+          else if (response.status === 429) errorMsg = `API rate or quota limit reached (429)`;
+          else if (response.status >= 500) errorMsg = `Server or Google service error (${response.status})`;
+          else errorMsg = `API request to ${endpoint} failed with status ${response.status}`;
+        }
+
+        throw new ApiClientError(errorMsg, response.status, endpoint, errData);
       }
 
-      return (await response.json()) as T;
+      try {
+        return (await response.json()) as T;
+      } catch {
+        throw new ApiClientError(`Invalid JSON response from ${endpoint}`, 502, endpoint);
+      }
     } catch (err: any) {
       clearTimeout(timeoutId);
-      if (err.name === 'AbortError') {
-        throw new ApiClientError(`API request to ${endpoint} timed out after ${timeoutMs}ms`, 408, endpoint);
+      if (externalSignal) externalSignal.removeEventListener('abort', onExternalAbort);
+      if (err?.name === 'AbortError') {
+        if (didTimeout) {
+          throw new ApiClientError(`Request to ${endpoint} timed out after ${timeoutMs}ms`, 408, endpoint);
+        }
+        throw new ApiClientError('Request cancelled', 499, endpoint);
       }
       if (err instanceof ApiClientError) {
         throw err;
       }
-      throw new ApiClientError(err?.message || 'Network error occurred', 0, endpoint);
+      const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
+      throw new ApiClientError(
+        isOffline ? 'No internet connection detected.' : err?.message || `Network failure calling ${endpoint}`,
+        0,
+        endpoint
+      );
     }
   }
 
@@ -349,17 +531,166 @@ class ApiClient {
   }
 
   /**
-   * Fetch place details via server-side Google Places API proxy
+   * Fetch place details via server-side Google Places API (New) proxy
    */
-  public getPlaceDetails(placeId: string): Promise<any> {
-    return this.get<any>(`/api/places/details/${encodeURIComponent(placeId)}`);
+  public getPlaceDetails(
+    placeId: string,
+    options?: { sessionToken?: string; language?: 'en' | 'bn'; signal?: AbortSignal }
+  ): Promise<any> {
+    const sp = new URLSearchParams();
+    if (options?.sessionToken) sp.set('sessionToken', options.sessionToken);
+    if (options?.language) sp.set('language', options.language);
+    const qs = sp.toString();
+    return this.get<any>(`/api/places/details/${encodeURIComponent(placeId)}${qs ? `?${qs}` : ''}`, {
+      skipAuth: true,
+      signal: options?.signal
+    });
   }
 
   /**
-   * High-accuracy server-side reverse geocoding
+   * Programmatic Places API (New) Autocomplete (Jalpaiguri-scoped)
    */
-  public reverseGeocode(lat: number, lng: number): Promise<ReverseGeocodeResponse> {
-    return this.get<ReverseGeocodeResponse>(`/api/location/reverse-geocode?lat=${lat}&lng=${lng}`);
+  public autocompletePlaces(
+    params: {
+      input: string;
+      sessionToken?: string;
+      languageCode?: 'en' | 'bn';
+      restrictToJalpaiguri?: boolean;
+      origin?: { lat: number; lng: number };
+    },
+    options?: { signal?: AbortSignal }
+  ): Promise<{ suggestions?: AutocompletePredictionItem[] }> {
+    return this.post<{ suggestions?: AutocompletePredictionItem[] }>('/api/places/autocomplete', params, {
+      skipAuth: true,
+      signal: options?.signal
+    });
+  }
+
+  /**
+   * High-accuracy server-side reverse geocoding + nearby POI identification
+   */
+  public reverseGeocode(
+    lat: number,
+    lng: number,
+    options?: { placeId?: string; language?: 'en' | 'bn'; signal?: AbortSignal }
+  ): Promise<ReverseGeocodeResponse> {
+    const sp = new URLSearchParams({ lat: String(lat), lng: String(lng) });
+    if (options?.placeId) sp.set('placeId', options.placeId);
+    if (options?.language) sp.set('language', options.language);
+    return this.get<ReverseGeocodeResponse>(`/api/location/reverse-geocode?${sp.toString()}`, {
+      skipAuth: true,
+      signal: options?.signal
+    });
+  }
+
+  /**
+   * Search places using Places API (New) Text Search proxy
+   */
+  public searchPlacesText(
+    params: {
+      textQuery: string;
+      lat?: number;
+      lng?: number;
+      radiusMeters?: number;
+      includedType?: string;
+      maxResultCount?: number;
+      languageCode?: 'en' | 'bn';
+      restrictToJalpaiguri?: boolean;
+    },
+    options?: { signal?: AbortSignal }
+  ): Promise<{ places?: GooglePlaceNewResult[] }> {
+    return this.post<{ places?: GooglePlaceNewResult[] }>('/api/places/search-text', params, {
+      skipAuth: true,
+      signal: options?.signal
+    });
+  }
+
+  /**
+   * Search places located along an encoded route polyline
+   */
+  public searchPlacesAlongRoute(
+    params: {
+      encodedPolyline: string;
+      textQuery?: string;
+      origin?: { lat: number; lng: number };
+      maxResultCount?: number;
+      languageCode?: 'en' | 'bn';
+    },
+    options?: { signal?: AbortSignal }
+  ): Promise<{ places?: GooglePlaceNewResult[] }> {
+    return this.post<{ places?: GooglePlaceNewResult[] }>('/api/places/along-route', params, {
+      skipAuth: true,
+      signal: options?.signal
+    });
+  }
+
+  /**
+   * Search nearby places using Places API (New) Nearby Search proxy
+   */
+  public searchPlacesNearby(
+    params: {
+      lat: number;
+      lng: number;
+      radiusMeters?: number;
+      includedTypes?: string[];
+      maxResultCount?: number;
+      rankPreference?: 'DISTANCE' | 'POPULARITY';
+      languageCode?: 'en' | 'bn';
+    },
+    options?: { signal?: AbortSignal }
+  ): Promise<{ places?: GooglePlaceNewResult[] }> {
+    return this.post<{ places?: GooglePlaceNewResult[] }>('/api/places/search-nearby', params, {
+      skipAuth: true,
+      signal: options?.signal
+    });
+  }
+
+  /**
+   * Compute turn-by-turn route using official Google Routes API v2 proxy
+   */
+  public computeRoute(params: RoutesComputeRequest, options?: { signal?: AbortSignal }): Promise<RoutesComputeResponse> {
+    return this.post<RoutesComputeResponse>('/api/routes/compute', params, {
+      skipAuth: true,
+      signal: options?.signal
+    });
+  }
+
+  /**
+   * Check authentic Google Street View panorama availability at coordinates
+   */
+  public getStreetViewMetadata(
+    lat: number,
+    lng: number,
+    options?: { radius?: number; source?: 'outdoor' | 'default'; signal?: AbortSignal }
+  ): Promise<StreetViewMetadataResponse> {
+    const sp = new URLSearchParams({
+      lat: String(lat),
+      lng: String(lng),
+      radius: String(options?.radius ?? 80)
+    });
+    if (options?.source) sp.set('source', options.source);
+    return this.get<StreetViewMetadataResponse>(`/api/streetview/metadata?${sp.toString()}`, {
+      skipAuth: true,
+      signal: options?.signal
+    });
+  }
+
+  /**
+   * Build ordered Street View panorama stops along a route polyline
+   */
+  public getJourneyStreetPreview(
+    params: {
+      encodedPolyline: string;
+      originName?: string;
+      destinationName?: string;
+      maxStops?: number;
+    },
+    options?: { signal?: AbortSignal }
+  ): Promise<JourneyPreviewResponse> {
+    return this.post<JourneyPreviewResponse>('/api/streetview/journey-preview', params, {
+      skipAuth: true,
+      signal: options?.signal
+    });
   }
 
   // ==========================================

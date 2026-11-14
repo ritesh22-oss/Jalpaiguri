@@ -5,6 +5,7 @@ import { useLocation } from '../../context/LocationContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { Bus, Store, MapPin, HeartPulse, Sparkles } from 'lucide-react';
 import { isAuthorizedAdminEmail } from '../../types';
+import { SplashLogo } from '../common/BrandLogo';
 
 const SERVICE_ITEMS = [
   { icon: Bus, label: 'Finding neighbourhood transit & buses...' },
@@ -67,24 +68,14 @@ export const SplashScreen: React.FC = () => {
       {/* Center Branding & Loading Content */}
       <div className="flex flex-col items-center justify-center w-full max-w-sm">
         
-        {/* Official MYJPG Logo inside a clean, elegant rounded white card */}
+        {/* Official Transparent MYJPG Logo floating cleanly without any white card */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.90, y: 15 }}
+          initial={{ opacity: 0, scale: 0.88, y: 14 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="relative bg-white rounded-3xl p-5 sm:p-6 shadow-xl shadow-[#0756D9]/15 border border-white/80 w-44 h-44 sm:w-48 sm:h-48 flex items-center justify-center mb-6"
+          className="relative flex items-center justify-center mb-6"
         >
-          {/* Subtle Ambient Radial Highlight inside card */}
-          <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-blue-50/40 to-transparent pointer-events-none" />
-          
-          <img
-            src="./logo.png"
-            alt="MYJPG Logo"
-            className="w-full h-full object-contain relative z-10"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/logo.png';
-            }}
-          />
+          <SplashLogo size="2xl" />
         </motion.div>
 
         {/* Animated Service Badge */}

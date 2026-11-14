@@ -273,17 +273,16 @@ private struct PremiumSplashView: View {
     }
 }
 
-// MARK: - Official MYJPG Map Pin Emblem Vector (Parity with JPGLogo.tsx)
+// MARK: - Official MYJPG Map Pin Emblem Vector (Parity with BrandLogo.tsx)
 
-private struct OfficialMYJPGEmblem: View {
+struct OfficialMYJPGEmblem: View {
     var body: some View {
         Canvas { context, size in
             let scaleX = size.width / 120.0
             let scaleY = size.height / 120.0
 
-            // 1. Blue Map Pin Teardrop
+            // 1. Glossy Cyan-to-Royal Blue Map Pin Teardrop
             var pinPath = Path()
-            // Arc from left to right, then down to point (60, 92.5)
             pinPath.move(to: CGPoint(x: 37.8 * scaleX, y: 61.5 * scaleY))
             pinPath.addArc(
                 center: CGPoint(x: 60.0 * scaleX, y: 42.0 * scaleY),
@@ -296,10 +295,11 @@ private struct OfficialMYJPGEmblem: View {
             pinPath.closeSubpath()
 
             let pinGradient = Gradient(colors: [
-                Color(red: 0.145, green: 0.388, blue: 0.922),
-                Color(red: 0.114, green: 0.306, blue: 0.847)
+                Color(red: 0.08, green: 0.80, blue: 0.96),
+                Color(red: 0.09, green: 0.48, blue: 0.92),
+                Color(red: 0.02, green: 0.25, blue: 0.72)
             ])
-            context.fill(pinPath, with: .linearGradient(pinGradient, startPoint: .zero, endPoint: CGPoint(x: 0, y: size.height)))
+            context.fill(pinPath, with: .linearGradient(pinGradient, startPoint: .zero, endPoint: CGPoint(x: size.width, y: size.height)))
 
             // 2. White circular cutout inside upper area of pin
             var whiteCircle = Path()
@@ -311,33 +311,31 @@ private struct OfficialMYJPGEmblem: View {
             ))
             context.fill(whiteCircle, with: .color(.white))
 
-            // 3. Three Connected Community Network Nodes
-            let nodeColor = Color(red: 0.114, green: 0.306, blue: 0.847)
+            // 3. Three Connected Community Network Nodes (Closed Triangle)
+            let nodeColor = Color(red: 0.02, green: 0.28, blue: 0.78)
 
-            // Connection Lines
             var lines = Path()
-            lines.move(to: CGPoint(x: 60.0 * scaleX, y: 34.0 * scaleY))
-            lines.addLine(to: CGPoint(x: 52.8 * scaleX, y: 44.8 * scaleY))
-            lines.move(to: CGPoint(x: 60.0 * scaleX, y: 34.0 * scaleY))
-            lines.addLine(to: CGPoint(x: 67.2 * scaleX, y: 44.8 * scaleY))
-            context.stroke(lines, with: .color(nodeColor), style: StrokeStyle(lineWidth: 2.8 * scaleX, lineCap: .round))
+            lines.move(to: CGPoint(x: 60.0 * scaleX, y: 33.5 * scaleY))
+            lines.addLine(to: CGPoint(x: 52.2 * scaleX, y: 45.8 * scaleY))
+            lines.addLine(to: CGPoint(x: 67.8 * scaleX, y: 45.8 * scaleY))
+            lines.closeSubpath()
+            context.stroke(lines, with: .color(nodeColor), style: StrokeStyle(lineWidth: 2.8 * scaleX, lineCap: .round, lineJoin: .round))
 
-            // Circular Node Dots
             var nodes = Path()
-            nodes.addEllipse(in: CGRect(x: (60.0 - 3.4) * scaleX, y: (34.0 - 3.4) * scaleY, width: 6.8 * scaleX, height: 6.8 * scaleY))
-            nodes.addEllipse(in: CGRect(x: (52.8 - 3.4) * scaleX, y: (44.8 - 3.4) * scaleY, width: 6.8 * scaleX, height: 6.8 * scaleY))
-            nodes.addEllipse(in: CGRect(x: (67.2 - 3.4) * scaleX, y: (44.8 - 3.4) * scaleY, width: 6.8 * scaleX, height: 6.8 * scaleY))
+            nodes.addEllipse(in: CGRect(x: (60.0 - 3.8) * scaleX, y: (33.5 - 3.8) * scaleY, width: 7.6 * scaleX, height: 7.6 * scaleY))
+            nodes.addEllipse(in: CGRect(x: (52.2 - 3.8) * scaleX, y: (45.8 - 3.8) * scaleY, width: 7.6 * scaleX, height: 7.6 * scaleY))
+            nodes.addEllipse(in: CGRect(x: (67.8 - 3.8) * scaleX, y: (45.8 - 3.8) * scaleY, width: 7.6 * scaleX, height: 7.6 * scaleY))
             context.fill(nodes, with: .color(nodeColor))
 
-            // 4. White 'J' inside lower tapered section
+            // 4. Bold White 'J' inside lower tapered section
             var jPath = Path()
-            jPath.move(to: CGPoint(x: 60.0 * scaleX, y: 64.5 * scaleY))
-            jPath.addLine(to: CGPoint(x: 60.0 * scaleX, y: 77.5 * scaleY))
+            jPath.move(to: CGPoint(x: 61.5 * scaleX, y: 63.5 * scaleY))
+            jPath.addLine(to: CGPoint(x: 61.5 * scaleX, y: 76.5 * scaleY))
             jPath.addQuadCurve(
-                to: CGPoint(x: 51.0 * scaleX, y: 78.0 * scaleY),
-                control: CGPoint(x: 54.0 * scaleX, y: 84.0 * scaleY)
+                to: CGPoint(x: 52.0 * scaleX, y: 78.0 * scaleY),
+                control: CGPoint(x: 56.0 * scaleX, y: 84.0 * scaleY)
             )
-            context.stroke(jPath, with: .color(.white), style: StrokeStyle(lineWidth: 3.2 * scaleX, lineCap: .round, lineJoin: .round))
+            context.stroke(jPath, with: .color(.white), style: StrokeStyle(lineWidth: 3.6 * scaleX, lineCap: .round, lineJoin: .round))
         }
     }
 }

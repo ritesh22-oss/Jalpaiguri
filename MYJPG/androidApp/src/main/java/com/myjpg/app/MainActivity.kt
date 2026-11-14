@@ -2,6 +2,7 @@ package com.myjpg.app
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
@@ -22,6 +23,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.webkit.WebViewAssetLoader
 import com.myjpg.app.auth.GoogleAuthManager
+import com.myjpg.app.maps.NativeMapActivity
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 
@@ -82,7 +84,6 @@ class MainActivity : ComponentActivity() {
 
         webView = WebView(this).apply {
             setBackgroundColor(appSurfaceColor)
-            clearCache(true)
             settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true
@@ -96,7 +97,7 @@ class MainActivity : ComponentActivity() {
                 mediaPlaybackRequiresUserGesture = false
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                 cacheMode = WebSettings.LOAD_NO_CACHE
-                userAgentString = "${settings.userAgentString} MYJPGNativeApp/1.1.0"
+                userAgentString = "${settings.userAgentString} MYJPGNativeApp/1.0.9"
             }
 
             addJavascriptInterface(AndroidGoogleAuthInterface(), "AndroidGoogleAuth")
@@ -320,6 +321,41 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 }
+            }
+        }
+
+        @JavascriptInterface
+        fun openNativeMap(paramsJson: String?) {
+            runOnUiThread {
+                val intent = Intent(this@MainActivity, NativeMapActivity::class.java)
+                if (!paramsJson.isNullOrBlank()) {
+                    try {
+                        val json = JSONObject(paramsJson)
+                        if (json.has("centerLat") && !json.isNull("centerLat")) {
+                            intent.putExtra(NativeMapActivity.EXTRA_CENTER_LAT, json.getDouble("centerLat"))
+                        }
+                        if (json.has("centerLng") && !json.isNull("centerLng")) {
+                            intent.putExtra(NativeMapActivity.EXTRA_CENTER_LNG, json.getDouble("centerLng"))
+                        }
+                        if (json.has("destinationLat") && !json.isNull("destinationLat")) {
+                            intent.putExtra(NativeMapActivity.EXTRA_DEST_LAT, json.getDouble("destinationLat"))
+                        }
+                        if (json.has("destinationLng") && !json.isNull("destinationLng")) {
+                            intent.putExtra(NativeMapActivity.EXTRA_DEST_LNG, json.getDouble("destinationLng"))
+                        }
+                        val destName = json.optString("destinationName", "")
+                        if (destName.isNotBlank()) {
+                            intent.putExtra(NativeMapActivity.EXTRA_DEST_NAME, destName)
+                        }
+                        val query = json.optString("query", "")
+                        if (query.isNotBlank()) {
+                            intent.putExtra(NativeMapActivity.EXTRA_INITIAL_QUERY, query)
+                        }
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Unable to parse openNativeMap JSON: ${e.message}")
+                    }
+                }
+                startActivity(intent)
             }
         }
 

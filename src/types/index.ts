@@ -227,6 +227,7 @@ export interface EmergencyEvent {
   alerts_sent_trusted?: boolean;
   alerts_sent_nearby?: boolean;
   nearby_recipients_count?: number;
+  delivery_mode?: 'development_recorded' | 'recorded';
 }
 
 export interface EmergencyAlertRecipient {
@@ -281,6 +282,8 @@ export function isAuthorizedAdminEmail(email?: string | null): boolean {
 
 export interface Worker {
   id: string;
+  userId?: string;
+  status?: string;
   name: string;
   profession: string;
   category:

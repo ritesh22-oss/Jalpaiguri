@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React from 'react';
 import { ExpoHaptics } from '../utils/expoHaptics';
 
 export type ExpoDeviceType = 'iphone-16-pro' | 'pixel-9' | 'compact' | 'fullscreen';
@@ -42,19 +42,19 @@ interface ExpoContextType {
   batteryLevel: number;
 }
 
-const ExpoContext = createContext<ExpoContextType | undefined>(undefined);
+const ExpoContext = React.createContext<ExpoContextType | undefined>(undefined);
 
 export const ExpoProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [deviceType, setDeviceTypeState] = useState<ExpoDeviceType>('fullscreen');
+  const [deviceType, setDeviceTypeState] = React.useState<ExpoDeviceType>('fullscreen');
 
-  const [pushNotification, setPushNotification] = useState<ExpoPushNotificationData | null>(null);
-  const [latestOtp, setLatestOtp] = useState<string | null>(null);
-  const [autoFillOtpTrigger, setAutoFillOtpTrigger] = useState<string | null>(null);
-  const [isDevMenuOpen, setDevMenuOpen] = useState<boolean>(false);
-  const [isQrModalOpen, setQrModalOpen] = useState<boolean>(false);
-  const [isSoundEnabled, setIsSoundEnabled] = useState<boolean>(true);
-  const [simulatedTime, setSimulatedTime] = useState<string>('9:41');
-  const [batteryLevel] = useState<number>(94);
+  const [pushNotification, setPushNotification] = React.useState<ExpoPushNotificationData | null>(null);
+  const [latestOtp, setLatestOtp] = React.useState<string | null>(null);
+  const [autoFillOtpTrigger, setAutoFillOtpTrigger] = React.useState<string | null>(null);
+  const [isDevMenuOpen, setDevMenuOpen] = React.useState<boolean>(false);
+  const [isQrModalOpen, setQrModalOpen] = React.useState<boolean>(false);
+  const [isSoundEnabled, setIsSoundEnabled] = React.useState<boolean>(true);
+  const [simulatedTime, setSimulatedTime] = React.useState<string>('9:41');
+  const [batteryLevel] = React.useState<number>(94);
 
   const setDeviceType = (type: ExpoDeviceType) => {
     setDeviceTypeState(type);
@@ -63,7 +63,7 @@ export const ExpoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Update clock every minute
-  useEffect(() => {
+  React.useEffect(() => {
     const updateTime = () => {
       const now = new Date();
       let hours = now.getHours();
@@ -78,7 +78,7 @@ export const ExpoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   // Real-time EventSource listener for Server-Sent Events (SSE)
-  useEffect(() => {
+  React.useEffect(() => {
     let evtSource: EventSource | null = null;
     try {
       evtSource = new EventSource('/api/realtime/stream');
@@ -203,7 +203,7 @@ export const ExpoProvider: React.FC<{ children: React.ReactNode }> = ({ children
 };
 
 export const useExpo = () => {
-  const context = useContext(ExpoContext);
+  const context = React.useContext(ExpoContext);
   if (!context) {
     throw new Error('useExpo must be used within an ExpoProvider');
   }

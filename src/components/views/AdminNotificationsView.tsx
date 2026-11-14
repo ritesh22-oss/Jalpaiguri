@@ -19,6 +19,7 @@ import { db } from '../../lib/firebase';
 import { useNav } from '../../context/NavigationContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { Header } from '../common/Header';
+import { AppLogo } from '../common/BrandLogo';
 import { 
   markAdminNotificationRead, 
   deleteAdminNotification, 
@@ -106,6 +107,7 @@ export const AdminNotificationsView: React.FC = () => {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
+          <AppLogo variant="icon-only" size="xs" showText={false} />
           <div>
             <h1 className="text-sm font-black text-[#11241C] dark:text-white flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-[#007AFF]" />
@@ -132,26 +134,26 @@ export const AdminNotificationsView: React.FC = () => {
 
       <main className="max-w-4xl mx-auto px-4 pt-6 space-y-6">
         
-        {/* Advanced Notification Analytics Bar */}
+        {/* Live Notification Analytics Bar */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="p-3.5 bg-white dark:bg-[#0F172A] rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-xs">
-            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total Dispatched</div>
-            <div className="text-lg font-black text-[#11241C] dark:text-white mt-0.5">1,420</div>
-            <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1 mt-0.5">
-              <span>97.5% Delivery Rate</span>
+            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total Activity</div>
+            <div className="text-lg font-black text-[#11241C] dark:text-white mt-0.5">{notifications.length}</div>
+            <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">
+              Live Firestore stream
             </div>
           </div>
 
           <div className="p-3.5 bg-white dark:bg-[#0F172A] rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-xs">
-            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">FCM Confirmed</div>
-            <div className="text-lg font-black text-[#0756D9] dark:text-blue-400 mt-0.5">1,385</div>
-            <div className="text-[10px] text-gray-500 font-medium">35 pending device sync</div>
+            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Reviewed</div>
+            <div className="text-lg font-black text-[#0756D9] dark:text-blue-400 mt-0.5">{notifications.filter(n => n.read).length}</div>
+            <div className="text-[10px] text-gray-500 font-medium">Marked as read</div>
           </div>
 
           <div className="p-3.5 bg-white dark:bg-[#0F172A] rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-xs">
-            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Active Devices</div>
-            <div className="text-lg font-black text-[#11241C] dark:text-white mt-0.5">890</div>
-            <div className="text-[10px] text-blue-600 dark:text-blue-400 font-medium">Android & iOS tokens</div>
+            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Filtered View</div>
+            <div className="text-lg font-black text-[#11241C] dark:text-white mt-0.5">{filteredNotifications.length}</div>
+            <div className="text-[10px] text-blue-600 dark:text-blue-400 font-medium">Category: {activeTab}</div>
           </div>
 
           <div className="p-3.5 bg-white dark:bg-[#0F172A] rounded-2xl border border-[#E8E4DA] dark:border-white/10 shadow-xs">

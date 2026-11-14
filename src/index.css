@@ -123,10 +123,34 @@ html:not(.dark) .app-route :is(header.sticky, .sticky.top-0) {
   animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
+.field {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid #D2CEBE;
+  background-color: #FAF8F5;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #11241C;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
 
-.leaflet-container {
-  cursor: crosshair !important;
+.field:focus {
+  border-color: #007AFF;
+  background-color: #FFFFFF;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.16);
 }
-.leaflet-interactive {
-  cursor: pointer !important;
+
+/* Prevent color inversion, dark-mode filters, or unnatural grading on Google Maps & Street View */
+.gm-style img,
+.gm-style canvas,
+.gm-style div,
+.gm-style-pbc img,
+.gm-style-pbc canvas,
+.gm-style-cc {
+  filter: none !important;
+  color-scheme: light !important;
 }
+
+

@@ -108,7 +108,7 @@ export const EmergencyBloodFinder: React.FC = () => {
 
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
+  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
 
   // Derived active filters
   const activeFilters = useMemo(() => {
@@ -209,19 +209,23 @@ export const EmergencyBloodFinder: React.FC = () => {
   // Marker Updates
   useEffect(() => {
     if (!googleMapRef.current || !mapLoaded) return;
-    markersRef.current.forEach(m => m.setMap(null));
+    markersRef.current.forEach((m) => {
+      m.map = null;
+    });
     markersRef.current = [];
     const addMarkers = async () => {
-        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker") as google.maps.MarkerLibrary;
-        donors.forEach(donor => {
-            const donorPin = new PinElement({ background: donor.isDemo ? '#4A90E2' : '#D9383A', scale: 0.8 });
-            const marker = new AdvancedMarkerElement({
-                map: googleMapRef.current,
-                position: { lat: donor.lat, lng: donor.lng },
-                content: donorPin.element
-            });
-            markersRef.current.push(marker as any);
+      const { AdvancedMarkerElement, PinElement } = (await google.maps.importLibrary(
+        'marker'
+      )) as google.maps.MarkerLibrary;
+      donors.forEach((donor) => {
+        const donorPin = new PinElement({ background: donor.isDemo ? '#4A90E2' : '#D9383A', scale: 0.8 });
+        const marker = new AdvancedMarkerElement({
+          map: googleMapRef.current,
+          position: { lat: donor.lat, lng: donor.lng },
+          content: donorPin.element
         });
+        markersRef.current.push(marker);
+      });
     };
     addMarkers();
   }, [donors, mapLoaded]);

@@ -13,7 +13,7 @@ import ReactMarkdown from 'react-markdown';
 import { useNav } from '../../context/NavigationContext';
 import { useLocation } from '../../context/LocationContext';
 import { apiClient } from '../../services/apiClient';
-import logo from '../../assets/logo.png';
+import { JPGLogo } from './JPGLogo';
 
 interface GroundingPlace {
   title: string;
@@ -309,7 +309,7 @@ export const JPGAssistantModal: React.FC = () => {
       >
         {/* New Header Structure */}
         <div className="flex items-center p-4 border-b border-[#E8E4DA] dark:border-white/10">
-          <img src={logo} alt="MYJPG Logo" className="w-8 h-8 mr-3 rounded-lg" />
+          <JPGLogo size="xs" showText={false} className="mr-3" />
           <div className="flex-1">
             <h3 className="font-bold text-base text-[#11241C] dark:text-white">JPG AI Assistant</h3>
             <p className="text-xs text-[#55685F] dark:text-[#A2B3AA]">Civic intelligence • বাংলা & English</p>

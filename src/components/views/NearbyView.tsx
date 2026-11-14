@@ -33,6 +33,7 @@ import { useApp } from '../../context/AppContext';
 import { NearbyCategoryType, DistanceFilterType, NearbyItem } from '../../types';
 import { UNIFIED_NEARBY_DIRECTORY } from '../../data/nearbyServicesDirectory';
 import { calculateHaversineDistance, formatDistanceString } from '../../data/jalpaiguriLocalities';
+import { NearbyGoogleMapPanel } from '../nearby/NearbyGoogleMapPanel';
 
 export const NearbyView: React.FC = () => {
   const { navigate, params, setIsAssistantOpen } = useNav();
@@ -378,147 +379,14 @@ export const NearbyView: React.FC = () => {
 
         {/* MAP VIEW */}
         {activeTab === 'map' && (
-          <div className="relative w-full h-[520px] bg-[#E8E4DA] dark:bg-[#131F1A] rounded-3xl overflow-hidden border border-[#D2CEBE] dark:border-white/10 shadow-md flex flex-col justify-between">
-            {/* Interactive Vector Map Canvas Mockup with real GPS markers */}
-            <div className="absolute inset-0 bg-[#E5E9E2] dark:bg-[#0F172A] overflow-hidden">
-              {/* Stylized road grid lines */}
-              <svg className="w-full h-full opacity-40 dark:opacity-20" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <pattern id="map-grid" width="60" height="60" patternUnits="userSpaceOnUse">
-                    <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#BAC5B5" strokeWidth="1.5" />
-                  </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#map-grid)" />
-                {/* Teesta & Karala Rivers stylized */}
-                <path
-                  d="M -20 180 Q 120 220, 240 160 T 480 260"
-                  fill="none"
-                  stroke="#99C2EC"
-                  strokeWidth="14"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M 320 -10 Q 300 200, 360 400"
-                  fill="none"
-                  stroke="#99C2EC"
-                  strokeWidth="8"
-                  strokeLinecap="round"
-                />
-              </svg>
-
-              {/* User Center GPS Beacon */}
-              <div
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center cursor-pointer"
-                title="Your approximate location"
-              >
-                <span className="relative flex h-8 w-8 items-center justify-center">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-60"></span>
-                  <span className="relative inline-flex rounded-full h-5 w-5 bg-[#007AFF] dark:bg-blue-600 border-3 border-white dark:border-[#0F172A] shadow-md"></span>
-                </span>
-                <span className="mt-1 px-2 py-0.5 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white text-[9px] font-extrabold shadow-sm">
-                  You are here ({location.locality})
-                </span>
-              </div>
-
-              {/* Service Pins placed relative to center */}
-              {filteredItems.slice(0, 12).map((item, idx) => {
-                // Calculate visual offsets relative to center based on lat/lng difference
-                const deltaLng = (item.lng - location.lng) * 4500;
-                const deltaLat = (location.lat - item.lat) * 4500;
-
-                const posX = Math.max(15, Math.min(85, 50 + deltaLng));
-                const posY = Math.max(15, Math.min(85, 50 + deltaLat));
-
-                const isSelected = selectedMarkerItem?.id === item.id;
-
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => setSelectedMarkerItem(item)}
-                    style={{ left: `${posX}%`, top: `${posY}%` }}
-                    className={`absolute -translate-x-1/2 -translate-y-1/2 z-10 cursor-pointer transition-transform hover:scale-125 ${
-                      isSelected ? 'scale-125 z-30' : ''
-                    }`}
-                  >
-                    <div
-                      className={`p-2 rounded-2xl shadow-lg border-2 flex items-center justify-center ${
-                        isSelected
-                          ? 'bg-[#007AFF] text-white border-white ring-4 ring-blue-50 dark:ring-blue-800'
-                          : 'bg-white dark:bg-[#0F172A] text-[#11241C] dark:text-white border-[#007AFF] dark:border-blue-500'
-                      }`}
-                    >
-                      {item.category === 'Workers' && <Wrench className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />}
-                      {item.category === 'Medical' && <Stethoscope className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />}
-                      {item.category === 'Blood' && <Droplet className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />}
-                      {item.category === 'Jobs' && <Briefcase className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />}
-                      {item.category === 'Shops' && <Store className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />}
-                      {item.category === 'Vehicle' && <Car className="w-3.5 h-3.5 text-slate-700 dark:text-slate-300" />}
-                      {item.category === 'Animal' && <PawPrint className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />}
-                      {item.category === 'Rentals' && <HomeIcon className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />}
-                      {item.category === 'Services' && <Landmark className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Map Top Badge */}
-            <div className="relative z-20 p-3 flex items-center justify-between">
-              <div className="bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#E8E4DA] dark:border-white/10 text-[11px] font-bold text-[#11241C] dark:text-white shadow-xs flex items-center gap-1.5">
-                <Navigation className="w-3.5 h-3.5 text-[#007AFF] dark:text-[#38BDF8]" />
-                <span>Tap any pin to inspect nearby service</span>
-              </div>
-            </div>
-
-            {/* Map Selected Result Bottom Sheet */}
-            {selectedMarkerItem && (
-              <div className="relative z-30 m-3 bg-white dark:bg-[#0F172A] rounded-2xl p-4 border border-[#E8E4DA] dark:border-white/10 shadow-xl animate-in slide-in-from-bottom-4 duration-200">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div>
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-blue-50 dark:bg-blue-950/60 text-[#007AFF] dark:text-[#38BDF8] uppercase">
-                        {selectedMarkerItem.subcategory}
-                      </span>
-                      {selectedMarkerItem.verified && (
-                        <span className="text-[10px] font-bold text-blue-700 dark:text-blue-300 flex items-center gap-0.5">
-                          <ShieldCheck className="w-3 h-3" />
-                          Verified
-                        </span>
-                      )}
-                    </div>
-                    <h4 className="text-sm font-extrabold text-[#0F172A] dark:text-white">
-                      {selectedMarkerItem.name}
-                    </h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
-                      📍 {selectedMarkerItem.area} • {selectedMarkerItem.distanceText}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setSelectedMarkerItem(null)}
-                    className="p-1 text-slate-500 dark:text-slate-400 hover:text-[#0F172A] dark:hover:text-white cursor-pointer"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="pt-2 border-t border-[#F0ECE1] dark:border-white/10 flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#007AFF] dark:text-[#38BDF8]">
-                    {selectedMarkerItem.startingPrice ||
-                      selectedMarkerItem.salary ||
-                      selectedMarkerItem.openStatus ||
-                      'Available Now'}
-                  </span>
-                  <button
-                    onClick={() => handleAction(selectedMarkerItem)}
-                    className="bg-[#007AFF] dark:bg-blue-600 text-white hover:bg-blue-700 px-3.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1 shadow-xs cursor-pointer"
-                  >
-                    <span>{selectedMarkerItem.primaryActionLabel}</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          <NearbyGoogleMapPanel
+            items={filteredItems}
+            userLat={location?.lat ?? 26.5265}
+            userLng={location?.lng ?? 88.723}
+            selectedMarkerItem={selectedMarkerItem}
+            onSelectMarker={setSelectedMarkerItem}
+            onAction={handleAction}
+          />
         )}
 
         {/* Empty State when no nearby services found */}

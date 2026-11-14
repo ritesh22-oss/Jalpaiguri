@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { WifiOff, RefreshCw, MessageSquare, AlertCircle } from 'lucide-react';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 import { useLanguage } from '../../context/LanguageContext';
+import { AppLogo } from './BrandLogo';
 
 export const OfflineView: React.FC = () => {
   const { refreshStatus } = useOnlineStatus();
@@ -108,7 +109,8 @@ export const OfflineView: React.FC = () => {
         </div>
 
         {/* Branding Footer */}
-        <div className="mt-12 flex items-center gap-1.5 opacity-40">
+        <div className="mt-12 flex items-center gap-2 opacity-75">
+          <AppLogo variant="icon-only" size="xs" showText={false} />
           <span className="text-[10px] font-black text-[#11241C] dark:text-white tracking-widest uppercase">
             MYJPG
           </span>

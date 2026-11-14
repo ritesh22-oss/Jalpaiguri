@@ -135,8 +135,15 @@ const AppContent: React.FC = () => {
   const { pujaPandals, addPujaPandal, reportPandalInfo } = useApp();
   const { isBengali } = useLanguage();
   const { isOnline } = useOnlineStatus();
+  const [quotaExceeded, setQuotaExceeded] = React.useState(false);
   const [showWelcomePopup, setShowWelcomePopup] = React.useState(false);
   const contentScrollRef = React.useRef<HTMLElement>(null);
+
+  React.useEffect(() => {
+    const onQuotaExceeded = () => setQuotaExceeded(true);
+    window.addEventListener('gmp-quota-exceeded', onQuotaExceeded);
+    return () => window.removeEventListener('gmp-quota-exceeded', onQuotaExceeded);
+  }, []);
 
   // The application has one scroll owner. Reset it when changing routes so content from a
   // previously scrolled route can never appear behind the next route's sticky header.
@@ -246,8 +253,10 @@ const AppContent: React.FC = () => {
       console.log(`[AUTH] routing decision: outside-area (entered service area) -> home`);
       replaceView('home');
     }
-  }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView, user?.role, serviceAreaStatus]);
+  }, [isLoading, isAuthenticated, isProfileComplete, currentView, replaceView, user?.role, user?.email, firebaseUser?.email, serviceAreaStatus]);
   
+  const isOfficialAdmin = user?.role === 'admin' || isAuthorizedAdminEmail(user?.email || firebaseUser?.email);
+
   const hideBottomNavViews = [
     'splash',
     'onboarding',
@@ -264,6 +273,7 @@ const AppContent: React.FC = () => {
     'chat',
     'ai-chat',
     'admin-dashboard',
+    'admin-notifications',
     'add-shop'
   ];
   const showBottomNav = !hideBottomNavViews.includes(currentView);
@@ -272,12 +282,14 @@ const AppContent: React.FC = () => {
     currentView === 'outside-area' ||
     currentView === 'safety-sos' ||
     currentView === 'sexual-violence-support' ||
-    currentView === 'splash';
+    currentView === 'splash' ||
+    currentView === 'admin-dashboard' ||
+    currentView === 'admin-notifications';
 
   // 3. CONDITIONAL EARLY RETURNS (Must be AFTER all hooks)
   
-  // Location bypass
-  if (serviceAreaStatus === 'outside' && !isExemptView) {
+  // Location bypass (admins and exempt routes are never blocked)
+  if (serviceAreaStatus === 'outside' && !isExemptView && !isOfficialAdmin) {
     return (
       <div className="w-full min-h-screen flex flex-col">
         <main className="flex-1 w-full">
@@ -288,7 +300,7 @@ const AppContent: React.FC = () => {
     );
   }
 
-  if ((locationStatus === 'denied' || locationStatus === 'permission_denied') && !isExemptView) {
+  if ((locationStatus === 'denied' || locationStatus === 'permission_denied') && !isExemptView && !isOfficialAdmin) {
     return (
       <div className="w-full min-h-screen flex flex-col">
         <main className="flex-1 w-full">
@@ -303,7 +315,7 @@ const AppContent: React.FC = () => {
   if (isLoading) {
     if (isRedirectPending) {
       return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAF8F5] dark:bg-[#020617] transition-colors">
           <div className="flex flex-col items-center gap-6">
             <div className="relative flex flex-col items-center">
               <div className="relative mb-8">
@@ -467,8 +479,41 @@ const AppContent: React.FC = () => {
 
   const isPostLogin = !['splash', 'onboarding', 'auth', 'phone-auth', 'otp', 'profile-setup', 'profile-onboarding'].includes(currentView);
 
+  // Admin Dashboard uses its own dedicated desktop/mobile sidebar + scroll layout without motion transforms
+  if (currentView === 'admin-dashboard') {
+    return (
+      <div id="app-root-scroll" className="app-root-safe-area w-full h-screen h-[100dvh] bg-[#FAF8F5] text-[#0F172A] flex flex-col relative overflow-hidden">
+        <AnimatePresence>
+          {!isOnline && <OfflineView />}
+        </AnimatePresence>
+        <div className={`flex-1 min-h-0 w-full overflow-hidden ${!isOnline ? 'hidden' : ''}`}>
+          <AdminDashboardView />
+        </div>
+        <Toast />
+      </div>
+    );
+  }
+
   return (
     <div id="app-root-scroll" className="app-root-safe-area w-full h-screen h-[100dvh] bg-[#FAF8F5] dark:bg-[#020617] text-[#0F172A] dark:text-[#F8FAFC] flex flex-col relative transition-colors overflow-hidden">
+      {quotaExceeded && (
+        <div
+          role="alert"
+          className="sticky top-0 z-50 flex items-center justify-between gap-4 bg-amber-100 border-b border-amber-300 px-4 py-2.5 text-sm text-amber-950 shrink-0"
+        >
+          <span>
+            <strong>Demo Quota Reached:</strong> This session&apos;s demo Google Maps key has reached its usage limit. If you plan to deploy or continue developing this app, ask the agent to switch to a Google Cloud project with billing enabled or configure your own Maps API key.
+          </span>
+          <button
+            type="button"
+            onClick={() => setQuotaExceeded(false)}
+            className="shrink-0 rounded px-2 py-0.5 text-xs font-medium text-amber-900 hover:bg-amber-200 cursor-pointer"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       <AnimatePresence>
         {!isOnline && <OfflineView />}
       </AnimatePresence>

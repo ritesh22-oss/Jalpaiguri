@@ -68,69 +68,78 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] text-[#11241C] dark:text-white flex flex-col max-w-lg mx-auto pb-24 select-none transition-colors">
+    <div className="w-full min-h-screen bg-[#FAF8F5] dark:bg-[#0B132B] text-[#11241C] dark:text-white flex flex-col pb-24 select-none overflow-x-hidden transition-colors">
       {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-white/95 dark:bg-[#0F172A]/95 backdrop-blur-md border-b border-[#E8E4DA] dark:border-white/10 px-4 py-3 flex items-center justify-between transition-colors">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onBack}
-            className="p-2 -ml-2 rounded-full hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] text-[#11241C] dark:text-white transition-colors cursor-pointer"
-            aria-label="Back"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <h1 className="text-base font-extrabold text-[#11241C] dark:text-white">
-              Support & Emergency Resources
-            </h1>
-            <p className="text-[11px] font-semibold text-[#667085] dark:text-[#A2B3AA]">
-              Confidential, Verified Guidance & Helplines
-            </p>
+      <header className="w-full sticky top-0 z-30 bg-white/95 dark:bg-[#0F172A]/95 backdrop-blur-md border-b border-[#E8E4DA] dark:border-white/10 transition-colors">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <button
+              type="button"
+              onClick={onBack}
+              className="p-2 -ml-2 rounded-full hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A] text-[#11241C] dark:text-white transition-colors cursor-pointer shrink-0"
+              aria-label="Back"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <div className="min-w-0">
+              <h1 className="text-base font-extrabold text-[#11241C] dark:text-white truncate">
+                Support &amp; Emergency Resources
+              </h1>
+              <p className="text-[11px] font-semibold text-[#667085] dark:text-[#A2B3AA] truncate">
+                Confidential, Verified Guidance &amp; Helplines
+              </p>
+            </div>
           </div>
-        </div>
 
-        <button
-          onClick={call112}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#B42318] hover:bg-[#912018] text-white font-black text-xs shadow-xs active:scale-95 transition-all cursor-pointer"
-        >
-          <Phone className="w-3.5 h-3.5 fill-current" />
-          <span>CALL 112</span>
-        </button>
+          <button
+            type="button"
+            onClick={call112}
+            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#B42318] hover:bg-[#912018] text-white font-black text-xs shadow-xs active:scale-95 transition-all cursor-pointer"
+          >
+            <Phone className="w-3.5 h-3.5 fill-current" />
+            <span>CALL 112</span>
+          </button>
+        </div>
       </header>
 
       {/* Official Disclaimer */}
-      <div className="bg-[#FFF4E5] dark:bg-amber-950/40 border-b border-[#FFE0B2] dark:border-amber-800/30 px-4 py-2.5 flex items-start gap-2 text-xs text-[#7A4100] dark:text-amber-300">
-        <Info className="w-4 h-4 text-[#B76E00] dark:text-amber-400 shrink-0 mt-0.5" />
-        <p className="leading-snug">
-          <strong className="font-bold">Disclaimer:</strong> MYJPG is not a law enforcement, healthcare, or medical provider. All helplines and legal aid bodies listed below are verified official Indian governmental and municipal services.
-        </p>
+      <div className="w-full bg-[#FFF4E5] dark:bg-amber-950/40 border-b border-[#FFE0B2] dark:border-amber-800/30">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-start gap-2.5 text-xs text-[#7A4100] dark:text-amber-300">
+          <Info className="w-4 h-4 text-[#B76E00] dark:text-amber-400 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
+            <strong className="font-bold">Disclaimer:</strong> MYJPG is not a law enforcement, healthcare, or medical provider. All helplines and legal aid bodies listed below are verified official Indian governmental and municipal services.
+          </p>
+        </div>
       </div>
 
       {/* Section Filter Pills */}
-      <div className="bg-white dark:bg-[#0F172A] border-b border-[#E8E4DA] dark:border-white/10 px-4 py-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-bold transition-colors">
-        {[
-          { id: 'immediate', label: '🚨 Immediate Safety' },
-          { id: 'triage', label: '🧭 Quick Triage' },
-          { id: 'helplines', label: '📞 Helplines' },
-          { id: 'medical', label: '🏥 Medical Care' },
-          { id: 'legal', label: '⚖️ Legal Support' },
-          { id: 'diary', label: `🔒 Private Diary (${privateNotes.length})` }
-        ].map((sec) => (
-          <button
-            key={sec.id}
-            onClick={() => setActiveSection(sec.id as any)}
-            className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
-              activeSection === sec.id
-                ? 'bg-[#007AFF] dark:bg-blue-600 text-white'
-                : 'text-[#55685F] dark:text-[#A2B3AA] hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A]'
-            }`}
-          >
-            {sec.label}
-          </button>
-        ))}
+      <div className="w-full bg-white dark:bg-[#0F172A] border-b border-[#E8E4DA] dark:border-white/10 transition-colors">
+        <div className="max-w-4xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-center gap-2 text-xs font-bold">
+          {[
+            { id: 'immediate', label: '🚨 Immediate Safety' },
+            { id: 'triage', label: '🧭 Quick Triage' },
+            { id: 'helplines', label: '📞 Helplines' },
+            { id: 'medical', label: '🏥 Medical Care' },
+            { id: 'legal', label: '⚖️ Legal Support' },
+            { id: 'diary', label: `🔒 Private Diary (${privateNotes.length})` }
+          ].map((sec) => (
+            <button
+              type="button"
+              key={sec.id}
+              onClick={() => setActiveSection(sec.id as any)}
+              className={`px-3.5 py-1.5 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
+                activeSection === sec.id
+                  ? 'bg-[#007AFF] dark:bg-blue-600 text-white shadow-xs'
+                  : 'bg-[#FAF8F5] dark:bg-[#131F1A] text-[#55685F] dark:text-[#A2B3AA] border border-[#E8E4DA] dark:border-white/10 hover:bg-[#F3F0E6] dark:hover:bg-[#1F312A]'
+              }`}
+            >
+              {sec.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <main className="p-4 space-y-4 flex-1">
+      <main className="w-full max-w-4xl mx-auto px-4 py-6 space-y-5 flex-1">
         {/* ========================================================= */}
         {/* SECTION 1: IMMEDIATE SAFETY */}
         {/* ========================================================= */}
@@ -211,11 +220,11 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
 
             {/* Kotwali Police Station Card */}
             <div className="bg-white dark:bg-[#0F172A] border border-[#E8E4DA] dark:border-white/10 rounded-3xl p-5 shadow-xs space-y-3 transition-colors">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="font-extrabold text-sm text-[#11241C] dark:text-white">
                   Kotwali Police Station (Jalpaiguri Headquarters)
                 </h3>
-                <span className="text-[11px] font-bold text-[#007AFF] dark:text-blue-400 bg-[#E6F4EA] dark:bg-blue-950/60 border border-transparent dark:border-blue-800/40 px-2 py-0.5 rounded-full">
+                <span className="shrink-0 text-[11px] font-bold text-[#007AFF] dark:text-blue-400 bg-[#E6F4EA] dark:bg-blue-950/60 border border-transparent dark:border-blue-800/40 px-2.5 py-0.5 rounded-full">
                   Open 24/7
                 </span>
               </div>
@@ -460,19 +469,19 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
                   Provides immediate medical examination, emergency trauma care, post-exposure prophylaxis (PEP), and certified medical documentation.
                 </p>
 
-                <div className="flex gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <a
                     href="tel:03561224001"
-                    className="flex-1 py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5"
+                    className="py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5"
                   >
-                    <Phone className="w-3.5 h-3.5" />
+                    <Phone className="w-3.5 h-3.5 shrink-0" />
                     <span>Emergency (03561-224001)</span>
                   </a>
                   <a
                     href="tel:108"
-                    className="flex-1 py-2.5 px-3 rounded-2xl bg-[#FAF8F5] dark:bg-[#121E19] border border-[#D2CEBE] dark:border-white/10 text-[#11241C] dark:text-white font-bold text-xs flex items-center justify-center gap-1.5"
+                    className="py-2.5 px-3 rounded-2xl bg-[#FAF8F5] dark:bg-[#121E19] border border-[#D2CEBE] dark:border-white/10 text-[#11241C] dark:text-white font-bold text-xs flex items-center justify-center gap-1.5"
                   >
-                    <Hospital className="w-3.5 h-3.5 text-[#D92D20]" />
+                    <Hospital className="w-3.5 h-3.5 text-[#D92D20] shrink-0" />
                     <span>108 Ambulance</span>
                   </a>
                 </div>
@@ -536,19 +545,19 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
                   Provides appointed pro-bono advocates, assistance with filing FIRs, victim compensation claims, and court representations.
                 </p>
 
-                <div className="flex gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <a
                     href="tel:03561224108"
-                    className="flex-1 py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5"
+                    className="py-2.5 px-3 rounded-2xl bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5"
                   >
-                    <Phone className="w-3.5 h-3.5" />
+                    <Phone className="w-3.5 h-3.5 shrink-0" />
                     <span>03561-224108</span>
                   </a>
                   <a
                     href="tel:15100"
-                    className="flex-1 py-2.5 px-3 rounded-2xl bg-[#FAF8F5] dark:bg-[#121E19] border border-[#D2CEBE] dark:border-white/10 text-[#11241C] dark:text-white font-bold text-xs flex items-center justify-center gap-1.5"
+                    className="py-2.5 px-3 rounded-2xl bg-[#FAF8F5] dark:bg-[#121E19] border border-[#D2CEBE] dark:border-white/10 text-[#11241C] dark:text-white font-bold text-xs flex items-center justify-center gap-1.5"
                   >
-                    <Scale className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400" />
+                    <Scale className="w-3.5 h-3.5 text-[#007AFF] dark:text-blue-400 shrink-0" />
                     <span>15100 (NALSA 24/7)</span>
                   </a>
                 </div>
@@ -575,7 +584,7 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
         {/* ========================================================= */}
         {activeSection === 'diary' && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h2 className="text-base font-extrabold text-[#11241C] dark:text-white flex items-center gap-1.5">
                   <Lock className="w-4 h-4 text-[#007AFF] dark:text-blue-400" />
@@ -587,8 +596,9 @@ export const SexualViolenceSupportView: React.FC<SexualViolenceSupportViewProps>
               </div>
 
               <button
+                type="button"
                 onClick={() => setIsAddingNote(true)}
-                className="px-3 py-1.5 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
+                className="shrink-0 px-3 py-1.5 rounded-full bg-[#007AFF] dark:bg-blue-600 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>New Note</span>

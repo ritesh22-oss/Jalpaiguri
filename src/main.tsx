@@ -10,7 +10,7 @@
                          origin.startsWith('file:') ||
                          (typeof document !== 'undefined' && document.documentElement?.getAttribute('data-native-app') === 'true') ||
                          (typeof window !== 'undefined' && (window as any).AndroidGoogleAuth !== undefined);
-        if (isNative || (!origin.includes('localhost') && !origin.includes('127.0.0.1') && !origin.includes('0.0.0.0'))) {
+        if (isNative) {
           return `${PROD_BACKEND}${input}`;
         }
       }
@@ -62,6 +62,44 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
+// Case A (Demo Project Key) Tier 1 quota / auth-failure detection before React mounts
+if (typeof window !== 'undefined') {
+  const prevAuthFailure = (window as any).gm_authFailure;
+  (window as any).gm_authFailure = () => {
+    console.error(
+      '%c[MYJPG Maps Diagnostic] Google Maps Authentication Failure (gm_authFailure) detected!\n' +
+      'Root Cause Analysis & Google Cloud Console Configuration Required:\n' +
+      '1. HTTP Referrer Restrictions:\n' +
+      '   Ensure the API key authorizes the exact browser origins:\n' +
+      '   - https://ais-dev-2kcr4ltnqit3uoxlrm5rmk-546659896182.asia-southeast1.run.app/*\n' +
+      '   - https://ais-pre-2kcr4ltnqit3uoxlrm5rmk-546659896182.asia-southeast1.run.app/*\n' +
+      '   - https://jalpaiguri-zxml.vercel.app/*\n' +
+      '   - http://localhost:3000/*\n' +
+      '2. Required APIs to Enable in Google Cloud Console:\n' +
+      '   - Maps JavaScript API\n' +
+      '   - Places API (New)\n' +
+      '   - Geocoding API\n' +
+      '   - Routes API\n' +
+      '   - Street View Static API / Maps SDK for Android & iOS\n' +
+      '3. Google Cloud Billing must be active for the project.\n' +
+      '4. Verify that the correct API key is populated in GOOGLE_MAPS_API_KEY / VITE_GOOGLE_MAPS_API_KEY.',
+      'background: #111; color: #ff3333; padding: 6px; font-weight: bold; border-radius: 4px;'
+    );
+    window.dispatchEvent(new Event('google-maps-auth-failure'));
+    window.dispatchEvent(new CustomEvent('gmp-quota-exceeded'));
+    if (typeof prevAuthFailure === 'function') {
+      try { prevAuthFailure(); } catch {}
+    }
+  };
+  const origConsoleError = console.error.bind(console);
+  console.error = (...args: unknown[]) => {
+    if (args.some((a) => typeof a === 'string' && (a.includes('OverQuotaMapError') || a.includes('QuotaExceededError') || a.includes('RefererNotAllowedMapError') || a.includes('InvalidKeyMapError') || a.includes('BillingNotEnabledMapError')))) {
+      window.dispatchEvent(new CustomEvent('gmp-quota-exceeded'));
+    }
+    origConsoleError(...args);
+  };
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
@@ -74,36 +112,18 @@ requestAnimationFrame(() => {
   (window as any).AndroidGoogleAuth?.reportWebAppReady?.();
 });
 
-// Service Worker Handling:
-// PWA browsers use service workers for offline caching.
-// Native Android WebView has bundled assets; unregister any previously cached service workers
-// so updated APK assets are always loaded immediately without cache retention.
-if ('serviceWorker' in navigator) {
-  if ((window as any).AndroidGoogleAuth) {
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-      for (const reg of registrations) {
-        reg.unregister().then(() => {
-          console.log('[Service Worker] Unregistered stale worker in native app');
-        });
-      }
-    });
-    if ('caches' in window) {
-      caches.keys().then((keys) => {
-        for (const key of keys) {
-          caches.delete(key);
-        }
+// Register service worker for Progressive Web App (PWA) support
+// APK assets are already offline-capable. Do not install a PWA service worker in WebView: it
+// can retain a stale app shell across APK upgrades and mask the newly bundled UI.
+if ('serviceWorker' in navigator && !(window as any).AndroidGoogleAuth) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then((reg) => {
+        console.log('[Service Worker] Registered successfully with scope:', reg.scope);
+      })
+      .catch((err) => {
+        console.warn('[Service Worker] Registration failed:', err);
       });
-    }
-  } else {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js')
-        .then((reg) => {
-          console.log('[Service Worker] Registered successfully with scope:', reg.scope);
-        })
-        .catch((err) => {
-          console.warn('[Service Worker] Registration failed:', err);
-        });
-    });
-  }
+  });
 }
 

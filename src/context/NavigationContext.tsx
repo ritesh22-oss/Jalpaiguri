@@ -6,6 +6,9 @@ interface NavigationStackItem {
   params?: Record<string, any>;
 }
 
+const isFileOrigin = (): boolean =>
+  typeof window !== 'undefined' && window.location.protocol === 'file:';
+
 const pathFor = (view: ViewType, params?: Record<string, any>) => {
   const pathMapping: Partial<Record<ViewType, string>> = {
     'shop-marketplace': '/shops',
@@ -24,22 +27,51 @@ const pathFor = (view: ViewType, params?: Record<string, any>) => {
   return pathMapping[view] || `/${view}`;
 };
 
-const itemFromPath = (pathname: string): NavigationStackItem | null => {
-  const cleanPath = pathname.replace(/^\/+|\/+$/g, '');
-  if (!cleanPath) return null;
+const parseRouteString = (routeStr: string): NavigationStackItem | null => {
+  const cleanPath = routeStr.replace(/^#?\/+|\/+$/g, '').split('?')[0];
+  if (!cleanPath || cleanPath === 'index.html' || cleanPath.startsWith('android_asset')) {
+    return null;
+  }
   const [head, section] = cleanPath.split('/');
   const pathMapping: Record<string, ViewType> = {
-    shops: 'shop-marketplace', blood: 'blood', discover: 'discover', profile: 'profile',
-    home: 'home', notifications: 'notifications', 'admin-notifications': 'admin-notifications',
-    auth: 'auth', onboarding: 'onboarding'
+    shops: 'shop-marketplace',
+    blood: 'blood',
+    discover: 'discover',
+    profile: 'profile',
+    home: 'home',
+    notifications: 'notifications',
+    'admin-notifications': 'admin-notifications',
+    auth: 'auth',
+    onboarding: 'onboarding'
   };
   if (head === 'admin-dashboard') {
-    return { view: 'admin-dashboard', params: section ? { section: decodeURIComponent(section) } : {} };
+    return {
+      view: 'admin-dashboard',
+      params: section ? { section: decodeURIComponent(section) } : {}
+    };
   }
   const view = pathMapping[head] || (head as ViewType);
-  // The app's route switch provides the safe visual fallback for legacy paths. Unknown
-  // external paths deliberately resolve to home rather than leaving a blank screen.
   return { view: view || 'home' };
+};
+
+const itemFromLocation = (): NavigationStackItem | null => {
+  if (typeof window === 'undefined') return null;
+  if (window.location.hash && window.location.hash.startsWith('#/')) {
+    const fromHash = parseRouteString(window.location.hash);
+    if (fromHash) return fromHash;
+  }
+  if (isFileOrigin()) {
+    return null;
+  }
+  return parseRouteString(window.location.pathname);
+};
+
+const formatHistoryUrl = (view: ViewType, params?: Record<string, any>): string => {
+  const route = pathFor(view, params);
+  if (isFileOrigin()) {
+    return `#${route}`;
+  }
+  return route;
 };
 
 interface NavigationContextType {
@@ -66,13 +98,15 @@ const NavigationContext = createContext<NavigationContextType | undefined>(undef
 export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [history, setHistory] = useState<NavigationStackItem[]>(() => {
     try {
-      // The address bar is canonical. This is essential for direct admin-section URLs
-      // and avoids an old session value overriding a pasted/deep-linked URL.
-      const fromPath = itemFromPath(window.location.pathname);
-      if (fromPath) return [fromPath];
+      const fromLoc = itemFromLocation();
+      if (fromLoc) return [fromLoc];
 
       const savedView = sessionStorage.getItem('jpg_current_view') as ViewType | null;
-      if (savedView && savedView !== 'splash') return [{ view: savedView }];
+      const savedParamsRaw = sessionStorage.getItem('jpg_current_params');
+      const savedParams = savedParamsRaw ? JSON.parse(savedParamsRaw) : undefined;
+      if (savedView && savedView !== 'splash') {
+        return [{ view: savedView, params: savedParams }];
+      }
     } catch (e) {
       console.warn('[MYJPG ROUTER] Error initializing route:', e);
     }
@@ -89,20 +123,19 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const currentView = currentItem.view;
   const params = currentItem.params || {};
 
-  // Persist the current screen; URL writes are made by the navigation actions below so
-  // browser Back/Forward retains meaningful entries instead of being overwritten.
   useEffect(() => {
     if (currentView && currentView !== 'splash') {
       try {
         sessionStorage.setItem('jpg_current_view', currentView);
+        sessionStorage.setItem('jpg_current_params', JSON.stringify(params || {}));
       } catch (e) {}
     }
-  }, [currentView]);
+  }, [currentView, params]);
 
   useEffect(() => {
     const onPopState = (event: PopStateEvent) => {
       const state = event.state as NavigationStackItem | null;
-      const next = state?.view ? state : itemFromPath(window.location.pathname) || { view: 'home' as ViewType };
+      const next = state?.view ? state : itemFromLocation() || { view: 'home' as ViewType };
       setHistory([{ view: next.view, params: next.params }]);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -112,7 +145,11 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const navigate = useCallback((view: ViewType, newParams?: Record<string, any>) => {
     setHistory((prev) => [...prev, { view, params: newParams }]);
-    window.history.pushState({ view, params: newParams }, '', pathFor(view, newParams));
+    try {
+      window.history.pushState({ view, params: newParams }, '', formatHistoryUrl(view, newParams));
+    } catch (e) {
+      console.warn('[MYJPG ROUTER] pushState warning:', e);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
@@ -122,14 +159,18 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     } else {
       const home: NavigationStackItem = { view: 'home' };
       setHistory([home]);
-      window.history.replaceState(home, '', pathFor(home.view));
+      try {
+        window.history.replaceState(home, '', formatHistoryUrl(home.view));
+      } catch (e) {}
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [history.length]);
 
   const resetToHome = useCallback(() => {
     setHistory([{ view: 'home' }]);
-    window.history.replaceState({ view: 'home' }, '', pathFor('home'));
+    try {
+      window.history.replaceState({ view: 'home' }, '', formatHistoryUrl('home'));
+    } catch (e) {}
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
@@ -139,7 +180,11 @@ export const NavigationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       copy[copy.length - 1] = { view, params: newParams };
       return copy;
     });
-    window.history.replaceState({ view, params: newParams }, '', pathFor(view, newParams));
+    try {
+      window.history.replaceState({ view, params: newParams }, '', formatHistoryUrl(view, newParams));
+    } catch (e) {
+      console.warn('[MYJPG ROUTER] replaceState warning:', e);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 

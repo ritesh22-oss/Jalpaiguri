@@ -1,111 +1,104 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  APIProvider,
+  AdvancedMarker,
   ControlPosition,
+  InfoWindow,
+  Map as GoogleMapCanvas,
   MapControl,
-  Marker,
-  Map,
-  useMap,
-  useMapsLibrary
+  Pin,
+  useMap
 } from '@vis.gl/react-google-maps';
-import { apiClient } from '../../services/apiClient';
+import { apiClient, GooglePlaceNewResult } from '../../services/apiClient';
+import {
+  DEFAULT_GOOGLE_MAP_ID,
+  GMP_SOLUTION_CHANNEL,
+  JALPAIGURI_CORE_CENTER,
+  MyJpgMapsProvider,
+  useGoogleMapsApiKey
+} from '../../utils/googleMapsHelpers';
 
-// Map handler to update map viewport and marker
-const MapHandler = ({ place }: { place: google.maps.places.PlaceResult | null }) => {
+const MapHandler = ({ place }: { place: GooglePlaceNewResult | null }) => {
   const map = useMap();
 
   useEffect(() => {
-    if (!map || !place) return;
-
-    if (place.geometry?.viewport) {
-      map.fitBounds(place.geometry?.viewport);
-      // Apply terrain view for immersive spatial experience
-      setTimeout(() => {
-        map.setMapTypeId('terrain');
-      }, 100);
-    } else if (place.geometry?.location) {
-      map.setCenter(place.geometry.location);
-      map.setZoom(17);
-      setTimeout(() => {
-        map.setMapTypeId('terrain');
-      }, 100);
-    }
+    if (!map || !place?.location) return;
+    map.panTo({ lat: place.location.latitude, lng: place.location.longitude });
+    map.setZoom(16);
   }, [map, place]);
 
   return null;
 };
 
-// Place Search helper
-const PlaceSearch = ({ onPlaceSelect }: { onPlaceSelect: (place: google.maps.places.PlaceResult | null) => void }) => {
+const PlaceSearch = ({
+  onResults,
+  onPlaceSelect
+}: {
+  onResults: (places: GooglePlaceNewResult[]) => void;
+  onPlaceSelect: (place: GooglePlaceNewResult | null) => void;
+}) => {
   const [query, setQuery] = useState('');
-  const places = useMapsLibrary('places');
-  const map = useMap();
+  const [searching, setSearching] = useState(false);
+  const [errorText, setErrorText] = useState<string | null>(null);
 
-  const handleSearch = () => {
-    if (!places || !map || !query) return;
-    
-    const service = new places.PlacesService(map);
-    const request = {
-      query: query,
-      fields: ['geometry', 'name', 'formatted_address', 'place_id']
-    };
-
-    service.textSearch(request, (results, status) => {
-      if (status === places.PlacesServiceStatus.OK && results && results[0]) {
-        onPlaceSelect(results[0]);
+  const handleSearch = async () => {
+    const q = query.trim();
+    if (!q) return;
+    setSearching(true);
+    setErrorText(null);
+    try {
+      const res = await apiClient.searchPlacesText({
+        textQuery: q,
+        lat: JALPAIGURI_CORE_CENTER.lat,
+        lng: JALPAIGURI_CORE_CENTER.lng,
+        radiusMeters: 25000,
+        maxResultCount: 8
+      });
+      const list = res.places || [];
+      onResults(list);
+      if (list.length > 0) {
+        onPlaceSelect(list[0]);
       } else {
-        alert("Couldn't find that location. Try a more specific place name.");
+        setErrorText(`No results found for "${q}". Try another Jalpaiguri landmark.`);
       }
-    });
+    } catch (err: any) {
+      setErrorText(err?.message || 'Unable to search Google Places right now.');
+    } finally {
+      setSearching(false);
+    }
   };
 
   return (
-    <div className="flex gap-2">
-      <input 
-        value={query} 
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-        placeholder="Search for a location (Terrain View)..." 
-        className="p-2 border border-gray-200 rounded-lg text-sm outline-none text-gray-800 font-semibold focus:border-blue-500 transition-colors shadow-sm" 
-      />
-      <button onClick={handleSearch} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors shadow-sm">Search</button>
+    <div className="space-y-1.5">
+      <div className="flex gap-2">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && void handleSearch()}
+          placeholder="Search Jalpaiguri places..."
+          className="p-2 border border-gray-200 rounded-lg text-sm outline-none text-gray-800 font-semibold focus:border-blue-500 transition-colors shadow-sm bg-white"
+        />
+        <button
+          onClick={() => void handleSearch()}
+          disabled={searching}
+          className="bg-[#007AFF] hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors shadow-sm cursor-pointer disabled:opacity-60"
+        >
+          {searching ? '...' : 'Search'}
+        </button>
+      </div>
+      {errorText && <p className="text-xs font-semibold text-amber-700 px-1">{errorText}</p>}
     </div>
   );
 };
 
-export const GooglePlacesMap: React.FC<{className?: string}> = ({ className }) => {
-  const [selectedPlace, setSelectedPlace] =
-    useState<google.maps.places.PlaceResult | null>(null);
-  const [apiKey, setApiKey] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+export const GooglePlacesMap: React.FC<{ className?: string }> = ({ className = 'h-96 w-full' }) => {
+  const { apiKey, isLoading } = useGoogleMapsApiKey();
+  const [places, setPlaces] = useState<GooglePlaceNewResult[]>([]);
+  const [selectedPlace, setSelectedPlace] = useState<GooglePlaceNewResult | null>(null);
 
-  useEffect(() => {
-    const fetchKey = async () => {
-      try {
-        const envKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-        if (envKey) {
-          setApiKey(envKey);
-          setLoading(false);
-          return;
-        }
-        
-        const res = await apiClient.getGoogleMapsKey();
-        if (res.apiKey) {
-          setApiKey(res.apiKey);
-        }
-      } catch (err) {
-        console.error("Failed to load Maps API key", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchKey();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className={`flex items-center justify-center bg-gray-100 border border-gray-200 rounded-2xl ${className}`}>
-        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -113,36 +106,68 @@ export const GooglePlacesMap: React.FC<{className?: string}> = ({ className }) =
   if (!apiKey) {
     return (
       <div className={`flex flex-col items-center justify-center bg-gray-100 border border-gray-200 rounded-2xl ${className}`}>
-        <p className="text-gray-500 font-medium text-sm">Google Maps Unavailable</p>
-        <p className="text-gray-400 text-xs mt-1">Configure VITE_GOOGLE_MAPS_API_KEY</p>
+        <p className="text-gray-600 font-semibold text-sm">Google Maps Unavailable</p>
+        <p className="text-gray-400 text-xs mt-1">Configure GOOGLE_MAPS_API_KEY</p>
       </div>
     );
   }
 
-  const markerPosition = selectedPlace?.geometry?.location;
-
   return (
     <div className={className}>
-      <APIProvider
-        apiKey={apiKey}
-        solutionChannel="gmp_mcp_codeassist_v1_aistudio">
-        <Map
-          defaultZoom={13}
-          defaultCenter={{ lat: 26.5077, lng: 88.4477 }}
-          gestureHandling={'greedy'}
+      <MyJpgMapsProvider apiKey={apiKey}>
+        <GoogleMapCanvas
+          mapId={DEFAULT_GOOGLE_MAP_ID}
+          defaultZoom={14}
+          defaultCenter={JALPAIGURI_CORE_CENTER}
+          gestureHandling="greedy"
           disableDefaultUI={false}
-          mapTypeId={'terrain'}
+          mapTypeId="roadmap"
+          internalUsageAttributionIds={[GMP_SOLUTION_CHANNEL]}
           className="w-full h-full rounded-2xl overflow-hidden shadow-xs"
         >
-          {markerPosition && <Marker position={markerPosition} />}
-        </Map>
+          {places.map((p) =>
+            p.location ? (
+              <AdvancedMarker
+                key={p.id}
+                position={{ lat: p.location.latitude, lng: p.location.longitude }}
+                title={p.displayName?.text}
+                onClick={() => setSelectedPlace(p)}
+              >
+                <Pin
+                  background={selectedPlace?.id === p.id ? '#007AFF' : '#EA4335'}
+                  borderColor="#FFFFFF"
+                  glyphColor="#FFFFFF"
+                />
+              </AdvancedMarker>
+            ) : null
+          )}
+
+          {selectedPlace?.location && (
+            <InfoWindow
+              position={{
+                lat: selectedPlace.location.latitude,
+                lng: selectedPlace.location.longitude
+              }}
+              onCloseClick={() => setSelectedPlace(null)}
+            >
+              <div className="p-1 font-sans max-w-[200px]">
+                <p className="text-xs font-extrabold text-gray-900">{selectedPlace.displayName?.text}</p>
+                {selectedPlace.shortFormattedAddress && (
+                  <p className="text-[11px] text-gray-600 mt-0.5">{selectedPlace.shortFormattedAddress}</p>
+                )}
+              </div>
+            </InfoWindow>
+          )}
+        </GoogleMapCanvas>
+
         <MapControl position={ControlPosition.TOP_CENTER}>
-          <div className="bg-white/90 backdrop-blur-md p-1.5 rounded-xl shadow-lg border border-gray-200 m-4">
-            <PlaceSearch onPlaceSelect={setSelectedPlace} />
+          <div className="bg-white/95 backdrop-blur-md p-1.5 rounded-xl shadow-lg border border-gray-200 m-4">
+            <PlaceSearch onResults={setPlaces} onPlaceSelect={setSelectedPlace} />
           </div>
         </MapControl>
+
         <MapHandler place={selectedPlace} />
-      </APIProvider>
+      </MyJpgMapsProvider>
     </div>
   );
 };

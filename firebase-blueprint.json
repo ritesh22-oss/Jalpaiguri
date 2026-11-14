@@ -67,6 +67,13 @@
             "shop_owner"
           ]
         },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "suspended"
+          ]
+        },
         "createdAt": {
           "type": "string",
           "format": "date-time"
@@ -690,6 +697,104 @@
         "createdAt": { "type": "string" }
       },
       "required": ["userId", "pandalId", "createdAt"]
+    },
+    "AdminAuditLog": {
+      "title": "Admin Audit Log",
+      "description": "Immutable administrative action log",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "action": { "type": "string" },
+        "section": { "type": "string" },
+        "targetCollection": { "type": "string" },
+        "targetId": { "type": "string" },
+        "summary": { "type": "string" },
+        "actorUid": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["action", "section", "actorUid", "createdAt"]
+    },
+    "CmsContent": {
+      "title": "CMS Content",
+      "description": "Homepage, city info, notices, and announcements managed via CMS",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "contentType": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["contentType", "title", "description"]
+    },
+    "AdminSettings": {
+      "title": "Admin Settings",
+      "description": "Protected municipal admin console settings",
+      "type": "object",
+      "properties": {
+        "notifications": { "type": "boolean" },
+        "digest": { "type": "boolean" },
+        "autoSyncApprovedPhotos": { "type": "boolean" },
+        "requireRejectReason": { "type": "boolean" },
+        "appNoticeBanner": { "type": "string" },
+        "maintenanceMode": { "type": "boolean" },
+        "updatedBy": { "type": "string" }
+      }
+    },
+    "PlacePhoto": {
+      "title": "Place Photo",
+      "description": "Community or admin submitted place photo",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "placeId": { "type": "string" },
+        "placeName": { "type": "string" },
+        "category": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["placeId", "placeName", "imageUrl", "status"]
+    },
+    "PlaceThumbnail": {
+      "title": "Place Thumbnail",
+      "description": "Curated gallery thumbnails per place",
+      "type": "object",
+      "properties": {
+        "placeId": { "type": "string" },
+        "placeName": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "images": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["placeId", "placeName"]
+    },
+    "AdminVerification": {
+      "title": "Admin Verification",
+      "description": "Worker verification queue submission",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "profession": { "type": "string" },
+        "date": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["name", "profession", "status"]
+    },
+    "Doctor": {
+      "title": "Doctor",
+      "description": "Doctor and medical specialist listing",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "specialty": { "type": "string" },
+        "phone": { "type": "string" },
+        "verified": { "type": "boolean" },
+        "verificationStatus": { "type": "string" }
+      },
+      "required": ["name", "specialty", "phone"]
     }
   },
   "firestore": {
@@ -744,6 +849,34 @@
     "pandal_reports/{reportId}": {
       "schema": "PandalReport",
       "description": "Correction reports for Durga Puja pandals"
+    },
+    "admin_audit_logs/{logId}": {
+      "schema": "AdminAuditLog",
+      "description": "Audit logs of municipal administrative actions"
+    },
+    "cms_content/{contentId}": {
+      "schema": "CmsContent",
+      "description": "Dynamic homepage, city info, and notice content"
+    },
+    "admin_settings/{settingId}": {
+      "schema": "AdminSettings",
+      "description": "Admin console preferences and configuration"
+    },
+    "place_photos/{photoId}": {
+      "schema": "PlacePhoto",
+      "description": "Community and admin uploaded place photos"
+    },
+    "place_thumbnails/{placeId}": {
+      "schema": "PlaceThumbnail",
+      "description": "Curated place thumbnail galleries"
+    },
+    "admin_verifications/{verificationId}": {
+      "schema": "AdminVerification",
+      "description": "Worker verification queue records"
+    },
+    "doctors/{doctorId}": {
+      "schema": "Doctor",
+      "description": "Verified and pending doctors directory"
     }
   }
 }

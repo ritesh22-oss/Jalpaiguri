@@ -27,20 +27,47 @@ import {
   AlertCircle,
   Camera
 } from 'lucide-react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import {
+  AdvancedMarker,
+  Map as GoogleMapCanvas,
+  Pin,
+  useMap
+} from '@vis.gl/react-google-maps';
 import { useNav } from '../../context/NavigationContext';
 import { useLocation } from '../../context/LocationContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
 import {
   BankEntity,
   VERIFIED_JALPAIGURI_BANKS_AND_ATMS,
-  isOfficialBankUrl,
-  BankType
+  isOfficialBankUrl
 } from '../../data/banksData';
 import { calculateHaversineDistance, formatDistanceString } from '../../data/jalpaiguriLocalities';
 import { UploadPlacePhotoModal } from '../common/UploadPlacePhotoModal';
 import { getAdminPlaceThumbnails } from '../../utils/placesPhotoClient';
+import {
+  DEFAULT_GOOGLE_MAP_ID,
+  GMP_SOLUTION_CHANNEL,
+  MyJpgMapsProvider,
+  useGoogleMapsApiKey
+} from '../../utils/googleMapsHelpers';
+
+const BanksBoundsFitter: React.FC<{
+  items: BankEntity[];
+  userLat: number;
+  userLng: number;
+}> = ({ items, userLat, userLng }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (!map || typeof google === 'undefined' || !google.maps?.LatLngBounds) return;
+    if (items.length === 0) return;
+    const bounds = new google.maps.LatLngBounds();
+    bounds.extend({ lat: userLat, lng: userLng });
+    items.forEach((it) => bounds.extend({ lat: it.latitude, lng: it.longitude }));
+    map.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 });
+  }, [map, items, userLat, userLng]);
+  return null;
+};
 
 type TabType = 'BANKS' | 'ATMs' | 'ALL';
 type SubViewMode = 'list' | 'map';
@@ -67,14 +94,12 @@ export const BanksAtmsView: React.FC = () => {
     } catch {}
   }, []);
 
-  // External Website Redirect Confirmation Modal State
+  const { isDarkMode } = useTheme();
+  const { apiKey: mapsApiKey, isLoading: isMapsKeyLoading } = useGoogleMapsApiKey();
+
   const [redirectModalUrl, setRedirectModalUrl] = useState<string | null>(null);
   const [redirectModalTitle, setRedirectModalTitle] = useState<string>('');
-
-  // Leaflet Map Ref
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<L.Marker[]>([]);
+  const [linkWarning, setLinkWarning] = useState<string | null>(null);
 
   // Calculate distances & filter items
   const processedData = useMemo(() => {
@@ -147,106 +172,6 @@ export const BanksAtmsView: React.FC = () => {
     return result;
   }, [processedData, activeTab, selectedFilter, searchQuery, sortBy]);
 
-  // Leaflet Map Initialization & Marker Rendering
-  useEffect(() => {
-    if (viewMode !== 'map' || !mapContainerRef.current) return;
-
-    let isSubscribed = true;
-
-    // Always re-initialize map cleanly for the current container
-    if (mapInstanceRef.current) {
-      try {
-        mapInstanceRef.current.remove();
-      } catch {}
-      mapInstanceRef.current = null;
-    }
-
-    const map = L.map(mapContainerRef.current, {
-      center: [location.lat, location.lng],
-      zoom: 14,
-      zoomControl: false,
-      attributionControl: false
-    });
-
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      minZoom: 2
-    }).addTo(map);
-
-    mapInstanceRef.current = map;
-
-    // Clear markers array
-    markersRef.current.forEach((m) => {
-      try { m.remove(); } catch {}
-    });
-    markersRef.current = [];
-
-    // User Location Marker
-    const userIcon = L.divIcon({
-      className: 'user-pin',
-      html: `<div style="width:20px;height:20px;border-radius:50%;background:#007AFF;border:3px solid #ffffff;box-shadow:0 0 10px rgba(0,122,255,0.5);"></div>`,
-      iconSize: [20, 20],
-      iconAnchor: [10, 10]
-    });
-    const uMarker = L.marker([location.lat, location.lng], { icon: userIcon })
-      .addTo(map)
-      .bindPopup(`<b>${isBengali ? 'আপনার অবস্থান' : 'Your Current Location'}</b>`);
-    markersRef.current.push(uMarker);
-
-    // Entity Markers (Branches & ATMs)
-    filteredItems.forEach((item) => {
-      const isBank = item.type === 'BANK';
-      const iconHtml = isBank
-        ? `<div style="background:#007AFF;color:#ffffff;border-radius:12px;padding:6px;box-shadow:0 4px 10px rgba(0,0,0,0.25);border:2px solid #ffffff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;">🏦</div>`
-        : `<div style="background:#0D9488;color:#ffffff;border-radius:12px;padding:6px;box-shadow:0 4px 10px rgba(0,0,0,0.25);border:2px solid #ffffff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;">🏧</div>`;
-
-      const customIcon = L.divIcon({
-        className: 'entity-marker',
-        html: iconHtml,
-        iconSize: [32, 32],
-        iconAnchor: [16, 16]
-      });
-
-      const marker = L.marker([item.latitude, item.longitude], { icon: customIcon }).addTo(map);
-
-      marker.on('click', () => {
-        setSelectedEntity(item);
-      });
-
-      markersRef.current.push(marker);
-    });
-
-    if (filteredItems.length > 0 && isSubscribed) {
-      try {
-        const group = L.featureGroup(markersRef.current);
-        map.fitBounds(group.getBounds().pad(0.15));
-      } catch {}
-    }
-
-    setTimeout(() => {
-      if (isSubscribed && mapInstanceRef.current) {
-        try {
-          mapInstanceRef.current.invalidateSize();
-        } catch {}
-      }
-    }, 100);
-
-    return () => {
-      isSubscribed = false;
-      markersRef.current.forEach((m) => {
-        try { m.remove(); } catch {}
-      });
-      markersRef.current = [];
-
-      if (mapInstanceRef.current) {
-        try {
-          mapInstanceRef.current.remove();
-        } catch {}
-        mapInstanceRef.current = null;
-      }
-    };
-  }, [viewMode, filteredItems, location.lat, location.lng, isBengali]);
-
   const handleGetDirections = (lat: number, lng: number, name: string) => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=${encodeURIComponent(
       name
@@ -257,10 +182,11 @@ export const BanksAtmsView: React.FC = () => {
   const handleOpenExternal = (url: string, title: string) => {
     if (!url) return;
     if (isOfficialBankUrl(url)) {
+      setLinkWarning(null);
       setRedirectModalUrl(url);
       setRedirectModalTitle(title);
     } else {
-      alert(isBengali ? 'অননুমোদিত ব্যাংক লিংক।' : 'Unverified bank link prevented for safety.');
+      setLinkWarning(isBengali ? 'অননুমোদিত ব্যাংক লিংক।' : 'Unverified bank link prevented for safety.');
     }
   };
 
@@ -450,13 +376,70 @@ export const BanksAtmsView: React.FC = () => {
           </div>
         </div>
 
+        {linkWarning && (
+          <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs font-semibold text-amber-800 flex items-center justify-between">
+            <span>{linkWarning}</span>
+            <button onClick={() => setLinkWarning(null)} className="cursor-pointer"><X className="w-3.5 h-3.5" /></button>
+          </div>
+        )}
+
         {/* MAP VIEW */}
         {viewMode === 'map' && (
           <div className="space-y-3">
-            <div
-              ref={mapContainerRef}
-              className="w-full h-80 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden relative z-10"
-            />
+            <div className="w-full h-80 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden relative z-10 bg-slate-100">
+              {isMapsKeyLoading ? (
+                <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-500">
+                  Loading Google Maps...
+                </div>
+              ) : !mapsApiKey ? (
+                <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-600 p-4 text-center">
+                  Google Maps API key is required to display Jalpaiguri banks & ATMs map.
+                </div>
+              ) : (
+                <MyJpgMapsProvider apiKey={mapsApiKey}>
+                  <GoogleMapCanvas
+                    mapId={DEFAULT_GOOGLE_MAP_ID}
+                    defaultCenter={{ lat: location?.lat ?? 26.5228, lng: location?.lng ?? 88.7245 }}
+                    defaultZoom={14}
+                    colorScheme={isDarkMode ? 'DARK' : 'LIGHT'}
+                    gestureHandling="greedy"
+                    disableDefaultUI={false}
+                    streetViewControl={false}
+                    mapTypeControl={false}
+                    internalUsageAttributionIds={[GMP_SOLUTION_CHANNEL]}
+                    className="w-full h-full"
+                  >
+                    <BanksBoundsFitter
+                      items={filteredItems}
+                      userLat={location?.lat ?? 26.5228}
+                      userLng={location?.lng ?? 88.7245}
+                    />
+                    <AdvancedMarker
+                      position={{ lat: location?.lat ?? 26.5228, lng: location?.lng ?? 88.7245 }}
+                      title={isBengali ? 'আপনার অবস্থান' : 'Your Current Location'}
+                    >
+                      <Pin background="#064E3B" borderColor="#FFFFFF" glyphColor="#60A5FA" />
+                    </AdvancedMarker>
+
+                    {filteredItems.map((item) => (
+                      <AdvancedMarker
+                        key={item.id}
+                        position={{ lat: item.latitude, lng: item.longitude }}
+                        title={`${item.bankName} - ${item.branchName}`}
+                        onClick={() => setSelectedEntity(item)}
+                      >
+                        <Pin
+                          background={item.type === 'BANK' ? '#007AFF' : '#0D9488'}
+                          borderColor="#FFFFFF"
+                          glyphColor="#FFFFFF"
+                          scale={selectedEntity?.id === item.id ? 1.2 : 0.95}
+                        />
+                      </AdvancedMarker>
+                    ))}
+                  </GoogleMapCanvas>
+                </MyJpgMapsProvider>
+              )}
+            </div>
             {selectedEntity ? (
               <div className="bg-white dark:bg-[#121E2C] border border-blue-200 dark:border-blue-800/80 rounded-2xl p-4 shadow-md space-y-3 relative">
                 <button

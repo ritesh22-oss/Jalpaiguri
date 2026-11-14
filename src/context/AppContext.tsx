@@ -280,8 +280,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => { localStorage.setItem('jpg_chats', JSON.stringify(chatMessages)); }, [chatMessages]);
 
   const refreshData = async () => {
-    // Refresh logic is now handled automatically by Firestore onSnapshot listeners
-    console.log('[DATA] Firestore real-time sync is active. Manual refresh not required.');
+    if (!isFirebaseConfigured || !db) return;
+    try {
+      const collectionMap: Array<{ name: string; setter: (data: any[]) => void }> = [
+        { name: 'workers', setter: setWorkers },
+        { name: 'civic_reports', setter: setCivicReports },
+        { name: 'local_alerts', setter: setLocalAlerts },
+        { name: 'blood_donors', setter: setBloodDonors },
+        { name: 'jobs', setter: setJobs },
+        { name: 'rentals', setter: setRentals },
+        { name: 'lost_found', setter: setLostFound },
+        { name: 'service_requests', setter: setServiceRequests },
+        { name: 'admin_verifications', setter: setAdminVerificationQueue },
+        { name: 'shops', setter: setShops },
+        { name: 'restaurants', setter: setRestaurants },
+        { name: 'doctors', setter: setDoctors },
+        { name: 'hospitals', setter: setHospitals },
+        { name: 'place_photos', setter: (data: PlacePhotoSubmission[]) => setPlacePhotoSubmissions(data) }
+      ];
+      await Promise.allSettled(
+        collectionMap.map(async ({ name, setter }) => {
+          const snap = await getDocs(collection(db, name));
+          setter(snap.docs.map((d) => ({ ...d.data(), id: d.id })));
+        })
+      );
+      setIsRealtimeConnected(true);
+    } catch (e) {
+      console.warn('[DATA] Manual refresh encountered an issue:', e);
+    }
   };
 
   // Initial Fetch & Real-Time Sync via Firestore
@@ -319,8 +345,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 try {
                   const thumbs = JSON.parse(localStorage.getItem('jpg_custom_thumbnails') || '{}');
                   data.forEach((item) => {
-                    if (item.placeId && item.imageUrl) {
-                      thumbs[item.placeId] = item.imageUrl;
+                    const primary = item.imageUrl || (Array.isArray(item.images) ? item.images[0] : '');
+                    if (item.placeId && primary) {
+                      thumbs[item.placeId] = primary;
                     }
                   });
                   localStorage.setItem('jpg_custom_thumbnails', JSON.stringify(thumbs));
@@ -411,8 +438,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addWorker = async (newWorker: Worker) => {
     if (isFirebaseConfigured && db) {
       try {
-        await setDoc(doc(db, 'workers', newWorker.id), newWorker);
-        showToast(`${newWorker.name} has been listed in Workers directory!`);
+        const uid = newWorker.userId || auth.currentUser?.uid || user?.id || '';
+        const payload = {
+          ...newWorker,
+          userId: uid,
+          verified: false,
+          status: 'Pending',
+          createdAt: new Date().toISOString()
+        };
+        await setDoc(doc(db, 'workers', newWorker.id), payload);
+        await setDoc(doc(db, 'admin_verifications', newWorker.id), {
+          id: newWorker.id,
+          workerId: newWorker.id,
+          userId: uid,
+          name: newWorker.name,
+          profession: newWorker.profession,
+          category: newWorker.category,
+          phone: newWorker.phone,
+          serviceArea: newWorker.serviceArea,
+          experienceYears: newWorker.experienceYears,
+          skills: newWorker.skills,
+          description: newWorker.description,
+          avatarUrl: newWorker.avatarUrl,
+          date: new Date().toISOString(),
+          status: 'Pending'
+        });
+        showToast(`${newWorker.name} has been submitted for verification!`);
       } catch (e) {
         console.error('Firestore add worker error:', e);
         showToast('Failed to save worker listing.', 'error');

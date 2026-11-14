@@ -15,6 +15,7 @@ import {
 import { useNav } from '../../context/NavigationContext';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
+import { AppLogo } from '../common/BrandLogo';
 import { BloodGroup } from '../../types';
 import { EmptyState } from '../common/EmptyState';
 
@@ -97,9 +98,9 @@ export const BloodView: React.FC = () => {
           <User className="w-5 h-5 stroke-[2]" />
         </div>
 
-        <h1 className="text-lg font-extrabold text-[#11241C] dark:text-white tracking-tight">
-          MYJPG
-        </h1>
+        <div onClick={() => navigate('home')} className="cursor-pointer">
+          <AppLogo size="xs" showText={true} showSubtitle={false} />
+        </div>
 
         <div
           onClick={() => navigate('alerts')}
